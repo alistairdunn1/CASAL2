@@ -166,3 +166,10 @@ Documentation/GettingStartedGuide/ModelComponents.aux
 Documentation/GettingStartedGuide/Output.aux
 Documentation/GettingStartedGuide/References.aux
 Documentation/GettingStartedGuide/Syntax.aux
+BuildSystem/buildtools/classes/__pycache__/Archiver.cpython-38.pyc
+BuildSystem/buildtools/classes/__pycache__/Builder.cpython-38.pyc
+*.pyc
+*.aux
+Documentation/UserManual/CASAL2.tps
+Documentation/UserManual/Version.tex
+Documentation/UserManual/CASAL2.tps
