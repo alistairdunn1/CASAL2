@@ -20,8 +20,8 @@ namespace selectivities {
  */
 Constant::Constant(shared_ptr<Model> model) : Selectivity(model) {
   parameters_.Bind<Double>(PARAM_A, &a_, "The constant value (default a = 0) in ax^b + c", "", 0.0);
-  parameters_.Bind<Double>(PARAM_B, &b_, "The constant value (default b = 0) in ax^b + c", "", 0.0);
-  parameters_.Bind<Double>(PARAM_C, &c_, "The constant value (default c = 1) in ax^b + c", "", 1.0);
+  parameters_.Bind<Double>(PARAM_B, &b_, "The constant value (default b = 0) in ax^b + c", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<Double>(PARAM_C, &c_, "The constant value (default c = 1) in ax^b + c", "", 1.0)->set_lower_bound(0.0, true);
   parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies", "", 0.0)->set_lower_bound(0.0, true);
 
   RegisterAsAddressable(PARAM_A, &a_);

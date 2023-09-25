@@ -12,12 +12,13 @@
 #ifdef TESTMODE
 
 // Headers
+#include "Constant.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "../../TestResources/MockClasses/Model.h"
 #include "../../TestResources/MockClasses/ModelLength.h"
-#include "Constant.h"
 
 namespace niwa {
 using ::testing::Return;
@@ -37,19 +38,20 @@ TEST(Selectivities, Constant_age) {
   constant.parameters().Add(PARAM_LABEL, "unit_test_constant", __FILE__, __LINE__);
   constant.parameters().Add(PARAM_TYPE, "not needed in test", __FILE__, __LINE__);
   constant.parameters().Add(PARAM_C, "83", __FILE__, __LINE__);
+  constant.parameters().Add(PARAM_BETA, "0", __FILE__, __LINE__);
   constant.Validate();
   constant.Build();
 
-  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(0, nullptr));
-  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(1, nullptr));
-  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(2, nullptr));
-  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(3, nullptr));
-  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(4, nullptr));
+  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(10, nullptr));
+  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(11, nullptr));
+  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(12, nullptr));
+  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(13, nullptr));
+  EXPECT_DOUBLE_EQ(83.0, constant.GetAgeResult(14, nullptr));
 }
 
 TEST(Selectivities, Constant_Length) {
   shared_ptr<MockModelLength> model   = shared_ptr<MockModelLength>(new MockModelLength());
-  vector<double>        lengths = {10, 20, 30, 40, 50, 60, 120};
+  vector<double>              lengths = {10, 20, 30, 40, 50, 60, 120};
   EXPECT_CALL(*model, length_bin_mid_points()).WillRepeatedly(ReturnRef(lengths));
   EXPECT_CALL(*model, partition_type()).WillRepeatedly(Return(PartitionType::kLength));
 
