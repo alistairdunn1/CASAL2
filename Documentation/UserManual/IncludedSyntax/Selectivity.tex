@@ -57,13 +57,24 @@
 \defRef{sec:Selectivity-Constant}
 \label{syntax:Selectivity-Constant}
 
-\defSub{c}{The constant value}
+\defSub{a}{The $a$ value in $ax^b + c$}
 \defType{Real number (estimable)}
-\defDefault{No default}
+\defDefault{0.0}
+\defNote{The defaults result in a simple linear constant where $x=1$ for all values of $x$}
+
+\defSub{b}{The $b$ value in $ax^b + c$}
+\defType{Real number (estimable)}
+\defDefault{0.0}
+\defNote{The defaults result in a simple linear constant where $x=1$ for all values of $x$}
+
+\defSub{c}{The $c$ value in $ax^b + c$}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defNote{The defaults result in a simple linear constant where $x=1$ for all values of $x$}
 
 \defSub{beta}{The minimum age/length for which the selectivity applies}
 \defType{Real number (constant)}
-\defDefault{0}
+\defDefault{0.0}
 \defLowerBound{0.0 (inclusive)}
 
 \subsubsection{Selectivity of type Double Exponential}

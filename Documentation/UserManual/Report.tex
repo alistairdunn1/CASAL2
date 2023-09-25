@@ -207,14 +207,19 @@ Simulated reports will be produced with the following extension \texttt{.1\_1}. 
 	\item \texttt{.1\_2} indicates simulated data produced from the first row of parameters and is the second random draw
 	\item \texttt{.2\_10} indicates simulated data produced from the second row of parameters and is the 10\(^{th}\) random draw
 \end{itemize}
+
 \subsection{\I{Print selectivities}}\index{Reports ! Selectivities}\label{sec:Report-Selectivity}
 
-This report prints the values of a selectivity for each age/length in the partition.
+\ifAgeBased
+This report prints the values of a selectivity for each age in the partition. If this is a length based selectivity in an age-based model, then the length values to evaluate the selectivity must also be supplied. Either provide the specific length values as an optional argument to the selectivity report or else the model length bins (\commandsub{model}{length\_bins}) will be used.
+\else
+This report prints the values of a selectivity for each length in the partition.
+\fi
+See Section~\ref{syntax:Report-Selectivity} for syntax information.
 
 \subsection{\I{Print selectivities by year}}\index{Reports ! Selectivities By Year}\label{sec:Report-SelectivityByYear}
 
 This report prints the values of a selectivity for each age/length for the given model years. Useful when you have a model with time-varying selectivity. See Section~\ref{syntax:Report-SelectivityByYear} for syntax information.
-
 
 \subsection{\I{Print the random number seed}}\index{Reports ! Random number seed}\label{sec:Report-RandomNumberSeed}
 

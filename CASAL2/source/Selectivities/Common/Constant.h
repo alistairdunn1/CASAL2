@@ -31,17 +31,18 @@ public:
   // Methods
   explicit Constant(shared_ptr<Model> model);
   virtual ~Constant() = default;
-  void   DoValidate() override final;
-  Double GetAgeResult(unsigned age, AgeLength* age_length) override final;
-  Double GetLengthResult(unsigned length_bin) override final;
+  void DoValidate() override final;
 
   Double get_value(Double value) override final;
   Double get_value(unsigned value) override final;
 
 private:
   // Members
-  Double c_;
-  Double beta_;
+  Double a_     = 0.0;
+  Double b_     = 1.0;
+  Double c_     = 1.0;
+  Double beta_  = 0.0;
+  Double value_ = 0.0;
 };
 
 } /* namespace selectivities */

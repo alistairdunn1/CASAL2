@@ -485,7 +485,11 @@ Note: the scale of $a$ can be specified incorrectly. If the catch is in tonnes a
 \ifAgeBased
 \subsection{\I{Age-weight relationship}}\label{sec:AgeWeight} \STATUS{Untested}
 
-Either `none' \label{sec:AgeWeight-None} or an Empirical weight-at-age matrix. The empirical weight-at-age data can be input\label{sec:AgeWeight-Data}. This option is different from the method above as it uses empirical data for weight-at-age, rather than calculating it with the growth functions (age -> length -> weight). This bypasses the growth relationship which is expected to be present and so using weight-at-age data needs to be declared in blocks that use this method, i.e., biomass observation blocks, fishery mortality blocks, and biomass derived quantities e.g., $SSB$. The subcommand to use this is "\subcommand{age\_weight\_label} ageWeight.block.label" within the block, but in mortality fisheries blocks, \subcommand{age\_weight\_label} is a column in the \textit{table method} part with the corresponding \textit{ageWeight.block.label} in the body of the table. More than one \command{age\_weight} blocks can be used, and both weight-at-age data and the usual growth version can be used in the same model (but not in the same block).
+Either \texttt{none}\label{sec:AgeWeight-None} or an Empirical weight-at-age matrix. The empirical weight-at-age data can be input\label{sec:AgeWeight-Data}. This option is different from the method above as it uses empirical data for weight-at-age, rather than calculating it from the growth and length-weight relationships (age $\rightarrow$\ length $\rightarrow$\ weight). This bypasses the growth relationship and uses the direct weight-at-age data instead. This needs to be declared in blocks that use this method, i.e., biomass observation blocks, fishery mortality blocks, and biomass derived quantities (e.g., $SSB$). The subcommand to use this is \subcommand{age\_weight\_label} (i.e., with argument  \argument{ageWeight.block.label}). 
+
+In the instantaneous fisheries mortality command, \subcommand{age\_weight\_label} is a column in the \textit{table method} part with the corresponding \texttt{ageWeight.block.label} in the body of the table. 
+
+More than one \command{age\_weight} blocks can be used, and both weight-at-age data and the more common method of using the growth and length-weight relationship (i.e., age $\rightarrow$\ length $\rightarrow$\ weight) can be used in the same model (but not in the same command block).
 
 This option specifies the weight-at-age values for categories at a point in time.
 
@@ -537,7 +541,7 @@ Selectivity is a term used in \CNAME\  to mean an ogive in both age and length b
 
 \ifAgeBased
 % One column version
-For age-based models \CNAME\ will either use the age to calculate the selectivity or will use the age-length relationship to integrate over the length distribution for a given age to get length-based selectivity in an age-based model (use the subcommand "\textit{by\_length true}", \textit{false} is the default). Do not expect too much from length selectivities because in the next time-step or year, the length distribution for each age reverts to being as defined in the \textit{age\_length} blocks, e.g., normal, rather than being partially truncated because, e.g., larger fish in an age class have been preferentially caught.
+For age-based models \CNAME\ will either use the age to calculate the selectivity or will use the age-length relationship to integrate over the length distribution for a given age to get length-based selectivity in an age-based model (use the subcommand \texttt{by\_length true}, \texttt{false} is the default). Do not expect too much from length selectivities because in the next time-step or year, the length distribution for each age reverts to being as defined in the \texttt{age\_length} blocks, e.g., normal, rather than being partially truncated because, for example, larger fish in an age class have been preferentially caught.
 
 Length-based selectivities denoted by \(g(.)\) in an age-based models are evaluated by integrating over the length distribution for each age class (see Section~\ref{sec:AgeLength-length_at_age}). For age-class. Given age \(a\) with mean length \(\bar{l}_a\), standard deviation \(\sigma_a\) and length distribution denoted by \(f(l,\bar{l}_a, \sigma_a)\). The selectivity for age class \(a\) denoted by \(s_a\) should be calculated as
 
@@ -612,20 +616,26 @@ See Figure \ref{fig:select examples} for example plots of the selectivities (p. 
 
 \subsubsection[Constant]{{constant}}\label{sec:Selectivity-Constant}
 
-The constant selectivity is constant ($C$) for all age/lengths greater than $\beta$. For $x < \beta$, the selectivity is zero.
+The constant selectivity is constant power function ($ax^b+c$) for all age/lengths greater than $\beta$. For $x < \beta$, the selectivity is zero.
 
 \begin{equation}
 f(x)= \begin{cases}
 	0, & \text{if $x < \beta$} \\
-	C, & otherwise \\
+	ax^b + c, & otherwise \\
 \end{cases}
 \end{equation}
 
-The constant selectivity has the estimable parameter $C$.
+For a simple constant selectivity (i.e., where $f(x) = 1$ for all \ifAgeBased age/lengths \else length bins \fi set $a$ and $b = 0$ and $c = 1$). 
+
+To implement an inverse length selectivity (to use, for example, as a selectivity for natural mortality ($M$) where $M$ is inversely proportional to length --- see \cite{lorenzen_natural_2022}), use \ifAgeBased \subcommand{length\_based}=\argument{true} with \fi $a=1$, $b=-1$, and $c=0$).
+
+The constant selectivity has estimable parameters $a$, $b$, and $c$.
 
 Input fragment: {\small{\begin{verbatim}
 type constant
-c    0.5
+a    0.0
+b    0.0
+c    1.0
 beta 0.0 # the default is 0.0
 \end{verbatim}}}
 

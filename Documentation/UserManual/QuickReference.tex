@@ -1057,7 +1057,7 @@
 \defSub{u\_max}{The maximum exploitation rate ($U\_{max}$)}
 \defSub{compatibility\_option}{Backwards compatibility option: either casal2 (the default) or casal. This affects the penalty and age-length calculations}
 \defSub{years}{The years to execute the tagging events in}
-\defSub{initial\_mortality}{The initial mortality value (as a instantaneous proportion)}
+\defSub{initial\_mortality}{The initial mortality value (as a proportion)}
 \defSub{initial\_mortality\_selectivity}{The initial mortality selectivity label}
 \defSub{selectivities}{The selectivity labels}
 \defSub{n}{the total number of tagged fish}
@@ -1364,6 +1364,7 @@
 \commandlabsubarg{report}{type}{Selectivity}
 
 \defSub{selectivity}{Selectivity name}
+\defSub{length\_values}{Length bins for reporting if a length-based selectivity in an age-based model}
 
 \commandlabsubarg{report}{type}{selectivity\_by\_year}
 
@@ -1400,7 +1401,9 @@
 
 \commandlabsubarg{selectivity}{type}{Constant}
 
-\defSub{c}{The constant value}
+\defSub{a}{The $a$ value in $ax^b + c$}
+\defSub{b}{The $b$ value in $ax^b + c$}
+\defSub{c}{The $c$ value in $ax^b + c$}
 \defSub{beta}{The minimum age/length for which the selectivity applies}
 
 \commandlabsubarg{selectivity}{type}{Double\_Exponential}

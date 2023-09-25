@@ -54,7 +54,7 @@ void TimeVarying::DoExecute(shared_ptr<Model> model) {
   LOG_TRACE();
   // single valid time-varying report value
   if (is_valid_) {
-    cache_ << ReportHeader(type_, time_varying_label_, format_);
+    cache_ << ReportHeader(type_, label_, format_);
     LOG_FINEST() << "Reporting for @time_varying block " << time_varying_label_;
     cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
 
@@ -70,7 +70,9 @@ void TimeVarying::DoExecute(shared_ptr<Model> model) {
 /**
  * Prepare Tabular report write header output
  */
-void TimeVarying::DoPrepareTabular(shared_ptr<Model> model) {}
+void TimeVarying::DoPrepareTabular(shared_ptr<Model> model) {
+  LOG_INFO() << "Tabular mode for reports of type " << PARAM_TIME_VARYING << " has not been implemented";
+}
 
 /**
  * Execute Tabular report

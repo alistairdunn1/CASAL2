@@ -45,21 +45,25 @@ void Selectivity::DoBuild(shared_ptr<Model> model) {
     if (!selectivity_) {
       LOG_FINE() << "couldn't create pointer to selectivity";
 #ifndef TESTMODE
-      LOG_WARNING() << "The " << PARAM_SELECTIVITY << " report with label '" << selectivity_label_ << "' was requested. This " << PARAM_SELECTIVITY
-                    << " was not found in the input configuration file and the report will not be generated";
+      LOG_WARNING() << "The " << PARAM_SELECTIVITY << " report with label '" << label_ << "' for the selectivity '" << selectivity_label_ << "' was requested. This "
+                    << PARAM_SELECTIVITY << " was not found in the input configuration file and the report will not be generated";
 #endif
       is_valid_ = false;
     } else {
-      if (selectivity_->IsSelectivityLengthBased()) {
+      if (!parameters_.Get(PARAM_LENGTH_VALUES)->has_been_defined() && selectivity_->IsSelectivityLengthBased()) {
         LOG_FINE() << " length based";
-        if (!parameters_.Get(PARAM_LENGTH_VALUES)->has_been_defined()) {
-          LOG_ERROR_P(PARAM_SELECTIVITY) << " this is a length-based selectivity in an age based model. If you want to report this you need to supply the subcommand "
-                                         << PARAM_LENGTH_VALUES;
-          LOG_FINE() << "created selectivity pointer";
+        if (model->length_bins().size() == 0) {
+          LOG_ERROR_P(PARAM_SELECTIVITY) << "- this is a length-based selectivity in an age based model, but no @model.length_bins have been defined. "
+                                         << " Please supply the subcommand " << PARAM_LENGTH_VALUES " for this selectivity report";
+        } else {
+          LOG_INFO() << "The selectivity report '" << label_ << "' is for a length-based selectivity in an age based model, but " << PARAM_LENGTH_VALUES " were not defined."
+                     << " Defaulting to @model.length_bins for this selectivity report";
+          length_values_ = model->length_bins();
         }
       }
     }
   }
+  LOG_FINE() << "created selectivity pointer";
 }
 
 void Selectivity::DoExecute(shared_ptr<Model> model) {
@@ -69,7 +73,7 @@ void Selectivity::DoExecute(shared_ptr<Model> model) {
   LOG_TRACE();
   if (model->partition_type() == PartitionType::kAge) {
     LOG_FINEST() << "Printing report for the age-based selectivity with label '" << selectivity_->GetLabel() << "'";
-    cache_ << ReportHeader(type_, selectivity_label_, format_);
+    cache_ << ReportHeader(type_, label_, format_);
     const map<string, Parameter*> parameters = selectivity_->parameters().parameters();
 
     for (auto iter : parameters) {

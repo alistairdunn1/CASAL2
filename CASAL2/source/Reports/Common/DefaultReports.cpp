@@ -196,7 +196,7 @@ void DefaultReports::DoBuild(shared_ptr<Model> model) {
           string label        = object->label();
           string report_label = "__" + label + "__";
 
-          if (!object->IsSelectivityLengthBased()) {
+          if (!(object->IsSelectivityLengthBased() && model->length_bins().size() == 0)) {
             LOG_INFO() << "Creating default report for selectivity " << label;
 
             reports::Selectivity* report = new reports::Selectivity();
@@ -209,7 +209,8 @@ void DefaultReports::DoBuild(shared_ptr<Model> model) {
             report->parameters().Add(PARAM_SELECTIVITY, label, __FILE__, __LINE__);
             model->managers()->report()->AddInternalObject(report);
           } else {
-            LOG_INFO() << "skipping the default report for " << label << " this is a length based selectivity. Please create a specific report for this";
+            LOG_INFO() << "Skipping the default report for selectivity '" << label << "' as this is a length based selectivity and no @model.length_bins have been defined. "
+                       << "Please create a report using @report.type=selectivity as length values need to be specified for reporting";
           }
         }
       } else {
@@ -219,7 +220,7 @@ void DefaultReports::DoBuild(shared_ptr<Model> model) {
           string label        = object->label();
           string report_label = "__" + label + "__";
 
-          if (!object->IsSelectivityLengthBased()) {
+          if (!(object->IsSelectivityLengthBased() && model->length_bins().size() == 0)) {
             LOG_INFO() << "Creating default report for selectivity " << label;
             reports::Selectivity* report = new reports::Selectivity();
             report->set_is_default(true);
@@ -231,7 +232,8 @@ void DefaultReports::DoBuild(shared_ptr<Model> model) {
             report->parameters().Add(PARAM_SELECTIVITY, label, __FILE__, __LINE__);
             model->managers()->report()->AddInternalObject(report);
           } else {
-            LOG_INFO() << "skipping the default report for " << label << " this is a length based selectivity. Please create a specific report for this";
+            LOG_INFO() << "Skipping the default report for selectivity '" << label << "' as this is a length based selectivity and no @model.length_bins have been defined. "
+                       << "Please create a report using @report.type=selectivity as length values need to be specified for reporting";
           }
         }
       }

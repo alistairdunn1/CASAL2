@@ -13,8 +13,8 @@
 // Headers
 #include "Selectivity.h"
 
-#include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/lognormal.hpp>
+#include <boost/math/distributions/normal.hpp>
 #include <cmath>
 
 #include "../AgeLengths/AgeLength.h"
@@ -55,7 +55,7 @@ void Selectivity::Validate() {
   else if (partition_type_label_ == PARAM_LENGTH)
     partition_type_ = PartitionType::kLength;
   else {
-    LOG_CODE_ERROR() << "The partition_type is not recognized for this selectivity. It is not availabe for a length or age";
+    LOG_CODE_ERROR() << "The partition_type is not recognised for this selectivity. It is not available for a length or age";
   }
   age_index_ = model_->min_age();
 
@@ -77,11 +77,10 @@ void Selectivity::Validate() {
   } else {
     length_values_.assign(model_->length_bin_mid_points().size(), 0.0);
   }
-  if(length_based_) {
-    if(!allowed_length_based_in_age_based_model_)
+  if (length_based_) {
+    if (!allowed_length_based_in_age_based_model_)
       LOG_ERROR_P(PARAM_LENGTH_BASED) << "this selectivity type is not allowed to be length based.";
   }
-  
 }
 
 /**
@@ -97,9 +96,7 @@ void Selectivity::Reset() {
  * Virtual method for children to implement
  * overriden if child has it specified
  */
-void Selectivity::DoReset() {
-
-}
+void Selectivity::DoReset() {}
 /**
  * Reset the objects
  */
@@ -108,15 +105,15 @@ void Selectivity::RebuildCache() {
   if (model_->partition_type() == PartitionType::kAge) {
     for (unsigned age = model_->min_age(); age <= model_->max_age(); ++age) {
       values_[age - age_index_] = this->get_value(age);
-      LOG_FINEST( ) << "age = " << age << " value = " << values_[age - age_index_] ;
+      LOG_FINEST() << "age = " << age << " value = " << values_[age - age_index_];
     }
   } else if (model_->partition_type() == PartitionType::kLength) {
     vector<double> length_bins = model_->length_bin_mid_points();
     Double         temp        = 0.0;
     for (unsigned length_bin_index = 0; length_bin_index < length_bins.size(); ++length_bin_index) {
-      temp = length_bins[length_bin_index];
+      temp                             = length_bins[length_bin_index];
       length_values_[length_bin_index] = this->get_value(temp);
-      LOG_FINEST( ) << "length = " << temp << " value = " << length_values_[length_bin_index];
+      LOG_FINEST() << "length = " << temp << " value = " << length_values_[length_bin_index];
     }
   }
 }
@@ -173,12 +170,12 @@ Double Selectivity::GetResult(Double x) {
 Double Selectivity::GetLengthBasedResult(unsigned age, AgeLength* age_length) {
   LOG_TRACE();
   unsigned time_step = model_->managers()->time_step()->current_time_step();
-  unsigned year = model_->current_year();
+  unsigned year      = model_->current_year();
   Double   cv        = age_length->cv(year, time_step, age);
   LOG_FINE() << "times step " << time_step << " year = " << year;
-  Double   mean      = age_length->mean_length(time_step, age);
-  string   dist      = age_length->distribution_label();
-  LOG_FINEST() << "mu = " << mean << " cv = " << cv <<  " dist = " << dist << " n quant " << n_quant_;
+  Double mean = age_length->mean_length(time_step, age);
+  string dist = age_length->distribution_label();
+  LOG_FINEST() << "mu = " << mean << " cv = " << cv << " dist = " << dist << " n quant " << n_quant_;
 
   if (dist == PARAM_NONE || n_quant_ <= 1) {
     LOG_FINEST() << "value = " << this->get_value(mean);
@@ -197,10 +194,10 @@ Double Selectivity::GetLengthBasedResult(unsigned age, AgeLength* age_length) {
 
   } else if (dist == PARAM_LOGNORMAL) {
     // convert paramters to log space
-    Double                 sigma = sqrt(log(1 + cv * cv));
-    Double                 mu    = log(mean) - sigma * sigma * 0.5;
-    Double                 size  = 0.0;
-    Double                 total = 0.0;
+    Double sigma = sqrt(log(1 + cv * cv));
+    Double mu    = log(mean) - sigma * sigma * 0.5;
+    Double size  = 0.0;
+    Double total = 0.0;
     LOG_FINEST() << "mu = " << mu << " sigma = " << sigma;
     boost::math::lognormal dist{AS_DOUBLE(mu), AS_DOUBLE(sigma)};
     for (unsigned j = 0; j < n_quant_; ++j) {
@@ -213,7 +210,6 @@ Double Selectivity::GetLengthBasedResult(unsigned age, AgeLength* age_length) {
   LOG_CODE_ERROR() << "The specified distribution is not a valid distribution: " << dist;
   return 0;
 }
-
 
 /**
  * This method returns a pointer to a 4D vector object
