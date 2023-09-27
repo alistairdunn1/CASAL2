@@ -7,7 +7,7 @@
 extract.parameters(file, path = "", fileEncoding = "", quiet = FALSE)
 }
 \arguments{
-\item{file}{The name of the input file containing model output to extract}
+\item{file}{The name of the free parameter file containing model output to extract}
 
 \item{path}{The path to the file (optional)}
 
@@ -19,7 +19,7 @@ extract.parameters(file, path = "", fileEncoding = "", quiet = FALSE)
 Data <"data.frame"> of parameters that are from a -i format.
 }
 \description{
-This function reads in a parameter file that would be generated using the -o syntax.
+This function reads in a free parameter file that would be generated using the -o syntax.
 }
 \author{
 Craig Marsh

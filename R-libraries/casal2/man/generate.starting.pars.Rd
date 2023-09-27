@@ -5,36 +5,39 @@
 \title{generate.starting.pars Generates a parameter file that is formatted for -i input into Casal2.}
 \usage{
 generate.starting.pars(
-  path = "",
-  estimation_csl2_file = "Estimation.csl2",
+  MPD = MPD,
   n_sim = 10,
-  par_file_name = "starting_pars.out",
+  start_free_filename = "start_free.dat",
+  path = "",
   all_uniform = FALSE,
-  fileEncoding = "",
-  quiet = T
+  shrink = 0,
+  quiet = T,
+  write = TRUE
 )
 }
 \arguments{
-\item{path}{Optionally, the path to the file}
+\item{MPD}{<casal2MPD> object that is generated from the extract() function.}
 
-\item{estimation_csl2_file}{the name of the configuration file containing the @estimate blocks.}
+\item{n_sim}{the number of randomly generated sets of free parameters}
 
-\item{n_sim}{the number of random samples you want.}
+\item{start_free_filename}{= the filename of the file created}
 
-\item{par_file_name}{= the filename of the file created}
+\item{path}{Optionally, the path to location to write the output file}
 
-\item{all_uniform}{= logical if TRUE draw from a uniform between bounds regardless of prior distribution}
+\item{all_uniform}{= logical if TRUE draw from a uniform between bounds regardless of the prior distribution}
 
-\item{fileEncoding}{Optional, allows the R-library to read in files that have been encoded in alternative UTF formats, see the manual for the error message that would indicate when to use this switch.}
+\item{shrink}{shrink bounds by a percent of the range of bounds to keep starting pars away from bounds (default = 0) and range (0-0.45)}
 
 \item{quiet}{Optional, suppresses printing statements}
+
+\item{write}{if false, do not write to the output file}
 }
 \value{
-a file named 'parms.out' in the path directory
+a file (with default name 'start_free.dat') in the 'path' directory and returns these values if the output is assigned to an object
 }
 \description{
-This function reads a Casal2 estimation configuration file and returns a par file. Where each parameter is drawn from the prior defined in an @estimate block.
+This function takes an  Casal2 MPD  object with an estimate_summary report, and returns a free parameters file. Where each parameter is drawn from the prior defined in the estimate_summary block.
 }
 \author{
-Craig Marsh
+Alistair Dunn (derived from code by Craig Marsh)
 }
