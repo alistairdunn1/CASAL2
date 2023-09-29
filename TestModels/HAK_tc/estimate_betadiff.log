@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:33:54 2023
+Date: Fri Sep 29 15:05:25 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=24256
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=19868
 
 
 *partition[state1]
@@ -1342,7 +1342,7 @@ recruit_event_SSB_percent: 100 99.9058 99.5834 99.0415 98.0074 96.7071 95.3069 9
 ssb_offset: 1
 *end
 
-*process[Instantaneous_Mortality]
+*process[Mortality]
 biomass: 1
 categories: male female
 label: Instantaneous_Mortality
@@ -1357,7 +1357,7 @@ catch[subaF]: 120 281 372 762 364 350 272 179 448 722 525 818 713 1095 1237 1897
 actual_catch[subaF]: 120 281 372 762 364 350 272 179 448 722 525 818 713 1095 1237 1897 2381 2810 3941 1596 1995 2779 1915 2958 2853 3109 2820 2445 2776 3221 2580 2566 1709 2329 2446 1926 1319 1900 1859 1839 1600 1464 1033 1033 
 *end
 
-*selectivity[maturity_sel_m]
+*selectivity[maturity_ogive_m]
 h: 15 
 intervals: 5 
 l: 2 
@@ -1398,7 +1398,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[maturity_sel_f]
+*selectivity[maturity_ogive_f]
 h: 15 
 intervals: 5 
 l: 2 
@@ -1439,7 +1439,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[subaFsel]
+*selectivity[fishery_selectivity]
 a50: 6.99702 
 alpha: 1 
 ato95: 2.70985 
@@ -1481,7 +1481,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[subaTANselA]
+*selectivity[survey_selectivity]
 a50: 3.03406 
 alpha: 1 
 ato95: 0.101095 
@@ -3347,7 +3347,7 @@ year category age length observed expected residual error_value process_error ad
 2017 male+female 0 0 0.55 0.695531 -0.145531 0.04 0.186572 0.190812 -1.00781 -1.09657 -1.14684
 *end
 
-*process[Recruitment]
+*process[__Recruitment__]
 age: 1
 b0: 53971.1
 b0_initialisation_phase: 
@@ -3374,13 +3374,13 @@ recruit_event_SSB_percent: 100 99.9058 99.5834 99.0415 98.0074 96.7071 95.3069 9
 ssb_offset: 1
 *end
 
-*process[Ageing]
+*process[__Ageing__]
 categories: male female
 label: Ageing
 type: ageing
 *end
 
-*process[Instantaneous_Mortality]
+*process[__Instantaneous_Mortality__]
 biomass: 1
 categories: male female
 label: Instantaneous_Mortality
@@ -3395,7 +3395,7 @@ catch[subaF]: 120 281 372 762 364 350 272 179 448 722 525 818 713 1095 1237 1897
 actual_catch[subaF]: 120 281 372 762 364 350 272 179 448 722 525 818 713 1095 1237 1897 2381 2810 3941 1596 1995 2779 1915 2958 2853 3109 2820 2445 2776 3221 2580 2566 1709 2329 2446 1926 1319 1900 1859 1839 1600 1464 1033 1033 
 *end
 
-*selectivity[maturity_sel_m]
+*selectivity[__maturity_sel_m__]
 h: 15 
 intervals: 5 
 l: 2 
@@ -3436,7 +3436,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[maturity_sel_f]
+*selectivity[__maturity_sel_f__]
 h: 15 
 intervals: 5 
 l: 2 
@@ -3477,7 +3477,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[subaFsel]
+*selectivity[__subaFsel__]
 a50: 6.99702 
 alpha: 1 
 ato95: 2.70985 
@@ -3519,7 +3519,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[subaTANselA]
+*selectivity[__subaTANselA__]
 a50: 3.03406 
 alpha: 1 
 ato95: 0.101095 
@@ -3561,7 +3561,9 @@ Values {vector}
 30 1
 *end
 
-*selectivity[One]
+*selectivity[__One__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 

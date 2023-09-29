@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:30:53 2023
+Date: Fri Sep 29 15:09:58 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=14260
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=11780
 
 
 *selectivity_by_year[multisel_by_year]
@@ -1771,7 +1771,7 @@ process[Recruitment].b0 catchability[chatTANq].q selectivity[chatTANSel].mu sele
 52583 0.0575073 9.51995 5.53388 10.8664 10.8129 3.50265 6.86987 6.44798 3.00327 7.8833 1.02472 1.04658 1.06324 1.07299 1.07458 1.06541 1.04328 1.01815 1.00285 0.426938 0.476757 0.520428 0.382199 0.527158 0.445187 0.67427 1.00397 0.761247 0.653433 0.592745 0.488619 0.321246 0.303421 0.221372 0.33299 0.219917 0.328752 0.925172 0.525766 0.434871 0.187221 0.307342 0.259689 0.23094 0.260211 3 3 
 *end
 
-*selectivity[multi_eastFSel]
+*selectivity[multisel_sel]
 default_selectivity: default_eastFSel 
 intervals: 5 
 label: multi_eastFSel 

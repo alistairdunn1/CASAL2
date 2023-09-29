@@ -20,7 +20,7 @@ class ModelRunner:
         binary_name = "casal2"
         if Globals.operating_system_ == "windows":
             binary_name += ".exe"
-        exe_path = f"Casal2/{binary_name}"
+        exe_path = f"Casal2/{binary_name} "
 
         if not os.path.exists(exe_path):
             print(f"Looking for {exe_path}")
@@ -301,7 +301,7 @@ class ModelRunner:
             start = time.time()
             os.chdir("../TestModels/" + folder)
             if (
-                os.system(f"{exe_path} -E mpd.log > estimate.log 2> esimate.err")
+                os.system(f"{exe_path} -E mpd.log > estimate.log 2> estimate.err")
                 != EX_OK
             ):
                 elapsed = time.time() - start
@@ -327,6 +327,7 @@ class ModelRunner:
                 success_count += 1
 
             start = time.time()
+            os.system(f"rm --force *.2 ")
             if os.system(f"{exe_path} -M mpd.log > mcmc.log 2> mcmc.err ") != EX_OK:
                 elapsed = time.time() - start
                 print(
@@ -355,6 +356,7 @@ class ModelRunner:
         for folder in resume_mcmc_dir_list:
             start = time.time()
             os.chdir("../TestModels/" + folder)
+            os.system(f"rm --force *.2 ")
             if (
                 os.system(
                     f"{exe_path} -R mpd.log --objective-file objectives.1 --sample-file samples.1 > mcmc.log 2>&1"

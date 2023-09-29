@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_gammadiff.csl2 
-Date: Fri Sep 01 23:50:17 2023
+Date: Fri Sep 29 15:10:32 2023
 Seed: 20
-Version: v23.09 (2023-09-01)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=1436
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=20268
 
 
 *partition[partition_step1]
@@ -1354,7 +1354,7 @@ year category age length observed expected residual error_value process_error ad
 2007 stock 21 0 0.0021 0.0081542 -0.0060542 42 0 42 0.379402 -0.436284
 *end
 
-*process[Recruitment]
+*process[__Recruitment__]
 age: 1
 b0: 56927.23048060482
 b0_initialisation_phase: 
@@ -1382,13 +1382,13 @@ recruit_event_SSB_percent: 100 99.8667 99.3793 98.1153 97.4216 97.899 99.119 101
 ssb_offset: 1
 *end
 
-*process[Ageing]
+*process[__Ageing__]
 categories: stock
 label: Ageing
 type: ageing
 *end
 
-*process[instant_mort]
+*process[__instant_mort__]
 biomass: 1
 categories: stock
 label: instant_mort
@@ -1407,7 +1407,7 @@ catch[FishingWest]: 80 152 74 28 103 481 914 393 154 224 232 282 387 385 386 309
 actual_catch[FishingWest]: 80 152 74 28 103 481 914 393 154 224 232 282 387 385 386 309 409 718 656 368 597 1353 1475 1424 1169 1155 1208 454 497 687 2585 184 270 259 1069 231 822 800 
 *end
 
-*selectivity[MaturationSel]
+*selectivity[__MaturationSel__]
 h: 13 
 intervals: 5 
 l: 2 
@@ -1448,7 +1448,7 @@ Values {vector}
 30 1
 *end
 
-*selectivity[westFSel]
+*selectivity[__westFSel__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -1491,7 +1491,7 @@ Values {vector}
 30 0.00186462
 *end
 
-*selectivity[eastFSel]
+*selectivity[__eastFSel__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -1534,7 +1534,7 @@ Values {vector}
 30 0.00421361
 *end
 
-*selectivity[chatTANSel]
+*selectivity[__chatTANSel__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -1577,7 +1577,9 @@ Values {vector}
 30 0.0794385
 *end
 
-*selectivity[One]
+*selectivity[__One__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 

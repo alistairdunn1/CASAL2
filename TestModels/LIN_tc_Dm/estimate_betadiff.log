@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:35:35 2023
+Date: Fri Sep 29 15:10:14 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=11352
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=17824
 
 
 *partition[state1]
@@ -1918,7 +1918,7 @@ recruit_event_SSB_percent: 100 100 100 100 100 99.936 99.7996 99.6792 99.225 98.
 ssb_offset: 4
 *end
 
-*process[Instantaneous_Mortality]
+*process[Mortality]
 biomass: 1
 categories: male female
 label: Instantaneous_Mortality
@@ -1941,7 +1941,7 @@ catch[FishingTrwl]: 0 500 1120 900 3402 3100 1945 3707 5200 4427 2402 2778 3203 
 actual_catch[FishingTrwl]: 0 500 1120 900 3402 3100 1945 3707 5200 4427 2402 2778 3203 4480 3182 3962 2065 2923 3199 4534 6237 7335 5456 5348 6769 6923 6032 5593 7089 6629 6970 7205 7826 7870 6161 7504 6990 5225 4270 4404 4384 6234 5841 6176 5228 5816 5800 
 *end
 
-*selectivity[M_all]
+*selectivity[NaturalMortalityOgive_all]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -1980,7 +1980,7 @@ Values {vector}
 25 0.351133
 *end
 
-*selectivity[MaturationSel_male]
+*selectivity[MaturationOgive_male]
 h: 10 
 intervals: 5 
 l: 3 
@@ -2014,7 +2014,7 @@ Values {vector}
 25 1
 *end
 
-*selectivity[MaturationSel_female]
+*selectivity[MaturationOgive_female]
 h: 10 
 intervals: 5 
 l: 3 
@@ -2048,7 +2048,7 @@ Values {vector}
 25 1
 *end
 
-*selectivity[summerTANSel_m]
+*selectivity[summerTANSel_male]
 a50: 13.3919 
 alpha: 0.98926 
 ato95: 9.60575 
@@ -2083,7 +2083,7 @@ Values {vector}
 25 0.961857
 *end
 
-*selectivity[summerTANSel_f]
+*selectivity[summerTANSel_female]
 a50: 13.3308 
 alpha: 1 
 ato95: 9.45078 
@@ -2118,7 +2118,7 @@ Values {vector}
 25 0.974309
 *end
 
-*selectivity[autumnTANSel_m]
+*selectivity[autumnTANSel_male]
 a50: 12.4743 
 alpha: 1.09906 
 ato95: 9.19445 
@@ -2153,7 +2153,7 @@ Values {vector}
 25 1.07951
 *end
 
-*selectivity[autumnTANSel_f]
+*selectivity[autumnTANSel_female]
 a50: 11.8477 
 alpha: 1 
 ato95: 8.71899 
@@ -2188,7 +2188,7 @@ Values {vector}
 25 0.98836
 *end
 
-*selectivity[trwlFSel_m]
+*selectivity[trwlFSel_male]
 alpha: 0.987371 
 beta: 0 
 intervals: 5 
@@ -2224,7 +2224,7 @@ Values {vector}
 25 0.95714
 *end
 
-*selectivity[trwlFSel_f]
+*selectivity[trwlFSel_female]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -2260,7 +2260,7 @@ Values {vector}
 25 0.975136
 *end
 
-*selectivity[lineHomeFSel_m]
+*selectivity[lineHomeFSel_male]
 a50: 13.5197 
 alpha: 0.831003 
 ato95: 9.86076 
@@ -2295,7 +2295,7 @@ Values {vector}
 25 0.804884
 *end
 
-*selectivity[lineHomeFSel_f]
+*selectivity[lineHomeFSel_female]
 a50: 14.1855 
 alpha: 1 
 ato95: 10.0633 
@@ -2330,7 +2330,7 @@ Values {vector}
 25 0.959466
 *end
 
-*selectivity[lineSpawnFSel_m]
+*selectivity[lineSpawnFSel_male]
 a50: 16.2748 
 alpha: 1.0419 
 ato95: 11.4116 
@@ -2365,7 +2365,7 @@ Values {vector}
 25 0.942667
 *end
 
-*selectivity[lineSpawnFSel_f]
+*selectivity[lineSpawnFSel_female]
 a50: 15.6625 
 alpha: 1 
 ato95: 10.7113 
@@ -4921,7 +4921,7 @@ year category age length observed expected residual error_value process_error ad
 2017 female 22 0 0.0269 0.0529415 -0.0260415 25 0 1.27151 3.80419
 *end
 
-*process[Recruitment]
+*process[__Recruitment__]
 age: 3
 b0: 688682
 b0_initialisation_phase: 
@@ -4948,13 +4948,13 @@ recruit_event_SSB_percent: 100 100 100 100 100 99.936 99.7996 99.6792 99.225 98.
 ssb_offset: 4
 *end
 
-*process[Ageing]
+*process[__Ageing__]
 categories: male female
 label: Ageing
 type: ageing
 *end
 
-*process[Instantaneous_Mortality]
+*process[__Instantaneous_Mortality__]
 biomass: 1
 categories: male female
 label: Instantaneous_Mortality
@@ -4977,7 +4977,7 @@ catch[FishingTrwl]: 0 500 1120 900 3402 3100 1945 3707 5200 4427 2402 2778 3203 
 actual_catch[FishingTrwl]: 0 500 1120 900 3402 3100 1945 3707 5200 4427 2402 2778 3203 4480 3182 3962 2065 2923 3199 4534 6237 7335 5456 5348 6769 6923 6032 5593 7089 6629 6970 7205 7826 7870 6161 7504 6990 5225 4270 4404 4384 6234 5841 6176 5228 5816 5800 
 *end
 
-*selectivity[MaturationSel_male]
+*selectivity[__MaturationSel_male__]
 h: 10 
 intervals: 5 
 l: 3 
@@ -5011,7 +5011,7 @@ Values {vector}
 25 1
 *end
 
-*selectivity[MaturationSel_female]
+*selectivity[__MaturationSel_female__]
 h: 10 
 intervals: 5 
 l: 3 
@@ -5045,7 +5045,7 @@ Values {vector}
 25 1
 *end
 
-*selectivity[summerTANSel_m]
+*selectivity[__summerTANSel_m__]
 a50: 13.3919 
 alpha: 0.98926 
 ato95: 9.60575 
@@ -5080,7 +5080,7 @@ Values {vector}
 25 0.961857
 *end
 
-*selectivity[summerTANSel_f]
+*selectivity[__summerTANSel_f__]
 a50: 13.3308 
 alpha: 1 
 ato95: 9.45078 
@@ -5115,7 +5115,7 @@ Values {vector}
 25 0.974309
 *end
 
-*selectivity[autumnTANSel_m]
+*selectivity[__autumnTANSel_m__]
 a50: 12.4743 
 alpha: 1.09906 
 ato95: 9.19445 
@@ -5150,7 +5150,7 @@ Values {vector}
 25 1.07951
 *end
 
-*selectivity[autumnTANSel_f]
+*selectivity[__autumnTANSel_f__]
 a50: 11.8477 
 alpha: 1 
 ato95: 8.71899 
@@ -5185,7 +5185,7 @@ Values {vector}
 25 0.98836
 *end
 
-*selectivity[trwlFSel_m]
+*selectivity[__trwlFSel_m__]
 alpha: 0.987371 
 beta: 0 
 intervals: 5 
@@ -5221,7 +5221,7 @@ Values {vector}
 25 0.95714
 *end
 
-*selectivity[trwlFSel_f]
+*selectivity[__trwlFSel_f__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -5257,7 +5257,7 @@ Values {vector}
 25 0.975136
 *end
 
-*selectivity[lineHomeFSel_m]
+*selectivity[__lineHomeFSel_m__]
 a50: 13.5197 
 alpha: 0.831003 
 ato95: 9.86076 
@@ -5292,7 +5292,7 @@ Values {vector}
 25 0.804884
 *end
 
-*selectivity[lineHomeFSel_f]
+*selectivity[__lineHomeFSel_f__]
 a50: 14.1855 
 alpha: 1 
 ato95: 10.0633 
@@ -5327,7 +5327,7 @@ Values {vector}
 25 0.959466
 *end
 
-*selectivity[lineSpawnFSel_m]
+*selectivity[__lineSpawnFSel_m__]
 a50: 16.2748 
 alpha: 1.0419 
 ato95: 11.4116 
@@ -5362,7 +5362,7 @@ Values {vector}
 25 0.942667
 *end
 
-*selectivity[lineSpawnFSel_f]
+*selectivity[__lineSpawnFSel_f__]
 a50: 15.6625 
 alpha: 1 
 ato95: 10.7113 
@@ -5397,7 +5397,7 @@ Values {vector}
 25 0.928692
 *end
 
-*selectivity[M_all]
+*selectivity[__M_all__]
 alpha: 1 
 beta: 0 
 intervals: 5 

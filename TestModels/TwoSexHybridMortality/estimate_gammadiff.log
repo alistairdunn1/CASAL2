@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_gammadiff.csl2 
-Date: Thu Aug 24 22:37:38 2023
+Date: Fri Sep 29 15:10:22 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=1184
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=18652
 
 
 *partition[state1]
@@ -984,7 +984,7 @@ values {vector}
 {end_list}
 *end
 
-*process[instant_mort]
+*process[Mortality]
 biomass: 1
 categories: male female
 f_iterations: 4
@@ -1003,7 +1003,7 @@ actual_catch[FishingTrwl]: 0 1.26325e+06 1.93025e+06 4.81551e+06 1.06113e+07 1.0
 f_by_year[FishingTrwl]: 0 0.0018629 0.00285234 0.00734273 0.0178 0.0205105 0.0156794 0.0268671 0.0146384 0.00698702 0.0116207 0.0112998 0.0121938 0.011649 0.0125985 0.0109551 0.0136413 0.0117216 0.0164397 0.0224425 0.0318077 0.0231357 0.0196781 0.0236545 0.0304874 0.0352214 0.0579221 0.0421078 0.048792 0.0449383 0.0378375 0.0420352 0.0309495 0.0230325 0.0193455 0.0270462 0.0273643 0.0179308 0.0174394 0.0140433 0.016619 0.0131786 0.015853 
 *end
 
-*process[Recruitment]
+*process[Rec]
 age: 3
 b0: 132864.10866631096
 b0_initialisation_phase: 

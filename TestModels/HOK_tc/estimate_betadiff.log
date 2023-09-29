@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:29:59 2023
+Date: Fri Sep 29 15:03:16 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=19072
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=8604
 
 
 *partition[state1]
@@ -3288,7 +3288,7 @@ correlation_matrix {matrix}
 -0.0569191 -0.0323379 -0.0579402 -0.032708 -0.0323742 0.00923439 0.00291198 0.0352055 0.0227424 0.0468748 -0.0113726 0.023551 0.00178092 0.0447664 0.0172444 0.0300206 0.0174214 0.0287384 0.00336586 0.0217541 0.0298222 0.011442 0.0116054 0.0310276 -0.0237474 0.027908 0.0111542 -0.0134334 -0.00303189 -0.000378299 0.00148648 -0.012894 0.0136309 -0.0121546 0.0220992 -0.112298 0.00908695 0.00857278 0.00840126 0.00308126 0.0120333 0.00127996 0.00189142 0.00839414 -0.000415688 0.00677169 0.000539643 5.76357e-05 -0.0389885 0.0156745 -0.000571233 0.00585631 0.0164742 -0.0441155 -0.0142976 0.0161177 0.0227773 -0.00703446 0.016648 0.0133629 0.00206983 0.0088908 0.00227163 -0.00953484 0.00681263 0.0205882 0.0259185 0.0137901 0.00782421 0.0277872 0.0286545 -0.0059361 -0.000720765 0.0468151 -0.0270258 0.0576345 -0.0242636 0.13386 0.0175279 0.00381426 0.00855823 0.0133833 -0.00390644 0.0147068 0.00824016 -0.00368265 0.00977082 -0.00538884 0.00710332 0.0152335 0.0021709 0.0189904 0.00440717 0.00524429 0.0164855 -0.00928542 -0.011512 0.0146714 -0.01005 -0.0108781 0.0151789 0.0843759 0.0122065 0.0222541 0.025411 0.0230315 0.0134532 0.00995812 0.0074312 -0.00346481 -0.00286283 0.0162533 0.00447381 -0.00143422 0.0076908 0.00938437 -0.0315928 -0.00116176 0.00599464 0.00141582 0.0502377 0.00659127 -0.000922291 0.0138882 0.0139134 -0.0201103 -0.0121626 -0.0312231 -0.0269783 0.0220992 -0.0633955 -0.0606296 1 
 *end
 
-*process[Instant_mortality]
+*process[Mortality]
 biomass: 1
 categories: west.sa east.cr west.cr west.wc east.cs
 label: Instant_mortality
@@ -3323,7 +3323,7 @@ catch[Wsp]: 5000 5000 5000 10000 30000 60000 5000 18000 20000 25000 25000 23300 
 actual_catch[Wsp]: 5000 5000 5000 10000 30000 60000 5000 18000 20000 25000 25000 23300 27900 24900 71500 146700 227000 185900 173000 135900 107200 100100 117200 80100 75900 96900 107100 97500 105600 109000 98000 79800 46300 38100 39700 33700 21200 20800 36600 49500 55800 57200 70200 80600 69900 67200 70000 
 *end
 
-*process[recruit_E]
+*process[Recruit_E]
 age: 1
 b0: 548395
 b0_initialisation_phase: 
@@ -3350,7 +3350,7 @@ recruit_event_SSB_percent: 100 100 99.7515 99.5258 99.2053 97.0601 95.0704 93.28
 ssb_offset: 2
 *end
 
-*process[recruit_W]
+*process[Recruit_W]
 age: 1
 b0: 1.08267e+06
 b0_initialisation_phase: 
@@ -8055,13 +8055,13 @@ year category age length observed expected residual error_value process_error ad
 1998 west.sa 9 0 0.54 0.601533 -0.0615331 0.25 0 0.25 -1.35186 -0.409175 -0.315165
 *end
 
-*process[Ageing]
+*process[__Ageing__]
 categories: west.sa east.cr west.cr west.wc east.cs
 label: Ageing
 type: ageing
 *end
 
-*process[Ertn]
+*process[__Ertn__]
 from: east.cs
 include_in_mortality_block: 0
 label: Ertn
@@ -8120,7 +8120,7 @@ year east.cr
 2018 1 
 *end
 
-*process[Wrtn]
+*process[__Wrtn__]
 from: west.wc
 include_in_mortality_block: 0
 label: Wrtn
@@ -8179,7 +8179,7 @@ year west.sa
 2018 1 
 *end
 
-*process[Whome]
+*process[__Whome__]
 from: west.cr
 include_in_mortality_block: 0
 label: Whome
@@ -8238,7 +8238,7 @@ year west.sa
 2018 1 
 *end
 
-*process[Espmg]
+*process[__Espmg__]
 from: east.cr
 include_in_mortality_block: 0
 label: Espmg
@@ -8297,7 +8297,7 @@ year east.cs
 2018 1 
 *end
 
-*process[Wspmg]
+*process[__Wspmg__]
 from: west.sa
 include_in_mortality_block: 0
 label: Wspmg
@@ -8356,7 +8356,7 @@ year west.wc
 2018 1 
 *end
 
-*process[recruit_W]
+*process[__recruit_W__]
 age: 1
 b0: 1.08267e+06
 b0_initialisation_phase: 
@@ -8383,7 +8383,7 @@ recruit_event_SSB_percent: 100 100 99.7729 99.5409 99.332 98.8877 97.5007 94.703
 ssb_offset: 2
 *end
 
-*process[recruit_E]
+*process[__recruit_E__]
 age: 1
 b0: 548395
 b0_initialisation_phase: 
@@ -8410,7 +8410,7 @@ recruit_event_SSB_percent: 100 100 99.7515 99.5258 99.2053 97.0601 95.0704 93.28
 ssb_offset: 2
 *end
 
-*process[Instant_mortality]
+*process[__Instant_mortality__]
 biomass: 1
 categories: west.sa east.cr west.cr west.wc east.cs
 label: Instant_mortality
@@ -8445,7 +8445,7 @@ catch[Wsp]: 5000 5000 5000 10000 30000 60000 5000 18000 20000 25000 25000 23300 
 actual_catch[Wsp]: 5000 5000 5000 10000 30000 60000 5000 18000 20000 25000 25000 23300 27900 24900 71500 146700 227000 185900 173000 135900 107200 100100 117200 80100 75900 96900 107100 97500 105600 109000 98000 79800 46300 38100 39700 33700 21200 20800 36600 49500 55800 57200 70200 80600 69900 67200 70000 
 *end
 
-*selectivity[M_male]
+*selectivity[__M_male__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8478,7 +8478,7 @@ Values {vector}
 17 1.57169
 *end
 
-*selectivity[M_female]
+*selectivity[__M_female__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8511,7 +8511,7 @@ Values {vector}
 17 0.811488
 *end
 
-*selectivity[Enspsl]
+*selectivity[__Enspsl__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8541,7 +8541,7 @@ Values {vector}
 17 0.951244
 *end
 
-*selectivity[Wnspsl]
+*selectivity[__Wnspsl__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8571,7 +8571,7 @@ Values {vector}
 17 0.962934
 *end
 
-*selectivity[Espsl]
+*selectivity[__Espsl__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8601,7 +8601,7 @@ Values {vector}
 17 0.244045
 *end
 
-*selectivity[Wspsl]
+*selectivity[__Wspsl__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8631,7 +8631,7 @@ Values {vector}
 17 0.257728
 *end
 
-*selectivity[CRsl]
+*selectivity[__CRsl__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8661,7 +8661,7 @@ Values {vector}
 17 0.175176
 *end
 
-*selectivity[SAsl]
+*selectivity[__SAsl__]
 alpha: 1 
 beta: 0 
 intervals: 5 
@@ -8691,7 +8691,7 @@ Values {vector}
 17 0.0428826
 *end
 
-*selectivity[sel_Whome]
+*selectivity[__sel_Whome__]
 h: 8 
 intervals: 5 
 l: 1 
@@ -8719,7 +8719,7 @@ Values {vector}
 17 1
 *end
 
-*selectivity[sel_Espmg]
+*selectivity[__sel_Espmg__]
 h: 8 
 intervals: 5 
 l: 1 
@@ -8747,7 +8747,7 @@ Values {vector}
 17 0.611004
 *end
 
-*selectivity[sel_Wspmg]
+*selectivity[__sel_Wspmg__]
 h: 8 
 intervals: 5 
 l: 1 
@@ -8775,7 +8775,9 @@ Values {vector}
 17 0.601533
 *end
 
-*selectivity[One]
+*selectivity[__One__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -8802,7 +8804,9 @@ Values {vector}
 17 1
 *end
 
-*selectivity[Point5]
+*selectivity[__Point5__]
+a: 0 
+b: 0 
 beta: 0 
 c: 0.5 
 intervals: 5 
@@ -8896,6 +8900,8 @@ Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Funct
 
 *warnings[messages_encountered]
 Values {string}
+In the age-length relationship 'age_length_W', the CVs are set to zero. In this relationship, the calculations of the density of lengths at age may fail. The CVs should be usually be set to values greater than zero if length data are being used in this model with this age-length relationship.
+In the age-length relationship 'age_length_E', the CVs are set to zero. In this relationship, the calculations of the density of lengths at age may fail. The CVs should be usually be set to values greater than zero if length data are being used in this model with this age-length relationship.
 At line 185 in Observation.csl2 the table obs : The sum of the values for year 1989 was 1 and do not sum to 1.0
 At line 185 in Observation.csl2 the table obs : The sum of the values for year 1990 was 1 and do not sum to 1.0
 At line 185 in Observation.csl2 the table obs : The sum of the values for year 1991 was 0.999999 and do not sum to 1.0

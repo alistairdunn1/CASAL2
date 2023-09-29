@@ -30,18 +30,24 @@ resizing from 85742 to 94316
 [INFO] Creating default report for process Fishing
 [INFO] Creating default report for selectivity MaturationSel_male
 [INFO] Creating default report for selectivity MaturationSel_female
-[INFO] skipping the default report for lineFSel this is a length based selectivity. Please create a specific report for this
-[INFO] skipping the default report for lineFretained this is a length based selectivity. Please create a specific report for this
-[INFO] skipping the default report for potFSel this is a length based selectivity. Please create a specific report for this
-[INFO] skipping the default report for potFretained this is a length based selectivity. Please create a specific report for this
-[INFO] skipping the default report for recFretained this is a length based selectivity. Please create a specific report for this
-[INFO] skipping the default report for recFSel this is a length based selectivity. Please create a specific report for this
+[INFO] Creating default report for selectivity lineFSel
+[INFO] Creating default report for selectivity lineFretained
+[INFO] Creating default report for selectivity potFSel
+[INFO] Creating default report for selectivity potFretained
+[INFO] Creating default report for selectivity recFretained
+[INFO] Creating default report for selectivity recFSel
 [INFO] Creating default report for selectivity potFdis
 [INFO] Creating default report for selectivity recFdis
 [INFO] Creating default report for selectivity potSurveySel_female
 [INFO] Creating default report for selectivity potSurveySel_male
 [INFO] Creating default report for selectivity One
 [INFO] The likelihood for the observation 'lgobookLF' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
+[INFO] The selectivity report '__lineFSel__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+[INFO] The selectivity report '__lineFretained__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+[INFO] The selectivity report '__potFSel__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+[INFO] The selectivity report '__potFretained__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+[INFO] The selectivity report '__recFretained__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+[INFO] The selectivity report '__recFSel__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
 [INFO] Initiating point estimate run mode
 [INFO] Estimation_phase 1
 [INFO] Estimation with the betadiff minimiser
@@ -1160,4 +1166,4 @@ finished main minimiser loop
 Successful convergence in optimise
 [INFO] Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Function had value 241.012 and 241.012 was expected.
 [INFO] Completed
-[INFO] Total elapsed time: 2.15 minutes
+[INFO] Total elapsed time: 2.217 minutes

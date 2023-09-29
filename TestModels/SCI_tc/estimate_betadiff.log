@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:35:44 2023
+Date: Fri Sep 29 15:03:48 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=6644
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=19692
 
 
 *partition[state_Oct_Jan]
@@ -1532,7 +1532,7 @@ untagged.male_initial_length_distribution: 0.022563 0.0172706 0.0268962 0.039074
 untagged.female_initial_length_distribution: 0.022563 0.0172706 0.0268962 0.0390749 0.0530715 0.0677428 0.0816862 0.0930239 0.098671 0.098671 0.0930239 0.0816862 0.0677428 0.0530715 0.0390749 0.0268962 0.0172706 0.0103684 0.00585649 0.00314139 0.00161758 0.000808476 0.000396279 0.000192211 9.29468e-05 4.50761e-05 2.20234e-05 1.08769e-05 5.44301e-06 5.83201e-06 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 *end
 
-*process[Instantaneous_Mortality]
+*process[Mortality]
 biomass: 1
 categories: untagged.male t1997_1.male t1996_2.male t1996_3.male untagged.female t1997_1.female t1996_2.female t1996_3.female
 label: Instantaneous_Mortality
@@ -9373,7 +9373,7 @@ year category age length observed expected residual error_value process_error ad
 1997 t1997_1.female 0 68 0 0 0 80 0 80 0 -0
 *end
 
-*process[Recruitment]
+*process[__Recruitment__]
 b0: 2107.57
 b0_initialisation_phase: 
 categories: untagged.male untagged.female
@@ -9403,7 +9403,7 @@ untagged.male_initial_length_distribution: 0.022563 0.0172706 0.0268962 0.039074
 untagged.female_initial_length_distribution: 0.022563 0.0172706 0.0268962 0.0390749 0.0530715 0.0677428 0.0816862 0.0930239 0.098671 0.098671 0.0930239 0.0816862 0.0677428 0.0530715 0.0390749 0.0268962 0.0172706 0.0103684 0.00585649 0.00314139 0.00161758 0.000808476 0.000396279 0.000192211 9.29468e-05 4.50761e-05 2.20234e-05 1.08769e-05 5.44301e-06 5.83201e-06 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 *end
 
-*process[Instantaneous_Mortality]
+*process[__Instantaneous_Mortality__]
 biomass: 1
 categories: untagged.male t1997_1.male t1996_2.male t1996_3.male untagged.female t1997_1.female t1996_2.female t1996_3.female
 label: Instantaneous_Mortality
@@ -9426,13 +9426,13 @@ catch[Trawl_3]: 0 0 3.00177 10.206 82.5805 93.6586 125.913 69.8657 157.272 107.4
 actual_catch[Trawl_3]: 0 0 3.00177 10.206 82.5805 93.6586 125.913 69.8657 157.272 107.421 96.0135 79.4757 21.1208 32.7258 74.3556 82.9297 80.132 12.7786 0.360778 24.8223 33.5123 18.2801 0.367236 9.59777 28.676 16.579 6.85472 0 2.1314 27.244 10.5231 24.816 11.5597 35.1636 38.4197 56.1205 36 
 *end
 
-*process[growth]
+*process[__growth__]
 categories: untagged.male t1997_1.male t1996_2.male t1996_3.male untagged.female t1997_1.female t1996_2.female t1996_3.female
 label: growth
 type: growth
 *end
 
-*process[tag_1996_2_male]
+*process[__tag_1996_2_male__]
 from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
@@ -9447,7 +9447,7 @@ u_max: 0.98999999999999999
 years: 1996
 *end
 
-*process[tag_1996_2_female]
+*process[__tag_1996_2_female__]
 from: untagged.female
 initial_mortality: 0
 initial_mortality_selectivity: 
@@ -9462,7 +9462,7 @@ u_max: 0.98999999999999999
 years: 1996
 *end
 
-*process[tag_1996_3_male]
+*process[__tag_1996_3_male__]
 from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
@@ -9477,7 +9477,7 @@ u_max: 0.98999999999999999
 years: 1996
 *end
 
-*process[tag_1996_3_female]
+*process[__tag_1996_3_female__]
 from: untagged.female
 initial_mortality: 0
 initial_mortality_selectivity: 
@@ -9492,7 +9492,7 @@ u_max: 0.98999999999999999
 years: 1996
 *end
 
-*process[tag_1997_1_male]
+*process[__tag_1997_1_male__]
 from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
@@ -9507,7 +9507,7 @@ u_max: 0.98999999999999999
 years: 1997
 *end
 
-*process[tag_1997_1_female]
+*process[__tag_1997_1_female__]
 from: untagged.female
 initial_mortality: 0
 initial_mortality_selectivity: 
@@ -10243,6 +10243,8 @@ Values {vector}
 *end
 
 *selectivity[One]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -10321,6 +10323,8 @@ Values {vector}
 *end
 
 *selectivity[tag_1996_2_male.one]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -10399,6 +10403,8 @@ Values {vector}
 *end
 
 *selectivity[tag_1996_2_female.one]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -10477,6 +10483,8 @@ Values {vector}
 *end
 
 *selectivity[tag_1996_3_male.one]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -10555,6 +10563,8 @@ Values {vector}
 *end
 
 *selectivity[tag_1996_3_female.one]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -10633,6 +10643,8 @@ Values {vector}
 *end
 
 *selectivity[tag_1997_1_male.one]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -10711,6 +10723,8 @@ Values {vector}
 *end
 
 *selectivity[tag_1997_1_female.one]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 

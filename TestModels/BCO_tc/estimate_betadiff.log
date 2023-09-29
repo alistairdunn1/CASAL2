@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:31:25 2023
+Date: Fri Sep 29 15:06:45 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=18900
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=22540
 
 
 *partition[state1]
@@ -1082,7 +1082,7 @@ recruit_event_SSB_percent: 100 100 100 100 99.7608 99.4191 98.9989 98.5086 97.95
 ssb_offset: 3
 *end
 
-*process[Fishing]
+*process[Mortality]
 categories: male female
 label: Fishing
 m: 0.14 0.2
@@ -1113,7 +1113,7 @@ discards[Recreation]: 0 3.46532 3.55998 3.64239 3.74321 3.83203 3.92386 4.03393 
 discards_dead[Recreation]: 0 3.46532 3.55998 3.64239 3.74321 3.83203 3.92386 4.03393 4.13146 4.24725 4.35028 4.456 4.48518 4.54782 4.59632 4.66268 4.71461 4.78463 4.83999 4.91372 4.97258 5.06716 5.16415 5.26364 5.36573 5.47052 5.57811 5.67063 5.76579 5.84533 5.94592 6.04951 6.21327 6.38148 6.58093 6.80619 6.93777 6.89468 6.78742 6.6679 6.54822 6.40924 6.27085 6.14938 6.05001 5.98542 5.97717 6.16498 6.4076 6.68751 6.97723 7.29122 7.53384 7.75361 7.89528 7.97931 8.02699 8.24806 8.49573 8.7492 8.97277 9.26426 9.46008 9.69609 9.90939 10.0993 10.2026 10.1976 10.1956 10.2252 10.2191 10.2488 10.2314 10.1907 10.1939 10.2307 10.2075 10.1322 10.0338 9.92692 9.79187 9.73022 9.66411 9.536 8.95086 7.75451 6.6053 5.81054 5.47128 5.61537 6.3498 8.09283 11.5938 17.0925 23.2651 25.9199 23.4748 20.657 19.0352 18.9742 19.265 18.132 16.5253 15.1097 14.023 13.5013 13.0855 13.446 14.824 15.3854 15.34 16.1518 16.7748 16.7154 17.3589 19.0409 18.8309 17.7184 16.3426 15.1629 
 *end
 
-*selectivity[potSurveySel_male]
+*selectivity[potSSelm]
 a50: 3.03845 
 alpha: 1 
 ato95: 0.191918 
@@ -1143,7 +1143,7 @@ Values {vector}
 20 1
 *end
 
-*selectivity[potSurveySel_female]
+*selectivity[potSSelf]
 a50: 3.30808 
 alpha: 1 
 ato95: 1.03043 
@@ -1731,7 +1731,7 @@ year category age length observed expected residual error_value process_error ad
 2010 male+female 0 58 0 6.70373e-05 -6.70373e-05 100 0 100 0 -0.0818791
 *end
 
-*process[Recruitment]
+*process[__Recruitment__]
 age: 3
 b0: 14564.9
 b0_initialisation_phase: 
@@ -1758,13 +1758,13 @@ recruit_event_SSB_percent: 100 100 100 100 99.7608 99.4191 98.9989 98.5086 97.95
 ssb_offset: 3
 *end
 
-*process[Ageing]
+*process[__Ageing__]
 categories: male female
 label: Ageing
 type: ageing
 *end
 
-*process[Fishing]
+*process[__Fishing__]
 categories: male female
 label: Fishing
 m: 0.14 0.2
@@ -1795,7 +1795,7 @@ discards[Recreation]: 0 3.46532 3.55998 3.64239 3.74321 3.83203 3.92386 4.03393 
 discards_dead[Recreation]: 0 3.46532 3.55998 3.64239 3.74321 3.83203 3.92386 4.03393 4.13146 4.24725 4.35028 4.456 4.48518 4.54782 4.59632 4.66268 4.71461 4.78463 4.83999 4.91372 4.97258 5.06716 5.16415 5.26364 5.36573 5.47052 5.57811 5.67063 5.76579 5.84533 5.94592 6.04951 6.21327 6.38148 6.58093 6.80619 6.93777 6.89468 6.78742 6.6679 6.54822 6.40924 6.27085 6.14938 6.05001 5.98542 5.97717 6.16498 6.4076 6.68751 6.97723 7.29122 7.53384 7.75361 7.89528 7.97931 8.02699 8.24806 8.49573 8.7492 8.97277 9.26426 9.46008 9.69609 9.90939 10.0993 10.2026 10.1976 10.1956 10.2252 10.2191 10.2488 10.2314 10.1907 10.1939 10.2307 10.2075 10.1322 10.0338 9.92692 9.79187 9.73022 9.66411 9.536 8.95086 7.75451 6.6053 5.81054 5.47128 5.61537 6.3498 8.09283 11.5938 17.0925 23.2651 25.9199 23.4748 20.657 19.0352 18.9742 19.265 18.132 16.5253 15.1097 14.023 13.5013 13.0855 13.446 14.824 15.3854 15.34 16.1518 16.7748 16.7154 17.3589 19.0409 18.8309 17.7184 16.3426 15.1629 
 *end
 
-*selectivity[MaturationSel_male]
+*selectivity[__MaturationSel_male__]
 a50: 4.1 
 alpha: 1 
 ato95: 2.47 
@@ -1825,7 +1825,7 @@ Values {vector}
 20 1
 *end
 
-*selectivity[MaturationSel_female]
+*selectivity[__MaturationSel_female__]
 a50: 4.1 
 alpha: 1 
 ato95: 2.47 
@@ -1855,7 +1855,363 @@ Values {vector}
 20 1
 *end
 
-*selectivity[potFdis]
+*selectivity[__lineFSel__]
+a50: 28 
+alpha: 1 
+ato95: 2.5 
+beta: 0 
+intervals: 11 
+label: lineFSel 
+length_based: 1 
+type: logistic 
+Values {vector}
+13 0
+14 0
+15 0
+16 7.2775e-07
+17 2.36311e-06
+18 7.6733e-06
+19 2.49159e-05
+20 8.09009e-05
+21 0.000262649
+22 0.000852356
+23 0.00276243
+24 0.00891467
+25 0.0283787
+26 0.0866255
+27 0.235452
+28 0.5
+29 0.764548
+30 0.913374
+31 0.971621
+32 0.991085
+33 0.997238
+34 0.999148
+35 0.999737
+36 0.999919
+37 0.999975
+38 0.999992
+39 0.999998
+40 0.999999
+41 1
+42 1
+43 1
+44 1
+45 1
+46 1
+47 1
+48 1
+49 1
+50 1
+51 1
+52 1
+53 1
+54 1
+55 1
+56 1
+57 1
+58 1
+59 1
+*end
+
+*selectivity[__lineFretained__]
+a50: 33 
+alpha: 1 
+ato95: 2.5 
+beta: 0 
+intervals: 11 
+label: lineFretained 
+length_based: 1 
+type: logistic 
+Values {vector}
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 7.2775e-07
+22 2.36311e-06
+23 7.6733e-06
+24 2.49159e-05
+25 8.09009e-05
+26 0.000262649
+27 0.000852356
+28 0.00276243
+29 0.00891467
+30 0.0283787
+31 0.0866255
+32 0.235452
+33 0.5
+34 0.764548
+35 0.913374
+36 0.971621
+37 0.991085
+38 0.997238
+39 0.999148
+40 0.999737
+41 0.999919
+42 0.999975
+43 0.999992
+44 0.999998
+45 0.999999
+46 1
+47 1
+48 1
+49 1
+50 1
+51 1
+52 1
+53 1
+54 1
+55 1
+56 1
+57 1
+58 1
+59 1
+*end
+
+*selectivity[__potFSel__]
+a50: 31 
+alpha: 1 
+ato95: 2 
+beta: 0 
+intervals: 11 
+label: potFSel 
+length_based: 1 
+type: logistic 
+Values {vector}
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 4.03861e-07
+22 1.76039e-06
+23 7.6733e-06
+24 3.34463e-05
+25 0.000145773
+26 0.000635097
+27 0.00276243
+28 0.0119305
+29 0.05
+30 0.186605
+31 0.5
+32 0.813395
+33 0.95
+34 0.98807
+35 0.997238
+36 0.999365
+37 0.999854
+38 0.999967
+39 0.999992
+40 0.999998
+41 1
+42 1
+43 1
+44 1
+45 1
+46 1
+47 1
+48 1
+49 1
+50 1
+51 1
+52 1
+53 1
+54 1
+55 1
+56 1
+57 1
+58 1
+59 1
+*end
+
+*selectivity[__potFretained__]
+a50: 33 
+alpha: 1 
+ato95: 2.5 
+beta: 0 
+intervals: 11 
+label: potFretained 
+length_based: 1 
+type: logistic 
+Values {vector}
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 7.2775e-07
+22 2.36311e-06
+23 7.6733e-06
+24 2.49159e-05
+25 8.09009e-05
+26 0.000262649
+27 0.000852356
+28 0.00276243
+29 0.00891467
+30 0.0283787
+31 0.0866255
+32 0.235452
+33 0.5
+34 0.764548
+35 0.913374
+36 0.971621
+37 0.991085
+38 0.997238
+39 0.999148
+40 0.999737
+41 0.999919
+42 0.999975
+43 0.999992
+44 0.999998
+45 0.999999
+46 1
+47 1
+48 1
+49 1
+50 1
+51 1
+52 1
+53 1
+54 1
+55 1
+56 1
+57 1
+58 1
+59 1
+*end
+
+*selectivity[__recFretained__]
+a50: 33 
+alpha: 1 
+ato95: 2.5 
+beta: 0 
+intervals: 11 
+label: recFretained 
+length_based: 1 
+type: logistic 
+Values {vector}
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 7.2775e-07
+22 2.36311e-06
+23 7.6733e-06
+24 2.49159e-05
+25 8.09009e-05
+26 0.000262649
+27 0.000852356
+28 0.00276243
+29 0.00891467
+30 0.0283787
+31 0.0866255
+32 0.235452
+33 0.5
+34 0.764548
+35 0.913374
+36 0.971621
+37 0.991085
+38 0.997238
+39 0.999148
+40 0.999737
+41 0.999919
+42 0.999975
+43 0.999992
+44 0.999998
+45 0.999999
+46 1
+47 1
+48 1
+49 1
+50 1
+51 1
+52 1
+53 1
+54 1
+55 1
+56 1
+57 1
+58 1
+59 1
+*end
+
+*selectivity[__recFSel__]
+a50: 30 
+alpha: 1 
+ato95: 5 
+beta: 0 
+intervals: 11 
+label: recFSel 
+length_based: 1 
+type: logistic 
+Values {vector}
+13 4.48971e-05
+14 8.09009e-05
+15 0.000145773
+16 0.000262649
+17 0.000473189
+18 0.000852356
+19 0.00153488
+20 0.00276243
+21 0.00496685
+22 0.00891467
+23 0.0159501
+24 0.0283787
+25 0.05
+26 0.0866255
+27 0.145958
+28 0.235452
+29 0.35689
+30 0.5
+31 0.64311
+32 0.764548
+33 0.854042
+34 0.913374
+35 0.95
+36 0.971621
+37 0.98405
+38 0.991085
+39 0.995033
+40 0.997238
+41 0.998465
+42 0.999148
+43 0.999527
+44 0.999737
+45 0.999854
+46 0.999919
+47 0.999955
+48 0.999975
+49 0.999986
+50 0.999992
+51 0.999996
+52 0.999998
+53 0.999999
+54 0.999999
+55 1
+56 1
+57 1
+58 1
+59 1
+*end
+
+*selectivity[__potFdis__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -1883,7 +2239,9 @@ Values {vector}
 20 1
 *end
 
-*selectivity[recFdis]
+*selectivity[__recFdis__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -1911,7 +2269,7 @@ Values {vector}
 20 1
 *end
 
-*selectivity[potSurveySel_female]
+*selectivity[__potSurveySel_female__]
 a50: 3.30808 
 alpha: 1 
 ato95: 1.03043 
@@ -1941,7 +2299,7 @@ Values {vector}
 20 1
 *end
 
-*selectivity[potSurveySel_male]
+*selectivity[__potSurveySel_male__]
 a50: 3.03845 
 alpha: 1 
 ato95: 0.191918 
@@ -1971,7 +2329,9 @@ Values {vector}
 20 1
 *end
 
-*selectivity[One]
+*selectivity[__One__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 
@@ -2017,18 +2377,24 @@ Creating default report for process Ageing
 Creating default report for process Fishing
 Creating default report for selectivity MaturationSel_male
 Creating default report for selectivity MaturationSel_female
-skipping the default report for lineFSel this is a length based selectivity. Please create a specific report for this
-skipping the default report for lineFretained this is a length based selectivity. Please create a specific report for this
-skipping the default report for potFSel this is a length based selectivity. Please create a specific report for this
-skipping the default report for potFretained this is a length based selectivity. Please create a specific report for this
-skipping the default report for recFretained this is a length based selectivity. Please create a specific report for this
-skipping the default report for recFSel this is a length based selectivity. Please create a specific report for this
+Creating default report for selectivity lineFSel
+Creating default report for selectivity lineFretained
+Creating default report for selectivity potFSel
+Creating default report for selectivity potFretained
+Creating default report for selectivity recFretained
+Creating default report for selectivity recFSel
 Creating default report for selectivity potFdis
 Creating default report for selectivity recFdis
 Creating default report for selectivity potSurveySel_female
 Creating default report for selectivity potSurveySel_male
 Creating default report for selectivity One
 The likelihood for the observation 'lgobookLF' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
+The selectivity report '__lineFSel__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+The selectivity report '__lineFretained__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+The selectivity report '__potFSel__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+The selectivity report '__potFretained__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+The selectivity report '__recFretained__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
+The selectivity report '__recFSel__' is for a length-based selectivity in an age based model, but length_values were not defined. Defaulting to @model.length_bins for this selectivity report
 Initiating point estimate run mode
 Estimation_phase 1
 Estimation with the betadiff minimiser

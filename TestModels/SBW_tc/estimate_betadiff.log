@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Thu Aug 24 22:31:13 2023
+Date: Fri Sep 29 15:09:29 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=26468
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=20564
 
 
 *partition[state1]
@@ -1690,7 +1690,7 @@ recruit_event_SSB_percent: 100 100 99.961 99.3198 98.3054 97.3526 96.5137 95.954
 ssb_offset: 2
 *end
 
-*process[Instantaneous_Mortality]
+*process[Mortality]
 biomass: 1
 categories: male.nonspawn male.spawn female.nonspawn female.spawn
 label: Instantaneous_Mortality
@@ -2975,7 +2975,7 @@ year category age length observed expected residual error_value process_error ad
 2015 female.spawn 15 0 0.004 0.00550866 -0.00150866 57 0 57 1.09295 -0.153888
 *end
 
-*process[Recruitment]
+*process[__Recruitment__]
 age: 2
 b0: 299610
 b0_initialisation_phase: 
@@ -3002,13 +3002,13 @@ recruit_event_SSB_percent: 100 100 99.961 99.3198 98.3054 97.3526 96.5137 95.954
 ssb_offset: 2
 *end
 
-*process[Ageing]
+*process[__Ageing__]
 categories: male.spawn female.spawn male.nonspawn female.nonspawn
 label: Ageing
 type: ageing
 *end
 
-*process[Maturity_Migration]
+*process[__Maturity_Migration__]
 from: male.nonspawn female.nonspawn
 include_in_mortality_block: 0
 label: Maturity_Migration
@@ -3076,7 +3076,7 @@ year male.spawn female.spawn
 2015 1 1 
 *end
 
-*process[Instantaneous_Mortality]
+*process[__Instantaneous_Mortality__]
 biomass: 1
 categories: male.nonspawn male.spawn female.nonspawn female.spawn
 label: Instantaneous_Mortality
@@ -3091,7 +3091,7 @@ catch[Trawl]: 0 0 0 0 0 0 0 0 0 0 0 7262 18017 33868 29469 1661 11933 18460 6403
 actual_catch[Trawl]: 0 0 0 0 0 0 0 0 0 0 0 7262 18017 33868 29469 1661 11933 18460 6403 25305 12828 5989 7915 12803 10777 7490 15252 12804 17422 26611 16542 21314 14208 9316 11668 10436 16504 18923 27164 27205 18052 28232 33445 23718 19799 26190 19763 20996 20483 19040 20224 30982 21321 28606 23397 22100 
 *end
 
-*selectivity[MaturationSel_male]
+*selectivity[__MaturationSel_male__]
 h: 6 
 intervals: 5 
 l: 2 
@@ -3116,7 +3116,7 @@ Values {vector}
 15 0.99
 *end
 
-*selectivity[MaturationSel_female]
+*selectivity[__MaturationSel_female__]
 h: 6 
 intervals: 5 
 l: 2 
@@ -3141,7 +3141,7 @@ Values {vector}
 15 0.99
 *end
 
-*selectivity[TangaroaImmatureSel]
+*selectivity[__TangaroaImmatureSel__]
 a50: 2 
 alpha: 1 
 ato95: 3 
@@ -3167,7 +3167,9 @@ Values {vector}
 15 0.999997
 *end
 
-*selectivity[One]
+*selectivity[__One__]
+a: 0 
+b: 0 
 beta: 0 
 c: 1 
 intervals: 5 

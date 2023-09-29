@@ -1,10 +1,10 @@
-Casal2 (https://github.com/alistairdunn1/CASAL2)
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 --config config_adolc.csl2 
-Date: Thu Aug 24 22:38:50 2023
+Date: Fri Sep 29 15:11:38 2023
 Seed: 20
-Version: v23.08 (2023-08-24)
+Version: v23.09 (2023-09-27)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=15472
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=24064
 
 
 *partition[state1]
@@ -984,7 +984,7 @@ values {vector}
 {end_list}
 *end
 
-*process[instant_mort]
+*process[Mortality]
 biomass: 1
 categories: male female
 f_iterations: 4
@@ -1003,7 +1003,7 @@ actual_catch[FishingTrwl]: 0 34750 53098 132467 291900 285645 194600 330820 1862
 f_by_year[FishingTrwl]: 0 0.00186291 0.00285234 0.00734274 0.0178001 0.0205106 0.0156795 0.0268672 0.0146385 0.00698705 0.0116207 0.0112999 0.0121939 0.011649 0.0125986 0.0109551 0.0136414 0.0117216 0.0164397 0.0224426 0.0318078 0.0231358 0.0196781 0.0236546 0.0304876 0.0352216 0.0579224 0.042108 0.0487923 0.0449386 0.0378377 0.0420355 0.0309497 0.0230327 0.0193456 0.0270465 0.0273645 0.017931 0.0174396 0.0140434 0.0166192 0.0131787 0.0158531 
 *end
 
-*process[Recruitment]
+*process[Rec]
 age: 3
 b0: 132864
 b0_initialisation_phase: 
