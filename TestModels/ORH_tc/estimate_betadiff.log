@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Fri Sep 29 15:09:59 2023
+Date: Fri Oct 06 14:34:43 2023
 Seed: 20
-Version: v23.09 (2023-09-27)
+Version: v23.09 (2023-09-29)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=4960
+Environment: User=alist Machine=HP1040 OS=Windows_NT PID=23384
 
 
 *partition[state1]
@@ -1149,8 +1149,8 @@ Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Funct
 
 *warnings[messages_encountered]
 Values {string}
-obs sum total (1.00002) for year (1993) doesn't sum to 1.0
-obs sum total (0.99999) for year (1994) doesn't sum to 1.0
-obs sum total (0.99999) for year (2003) doesn't sum to 1.0
+At line 46 in Observation.csl2 the table obs : The sum of the values for year 1993 was 1.00002 and do not sum to 1.0
+At line 46 in Observation.csl2 the table obs : The sum of the values for year 1994 was 0.99999 and do not sum to 1.0
+At line 46 in Observation.csl2 the table obs : The sum of the values for year 2003 was 0.99999 and do not sum to 1.0
 *end
 

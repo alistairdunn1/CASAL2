@@ -226,10 +226,6 @@ void ProportionsByCategory::DoValidate() {
         }
       }
     }
-
-    // if (!utilities::math::IsOne(total)) {
-    //   LOG_WARNING()  << "obs sum total (" << total << ") for year (" << iter->first << ") doesn't sum to 1.0";
-    // }
   }
 }
 

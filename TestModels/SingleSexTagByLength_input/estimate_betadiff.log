@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Fri Sep 29 15:08:58 2023
+Date: Fri Oct 06 14:27:24 2023
 Seed: 20
-Version: v23.09 (2023-09-27)
+Version: v23.09 (2023-09-29)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=24460
+Environment: User=alist Machine=HP1040 OS=Windows_NT PID=15488
 
 
 *partition[partition]
@@ -682,57 +682,6 @@ Assert Passed: The Assert with label 'obj' for the Objective Function had value 
 *warnings[messages_encountered]
 Values {string}
 in @process 2001Tags_shelf you have specified compatibility_option = casal this is not recommended unless you validating for backwards compatibility reasons
-At line 12 in observations.csl2 the table obs : The sum of the values for year 1999 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2000 was 0.999999 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2001 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2002 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2003 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2004 was 0.999999 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2005 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2006 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2007 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2008 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2009 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2010 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2011 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2012 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2013 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2014 was 1 and do not sum to 1.0
-At line 12 in observations.csl2 the table obs : The sum of the values for year 2015 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 1998 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 1999 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2000 was 0.999999 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2001 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2002 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2003 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2004 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2005 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2006 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2007 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2008 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2009 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2010 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2011 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2012 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2013 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2014 was 1 and do not sum to 1.0
-At line 64 in observations.csl2 the table obs : The sum of the values for year 2015 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 1998 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 1999 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2001 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2002 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2003 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2004 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2005 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2006 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2007 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2008 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2009 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2010 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2011 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2012 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2013 was 1 and do not sum to 1.0
-At line 120 in observations.csl2 the table obs : The sum of the values for year 2014 was 1 and do not sum to 1.0
 Estimates were removed because of matching lower and upper bounds. Originally had 33 estimates, now have 16
 The categories t2001, t2002, t2003, t2004, t2005, t2006, t2007, t2008, t2009, t2010, t2011, t2012, t2013, t2014 were not used in @process[type=recruitment]. This may be expected for models that have categories that are not used at the beginning of the model e.g. tagged categories.
 At line 279 in population.csl2 the parameter 'compatibility_option' : Using the 'casal' compatibility option. Note this is provided for backwards compatibility with CASAL - the recommended compatibility option is 'casal2'

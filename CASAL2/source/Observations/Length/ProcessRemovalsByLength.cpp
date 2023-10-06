@@ -280,8 +280,8 @@ void ProcessRemovalsByLength::DoValidate() {
         }
       }
     } else {
-      if (!utilities::math::IsOne(total)) {
-        LOG_WARNING() << "obs sum total (" << total << ") for year (" << iter->first << ") doesn't sum to 1.0";
+      if (!utilities::math::IsBasicallyOne(total)) {
+        LOG_WARNING_P(PARAM_OBS) << ": The sum of the values for year " << iter->first << " was " << total << " and do not sum to 1.0";
       }
     }
   }
@@ -447,7 +447,7 @@ void ProcessRemovalsByLength::CalculateScore() {
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
   if (model_->run_mode() == RunMode::kSimulation) {
-    if(model_->get_simulation_iterator() == 0) {
+    if (model_->get_simulation_iterator() == 0) {
       for (auto& iter : comparisons_) {
         auto     it       = std::find(years_.begin(), years_.end(), iter.first);
         unsigned year_ndx = distance(years_.begin(), it);

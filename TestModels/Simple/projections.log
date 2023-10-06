@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -f 100 -i free.dat -g 20 -c config_projections.csl2 -t 
-Date: Fri Sep 29 15:12:25 2023
+Date: Fri Oct 06 14:41:10 2023
 Seed: 20
-Version: v23.09 (2023-09-27)
+Version: v23.09 (2023-09-29)
 Copyright (c) 2017-2023, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=19588
+Environment: User=alist Machine=HP1040 OS=Windows_NT PID=23612
 
 
 *project[test_project]

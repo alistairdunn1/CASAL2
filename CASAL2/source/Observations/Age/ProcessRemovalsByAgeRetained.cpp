@@ -227,8 +227,8 @@ void ProcessRemovalsByAgeRetained::DoValidate() {
         }
       }
     } else {
-      if (!utilities::math::IsOne(total)) {
-        LOG_WARNING_P(PARAM_OBS) << "obs sum total (" << total << ") for year (" << iter->first << ") doesn't sum to 1.0";
+      if (!utilities::math::IsBasicallyOne(total)) {
+        LOG_WARNING_P(PARAM_OBS) << ": The sum of the values for year " << iter->first << " was " << total << " and do not sum to 1.0";
       }
     }
   }

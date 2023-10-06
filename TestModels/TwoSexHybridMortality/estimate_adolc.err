@@ -38,12 +38,12 @@
 [WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2006 was 1.0004 and do not sum to 1.0
 [WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2007 was 1.0001 and do not sum to 1.0
 [WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2008 was 0.9998 and do not sum to 1.0
-[WARNING] obs sum total (0.9999) for year (1995) doesn't sum to 1.0
-[WARNING] obs sum total (0.9999) for year (1996) doesn't sum to 1.0
-[WARNING] obs sum total (1.0003) for year (1997) doesn't sum to 1.0
-[WARNING] obs sum total (0.9999) for year (1998) doesn't sum to 1.0
-[WARNING] obs sum total (0.9997) for year (2000) doesn't sum to 1.0
-[WARNING] obs sum total (0.9997) for year (2001) doesn't sum to 1.0
+[WARNING] At line 228 in Observation.csl2 the table obs : The sum of the values for year 1995 was 0.9999 and do not sum to 1.0
+[WARNING] At line 228 in Observation.csl2 the table obs : The sum of the values for year 1996 was 0.9999 and do not sum to 1.0
+[WARNING] At line 228 in Observation.csl2 the table obs : The sum of the values for year 1997 was 1.0003 and do not sum to 1.0
+[WARNING] At line 228 in Observation.csl2 the table obs : The sum of the values for year 1998 was 0.9999 and do not sum to 1.0
+[WARNING] At line 228 in Observation.csl2 the table obs : The sum of the values for year 2000 was 0.9997 and do not sum to 1.0
+[WARNING] At line 228 in Observation.csl2 the table obs : The sum of the values for year 2001 was 0.9997 and do not sum to 1.0
 [INFO] The likelihood for the observation 'Tangaroa_propn_at_age_Jan' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
 [INFO] The likelihood for the observation 'trawl_propn_at_age' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
 [INFO] The likelihood for the observation 'longline_propn_at_length' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
@@ -139,4 +139,4 @@
 [WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 0.001 of the upper bound of 200
 [INFO] Assert Passed: The Assert with label 'obj' for the Objective Function had value 1782.95 and 1782.95 was expected.
 [INFO] Completed
-[INFO] Total elapsed time: 5 seconds
+[INFO] Total elapsed time: 13 seconds
