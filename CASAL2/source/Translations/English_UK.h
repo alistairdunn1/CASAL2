@@ -537,6 +537,7 @@
 #define PARAM_ORTHOGONAL                          "orthogonal"
 #define PARAM_OVERWRITE                           "overwrite"
 #define PARAM_OVERDISPERSION_TYPE                 "overdispersion_type"
+#define PARAM_OVERLAP_SCALAR                      "overlap_scalar" 
 #define PARAM_P1                                  "p1"
 #define PARAM_P2                                  "p2"
 #define PARAM_PARAMETER                           "parameter"

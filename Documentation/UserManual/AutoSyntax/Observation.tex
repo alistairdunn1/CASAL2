@@ -111,10 +111,6 @@
 \defRef{sec:Observation-Biomass}
 \label{syntax:Observation-Biomass}
 
-\defSub{time\_step}{The label of the time step that the observation occurs in}
-\defType{String}
-\defDefault{No default}
-
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defType{String}
 \defDefault{No default}
@@ -128,7 +124,7 @@
 \defDefault{0.0}
 \defLowerBound{0.0 (inclusive)}
 
-\defSub{age\_weight\_labels}{The labels for the \command{$age\_weight$} block which corresponds to each category, to use the weight calculation method for biomass calculations)}
+\defSub{age\_weight\_labels}{The labels for the age\_weight block which corresponds to each category, to use the weight calculation method for biomass calculations}
 \defType{Vector of strings}
 \defDefault{No default}
 
@@ -698,6 +694,11 @@
 \defLowerBound{0.0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
 
+\defSub{overlap\_scalar}{Scalar for the relative overlap of the tag recaptures}
+\defType{Vector of real numbers (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+
 \subsubsection{Observation of type Tag\_Recapture\_By\_Fishery}
 \commandlabsubarg{Observation}{type}{Tag\_Recapture\_By\_Fishery}.
 \defRef{sec:Observation-TagRecaptureByFishery}
@@ -766,4 +767,9 @@
 \defDefault{0.5}
 \defLowerBound{0.0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
+
+\defSub{overlap\_scalar}{Scalar for the relative overlap of the tag recaptures}
+\defType{Vector of real numbers (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
 

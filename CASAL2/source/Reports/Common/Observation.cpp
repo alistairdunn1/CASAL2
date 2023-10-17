@@ -96,8 +96,14 @@ void Observation::DoExecute(shared_ptr<Model> model) {
   cache_ << "likelihood_multiplier: " << observation_->likelihood_multiplier() << REPORT_EOL;
   if (observation_->type() == PARAM_TAG_RECAPTURE_BY_AGE || observation_->type() == PARAM_TAG_RECAPTURE_BY_LENGTH) {
     map<unsigned, Double> dispersion = observation_->dispersion();
-    cache_ << "dispersion:";
+    cache_ << PARAM_DISPERSION << ":";
     for (auto iter = dispersion.begin(); iter != dispersion.end(); ++iter) {
+      cache_ << " " << iter->second;
+    }
+    cache_ << REPORT_EOL;
+    map<unsigned, Double> overlap_scalar = observation_->overlap_scalar();
+    cache_ << PARAM_OVERLAP_SCALAR << ":";
+    for (auto iter = overlap_scalar.begin(); iter != overlap_scalar.end(); ++iter) {
       cache_ << " " << iter->second;
     }
     cache_ << REPORT_EOL;

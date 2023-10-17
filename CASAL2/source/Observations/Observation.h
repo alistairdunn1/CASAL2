@@ -58,6 +58,7 @@ public:
   const Double&                error_value_multiplier() { return error_value_multiplier_; }
   const Double&                likelihood_multiplier() { return likelihood_multiplier_; }
   map<unsigned, Double>        dispersion() { return dispersion_by_year_; }
+  map<unsigned, Double>        overlap_scalar() { return overlap_scalar_by_year_; }
 
   vector<obs::Comparison>&                 comparisons(unsigned year) { return comparisons_[year]; }
   map<unsigned, vector<obs::Comparison> >& comparisons() { return comparisons_; }
@@ -84,6 +85,8 @@ protected:
   Double                likelihood_multiplier_  = 1.0;
   vector<Double>        dispersion_;
   map<unsigned, Double> dispersion_by_year_;
+  vector<Double>        overlap_scalar_;
+  map<unsigned, Double> overlap_scalar_by_year_;
   vector<string>        category_labels_;
   unsigned              expected_selectivity_count_;
 

@@ -456,7 +456,7 @@ For example,
 
 \paragraph*{\I{Tag recaptures by age or length}\label{sec:Observation-TagRecaptures}\label{sec:Observation-TagRecaptureByAge}\label{sec:Observation-TagRecaptureByLength}}
 
-Tag data is primarily used to estimate the population abundance of fish. In some models, this estimation can only be made outside the model and the result is used as an estimate of abundance in the model. But in \CNAME\ the tagging data can, alternatively, be fitted within the model.
+Tag data is primarily used to estimate the population abundance of fish. In some models, this estimation can only be made outside the model and the result is used as an estimate of abundance in the model. But in \CNAME\ the tagging data can be fitted within a model.
 
 Before adding a tag-recapture time series, a tag-release process (Section~\ref{sec:Process-TagByAge}) needs to be defined. Tagging events list the labels of the tags which are modelled, and define the events where fish are tagged (i.e., \CNAME\ moves fish into the section of the partition corresponding to a specific tag).
 
@@ -466,19 +466,20 @@ The options for tag-recaptures are available:
 
 \begin{itemize}
 	\item age: both the scanned and recaptured are vectors containing numbers-at-age. Only available in an age-based model. 
-	\item size: both the scanned and recaptured are vectors containing numbers-at-length. Can be used in either an age- or length-based model.
+	\item length: both the scanned and recaptured are vectors containing numbers-at-length. Can be used in either an age- or length-based model.
 \end{itemize}
 
 When defining the tag-recapture time series, the following are also required:
 
 \begin{itemize}
 	\item the time step,
-	\item the years (unlike a tag-release process, the tag-recapture observations can occur over several years),
+	\item the years where a cohort of tags were observed,
 	\item the probability that each scanned tagged fish is detected as tagged (may be less than 1 if the observers are not infallible). The expected number of tags detected is calculated by multiplying the expected number of tagged fish in the observation by the detection probability,
-	\item the tagged category or categories (Make up the recaptures),
-	\item the categories scanned (All the fish sampled for tags),
+	\item the tagged category or categories (make up the recaptures),
+	\item the categories scanned (all the fish sampled for tags),
 	\item the length bins if the observations are length-based in an age-based model,
-	\item The selectivities for the categories. 
+	\item The selectivities for the categories,
+	\item The scalar in each observed year to account for lack of spatial overlap (defaults to 1)
 \end{itemize}
 
 An example of a tag recapture observation:
@@ -530,10 +531,10 @@ where $R_{y,l}$ is the number of recaptures in year $y$ at length $l$ and $S_{y,
 
 \begin{equation}
 E_{y,l} = d \frac{\tilde{N}_{y,l,t} +  (\tilde{N}_{y,l,t + 1} - \tilde{N}_{y,l,t}) \times p}
-{N_{y,l,t} + (N_{y,l,t+1} - N_{y,l,t}) \times p}
+{N_{y,l,t} + (N_{y,l,t+1} - N_{y,l,t}) \times p \times k}
 \end{equation}
 
-where $\tilde{N}_{y,l,t}$ is an element in the tagged categories at the beginning of time step $t$ and $\tilde{N}_{y,l,t + 1}$ is an element in the tagged categories at the end of time step $t$, $N_{y,l,t}$ is the sum of the categories that were vulnerable to sampling when the observation occurred, $p$ is the proportion of the time step that the observation was taken, and $d$ is the detection probability.
+where $\tilde{N}_{y,l,t}$ is an element in the tagged categories at the beginning of time step $t$ and $\tilde{N}_{y,l,t + 1}$ is an element in the tagged categories at the end of time step $t$, $N_{y,l,t}$ is the sum of the categories that were vulnerable to sampling when the observation occurred, $p$ is the proportion of the time step that the observation was taken, $d$ is the detection probability, and $k$ is the scalar to account for incomplete spatial overlap of effort in capturing released tags.
 
 For observations with multiple tagged categories and multiple categories that were vulnerable to sampling:
 

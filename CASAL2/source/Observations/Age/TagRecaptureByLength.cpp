@@ -52,9 +52,12 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
   parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each length bin", "", false);
   parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each length bin", "", false);
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "", Double(0.5))->set_range(0.0, 1.0);
+  parameters_.Bind<Double>(PARAM_OVERLAP_SCALAR, &overlap_scalar_, "Scalar for the relative overlap of the tag recaptures ", "", 1.0)->set_lower_bound(0.0, true);
   // clang-format on
 
   RegisterAsAddressable(PARAM_DETECTION_PARAMETER, &detection_);
+  RegisterAsAddressable(PARAM_DISPERSION, &dispersion_);
+  RegisterAsAddressable(PARAM_OVERLAP_SCALAR, &overlap_scalar_);
 
   mean_proportion_method_ = true;
 
@@ -76,6 +79,7 @@ void TagRecaptureByLength::DoValidate() {
   if (length_plus_ & !model_->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
+
   /**
    * Do some simple checks
    * e.g Validate that the length_bins are strictly increasing
@@ -369,6 +373,25 @@ void TagRecaptureByLength::DoValidate() {
     Double dispersion_val = 1.0;
     dispersion_by_year_   = utilities::Map::create(years_, dispersion_val);
   }
+  // Check overlap scalar variable
+  for (Double overlap_scalar : overlap_scalar_) {
+    if (overlap_scalar < 0.0)
+      LOG_ERROR_P(PARAM_OVERLAP_SCALAR) << ": overlap_scalar (" << AS_DOUBLE(overlap_scalar) << ") cannot be less than 0.0";
+  }
+  // if only one value supplied then assume its the same for all years
+  if (overlap_scalar_.size() == 1) {
+    overlap_scalar_.resize(years_.size(), overlap_scalar_[0]);
+  }
+  if (overlap_scalar_.size() != 0) {
+    if (overlap_scalar_.size() != years_.size()) {
+      LOG_FATAL_P(PARAM_OVERLAP_SCALAR) << "Supply an overlap_scalar for each year, or a value of overlap_scalar for each year. Values for " << overlap_scalar_.size()
+                                        << " years were supplied, but " << years_.size() << " years are required";
+    }
+    overlap_scalar_by_year_ = utilities::Map::create(years_, overlap_scalar_);
+  } else {
+    Double scalar_val       = 1.0;
+    overlap_scalar_by_year_ = utilities::Map::create(years_, scalar_val);
+  }
 }
 
 /**
@@ -573,7 +596,7 @@ void TagRecaptureByLength::Execute() {
       Double expected = 0.0;
       double observed = 0.0;
       if (length_results_[i] != 0.0) {
-        expected = detection_ * tagged_length_results_[i] / length_results_[i];
+        expected = detection_ * tagged_length_results_[i] / (length_results_[i] * overlap_scalar_by_year_[model_->current_year()]);
         LOG_FINEST() << "total numbers at length " << length_bins_[i] << " = " << tagged_length_results_[i] << ", denominator = " << length_results_[i];
       }
 
