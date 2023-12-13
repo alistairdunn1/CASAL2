@@ -20,10 +20,10 @@
 #include "Model/Model.h"
 #include "Partition/Accessors/Categories.h"
 #include "Penalties/Common/Process.h"
+#include "Processes/Age/Mortality.h"
 #include "Processes/Process.h"
 #include "Selectivities/Selectivity.h"
 #include "Utilities/Map.h"
-#include "Processes/Age/Mortality.h"
 
 // namespaces
 namespace niwa {
@@ -53,9 +53,9 @@ class MortalityInstantaneous : public Mortality {
     map<unsigned, Double> exploitation_by_year_;
     map<unsigned, Double> uobs_by_year_;
 
-    Double  vulnerability_;
-    Double  uobs_fishery_;
-    Double  exploitation_;
+    Double vulnerability_;
+    Double uobs_fishery_;
+    Double exploitation_;
   };
 
   struct CategoryData {
@@ -64,6 +64,7 @@ class MortalityInstantaneous : public Mortality {
     Double*              m_;
     vector<Double>       exploitation_;
     vector<Double>       exp_values_half_m_;
+    vector<Double>       m_at_age_;
     string               selectivity_label_;
     Selectivity*         selectivity_;
     vector<Double>       selectivity_values_;
@@ -98,7 +99,6 @@ public:
   void FillReportCache(ostringstream& cache) override final;
   void FillTabularReportCache(ostringstream& cache, bool first_run) override final;
 
-
   // set
 
 private:
@@ -111,7 +111,7 @@ private:
   parameters::Table*          catches_table_ = nullptr;
   parameters::Table*          method_table_  = nullptr;
   accessor::Categories        partition_;
-  Double                      current_m_ = 0.0;
+  Double                      current_m_        = 0.0;
   bool                        is_catch_biomass_ = true;
 
   // members from mortality event

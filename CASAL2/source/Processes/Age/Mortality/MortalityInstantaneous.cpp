@@ -337,6 +337,7 @@ void MortalityInstantaneous::DoBuild() {
     category.category_ = &model_->partition().category(category.category_label_);
     category.exploitation_.assign(category.category_->age_spread(), 0.0);
     category.exp_values_half_m_.assign(category.category_->age_spread(), 0.0);
+    category.m_at_age_.assign(category.category_->age_spread(), 0.0);
     category.selectivity_values_.assign(category.category_->age_spread(), 0.0);
   }
 
@@ -539,9 +540,10 @@ void MortalityInstantaneous::DoExecute() {
       selectivity_value               = category.selectivity_->GetAgeResult(category.category_->min_age_ + i, category.category_->age_length_);
       category.exploitation_[i]       = 0.0;
       category.selectivity_values_[i] = selectivity_value;
-      category.exp_values_half_m_[i]  = exp(-0.5 * ratio * (*category.m_) * selectivity_value);  // this exp call should only be called once per length bin + category
-      LOG_FINEST() << "category " << category.category_label_ << " age index " << i << " selectivity " << selectivity_value << " has exp_values_half_m_ "
-                   << category.exp_values_half_m_[i];
+      category.m_at_age_[i]           = (*category.m_) * selectivity_value;
+      category.exp_values_half_m_[i]  = exp(-0.5 * ratio * category.m_at_age_[i]);  // this exp call should only be called once per length bin + category
+      LOG_FINEST() << "category " << category.category_label_ << " age index " << i << " selectivity " << selectivity_value << " has M = " << category.m_at_age_[i]
+                   << " and exp_values_half_m_ " << category.exp_values_half_m_[i];
     }
   }
   /**
@@ -784,6 +786,15 @@ void MortalityInstantaneous::FillReportCache(ostringstream& cache) {
   LOG_FINE();
   // This one is niggly because we need to iterate over each year and time step to print the right information so we don't
   // these years are for M and F
+  unsigned category_ndx = 0;
+  for (auto& category : categories_) {
+    cache << "m_by_age[" << category.category_label_ << "]: ";
+    for (unsigned i = 0; i < category.category_->data_.size(); ++i) {
+      cache << AS_DOUBLE(category.m_at_age_[i]) << " ";
+    }
+    cache << "\n";
+    ++category_ndx;
+  }
   cache << "year: ";
   for (auto year : process_years_) cache << year << " ";
   for (auto& fishery_iter : fisheries_) {

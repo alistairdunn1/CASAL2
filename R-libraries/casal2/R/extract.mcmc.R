@@ -4,9 +4,9 @@
 #' An extract function that reads objective and sample output that are produced from a 'casal2 -m' model run. This function
 #' also creates a 'casal2.mcmc' class which can be used in plotting and summary functions.
 #'
-#' @author C. Marsh
-#' @param samples.file <string> the name of the input file containing the samples.file output by casal2
-#' @param objectives.file <string> the name of the input file containing the objectives.file output by casal2
+#' @author C. Marsh & A. Dunn
+#' @param samples.file <string> the name of the input file containing the samples.file output by Casal2
+#' @param objectives.file <string> the name of the input file containing the objectives.file output by Casal2 (optional - set objectives.file = "" to ignore the objectives file).
 #' @param path Optional<string>, the path to the file
 #' @param return_covariance Optional<bool>, Whether you want to extract the covariance matrix with the mcmc object?
 #' @param fileEncoding Optional, allows the R-library to read in files that have been encoded in alternative UTF formats, see the manual for the error message that would indicate when to use this switch.
@@ -25,7 +25,6 @@
     path <- ""
   }
 
-  obj_filename <- make.filename(path = path, file = objectives.file)
   sample_filename <- make.filename(path = path, file = samples.file)
   sample_file <- convert.to.lines(sample_filename, fileEncoding = fileEncoding, quiet = quiet)
   temp <- get.lines(sample_file, starts.with = "\\*", fixed = F)
@@ -55,44 +54,58 @@
   #########################
   ## Deal with the Objectives
   #########################
-  objective_file <- convert.to.lines(obj_filename, fileEncoding = fileEncoding, quiet = quiet)
-  covar <- get.lines(objective_file, starts.with = "starting_covariance_matrix", fixed = F)
-  object <- get.lines(objective_file, starts.with = "samples", fixed = F)
-  covar_lines <- get.lines(objective_file, clip.to = covar)
-  covar_lines <- get.lines(covar_lines, clip.from = object)
-  ## build covariance matrix
-  columns <- string.to.vector.of.words(covar_lines[1])
-  covar_mat <- matrix(0, length(columns), length(columns))
-  for (i in 2:length(covar_lines)) {
-    line <- string.to.vector.of.numbers(covar_lines[i])
-    if (length(line) != length(columns)) {
-      stop(paste(covar_lines[i], "is not the same length as", covar_lines[1]))
+  if (objectives.file != "") {
+    obj_filename <- make.filename(path = path, file = objectives.file)
+    objective_file <- convert.to.lines(obj_filename, fileEncoding = fileEncoding, quiet = quiet)
+    covar <- get.lines(objective_file, starts.with = "starting_covariance_matrix", fixed = F)
+    object <- get.lines(objective_file, starts.with = "samples", fixed = F)
+    covar_lines <- get.lines(objective_file, clip.to = covar)
+    covar_lines <- get.lines(covar_lines, clip.from = object)
+    ## build covariance matrix
+    columns <- string.to.vector.of.words(covar_lines[1])
+    covar_mat <- matrix(0, length(columns), length(columns))
+    for (i in 2:length(covar_lines)) {
+      line <- string.to.vector.of.numbers(covar_lines[i])
+      if (length(line) != length(columns)) {
+        stop(paste(covar_lines[i], "is not the same length as", covar_lines[1]))
+      }
+      covar_mat[i - 1, ] <- line
     }
-    covar_mat[i - 1, ] <- line
-  }
-  dimnames(covar_mat) <- list(columns, columns)
+    dimnames(covar_mat) <- list(columns, columns)
 
-  ## now pull out the objectives table
-  object_lines <- get.lines(objective_file, clip.to = object)
+    ## now pull out the objectives table
+    object_lines <- get.lines(objective_file, clip.to = object)
 
-  if (length(object_lines) > (nrow(Dataframe) + 1)) {
-    # + 1 to take into account the header
-    # assume there is a one to one relationship between objecives and samples
-    object_lines <- object_lines[1:(nrow(Dataframe) + 1)]
-  } else if (length(object_lines) <= nrow(Dataframe)) {
-    stop("less objectives rows than samples, this is not allowed, please check output, this function expects there to be the number of objective print outs as samples")
-  }
-  obj_header <- string.to.vector.of.words(object_lines[1])
-  OBJ_Dataframe <- read.table(textConnection(object_lines[2:length(object_lines)]))
-  colnames(OBJ_Dataframe) <- as.character(obj_header)
-  if (nrow(OBJ_Dataframe) != nrow(Dataframe)) {
-    stop("Something went wrong in the code there are different numbers of samples than objects, you will need to look at the R code.")
-  }
+    if (length(object_lines) > (nrow(Dataframe) + 1)) {
+      # + 1 to take into account the header
+      # assume there is a one to one relationship between objectives and samples
+      object_lines <- object_lines[1:(nrow(Dataframe) + 1)]
+    } else if (length(object_lines) != nrow(Dataframe)) {
+      stop(paste0(
+        "There were a different number of rows in the objectives file (", length(object_lines),
+        ") than the samples file (", nrow(Dataframe), "). These should be the same. Please check the output"
+      ))
+    }
+    obj_header <- string.to.vector.of.words(object_lines[1])
+    OBJ_Dataframe <- read.table(textConnection(object_lines[2:length(object_lines)]))
+    colnames(OBJ_Dataframe) <- as.character(obj_header)
 
-  #########################
-  ## Merge the Two dataframes and print result
-  #########################
-  result <- cbind(OBJ_Dataframe, Dataframe)
+    if (nrow(OBJ_Dataframe) != nrow(Dataframe)) {
+      anti_join(OBJ_Data_frame, Dataframe, by = ("sample"))
+      stop(paste0(
+        "There were a different number of rows in the objectives file (", length(OBJ_Dataframe),
+        ") than the samples file (", nrow(Dataframe), "). These should be the same. Please check the output"
+      ))
+    }
+
+    #########################
+    ## Merge the Two dataframes and print result
+    #########################
+    result <- cbind(OBJ_Dataframe, Dataframe)
+  } else {
+    return_covariance <- FALSE
+    result <- Dataframe
+  }
   result <- set.class(result, "casal2MCMC")
   if (!return_covariance) {
     return(result)

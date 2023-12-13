@@ -51,7 +51,7 @@ void DirichletMultinomial::DoVerify(shared_ptr<Model> model) {
   if ((model->run_mode() == RunMode::kEstimation) || (model->run_mode() == RunMode::kProfiling) || (model->run_mode() == RunMode::kMCMC)
       || (model->run_mode() == RunMode::kTesting)) {
     if (!IsAddressableUsedFor(PARAM_THETA, addressable::kTransformation)) {
-      LOG_ERROR_P(PARAM_THETA) << " could not find an @" << PARAM_PARAMETER_TRANSFORMATION << " block for " << PARAM_THETA << ", this is recommeded.";
+      LOG_ERROR_P(PARAM_THETA) << " could not find an @" << PARAM_PARAMETER_TRANSFORMATION << " block for " << PARAM_THETA << ", this is recommended.";
     }
   }
 }

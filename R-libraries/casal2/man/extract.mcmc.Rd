@@ -14,9 +14,9 @@ extract.mcmc(
 )
 }
 \arguments{
-\item{samples.file}{<string> the name of the input file containing the samples.file output by casal2}
+\item{samples.file}{<string> the name of the input file containing the samples.file output by Casal2}
 
-\item{objectives.file}{<string> the name of the input file containing the objectives.file output by casal2}
+\item{objectives.file}{<string> the name of the input file containing the objectives.file output by Casal2 (optional - set objectives.file = "" to ignore the objectives file).}
 
 \item{path}{Optional<string>, the path to the file}
 
@@ -34,5 +34,5 @@ An extract function that reads objective and sample output that are produced fro
 also creates a 'casal2.mcmc' class which can be used in plotting and summary functions.
 }
 \author{
-C. Marsh
+C. Marsh & A. Dunn
 }

@@ -51,7 +51,7 @@ void Observation::DoValidate(shared_ptr<Model> model) {
  */
 void Observation::DoBuild(shared_ptr<Model> model) {
   LOG_TRACE();
-  vector<string> pearson_likelihoods    = {PARAM_BINOMIAL, PARAM_MULTINOMIAL, PARAM_LOGNORMAL, PARAM_NORMAL, PARAM_BINOMIAL_APPROX};
+  vector<string> pearson_likelihoods    = {PARAM_BINOMIAL, PARAM_DIRICHLET, PARAM_MULTINOMIAL, PARAM_LOGNORMAL, PARAM_NORMAL, PARAM_BINOMIAL_APPROX};
   vector<string> normalised_likelihoods = {PARAM_LOGNORMAL, PARAM_NORMAL};
 
   observation_ = model->managers()->observation()->GetObservation(observation_label_);
@@ -68,7 +68,7 @@ void Observation::DoBuild(shared_ptr<Model> model) {
     if (std::find(pearson_likelihoods.begin(), pearson_likelihoods.end(), observation_->likelihood()) == pearson_likelihoods.end()) {
       if (!default_report_)
         LOG_INFO() << "The likelihood for the observation '" << observation_label_ << "' is " << observation_->likelihood()
-                   << ". Pearsons residuals can only be calculated for the binomial, multinomial, lognormal, normal, and binomial_approx likelihoods";
+                   << ". Pearsons residuals can only be calculated for the binomial, dirichlet, multinomial, lognormal, normal, and binomial_approx likelihoods";
       pearson_resids_ = false;
     }
   }
@@ -122,6 +122,9 @@ void Observation::DoExecute(shared_ptr<Model> model) {
     for (auto iter = comparisons.begin(); iter != comparisons.end(); ++iter) {
       for (obs::Comparison comparison : iter->second) {
         if (observation_->likelihood() == PARAM_BINOMIAL) {
+          resid = (comparison.observed_ - comparison.expected_)
+                  / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
+        } else if (observation_->likelihood() == PARAM_DIRICHLET) {
           resid = (comparison.observed_ - comparison.expected_)
                   / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
         } else if (observation_->likelihood() == PARAM_MULTINOMIAL) {
