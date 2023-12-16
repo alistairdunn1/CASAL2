@@ -386,6 +386,9 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         if (observation_->likelihood() == PARAM_BINOMIAL) {
           resid = (comparison.observed_ - comparison.expected_)
                   / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
+        } else if (observation_->likelihood() == PARAM_DIRICHLET) {
+          resid = (comparison.observed_ - comparison.expected_)
+                  / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
         } else if (observation_->likelihood() == PARAM_MULTINOMIAL) {
           resid = (comparison.observed_ - comparison.expected_)
                   / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
