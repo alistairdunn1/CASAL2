@@ -45,9 +45,8 @@ Nuisance::Nuisance(shared_ptr<Model> model) : Catchability(model) {
  */
 void Nuisance::DoBuild() {
   // TODO: Fix this. Building dynamic parameter feels horrible.
-  if (IsAddressableUsedFor(PARAM_Q, addressable::kEstimate)) 
-      LOG_ERROR_P(PARAM_Q) <<"Has an @esimate block, this is not allowed. We suggest adding an @additional_prior for this nuisance parameter";
-  
+  if (IsAddressableUsedFor(PARAM_Q, addressable::kEstimate))
+    LOG_ERROR_P(PARAM_Q) << "Has an @esimate block, this is not allowed. We suggest adding an @additional_prior for this nuisance parameter";
 
   /**
    *  Build the objects
@@ -60,7 +59,7 @@ void Nuisance::DoBuild() {
   LOG_FINEST() << "Find an @additional_prior command for parameter " << parameter;
 
   bool has_prior = false;
-  has_prior = model_->managers()->additional_prior()->HasAdditionalPriorExcludingRatioType(parameter);
+  has_prior      = model_->managers()->additional_prior()->HasAdditionalPriorExcludingRatioType(parameter);
 
   LOG_FINE() << " has prior = " << has_prior;
   if (has_prior) {
@@ -72,7 +71,7 @@ void Nuisance::DoBuild() {
     prior_type_ = additional_prior->type();
     LOG_FINEST() << "Type of prior on Nuisance q = " << prior_type_;
 
-    if(prior_type_ != PARAM_LOGNORMAL && prior_type_ != PARAM_NONE && prior_type_ != PARAM_UNIFORM_LOG)
+    if (prior_type_ != PARAM_LOGNORMAL && prior_type_ != PARAM_NONE && prior_type_ != PARAM_UNIFORM_LOG)
       LOG_ERROR_P(PARAM_LABEL) << "the additional prior type needs to be either 'none', 'lognormal' or 'uniform_log'";
 
     // Perhaps set value to the mean of the bounds for now if the estimate system cannot handle an uninitialised estimate
@@ -119,7 +118,7 @@ void Nuisance::CalculateQ(map<unsigned, vector<observations::Comparison> >& comp
   LOG_FINEST() << "Converting nuisance q with prior = " << prior_type_ << " and likelihood = " << likelihood;
   if (likelihood != PARAM_NORMAL && likelihood != PARAM_LOGNORMAL) {
     LOG_FATAL() << "The nuisance q method can be applied only to observations with normal or lognormal likelihoods. "
-                << "Check the observation likelihood or use type = free";
+                << "Check the observation likelihood or else use type = free";
   }
 
   // The first set of conditions
@@ -250,15 +249,13 @@ void Nuisance::CalculateQ(map<unsigned, vector<observations::Comparison> >& comp
  * Verify this objects
  */
 void Nuisance::DoVerify(shared_ptr<Model> model) {
-  if(observation_labels_.size() == 0)
+  if (observation_labels_.size() == 0)
     LOG_WARNING() << "The @catchability block " << label_ << " is not assigned to an @observation.";
-  if(observation_labels_.size() > 1) {
+  if (observation_labels_.size() > 1) {
     string all_observation_labels;
-    for(unsigned i = 0; i < observation_labels_.size(); ++i)
-      all_observation_labels = all_observation_labels + string(", ") + observation_labels_[i];
+    for (unsigned i = 0; i < observation_labels_.size(); ++i) all_observation_labels = all_observation_labels + string(", ") + observation_labels_[i];
     LOG_VERIFY() << "The @catchability block " << label_ << " is assigned to more than one @observation. These were " << all_observation_labels;
   }
-
 }
 
 } /* namespace catchabilities */

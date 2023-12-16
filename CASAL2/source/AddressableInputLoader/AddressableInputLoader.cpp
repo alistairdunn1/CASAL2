@@ -114,7 +114,8 @@ void AddressableInputLoader::LoadValues(unsigned index) {
         LOG_FATAL() << "The estimate " << estimate->parameter() << " was not found in the input configuration file";
     }
     if (estimates.size() != addressable_values_.size())
-      LOG_FATAL() << "The free parameters file does not have the correct number of estimables defined. Expected " << estimates.size() << ", parsed " << addressable_values_.size();
+      LOG_FATAL() << "The free parameters file does not have the correct number of estimables defined. Expected " << estimates.size() << "estimables, but found  "
+                  << addressable_values_.size() << " in the free parameters file";
   }
 
   unsigned estimate_count = 0;
@@ -136,8 +137,8 @@ void AddressableInputLoader::LoadValues(unsigned index) {
 
   if (model_->global_configuration().force_overwrite_of_addressables()) {
     int AdditionalAddressables = addressable_values_.size() - estimate_count;
-    LOG_IMPORTANT() << AdditionalAddressables
-                    << " additional non-estimated addressable parameters were found in the free parameter file: " << model_->global_configuration().get_free_parameter_input_file();
+    LOG_IMPORTANT() << AdditionalAddressables << " additional non-estimated addressable parameters were found in the free parameter file '"
+                    << model_->global_configuration().get_free_parameter_input_file() << "'. These will overwrite the values in the input configuration file";
   }
 }
 

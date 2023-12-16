@@ -356,7 +356,8 @@ void Loader::ParseBlock(shared_ptr<Model> model, vector<FileLine>& block) {
       table_label    = util::ToLowercase(line_parts[1]);
       current_table_ = object->parameters().GetTable(table_label);
       if (!current_table_)
-        LOG_FATAL() << "At line " << file_line.line_number_ << " in " << file_line.file_name_ << ": table " << table_label << " is not a supported table label";
+        LOG_FATAL() << "At line " << file_line.line_number_ << " in " << file_line.file_name_ << ": The label '" << table_label
+                    << "' is not a valid label for a table. Please check that it is specified correctly.";
       current_table_->set_file_name(file_line.file_name_);
       current_table_->set_line_number(file_line.line_number_);
 

@@ -40,7 +40,7 @@ void Manager<ClassType, StoredType>::Validate() {
   for (auto stored_object : objects_) {
     stored_object->Validate();
     if (stored_object->label() != "" && duplicates.find(stored_object->label()) != duplicates.end()) {
-      LOG_FATAL() << "Two " << stored_object->block_type() << " objects with the same label " << stored_object->label() << " have been declared. Found at "
+      LOG_FATAL() << "Two " << stored_object->block_type() << " objects with the same label " << stored_object->label() << " have been declared. They were found at "
                   << stored_object->location() << "and " << duplicates[stored_object->label()]->location();
     }
     duplicates[stored_object->label()] = stored_object;

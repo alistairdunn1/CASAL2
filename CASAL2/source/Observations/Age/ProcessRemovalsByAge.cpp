@@ -272,7 +272,7 @@ void ProcessRemovalsByAge::DoBuild() {
     LOG_FATAL_P(PARAM_MORTALITY_PROCESS) << "Could not find process " << process_label_ << ".";
   } else {
     if (find(allowed_mortality_types_.begin(), allowed_mortality_types_.end(), mortality_process_->type()) == allowed_mortality_types_.end())
-      LOG_FATAL_P(PARAM_MORTALITY_PROCESS) << "The mortality process is of type " << mortality_process_->type() << " is not allowed for this observation.";
+      LOG_FATAL_P(PARAM_MORTALITY_PROCESS) << "The mortality process of type '" << mortality_process_->type() << "' is not allowed for this observation.";
   }
   // Need to split the categories if any are combined for checking
   vector<string> temp_split_category_labels, split_category_labels;

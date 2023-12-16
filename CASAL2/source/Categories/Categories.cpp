@@ -140,7 +140,7 @@ void Categories::Validate() {
       vector<string> category_chunks;
       boost::split(category_chunks, names_[i], boost::is_any_of("."), boost::token_compress_on);
       if (category_chunks.size() != category_chunks.size())
-        LOG_ERROR_P(PARAM_NAMES) << "The category named " << names_[i] << " does not match the format " << format_;
+        LOG_ERROR_P(PARAM_NAMES) << "the category named " << names_[i] << " does not match the format " << format_;
 
       // ensure category names start with a letter
       if (!isalpha(names_[i][0])) {
