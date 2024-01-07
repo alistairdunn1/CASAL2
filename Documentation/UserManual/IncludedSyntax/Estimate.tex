@@ -35,44 +35,18 @@
 \defType{Boolean}
 \defDefault{false}
 
+\subsubsection{Estimate of type Uniform}
+\commandlabsubarg{estimate}{type}{Uniform}.
+\defRef{sec:Prior-Uniform}
+\label{syntax:Estimate-Uniform}
 
+The Uniform type has no additional subcommands.
+\subsubsection{Estimate of type Uniform-Log}
+\commandlabsubarg{estimate}{type}{Uniform\_Log}.
+\defRef{sec:Prior-UniformLog}
+\label{syntax:Estimate-UniformLog}
 
-\subsubsection{Estimate of prior type Beta}
-\commandlabsubarg{estimate}{type}{Beta}.
-\defRef{sec:Prior-Beta}
-\label{syntax:Estimate-Beta}
-
-\defSub{mu}{Beta prior  mean (mu) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-
-\defSub{sigma}{Beta prior standard deviation (sigma) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-\defLowerBound{0.0 (exclusive)}
-
-\defSub{a}{Beta prior lower bound of the range (A) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-
-\defSub{b}{Beta prior upper bound of the range (B) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-
-\subsubsection{Estimate of prior type Lognormal}
-\commandlabsubarg{estimate}{type}{Lognormal}.
-\defRef{sec:Prior-Lognormal}
-\label{syntax:Estimate-Lognormal}
-
-\defSub{mu}{The lognormal prior mean (mu) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-\defLowerBound{0.0 (exclusive)}
-
-\defSub{cv}{The lognormal variance (cv) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-\defLowerBound{0.0 (exclusive)}
+The Uniform\_Log type has no additional subcommands.
 
 \subsubsection{Estimate of prior type Normal}
 \commandlabsubarg{estimate}{type}{Normal}.
@@ -106,6 +80,21 @@
 \defType{Boolean}
 \defDefault{false}
 
+\subsubsection{Estimate of prior type Lognormal}
+\commandlabsubarg{estimate}{type}{Lognormal}.
+\defRef{sec:Prior-Lognormal}
+\label{syntax:Estimate-Lognormal}
+
+\defSub{mu}{The lognormal prior mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{cv}{The lognormal variance (cv) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
 \subsubsection{Estimate of prior type Normal-Log}
 \commandlabsubarg{estimate}{type}{Normal\_Log}.
 \defRef{sec:Prior-NormalLog}
@@ -120,15 +109,43 @@
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Estimate of type Uniform}
-\commandlabsubarg{estimate}{type}{Uniform}.
-\defRef{sec:Prior-Uniform}
-\label{syntax:Estimate-Uniform}
+\subsubsection{Estimate of prior type Beta}
+\commandlabsubarg{estimate}{type}{Beta}.
+\defRef{sec:Prior-Beta}
+\label{syntax:Estimate-Beta}
 
-The Uniform type has no additional subcommands.
-\subsubsection{Estimate of type Uniform-Log}
-\commandlabsubarg{estimate}{type}{Uniform\_Log}.
-\defRef{sec:Prior-UniformLog}
-\label{syntax:Estimate-UniformLog}
+\defSub{mu}{Beta prior  mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
 
-The Uniform\_Log type has no additional subcommands.
+\defSub{sigma}{Beta prior standard deviation (sigma) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{a}{Beta prior lower bound of the range (A) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\defSub{b}{Beta prior upper bound of the range (B) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\subsubsection{Estimate of prior type Student's t}
+\commandlabsubarg{estimate}{type}{students\_t}.
+\defRef{sec:Prior-Studentst}
+\label{syntax:Estimate-Studentst}
+
+\defSub{mu}{The Student's t prior location (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\defSub{sigma}{The Student's t scale (sigma) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{df}{The Student's t degrees of freedom (df) parameter}
+\defType{Real number (constant)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}

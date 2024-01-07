@@ -195,17 +195,11 @@
 \defSub{estimation\_phase}{The first estimation phase to allow this to be estimated}
 \defSub{mcmc\_fixed}{Indicates if this parameter is estimated at the point estimate but fixed during MCMC estimation run}
 
-\commandlabsubarg{estimate}{type}{Beta}
+\commandlabsubarg{estimate}{type}{Uniform}
 
-\defSub{mu}{Beta prior  mean (mu) parameter}
-\defSub{sigma}{Beta prior standard deviation (sigma) parameter}
-\defSub{a}{Beta prior lower bound of the range (A) parameter}
-\defSub{b}{Beta prior upper bound of the range (B) parameter}
 
-\commandlabsubarg{estimate}{type}{Lognormal}
+\commandlabsubarg{estimate}{type}{Uniform\_Log}
 
-\defSub{mu}{The lognormal prior mean (mu) parameter}
-\defSub{cv}{The lognormal variance (cv) parameter}
 
 \commandlabsubarg{estimate}{type}{Normal}
 
@@ -218,16 +212,28 @@
 \defSub{sigma}{The normal standard deviation (sigma) parameter}
 \defSub{lognormal\_transformation}{Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information}
 
+\commandlabsubarg{estimate}{type}{Lognormal}
+
+\defSub{mu}{The lognormal prior mean (mu) parameter}
+\defSub{cv}{The lognormal variance (cv) parameter}
+
 \commandlabsubarg{estimate}{type}{Normal\_Log}
 
 \defSub{mu}{The normal-log prior mean (mu) parameter}
 \defSub{sigma}{The normal-log prior standard deviation (sigma) parameter}
 
-\commandlabsubarg{estimate}{type}{Uniform}
+\commandlabsubarg{estimate}{type}{Beta}
 
+\defSub{mu}{Beta prior  mean (mu) parameter}
+\defSub{sigma}{Beta prior standard deviation (sigma) parameter}
+\defSub{a}{Beta prior lower bound of the range (A) parameter}
+\defSub{b}{Beta prior upper bound of the range (B) parameter}
 
-\commandlabsubarg{estimate}{type}{Uniform\_Log}
+\commandlabsubarg{estimate}{type}{students\_t}
 
+\defSub{mu}{The Student's t prior location (mu) parameter}
+\defSub{sigma}{The Student's t scale (sigma) parameter}
+\defSub{df}{The Student's t degrees of freedom (df) parameter}
 
 \defComLab{growth\_increment}{Define an object of type \emph{growth\_increment}}
 

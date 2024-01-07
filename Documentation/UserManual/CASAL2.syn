@@ -213,6 +213,7 @@ parameter_transformation
 selectivity_by_year
 simplex
 sqrt
+students_t
 sum_to_one
 tag_recapture_by_fishery
 tag_recapture_by_length_for_growth

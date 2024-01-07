@@ -79,7 +79,7 @@ namespace utilities {
 /**
  * double conditional depending on if we're using auto differentiation or not
  *
- * The AS_DOUBLE macro is used to convert from the auto-differentation type
+ * The AS_DOUBLE macro is used to convert from the auto-differentiation type
  * to a standard double. This is used for two reasons.
  * 1. To convert to a double for piping into a stream when an operator overload doesn't exist
  * 2. To force break the chain to store the values for reporting out
@@ -97,12 +97,12 @@ typedef adouble Double;
 #define AS_DOUBLE(x) x.toDouble()
 #endif
 
-//#ifdef USE_CPPAD
-//typedef CppAD::AD<double> Double;
-// per https://coin-or.github.io/CppAD/doc/ad_output.htm
-// use this (CppAD::AD<base> has '<<'' defined)
-//#define AS_DOUBLE(x) CppAD::Value(x)
-//#endif
+// #ifdef USE_CPPAD
+// typedef CppAD::AD<double> Double;
+//  per https://coin-or.github.io/CppAD/doc/ad_output.htm
+//  use this (CppAD::AD<base> has '<<'' defined)
+// #define AS_DOUBLE(x) CppAD::Value(x)
+// #endif
 
 // #ifdef USE_ATL
 // typedef atl::Variable<double> Double;

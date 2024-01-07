@@ -325,7 +325,6 @@ When some of these priors are parameterised in terms of mean, c.v., and standard
 
 \CNAME\ has the following priors (expressed in terms of their contribution to the objective function):
 
-
 \subsubsection{Uniform\index{Uniform prior}\index{Priors ! Uniform}}\label{sec:Prior-Uniform}
 
 \begin{equation}
@@ -373,7 +372,6 @@ Similar to the lognormal prior, but with the mean ($mu$) and standard deviation 
 
 where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 \right)}$.
 
-
 \subsubsection{Beta\index{Beta prior}\index{Priors ! Beta}}\label{sec:Prior-Beta}
 
 The Beta distribution with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$
@@ -383,6 +381,19 @@ The Beta distribution with mean $\mu$ and standard deviation $\sigma$, and range
 \end{equation}
 
 where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $\mu=\tau \nu$ and $n=\tau(1-\nu)$. Note that the beta prior is undefined when $\tau \leq 0$.
+
+\subsubsection{Student's t\index{students\_t prior}\index{Priors ! Student's t}}\label{sec:Prior-Studentst}
+
+The Student's t distribution with location (mean) $\mu$, scale $\sigma$, and degrees of freedom $\nu$ where the pdf is defined as
+
+\begin{equation}
+	\begin{aligned}
+f(x | \mu, \sigma, \nu) &= \frac{\Gamma\left((\nu + 1)/2\right)} {\Gamma(\nu/2)} \ \frac{1}{\sqrt{\nu \pi} \ \sigma} \ \left( 1 + \frac{1}{\nu} \left(\frac{x - \mu}{\sigma}\right)^2 \right)^{-(\nu + 1)/2} \text{ and} \\
+- log \left(\pi \left( p \right) \right) &= -\log \left( f(x | \mu, \sigma, \nu) \right)
+	\end{aligned}
+\end{equation}
+
+The Student's t prior is Cauchy with $\nu = 1$ and is equivalent to the normal as $\nu \rightarrow \inf$.
 
 Vectors of parameters can be independently (but not necessarily identically) distributed according to any of the above forms, in which case the joint negative-log-prior for the vector is the sum of the negative-log-priors of the components. Values of each parameter need to be specified for each element of the vector. Example of syntax to define the estimation of a parameter and the prior assumed:
 

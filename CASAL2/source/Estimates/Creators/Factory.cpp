@@ -4,7 +4,7 @@
  * @date 22/09/2014
  * @section LICENSE
  *
- * Copyright NIWA Science ©2014 - www.niwa.co.nz
+ * Copyright NIWA Science ï¿½2014 - www.niwa.co.nz
  */
 
 // headers
@@ -15,6 +15,7 @@
 #include "../../Estimates/Creators/Common/Normal.h"
 #include "../../Estimates/Creators/Common/NormalByStdev.h"
 #include "../../Estimates/Creators/Common/NormalLog.h"
+#include "../../Estimates/Creators/Common/Students_t.h"
 #include "../../Estimates/Creators/Common/Uniform.h"
 #include "../../Estimates/Creators/Common/UniformLog.h"
 #include "../../Estimates/Manager.h"
@@ -45,6 +46,8 @@ Creator* Factory::Create(shared_ptr<Model> model, const string& object_type, con
     object = new NormalByStdev(model);
   else if (sub_type == PARAM_NORMAL_LOG)
     object = new NormalLog(model);
+  else if (sub_type == PARAM_STUDENTS_T)
+    object = new Students_t(model);
   else if (sub_type == PARAM_UNIFORM)
     object = new Uniform(model);
   else if (sub_type == PARAM_UNIFORM_LOG)
