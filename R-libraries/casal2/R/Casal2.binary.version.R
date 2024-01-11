@@ -1,5 +1,5 @@
 #'@export
 "casal2.binary.version"<-
 function() {
-return("23.12")
+return("24.01")
 }
