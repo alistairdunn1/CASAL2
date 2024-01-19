@@ -64,15 +64,14 @@ time_step_proportions 1
 m 0
 relative_m_by_age One*4
 categories *
-biomass false
 table catches
 year Fishing
 2000 10120
 end_table
 
 table method
-method  category selectivity u_max time_step penalty
-Fishing   format=*   One 1 step1 none
+method  category selectivity u_max time_step penalty biomass
+Fishing   format=*   One 1 step1 none false
 end_table
 
 @selectivity One
@@ -147,8 +146,7 @@ TEST_F(InternalEmptyModel, Observation_TagRecapture_By_fishery) {
   EXPECT_DOUBLE_EQ(10120, comparisons[year][0].error_value_);
   EXPECT_DOUBLE_EQ(10120, comparisons[year][0].expected_);
   EXPECT_DOUBLE_EQ(10120, comparisons[year][0].observed_);
-  EXPECT_NEAR(5.53008, comparisons[year][0].score_, 0.001); // -1.0 * dpois(10120, 10120, log = T)
-
+  EXPECT_NEAR(5.53008, comparisons[year][0].score_, 0.001);  // -1.0 * dpois(10120, 10120, log = T)
 }
 
 }  // namespace age

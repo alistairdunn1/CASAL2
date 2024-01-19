@@ -293,9 +293,9 @@ There are several types of mortality processes available in \CNAME, including ta
 	\item Holling mortality,
 	\item initialisation,
 	\item a density-dependent relationship based on prey suitability,
-	\item Tag-release by age,
-	\item Tag-release by length, and	
-	\item Tag-loss
+	\item tag-release by age,
+	\item tag-release by length, and	
+	\item tag-loss
 \end{itemize}
 
 These processes remove individuals from the partition, either as a rate, as a total number (abundance), as a biomass of individuals or, as a combination of these. \CNAME\ does not (yet) implement the Baranov catch equation. However, instantaneous mortality is considered an approximation to the Baranov catch equation.
@@ -540,7 +540,7 @@ and specified similarly for a \textbf{biomass-based} fishing mortality process
 
 \paragraph{Instantaneous mortality}\label{sec:Process-MortalityInstantaneous}
 
-The instantaneous mortality process\index{Instantaneous mortality} combines both natural mortality and fishing exploitation into a single process. This allows the simultaneous application of both natural mortality and anthropogenic mortality to occur across multiple time steps. This process accounts for half the natural mortality within a time step before calculating vulnerable biomasses for calculating exploitation rates. The remaining half of the natural mortality is taken after exploitation has been accounted for. The input for this process is catches and these can either be specified as biomasses or numbers (abundance). In fisheries models in \CNAME\ this is the most commonly used mortality process.
+The instantaneous mortality process\index{Instantaneous mortality} combines both natural mortality and fishing exploitation into a single process. This allows the simultaneous application of both natural mortality and anthropogenic mortality to occur across multiple time steps. This process accounts for half the natural mortality within a time step before calculating vulnerable biomasses for calculating exploitation rates. The remaining half of the natural mortality is taken after exploitation has been accounted for. The input for this process is removals (either catches in either biomass or abundance, or an exploitation rate of either biomass or abundance). In fisheries models in \CNAME\ this is the most commonly used mortality process.
 
 This process allows for multiple removal events, e.g., a fisheries model with multiple fisheries and/or fleets. A removal method can occur in one time step only, although multiple removals can be defined to cover events during the year.
 
@@ -573,7 +573,6 @@ For example, to apply natural mortality of $0.20$ across three time steps on bot
 	time_step_proportions 0.42 0.25 0.33
 	relative_m_by_age One
 	categories male female
-	biomass true
 	units kgs
 
 	table catches
@@ -584,14 +583,17 @@ For example, to apply natural mortality of $0.20$ across three time steps on bot
 	end table
 
 	table method
-	method       category  selectivity u_max   time_step  penalty
-	FishingWest   stock     westFSel    0.7     step1     CatchPenalty
-	FishingEast   stock     eastFSel    0.7     step1     CatchPenalty
+	method      category selectivity u_max time_step penalty      biomass U
+	FishingWest stock    westFSel    0.7   step1     CatchPenalty true    true
+	FishingEast stock    eastFSel    0.7   step1     CatchPenalty true    true
 	end_table
 	\end{verbatim}}}
 
-For referencing catch parameters for use in projecting, time-varying, and estimating, the syntax is
+For catches specified as removals as abundance, the column \argument{biomass} in the \argument{methods} table is set to \argument{false}. Exploitation rates can be specified (in which case, the column of catches is not a U) with valid range from $0-1$), by setting the \argument{method} table column \argument{U} to \argument{true}.
 
+The columns \argument{biomass} and \argument{U} are optional, and if omitted, default to \argument{biomass=true} (i.e., the catches are in biomass not abundance) and \argument{U=false} (i.e., the removals are the amount, not an exploitation rate) respectively. 
+
+For referencing catch parameters for use in projecting, time-varying, and estimating, the syntax is
 {\small{\begin{verbatim}
 		parameter process[mortality_instantaneous].method_"method_label"{2018}
 \end{verbatim}}}
@@ -613,9 +615,9 @@ To calculate weight by empirical weight-at-age matrices as described in Section~
 		end_table
 
 		table method
-		method       category  selectivity  u_max  time_step  penalty       age_weight
-		FishingWest  stock     westFSel     0.7    step1      CatchPenalty  jan_weight_at_age
-		FishingEast  stock     eastFSel     0.7    step1      CatchPenalty  jan_weight_at_age
+		method      category selectivity u_max time_step penalty      age_weight
+		FishingWest stock    westFSel    0.7   step1     CatchPenalty jan_weight_at_age
+		FishingEast stock    eastFSel    0.7   step1     CatchPenalty jan_weight_at_age
 		end_table
 \end{verbatim}}}
 
@@ -653,9 +655,9 @@ end table
 
 table method
 # all discards die
-method category selectivity retained_selectivity u_max time_step penalty
-FishingWest stock westFSel westRetainedSel 0.7 step1 CatchPenalty
-FishingEast stock eastFSel eastRetainedSel 0.7 step1 CatchPenalty
+method      category selectivity retained_selectivity u_max time_step penalty
+FishingWest stock    westFSel    westRetainedSel      0.7   step1     CatchPenalty
+FishingEast stock    eastFSel    eastRetainedSel      0.7   step1     CatchPenalty
 end_table
 \end{verbatim}}}
 

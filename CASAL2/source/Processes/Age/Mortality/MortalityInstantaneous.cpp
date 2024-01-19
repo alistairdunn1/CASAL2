@@ -52,16 +52,20 @@ MortalityInstantaneous::MortalityInstantaneous(shared_ptr<Model> model) : Mortal
 
   catches_table_ = new parameters::Table(PARAM_CATCHES);
   method_table_  = new parameters::Table(PARAM_METHOD);
-  // catches_table_->set_required_columns({"years"}, allow_others = true)
-  // method_table_->set_required_columns({"x", "x", "x,"});
 
+  catches_table_->set_required_columns({PARAM_YEAR}, true);
+  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_U_MAX, PARAM_TIME_STEP, PARAM_PENALTY}, true);
+  method_table_->set_optional_columns({PARAM_BIOMASS, PARAM_U, PARAM_AGE_WEIGHT_LABEL});
+
+  // clang-format off
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality", "");
   parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
-  parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
+  parameters_.BindTable(PARAM_METHOD, method_table_, "The table of methods for the removals data", "", true, false);
   parameters_.Bind<Double>(PARAM_M, &m_input_, "The natural mortality rates for each category", "")->set_lower_bound(0.0);
   parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_ratios_temp_, "The time step proportions for natural mortality", "", false)->set_range(0.0, 1.0);
-  parameters_.Bind<bool>(PARAM_BIOMASS, &is_catch_biomass_, "Indicator to denote if the catches are as biomass (true) or abundance (false)", "", true);
+  parameters_.Bind<bool>(PARAM_BIOMASS, &is_catch_biomass_, "(Deprecated) Indicator to denote if the catches are as biomass (true) or abundance (false)", "", true);
   parameters_.Bind<string>(PARAM_RELATIVE_M_BY_AGE, &selectivity_labels_, "The M-by-age ogives to apply to each category for natural mortality", "");
+  // clang-format on
 
   RegisterAsAddressable(PARAM_M, &m_);
 }
@@ -81,12 +85,13 @@ MortalityInstantaneous::~MortalityInstantaneous() {
  * Note: all parameters are populated from configuration files
  */
 void MortalityInstantaneous::DoValidate() {
+  LOG_TRACE();
   // Check Natural Mortality parameter first
   for (auto M_proportion : time_step_ratios_temp_) {
     if (M_proportion < 0.0)
       LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "Natural Mortality time step proportions cannot be less than 0.0 for a given time step";
   }
-
+  // Check time step ratios
   Double total = 0.0;
   for (Double value : time_step_ratios_temp_) {
     total += value;
@@ -94,40 +99,43 @@ void MortalityInstantaneous::DoValidate() {
   if (!utilities::math::IsOne(total)) {
     LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "summed to " << total << ". They must be specified to sum to one.";
   }
+  // check if is_catch_biomass_ is present (optional) and error out if defined as it's now deprecated and replaced in the methods Table
+  if (parameters_.Get(PARAM_BIOMASS)->has_been_defined()) {
+    LOG_ERROR_P(PARAM_BIOMASS) << " is deprecated. The option for abundance (or biomass) should be defined for each fishery in the " << PARAM_METHOD << " table";
+  }
 
-  /**
-   * Load a temporary map of the fishery catch data so we can use this
-   * when we load our vector of FisheryData objects
-   */
+  // Load a temporary map of the catch table data so we can use this when we load our vector of FisheryData objects
   map<string, map<unsigned, Double>> fishery_year_catch;
-  auto                               columns = catches_table_->columns();
+  // Load catch data
+  auto catch_columns = catches_table_->columns();
 
-  // TODO Need to catch if key column headers are missing for example year
-  if (std::find(columns.begin(), columns.end(), PARAM_YEAR) == columns.end())
-    LOG_ERROR_P(PARAM_CATCHES) << "The required column " << PARAM_YEAR << " was not found.";
-  unsigned year_index = std::find(columns.begin(), columns.end(), PARAM_YEAR) - columns.begin();
-  LOG_FINEST() << "The year_index for fisheries table is: " << year_index;
+  // TODO Need to check if key column headers are missing other than year
 
-  auto model_years = model_->years();
-  auto rows        = catches_table_->data();
-  for (auto row : rows) {
+  unsigned catch_year_index = std::find(catch_columns.begin(), catch_columns.end(), PARAM_YEAR) - catch_columns.begin();
+  LOG_FINEST() << "The catch_year_index for catch table is: " << catch_year_index;
+
+  auto model_years  = model_->years();
+  auto catches_rows = catches_table_->data();
+  for (auto row : catches_rows) {
     unsigned year = 0;
-    if (!utilities::To<string, unsigned>(row[year_index], year))
-      LOG_ERROR_P(PARAM_CATCHES) << "year value " << row[year_index] << " could not be converted to an unsigned integer.";
+    if (!utilities::To<string, unsigned>(row[catch_year_index], year))
+      LOG_ERROR_P(PARAM_CATCHES) << "year value " << row[catch_year_index] << " could not be converted to an unsigned integer.";
     if (std::find(model_years.begin(), model_years.end(), year) == model_years.end())
       LOG_ERROR_P(PARAM_CATCHES) << "year " << year << " is not a valid year in this model";
 
     process_years_.push_back(year);
 
     for (unsigned i = 0; i < row.size(); ++i) {
-      if (i == year_index)
+      if (i == catch_year_index)
         continue;
 
       Double value = 0.0;
       if (!utilities::To<string, Double>(row[i], value))
-        LOG_ERROR_P(PARAM_CATCHES) << "value " << row[i] << " for fishery " << columns[i] << " could not be converted to a Double";
-      fishery_year_catch[columns[i]][year] = value;
-      fishery_catch_[columns[i]][year]     = value;  // needed for Mortality.h checks
+        LOG_ERROR_P(PARAM_CATCHES) << "value " << row[i] << " for fishery " << catch_columns[i] << " could not be converted to a Double";
+      if (value < 0)
+        LOG_ERROR_P(PARAM_CATCHES) << "value " << row[i] << " for fishery " << catch_columns[i] << " must be >= 0";
+      fishery_year_catch[catch_columns[i]][year] = value;
+      fishery_catch_[catch_columns[i]][year]     = value;  // needed for Mortality.h checks
     }
   }
 
@@ -151,8 +159,8 @@ void MortalityInstantaneous::DoValidate() {
   }
 
   if (m_input_.size() != category_labels_.size())
-    LOG_FATAL_P(PARAM_M) << ": The number of Ms provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                         << ", Ms: " << m_input_.size();
+    LOG_FATAL_P(PARAM_M) << ": The number of M's provided is not the same as the number of categories provided. The number of categories are: " << category_labels_.size()
+                         << ", and the number of M's are: " << m_input_.size();
   for (unsigned i = 0; i < m_input_.size(); ++i) m_[category_labels_[i]] = m_input_[i];
 
   /**
@@ -171,53 +179,75 @@ void MortalityInstantaneous::DoValidate() {
   }
 
   /**
-   * Now we want to load the information from the fisheries table.
+   * Now we want to load the information from the methods table.
    * We create a master fishery object and then multiple category objects
    * depending on how many categories are defined.
    */
-  columns = method_table_->columns();
-  rows    = method_table_->data();
-  LOG_FINE() << "method_table.columns.size(): " << columns.size();
-  LOG_FINE() << "method_table.rows.size(): " << rows.size();
-  LOG_FINE() << "columns: " << boost::join(columns, " ");
-  for (auto row : rows) {
+  auto method_columns = method_table_->columns();
+  auto method_rows    = method_table_->data();
+
+  LOG_FINE() << "method_table.method_columns.size(): " << method_columns.size();
+  LOG_FINE() << "method_table.method_rows.size(): " << method_rows.size();
+  LOG_FINE() << "columns: " << boost::join(method_columns, " ");
+  for (auto row : method_rows) {
     LOG_FINE() << "row: " << boost::join(row, " ");
   }
 
+  // check all columns are valid
+
   // Check the column headers are all specified correctly
-  if (std::find(columns.begin(), columns.end(), PARAM_METHOD) == columns.end())
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_METHOD) == method_columns.end())
     LOG_FATAL_P(PARAM_METHOD) << "The required column " << PARAM_METHOD << " was not found.";
-  if (std::find(columns.begin(), columns.end(), PARAM_CATEGORY) == columns.end())
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_CATEGORY) == method_columns.end())
     LOG_FATAL_P(PARAM_METHOD) << "The required column " << PARAM_CATEGORY << " was not found.";
-  if (std::find(columns.begin(), columns.end(), PARAM_SELECTIVITY) == columns.end())
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_SELECTIVITY) == method_columns.end())
     LOG_FATAL_P(PARAM_METHOD) << "The required column " << PARAM_SELECTIVITY << " was not found.";
-  if (std::find(columns.begin(), columns.end(), PARAM_TIME_STEP) == columns.end())
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_TIME_STEP) == method_columns.end())
     LOG_FATAL_P(PARAM_METHOD) << "The required column " << PARAM_TIME_STEP << " was not found.";
-  if (std::find(columns.begin(), columns.end(), PARAM_U_MAX) == columns.end())
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_U_MAX) == method_columns.end())
     LOG_FATAL_P(PARAM_METHOD) << "The required column " << PARAM_U_MAX << " was not found.";
-  if (std::find(columns.begin(), columns.end(), PARAM_PENALTY) == columns.end())
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_PENALTY) == method_columns.end())
     LOG_FATAL_P(PARAM_METHOD) << "The required column " << PARAM_PENALTY << " was not found.";
-  if (std::find(columns.begin(), columns.end(), PARAM_AGE_WEIGHT_LABEL) == columns.end()) {
-    // Users can choose not to add this column if they wish
+  // Users can choose not to add the following column if they wish (biomass, amount, age_weights)
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_BIOMASS) == method_columns.end()) {
+    // Users can choose not to add this column if they wish (in which case, catches are in biomass, not numbers)
+    use_catch_biomass_ = false;
+    LOG_FINE() << "The optional column " << PARAM_BIOMASS << " was not found";
+  }
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_U) == method_columns.end()) {
+    // Users can choose not to add this column if they wish (in which case, exploitation is not a U)
+    use_u_ = false;
+    LOG_FINE() << "The optional column " PARAM_U << " was not found";
+  }
+  if (std::find(method_columns.begin(), method_columns.end(), PARAM_AGE_WEIGHT_LABEL) == method_columns.end()) {
+    // Users can choose not to add this column if they wish (in which case age-weight is not used)
     use_age_weight_ = false;
-    LOG_FINE() << "Age weight column not found";
-  } else if (!is_catch_biomass_) {
-    LOG_FATAL_P(PARAM_BIOMASS) << "The parameter " << PARAM_BIOMASS << " must be true if an Age weight relationship is also used";
+    LOG_FINE() << "The optional column " PARAM_AGE_WEIGHT_LABEL << "was not found";
+    // todo: this needs to be a business rule in the methods table
+    // if (!is_catch_biomass_) {
+    //  LOG_FATAL_P(PARAM_BIOMASS) << "The parameter " << PARAM_BIOMASS << " must be true if an Age weight relationship is also used";
+    //}
   }
 
-  unsigned fishery_index     = std::find(columns.begin(), columns.end(), PARAM_METHOD) - columns.begin();
-  unsigned category_index    = std::find(columns.begin(), columns.end(), PARAM_CATEGORY) - columns.begin();
-  unsigned selectivity_index = std::find(columns.begin(), columns.end(), PARAM_SELECTIVITY) - columns.begin();
-  unsigned time_step_index   = std::find(columns.begin(), columns.end(), PARAM_TIME_STEP) - columns.begin();
-  unsigned u_max_index       = std::find(columns.begin(), columns.end(), PARAM_U_MAX) - columns.begin();
-  unsigned penalty_index     = std::find(columns.begin(), columns.end(), PARAM_PENALTY) - columns.begin();
+  unsigned fishery_index     = std::find(method_columns.begin(), method_columns.end(), PARAM_METHOD) - method_columns.begin();
+  unsigned category_index    = std::find(method_columns.begin(), method_columns.end(), PARAM_CATEGORY) - method_columns.begin();
+  unsigned selectivity_index = std::find(method_columns.begin(), method_columns.end(), PARAM_SELECTIVITY) - method_columns.begin();
+  unsigned time_step_index   = std::find(method_columns.begin(), method_columns.end(), PARAM_TIME_STEP) - method_columns.begin();
+  unsigned u_max_index       = std::find(method_columns.begin(), method_columns.end(), PARAM_U_MAX) - method_columns.begin();
+  unsigned penalty_index     = std::find(method_columns.begin(), method_columns.end(), PARAM_PENALTY) - method_columns.begin();
+  unsigned biomass_index     = 999;
+  unsigned u_index           = 999;
   unsigned age_weight_index  = 999;
-
+  if (use_catch_biomass_)
+    biomass_index = std::find(method_columns.begin(), method_columns.end(), PARAM_BIOMASS) - method_columns.begin();
+  if (use_u_)
+    u_index = std::find(method_columns.begin(), method_columns.end(), PARAM_U) - method_columns.begin();
   if (use_age_weight_)
-    age_weight_index = std::find(columns.begin(), columns.end(), PARAM_AGE_WEIGHT_LABEL) - columns.begin();
+    age_weight_index = std::find(method_columns.begin(), method_columns.end(), PARAM_AGE_WEIGHT_LABEL) - method_columns.begin();
 
   LOG_FINEST() << "indexes: fishery=" << fishery_index << "; category=" << category_index << "; selectivity=" << selectivity_index << "; time_step=" << time_step_index
-               << "; u_max=" << u_max_index << "; penalty " << penalty_index << "; age weight index " << age_weight_index;
+               << "; u_max=" << u_max_index << "; penalty " << penalty_index << "; is_U_index " << u_index << "; is_biomass_index " << biomass_index << "; is_age_weight_index "
+               << age_weight_index;
 
   // This is object is going to check the business rule that a fishery can only exist in one time-step in each year
   map<string, vector<string>> fishery_time_step;
@@ -227,7 +257,7 @@ void MortalityInstantaneous::DoValidate() {
   // so do some consistency checks that the repeat fisheries are are consistent.
   // regarding timing, and Umax
   unsigned row_iter = 1;
-  for (auto row : rows) {
+  for (auto row : method_rows) {
     FisheryData new_fishery;
     new_fishery.label_                     = row[fishery_index];
     new_fishery.time_step_label_           = row[time_step_index];
@@ -235,6 +265,23 @@ void MortalityInstantaneous::DoValidate() {
     new_fishery.years_                     = process_years_;
     std::pair<bool, int> this_fishery_iter = findInVector(fishery_labels_, new_fishery.label_);
     LOG_FINE() << new_fishery.label_ << " found = " << this_fishery_iter.first << " ndx = " << this_fishery_iter.second;
+
+    if (!utilities::To<string, Double>(row[u_max_index], new_fishery.u_max_))
+      LOG_ERROR_P(PARAM_METHOD) << "u_max value " << row[u_max_index] << " could not be converted to a Double";
+    if (use_catch_biomass_) {
+      if (!(utilities::To(row[biomass_index], new_fishery.catch_as_biomass_)))
+        LOG_ERROR_P(PARAM_METHOD) << ": in row = " << row_iter << ", unable to convert '" << row[biomass_index] << "' to a boolean (true/false)";
+      LOG_FINE() << "row[biomass_index] = " << row[biomass_index] << ", new_fishery.catch_as_biomass_ = " << new_fishery.catch_as_biomass_ << "\n";
+    } else {
+      new_fishery.catch_as_biomass_ = true;
+    }
+    if (use_u_) {
+      if (!(utilities::To(row[u_index], new_fishery.catch_as_u_)))
+        LOG_ERROR_P(PARAM_METHOD) << ": in row = " << row_iter << ", unable to convert '" << row[u_index] << "' to a boolean (true/false) ";
+    } else {
+      new_fishery.catch_as_u_ = false;
+    }
+
     if (this_fishery_iter.first) {
       // we have already seen this fishery in the methods table
       // Do some checks and don't cache anything
@@ -247,19 +294,41 @@ void MortalityInstantaneous::DoValidate() {
         LOG_ERROR_P(PARAM_METHOD) << "u_max value " << row[u_max_index] << " could not be converted to a Double";
       if (fisheries_[new_fishery.label_].u_max_ != new_fishery.u_max_)
         LOG_ERROR_P(PARAM_METHOD) << "Fishery labelled " << new_fishery.label_ << " had u_max = " << new_fishery.u_max_ << " at row " << row_iter
-                                  << " but the same fishery had u_max_ = " << fisheries_[new_fishery.label_].u_max_ << " at row = " << this_fishery_iter.second + 1
-                                  << " these need to be consistent for a single method";
+                                  << ", but the same fishery had u_max = " << fisheries_[new_fishery.label_].u_max_ << " at row " << this_fishery_iter.second + 1
+                                  << ". These need to be the same for a single method in the methods table";
+      if (fisheries_[new_fishery.label_].catch_as_biomass_ != new_fishery.catch_as_biomass_)
+        LOG_ERROR_P(PARAM_METHOD) << "Fishery labelled " << new_fishery.label_ << " had biomass = " << new_fishery.catch_as_biomass_ << " at row " << row_iter
+                                  << ", but the same fishery had biomass = " << fisheries_[new_fishery.label_].catch_as_biomass_ << " at row " << this_fishery_iter.second + 1
+                                  << ". These need to be the same for a single method in the methods table";
+      if (fisheries_[new_fishery.label_].catch_as_u_ != new_fishery.catch_as_u_)
+        LOG_ERROR_P(PARAM_METHOD) << "Fishery labelled " << new_fishery.label_ << " had U = " << new_fishery.catch_as_u_ << " at row " << row_iter
+                                  << ", but the same fishery had U = " << fisheries_[new_fishery.label_].catch_as_u_ << " at row " << this_fishery_iter.second + 1
+                                  << ". These need to be the same for a single method in the methods table";
     } else {
       // haven't seen this method so store it in the fisheries struct
       fishery_labels_.push_back(new_fishery.label_);
       new_fishery.fishery_ndx_ = fishery_labels_.size() - 1;
       fishery_time_step[new_fishery.label_].push_back(new_fishery.time_step_label_);
-      if (!utilities::To<string, Double>(row[u_max_index], new_fishery.u_max_))
-        LOG_ERROR_P(PARAM_METHOD) << "u_max value " << row[u_max_index] << " could not be converted to a Double";
-      if (fishery_year_catch.find(new_fishery.label_) == fishery_year_catch.end())
+
+      if (fishery_year_catch.find(new_fishery.label_) == fishery_year_catch.end()) {
+        // not in the catch table
         LOG_ERROR_P(PARAM_METHOD) << "fishery " << new_fishery.label_ << " does not have catch information in the catches table";
+      }
+
       new_fishery.catches_        = fishery_year_catch[new_fishery.label_];
       new_fishery.actual_catches_ = fishery_year_catch[new_fishery.label_];
+
+      // and check that if catches are exploitation rates, they have values between 0 and 1
+      if (new_fishery.catch_as_u_) {
+        for (auto iter : new_fishery.catches_) {
+          if (iter.second < 0.0 || iter.second > 1.0) {
+            LOG_ERROR_P(PARAM_CATCHES) << ": the column " << new_fishery.label_ << " with year " << iter.first << " has value '" << iter.second
+                                       << "'. It must have a value between 0 and 1 (inclusive) as the column is defined as an exploitation rate in the " << PARAM_METHOD
+                                       << " table";
+          }
+        }
+      }
+
       // store fishery and make it addressable
       fisheries_[new_fishery.label_] = new_fishery;
       RegisterAsAddressable(PARAM_METHOD + string("_") + utilities::ToLowercase(new_fishery.label_), &fisheries_[new_fishery.label_].catches_);
@@ -269,7 +338,7 @@ void MortalityInstantaneous::DoValidate() {
     // move onto category stuff for this method
     vector<string> categories;
     vector<string> selectivities;
-    vector<string> age_weights;
+    vector<string> age_weight_values;
 
     boost::split(categories, row[category_index], boost::is_any_of(","));
     boost::split(selectivities, row[selectivity_index], boost::is_any_of(","));
@@ -278,7 +347,7 @@ void MortalityInstantaneous::DoValidate() {
       LOG_FINEST() << cat;
     }
     if (use_age_weight_)
-      boost::split(age_weights, row[age_weight_index], boost::is_any_of(","));
+      boost::split(age_weight_values, row[age_weight_index], boost::is_any_of(","));
 
     if (categories.size() != selectivities.size())
       LOG_FATAL_P(PARAM_METHOD) << "The number of categories (" << categories.size() << ") and selectivities (" << selectivities.size() << ") provided must be the same";
@@ -297,9 +366,9 @@ void MortalityInstantaneous::DoValidate() {
 
       new_category_data.selectivity_label_ = selectivities[i];
 
-      if (use_age_weight_)
-        new_category_data.category_.age_weight_label_ = age_weights[i];
-      else {
+      if (use_age_weight_) {
+        new_category_data.category_.age_weight_label_ = age_weight_values[i];
+      } else {
         new_category_data.category_.age_weight_label_ = PARAM_NONE;
         LOG_FINE() << "setting age weight label to none.";
       }
@@ -370,14 +439,10 @@ void MortalityInstantaneous::DoBuild() {
 
   for (unsigned i = 0; i < time_step_ratios_temp_.size(); ++i) time_step_ratios_[active_time_steps[i]] = time_step_ratios_temp_[i];
 
-  /**
-   * Assign the selectivity, penalty and time step index to each fishery data object
-   */
+  // Assign the selectivity, penalty and time step index to each fishery data object
   for (auto& fishery_category : fishery_categories_) {
     fishery_category.selectivity_ = model_->managers()->selectivity()->GetSelectivity(fishery_category.selectivity_label_);
-    /**
-     * Check the fishery categories are valid
-     */
+    // Check the fishery categories are valid
     if (!model_->categories()->IsValid(fishery_category.category_label_))
       LOG_ERROR_P(PARAM_METHOD) << ": Fishery category " << fishery_category.category_label_ << " was not found.";
 
@@ -398,17 +463,13 @@ void MortalityInstantaneous::DoBuild() {
     fishery.time_step_index_ = model_->managers()->time_step()->GetTimeStepIndex(fishery.time_step_label_);
   }
 
-  /**
-   * Check the natural mortality categories are valid
-   */
+  // Check the natural mortality categories are valid
   for (const string& label : category_labels_) {
     if (!model_->categories()->IsValid(label))
       LOG_ERROR_P(PARAM_CATEGORIES) << ": Category " << label << " was not found.";
   }
 
-  /**
-   * Assign the natural mortality selectivities
-   */
+  // Assign the natural mortality selectivities
   for (auto& category : categories_) {
     // Selectivity
     Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(category.selectivity_label_);
@@ -480,23 +541,6 @@ void MortalityInstantaneous::DoBuild() {
         removals_by_year_fishery_category_[year_ndx][fishery_ndx][category_ndx].resize(model_->age_spread(), 0.0);
     }
   }
-  /*
-  for (auto year : process_years_) {
-    for (unsigned current_time_step = 0; current_time_step < ordered_time_steps.size(); ++current_time_step) {
-      for (auto& category : category_labels_) {
-        for (auto& fishery_category : fishery_categories_) {
-          LOG_FINE() << "Checking category " << category << " time step = " << fisheries_[fishery_category.fishery_label_].time_step_index_;
-          if (fishery_category.category_label_ == category && fisheries_[fishery_category.fishery_label_].time_step_index_ == current_time_step) {
-            removals_by_year_fishery_category_[year][fishery_category.fishery_label_][category].assign(model_->age_spread(), 0.0);
-
-            LOG_FINE() << "year " << year << " fishery = " << fishery_category.fishery_label_ << " category = " << fishery_category.category_label_
-                       << "  size of vector = " << removals_by_year_fishery_category_[year][fishery_category.fishery_label_][category].size();
-          }
-        }
-      }
-    }
-  }
-  */
 }
 
 /**
@@ -585,16 +629,18 @@ void MortalityInstantaneous::DoExecute() {
               vulnerable += category->data_[i] * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model_->min_age())
                             * fishery_category.selectivity_values_[i] * fishery_category.category_.exp_values_half_m_[i];
             }
-          } else if (is_catch_biomass_) {  // as biomass
+          } else if (fishery_category.fishery_.catch_as_biomass_) {  // as biomass
             for (unsigned i = 0; i < category->data_.size(); ++i) {
               vulnerable += category->data_[i] * category->age_length_->mean_weight(time_step_index, category->min_age_ + i) * fishery_category.selectivity_values_[i]
                             * fishery_category.category_.exp_values_half_m_[i];
             }
-          } else {  // as abundance
+          } else {
+            // catch_as_biomass = false: i.e., abundance
             for (unsigned i = 0; i < category->data_.size(); ++i) {
               vulnerable += category->data_[i] * fishery_category.selectivity_values_[i] * fishery_category.category_.exp_values_half_m_[i];
             }
           }
+
           fishery_category.fishery_.vulnerability_ += vulnerable;
 
           LOG_FINEST() << "Category is fished in year " << year << " time_step " << time_step_index << ", numbers at age length = " << category->data_.size();
@@ -611,7 +657,11 @@ void MortalityInstantaneous::DoExecute() {
 
           // If fishery occurs in this time step calculate exploitation rate
           if (fishery.time_step_index_ == time_step_index) {
-            exploitation = fishery.catches_[year] / utilities::math::ZeroFun(fishery.vulnerability_);
+            if (fishery.catch_as_u_) {
+              exploitation = fishery.catches_[year];
+            } else {  // catch_as_u_ is false
+              exploitation = fishery.catches_[year] / utilities::math::ZeroFun(fishery.vulnerability_);
+            }
 
             fishery.exploitation_ = exploitation;
             fishery.uobs_fishery_ = exploitation;
@@ -644,7 +694,6 @@ void MortalityInstantaneous::DoExecute() {
          */
         bool recalculate_age_exploitation = false;
         LOG_FINEST() << "Size of fishery_categories_ " << fishery_categories_.size();
-
         LOG_FINEST() << "calc uobs";
 
         for (auto& fishery_iter : fisheries_) {
@@ -810,28 +859,6 @@ void MortalityInstantaneous::FillReportCache(ostringstream& cache) {
   }
 
   cache << REPORT_EOL;
-
-  /*
-    cache << "removals " << REPORT_R_DATAFRAME << "\n";
-    cache << "year category";
-    unsigned age = model_->min_age();
-    while(age <= model_->max_age()) {
-      cache << " " << age ;
-      ++age;
-    }
-    cache << REPORT_EOL;
-
-    for (auto& removals : removals_by_year_category_age_) {
-      LOG_FINE() << "printing year = " << removals.first;
-      for (unsigned category_ndx = 0; category_ndx < removals.second.size(); ++category_ndx) {
-        cache << removals.first << " " << category_labels_[category_ndx];
-        for (unsigned age_ndx = 0; age_ndx < removals.second[category_ndx].size(); ++age_ndx) {
-          cache << " " << removals.second[category_ndx][age_ndx];
-        }
-        cache << REPORT_EOL;
-      }
-    }
-  */
 }
 
 /**

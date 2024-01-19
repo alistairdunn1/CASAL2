@@ -56,6 +56,9 @@ class MortalityInstantaneous : public Mortality {
     Double vulnerability_;
     Double uobs_fishery_;
     Double exploitation_;
+
+    bool catch_as_biomass_;
+    bool catch_as_u_;
   };
 
   struct CategoryData {
@@ -68,6 +71,8 @@ class MortalityInstantaneous : public Mortality {
     string               selectivity_label_;
     Selectivity*         selectivity_;
     vector<Double>       selectivity_values_;
+    bool                 catch_as_biomass_;
+    bool                 catch_as_amount_;
     AgeWeight*           age_weight_ = nullptr;
     string               age_weight_label_;
     bool                 used_in_current_timestep_;
@@ -106,13 +111,15 @@ private:
   vector<CategoryData>       categories_;
 
   // members
-  vector<FisheryCategoryData> fishery_categories_;
-  map<string, FisheryData>    fisheries_;
-  parameters::Table*          catches_table_ = nullptr;
-  parameters::Table*          method_table_  = nullptr;
-  accessor::Categories        partition_;
-  Double                      current_m_        = 0.0;
-  bool                        is_catch_biomass_ = true;
+  vector<FisheryCategoryData>        fishery_categories_;
+  map<string, FisheryData>           fisheries_;
+  parameters::Table*                 catches_table_ = nullptr;
+  parameters::Table*                 method_table_  = nullptr;
+  accessor::Categories               partition_;
+  map<string, map<unsigned, Double>> fishery_exploitation_;  // fishery x  year = exploitation_rate
+
+  Double current_m_        = 0.0;
+  bool   is_catch_biomass_ = true;  // Now deprecated so remove in future versions
 
   // members from mortality event
   // Double                      u_max_ = 0.99; // Now attached to the fishery object
@@ -130,7 +137,9 @@ private:
 
   // Members for reporting
   vector<unsigned>               time_steps_to_skip_applying_F_mortality_;
-  bool                           use_age_weight_ = true;
+  bool                           use_age_weight_    = true;
+  bool                           use_catch_biomass_ = true;
+  bool                           use_u_             = true;
   vector<vector<vector<Double>>> removals_by_year_category_age_;  // year[year_ndx][category_ndx][age_ndx]
 };
 
