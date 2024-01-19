@@ -5,7 +5,7 @@
  * @date 18/09/2012
  * @section LICENSE
  *
- * Copyright NIWA Science ©2012 - www.niwa.co.nz
+ * Copyright NIWA Science ï¿½2012 - www.niwa.co.nz
  *
  * @section DESCRIPTION
  *
@@ -139,8 +139,8 @@ inline bool To(const ::std::string arg, bool& result) {
     return true;
 
   } catch (...) {
-    vector<string> true_values  = {"t", "true", "yes", "y"};
-    vector<string> false_values = {"f", "false", "no", "n"};
+    vector<string> true_values  = {"t", "true", "yes", "y", "1"};
+    vector<string> false_values = {"f", "false", "no", "n", "0"};
 
     string value = ToLowercase(arg);
 

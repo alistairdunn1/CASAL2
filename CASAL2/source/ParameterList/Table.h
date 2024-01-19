@@ -61,7 +61,7 @@ public:
   void AddColumns(const vector<string>& columns);
   void AddRow(const vector<string>& row);
   bool HasColumns() { return columns_.size() != 0; }
-  bool HasBeenDefined() const { return data_.size() != 0; }
+  bool has_been_defined() const { return data_.size() != 0; }
   void Populate(shared_ptr<Model> model);
   template <typename T>
   void CheckColumnValuesAreType(const string& column);

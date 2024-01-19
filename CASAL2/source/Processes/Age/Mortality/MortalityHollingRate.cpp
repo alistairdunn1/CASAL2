@@ -17,6 +17,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
+#include "AgeLengths/AgeLength.h"
 #include "Categories/Categories.h"
 #include "Model/Managers.h"
 #include "Penalties/Manager.h"
@@ -25,7 +26,6 @@
 #include "TimeSteps/TimeStep.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
-#include "AgeLengths/AgeLength.h"
 
 // namespaces
 namespace niwa {
@@ -94,21 +94,21 @@ void MortalityHollingRate::DoValidate() {
   }
   LOG_TRACE();
   LOG_FINEST() << "prey = " << parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined();
-  LOG_FINEST() << "prey by year = " << parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined();
+  LOG_FINEST() << "prey by year = " << parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->has_been_defined();
   LOG_TRACE();
 
   // Check how the user has selected selectivities, this is an unusal process where we allow an alternative way to parameterise the selectivity
-  if (!parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined() && !parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
+  if (!parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined() && !parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->has_been_defined()) {
     LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREY_SELECTIVITIES << "' or '" << PARAM_PREY_SELECTIVITIES_BY_YEAR << "' for this process";
     LOG_TRACE();
   }
-  if (parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined() && parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined())
+  if (parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined() && parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->has_been_defined())
     LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREY_SELECTIVITIES << "' or '" << PARAM_PREY_SELECTIVITIES_BY_YEAR << "' for this process.";
   LOG_TRACE();
-  if (!parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined() && !parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->HasBeenDefined())
+  if (!parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined() && !parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->has_been_defined())
     LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREDATOR_SELECTIVITIES << "' or '" << PARAM_PREDATOR_SELECTIVITIES_BY_YEAR << "' for this process";
   LOG_TRACE();
-  if (parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined() && parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->HasBeenDefined())
+  if (parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined() && parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->has_been_defined())
     LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREDATOR_SELECTIVITIES << "' or '" << PARAM_PREDATOR_SELECTIVITIES_BY_YEAR << "' for this process.";
 
   LOG_TRACE();
@@ -125,7 +125,7 @@ void MortalityHollingRate::DoValidate() {
   }
   LOG_TRACE();
   // Populate maps from tables if user has defined them
-  if (parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
+  if (parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->has_been_defined()) {
     prey_selectivity_by_year_supplied_ = true;
     auto columns                       = prey_selectivities_table_->columns();
     if (columns.size() != (model_->age_spread() + 1))
@@ -172,7 +172,7 @@ void MortalityHollingRate::DoValidate() {
 
   LOG_TRACE();
   // Predator table
-  if (parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
+  if (parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->has_been_defined()) {
     predator_selectivity_by_year_supplied_ = true;
     auto columns                           = predator_selectivities_table_->columns();
     if (columns.size() != (model_->age_spread() + 1))
@@ -320,7 +320,7 @@ void MortalityHollingRate::DoExecute() {
           for (unsigned i = 0; i < predator_categories->data_.size(); ++i)
             PredatorVulnerable += predator_categories->data_[i]
                                   * predator_selectivities_[predator_offset]->GetAgeResult(predator_categories->min_age_ + i, predator_categories->age_length_)
-                                  * predator_categories->age_length_->mean_weight(time_step_index,predator_categories->min_age_ + i);
+                                  * predator_categories->age_length_->mean_weight(time_step_index, predator_categories->min_age_ + i);
         }
       } else {
         if (predator_selectivity_by_year_supplied_) {

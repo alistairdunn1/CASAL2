@@ -5,7 +5,7 @@
  * @date 12/10/2018
  * @section LICENSE
  *
- * Copyright NIWA Science ©2018 - www.niwa.co.nz
+ * Copyright NIWA Science ï¿½2018 - www.niwa.co.nz
  *
  */
 #ifndef SOURCE_PARAMETERLIST_TABLE_INL_H_
@@ -72,7 +72,7 @@ void Table::CheckColumnValuesContain(const string& column, const vector<T>& valu
  * as the target type. This makes it easy for objects using this table
  * to do something like table->GetColumnValuesAs<unsigned>(PARAM_YEAR);
  *
- * @param column The column label to prcess
+ * @param column The column label to process
  */
 template <typename T>
 vector<T> Table::GetColumnValuesAs(const string& column) {
