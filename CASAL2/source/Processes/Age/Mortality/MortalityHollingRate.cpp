@@ -47,6 +47,7 @@ MortalityHollingRate::MortalityHollingRate(shared_ptr<Model> model) : Mortality(
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
+  // clang-format off
   predator_selectivities_table_ = new parameters::Table(PARAM_PREDATOR_SELECTIVITIES);
   prey_selectivities_table_     = new parameters::Table(PARAM_PREY_SELECTIVITIES);
 
@@ -57,14 +58,13 @@ MortalityHollingRate::MortalityHollingRate(shared_ptr<Model> model) : Mortality(
   parameters_.Bind<bool>(PARAM_IS_ABUNDANCE, &is_abundance_, "Is vulnerable amount of prey and predator an abundance [true] or biomass [false]", "", true);
   parameters_.Bind<Double>(PARAM_A, &a_, "Parameter a", "")->set_lower_bound(0.0);
   parameters_.Bind<Double>(PARAM_B, &b_, "Parameter b", "")->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_X, &x_, "This parameter controls the functional form: Holling function type 2 (x=2) or 3 (x=3), or generalised (Michaelis Menten, x>=1)", "")
-      ->set_lower_bound(1.0);
+  parameters_.Bind<Double>(PARAM_X, &x_, "This parameter controls the functional form: Holling function type 2 (x=2) or 3 (x=3), or generalised (Michaelis Menten, x>=1)", "")->set_lower_bound(1.0);
   parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)", "", 0.99)->set_range(0.0, 1.0);
   parameters_.Bind<string>(PARAM_PREY_SELECTIVITIES, &prey_selectivity_labels_, "The selectivities for prey categories", "", true);
   parameters_.Bind<string>(PARAM_PREDATOR_SELECTIVITIES, &predator_selectivity_labels_, "The selectivities for predator categories", "", true);
   parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of penalty", "", "");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process", "");
-
+  // clang-format on
   RegisterAsAddressable(PARAM_A, &a_);
   RegisterAsAddressable(PARAM_B, &b_);
   RegisterAsAddressable(PARAM_X, &x_);

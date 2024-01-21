@@ -23,7 +23,10 @@ namespace niwa::processes {
 LoadPartition::LoadPartition(shared_ptr<Model> model) : Process(model) {
   process_type_        = ProcessType::kNullProcess;
   partition_structure_ = PartitionType::kAge;
-  data_table_          = new parameters::Table(PARAM_DATA);
+
+  data_table_ = new parameters::Table(PARAM_DATA);
+
+  data_table_->set_required_columns({PARAM_CATEGORY}, true);
 
   parameters_.BindTable(PARAM_DATA, data_table_, "Partition information to load", "", true, false);
 }

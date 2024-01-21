@@ -52,10 +52,13 @@ MortalityHybrid::MortalityHybrid(shared_ptr<Model> model) : Mortality(model), pa
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
+  //clang-format off
   catches_table_ = new parameters::Table(PARAM_CATCHES);
   method_table_  = new parameters::Table(PARAM_METHOD);
-  // catches_table_->set_required_columns({"years"}, allow_others = true)
-  // method_table_->set_required_columns({"x", "x", "x,"});
+
+  catches_table_->set_required_columns({PARAM_YEAR}, true);
+  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_PENALTY, PARAM_ANNUAL_DURATION}, true);
+  method_table_->set_optional_columns({PARAM_AGE_WEIGHT_LABEL});
 
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality", "");
   parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
@@ -66,6 +69,7 @@ MortalityHybrid::MortalityHybrid(shared_ptr<Model> model) : Mortality(model), pa
   parameters_.Bind<string>(PARAM_RELATIVE_M_BY_AGE, &selectivity_labels_, "The M-by-age ogives to apply to each category for natural mortality", "");
   parameters_.Bind<Double>(PARAM_MAX_F, &max_F_, "The maximum F applied in a time-step", "", 4.0)->set_lower_bound(0.0);
   parameters_.Bind<unsigned>(PARAM_F_ITERATIONS, &F_iterations_, "The number of iterations to tune the F coefficients", "", 4)->set_lower_bound(0);
+  //clang-format on
 
   RegisterAsAddressable(PARAM_M, &m_);
 }
@@ -107,8 +111,6 @@ void MortalityHybrid::DoValidate() {
   auto                               columns = catches_table_->columns();
 
   // TODO Need to catch if key column headers are missing for example year
-  if (std::find(columns.begin(), columns.end(), PARAM_YEAR) == columns.end())
-    LOG_ERROR_P(PARAM_CATCHES) << "The required column " << PARAM_YEAR << " was not found.";
   unsigned year_index = std::find(columns.begin(), columns.end(), PARAM_YEAR) - columns.begin();
   LOG_FINEST() << "The year_index for fisheries table is: " << year_index;
 
