@@ -20,7 +20,7 @@ class ModelRunner:
         binary_name = "casal2"
         if Globals.operating_system_ == "windows":
             binary_name += ".exe"
-        exe_path = f"Casal2/{binary_name} "
+        exe_path = f"Casal2/{binary_name}"
 
         if not os.path.exists(exe_path):
             print(f"Looking for {exe_path}")
