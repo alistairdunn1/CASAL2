@@ -1176,7 +1176,7 @@ For example, the wrong year could be misspecified in the case of removals in yea
 
 This example is a valid equation but it will have nonsensical results, since a value for 2020 is to be calculated using values for 2015. Although the equation parser adds flexibility, it is easy to incorrectly specify equations.
 
-\subsection{\I{Specifying projections}}\label{sec:Project} \STATUS{Untested}
+\subsection{\I{Specifying projections}}\label{sec:Project}\index{Projections}
 
 Given a set of estimated parameter values from a \textit{-e} or a MCMC run,
 the model can be projected. Projection years are after the model run years, and are defined in the \command{model} command block using the \subcommand{final\_projection\_year} subcommand, i.e., projection years are \subcommand{final\_year + 1} through to \subcommand{final\_projection\_year}.
@@ -1246,7 +1246,7 @@ A parameter can either be fixed during all projection years or specified individ
 		\end{verbatim}}}
 
 
-\paragraph[Multiple Values]{The multiple values projection type, \argument{multiple\_values}}\index{Project-MultipleValues}\label{sec:Project-MultipleValues}
+\paragraph[Multiple Values]{The multiple values projection type, \argument{multiple\_values}}\index{Projections!MultipleValues}\label{sec:Project-MultipleValues}
 
 Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection class. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this class.
 
@@ -1276,7 +1276,11 @@ Parameters that have time components associated with them can be sampled uniform
 		multiplier 1
 		\end{verbatim}}}
 
-Note that when projecting recruitment\_multipliers, the \emph{unstandardised} values are used. This may cause projections to be other than what was intended unless these average one (or some other chosen value). If not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty should be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is equal to one over some pre-defined range. 
+Note that if projecting \argument{recruitment\_multipliers} with the Haist parameterisation of recruitment multipliers, the \emph{unstandardised} values are used. This may cause projections to be other than what was intended unless these (by chance) they have a mean of one. Note that \CNAME\ will not warn nor report an error if this is done. \index{Projections!Haist parameterisation}
+
+In this specific case, project the \argument{standardised\_recruitment\_multipliers} as these will have a mean of one (by definition). If using \argument{standardised\_recruitment\_multipliers}, note that \CNAME\ versions before v24.01 may not implement this correctly and a more recent version is recommended. \index{Projections! standardised\_recruitment\_multipliers}
+
+Additionally, if not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty could be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is close to one over some pre-defined range. Note that this is recommended in any case, as the prior on recruitments is applied to the unstandardised values when the Haist parameterisation is used. 
 
 \paragraph[Lognormal]{Sampling from a Lognormal distribution, type  \argument{lognormal}}\index{Projections!Lognormal}\label{sec:Project-LogNormal} \STATUS{Untested}
 

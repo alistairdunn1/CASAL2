@@ -94,10 +94,6 @@ The Nop type has no additional subcommands.
 \defRef{sec:Process-RecruitmentBevertonHolt}
 \label{syntax:Process-RecruitmentBevertonHolt}
 
-\defSub{categories}{The category labels}
-\defType{Vector of strings}
-\defDefault{No default}
-
 \defSub{r0}{R0, the mean recruitment used to scale annual recruits or initialise the model}
 \defType{Real number (estimable)}
 \defDefault{false}
@@ -111,10 +107,13 @@ The Nop type has no additional subcommands.
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
 \defDefault{true}
+\defLowerBound{0.0; (inclusive)}
 
 \defSub{ssb\_offset}{The spawning biomass year offset}
 \defType{Non-negative integer}
@@ -137,6 +136,7 @@ The Nop type has no additional subcommands.
 \defSub{recruitment\_multipliers}{The YCS values}
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
+\defLowerBound{0 (inclusive)}
 
 \defSub{standardise\_years}{The years that are included for year class standardisation}
 \defType{Vector of non-negative integers}

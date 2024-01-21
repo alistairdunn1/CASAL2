@@ -35,25 +35,24 @@ namespace math = niwa::utilities::math;
  */
 RecruitmentBevertonHolt::RecruitmentBevertonHolt(shared_ptr<Model> model) : Process(model), partition_(model) {
   LOG_TRACE();
-
+  // clang-format off
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels", "");
-  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
+  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0); 
   parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "");
-  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "", true);
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "")->set_range(0.0, 1.0);
+  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "", true)->set_lower_bound(0.0);;
   parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset", "", true);
   parameters_.Bind<Double>(PARAM_STEEPNESS, &steepness_, "Steepness (h)", "", 1.0)->set_range(0.2, 1.0);
   parameters_.Bind<string>(PARAM_SSB, &ssb_label_, "The SSB label (i.e., the derived quantity label)", "");
   parameters_.Bind<string>(PARAM_B0_PHASE, &phase_b0_label_, "The initialisation phase label that B0 is from", "", "");
-
-  parameters_.Bind<Double>(PARAM_RECRUITMENT_MULTIPLIERS, &recruitment_multipliers_, "The YCS values", "");
+  parameters_.Bind<Double>(PARAM_RECRUITMENT_MULTIPLIERS, &recruitment_multipliers_, "The YCS values", "")->set_lower_bound(0, false);;
   parameters_.Bind<unsigned>(PARAM_STANDARDISE_YEARS, &standardise_years_, "The years that are included for year class standardisation", "", true);
 
   // these inputs are deprecated
   parameters_.Bind<unsigned>(PARAM_STANDARDISE_YCS_YEARS, &standardise_ycs_years_, "The years that are included for year class standardisation", "", true);
   parameters_.Bind<Double>(PARAM_YCS_VALUES, &ycs_values_, "The YCS values", "", true);
-  parameters_.Bind<unsigned>(PARAM_YCS_YEARS, &ycs_years_, "The recruitment years. A vector of years that relates to the year of the spawning event that created this cohort", "",
-                             true);
+  parameters_.Bind<unsigned>(PARAM_YCS_YEARS, &ycs_years_, "The recruitment years. A vector of years that relates to the year of the spawning event that created this cohort", "", true);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_R0, &r0_);
   RegisterAsAddressable(PARAM_B0, &b0_);
@@ -398,9 +397,16 @@ void RecruitmentBevertonHolt::DoExecute() {
     // note that the container recruitment_multipliers_by_year_ is changed by time_varying and projection classes
     // but the code wants to use standardised_recruitment_multipliers_by_year_ in the functions following here, so we might need to update this.
     if (model_->run_mode() == RunMode::kProjection) {
-      if (recruitment_multipliers_by_year_[current_year] == 0.0) {
-        LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
-                                                   << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+      if (project_standardised_ycs_) {
+        if (standardised_recruitment_multipliers_by_year_[current_year] <= 0.0) {
+          LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
+                                                     << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+        }
+      } else {
+        if (recruitment_multipliers_by_year_[current_year] <= 0.0) {
+          LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
+                                                     << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+        }
       }
       // Projection classes will update this container automatically
       ycs = recruitment_multipliers_by_year_[current_year];

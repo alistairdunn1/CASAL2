@@ -83,7 +83,7 @@ private:
   vector<unsigned> ycs_years_;
   vector<unsigned> standardise_ycs_years_;
   vector<Double>   ycs_values_;
-  bool             project_standardised_ycs_ = true;
+  bool             project_standardised_ycs_ = false;
 };
 
 } /* namespace age */
