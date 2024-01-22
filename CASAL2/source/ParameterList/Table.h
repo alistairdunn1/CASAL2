@@ -86,10 +86,7 @@ public:
   void                    set_requires_columns(bool requires_columns) { requires_columns_ = requires_columns; }
   bool                    requires_columns() const { return requires_columns_; }
   void                    set_required_columns(const vector<string>& columns, bool allow_others = false);
-  void                    set_optional_columns(const vector<string>& columns) {
-    optional_columns_    = columns;
-    allow_other_columns_ = true;
-  }
+  void                    set_optional_columns(const vector<string>& columns) { optional_columns_ = columns; }
 
 private:
   string                 label_       = "";

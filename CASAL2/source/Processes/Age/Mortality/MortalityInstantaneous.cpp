@@ -54,7 +54,7 @@ MortalityInstantaneous::MortalityInstantaneous(shared_ptr<Model> model) : Mortal
   method_table_  = new parameters::Table(PARAM_METHOD);
 
   catches_table_->set_required_columns({PARAM_YEAR}, true);
-  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_U_MAX, PARAM_TIME_STEP, PARAM_PENALTY}, true);
+  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_U_MAX, PARAM_TIME_STEP, PARAM_PENALTY}, false);
   method_table_->set_optional_columns({PARAM_BIOMASS, PARAM_U, PARAM_AGE_WEIGHT_LABEL});
 
   // clang-format off

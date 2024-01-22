@@ -5,7 +5,7 @@
  * @date 16/11/2012
  * @section LICENSE
  *
- * Copyright NIWA Science ©2012 - www.niwa.co.nz
+ * Copyright NIWA Science ï¿½2012 - www.niwa.co.nz
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
@@ -69,6 +69,7 @@ unsigned Table::column_index(const string& label, bool throw_error) const {
 /**
  * This method will set a list of required columns. This will be used during the Populate method
  * to validate the columns exist and the table structure is as expected.
+ * Use allow_others = false if the only allowed columns are defined as required or optional
  */
 void Table::set_required_columns(const vector<string>& columns, bool allow_others) {
   required_columns_    = columns;
@@ -103,7 +104,7 @@ void Table::Populate(shared_ptr<Model> model) {
         missing_columns.push_back(column);
     }
     if (missing_columns.size() > 0)
-      LOG_ERROR() << location() << " is missing the following column headers: " << boost::join(missing_columns, ", ");
+      LOG_ERROR() << location() << "is missing the following column headers: " << boost::join(missing_columns, ", ");
 
     // See if we have any extra columns that are not allowed.
     if (required_columns_.size() != columns_.size() && !allow_other_columns_) {

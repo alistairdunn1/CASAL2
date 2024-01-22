@@ -57,7 +57,7 @@ MortalityHybrid::MortalityHybrid(shared_ptr<Model> model) : Mortality(model), pa
   method_table_  = new parameters::Table(PARAM_METHOD);
 
   catches_table_->set_required_columns({PARAM_YEAR}, true);
-  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_PENALTY, PARAM_ANNUAL_DURATION}, true);
+  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_PENALTY, PARAM_ANNUAL_DURATION}, false);
   method_table_->set_optional_columns({PARAM_AGE_WEIGHT_LABEL});
 
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality", "");
