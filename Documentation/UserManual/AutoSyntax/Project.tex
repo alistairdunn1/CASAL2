@@ -18,11 +18,6 @@
 \defType{String}
 \defDefault{No default}
 
-\defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
-\defDefault{1.0}
-\defLowerBound{0 (exclusive)}
-
 \subsubsection{Project of type Constant}
 \commandlabsubarg{Project}{type}{Constant}.
 \defRef{sec:Project-Constant}
@@ -31,6 +26,11 @@
 \defSub{values}{The values to assign to the addressable}
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers (estimable)}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
 
 \subsubsection{Project of type Empirical\_Sampling}
 \commandlabsubarg{Project}{type}{Empirical\_Sampling}.
@@ -45,6 +45,11 @@
 \defType{Non-negative integer}
 \defDefault{false}
 
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers (estimable)}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
+
 \subsubsection{Project of type Log\_Normal}
 \commandlabsubarg{Project}{type}{Log\_Normal}.
 \defRef{sec:Project-LogNormal}
@@ -58,6 +63,11 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (inclusive)}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers (estimable)}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
 
 \subsubsection{Project of type Log\_Normal\_Empirical}
 \commandlabsubarg{Project}{type}{Log\_Normal\_Empirical}.
@@ -75,6 +85,11 @@
 \defSub{final\_year}{The final year of sampling}
 \defType{Non-negative integer}
 \defDefault{false}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers (estimable)}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
 
 \subsubsection{Project of type Multiple\_Constants}
 \commandlabsubarg{Project}{type}{Multiple\_Constants}.

@@ -18,11 +18,6 @@
 \defType{String}
 \defDefault{No default}
 
-\defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
-\defDefault{1.0}
-\defLowerBound{0.0 (exclusive)}
-
 \subsubsection{Project of type Constant}
 \commandlabsubarg{project}{type}{Constant}.
 \defRef{sec:Project-Constant}
@@ -32,11 +27,16 @@
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
 
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (exclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
 \subsubsection{Project of type Multiple Values}
 \commandlabsubarg{project}{type}{multiple\_values}.
 \defRef{sec:Project-MultipleValues}
 \label{syntax:Multiple-Values}
-
 
 \defSub{table values}{The table of data specifying the projected values to use for each row of the \texttt{-i} or \texttt{-I} file}
 \defType{table with label = values}
@@ -44,16 +44,16 @@
 \defValue{A $n_i \times n_y$ matrix. Where \(n_i\) is the number of rows (parameter sets) in the \texttt{-i} or \texttt{-I} file. And \(n_y\) is the number of projection years defined by the input \texttt{years}}
 \defNote{example below}
 \begin{verbatim}
-@project future_disease_rates
-type multiple_values
-parameter process[dtransition].proportions{disease}  	
-years 2024:2026
-
-table values
-2024 2025 2026
-0.1 0.2 0.3
-0.3 0.4 0.5
-end_table
+	@project future_disease_rates
+	type multiple_values
+	parameter process[dtransition].proportions{disease}  	
+	years 2024:2026
+	
+	table values
+	2024 2025 2026
+	0.1 0.2 0.3
+	0.3 0.4 0.5
+	end_table
 \end{verbatim}
 
 \subsubsection{Project of type Empirical Sampling}
@@ -69,6 +69,12 @@ end_table
 \defType{Non-negative integer}
 \defDefault{No default}
 
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (exclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
 \subsubsection{Project of type Lognormal}
 \commandlabsubarg{project}{type}{Lognormal}.
 \defRef{sec:Project-LogNormal}
@@ -82,6 +88,12 @@ end_table
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (inclusive)}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (exclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
 \subsubsection{Project of type Lognormal Empirical}
 \commandlabsubarg{project}{type}{Lognormal\_Empirical}.
@@ -99,6 +111,12 @@ end_table
 \defSub{final\_year}{The final year of sampling}
 \defType{Non-negative integer}
 \defDefault{No default}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (exclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
 %\subsubsection{Project of type User Defined}
 %\commandlabsubarg{project}{type}{User\_Defined}.

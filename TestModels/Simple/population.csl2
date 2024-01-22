@@ -48,7 +48,7 @@ time_step_proportions 0.42 0.25 0.33
 relative_m_by_age One
 categories stock
 table catches
-year FishingWest FishingEest
+year FishingWest FishingEast
 1975	80	111
 1976	152	336
 1977	74	1214
@@ -90,9 +90,9 @@ year FishingWest FishingEest
 end_table
 
 table method
-method  	category 	selectivity 	u_max 	time_step 	penalty
-FishingWest   	stock   	westFSel 	0.7 	step1 		CatchMustBeTaken1
-FishingEest  	stock   	eastFSel 	0.7 	step1 		CatchMustBeTaken1
+method      category selectivity u_max time_step penalty
+FishingWest stock    westFSel    0.7   step1     CatchMustBeTaken1
+FishingEast stock    eastFSel    0.7   step1     CatchMustBeTaken1
 end_table
 
 @derived_quantity biomass_t1

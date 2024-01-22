@@ -33,9 +33,7 @@ MultipleConstants::~MultipleConstants() {
 /**
  * Validate
  */
-void MultipleConstants::DoValidate() {
-  
-}
+void MultipleConstants::DoValidate() {}
 
 /**
  * Build
@@ -47,14 +45,15 @@ void MultipleConstants::DoBuild() {
     LOG_FATAL_P(PARAM_VALUES) << " the input column count was " << columns.size() << ", but expected " << years_.size() << " columns. One for each projection year.";
   vector<vector<string>>& data = data_table_->data();
   LOG_FINE() << "-i count " << model_->get_addressable_values_count();
-  if (data.size() != (model_->get_addressable_values_count())) 
-    LOG_FATAL_P(PARAM_VALUES) << " the input row cound was " << data.size() << ", but expected " << model_->get_addressable_values_count() << " number of rows. This is each row for the -i or -I file plus the header.";
+  if (data.size() != (model_->get_addressable_values_count()))
+    LOG_FATAL_P(PARAM_VALUES) << " the input row cound was " << data.size() << ", but expected " << model_->get_addressable_values_count()
+                              << " number of rows. This is each row for the -i or -I file plus the header.";
   // Check the first row is year followed by the years
-  for(unsigned i = 1; i < columns.size(); ++i) {
+  for (unsigned i = 1; i < columns.size(); ++i) {
     unsigned year = utilities::ToInline<string, unsigned>(columns[i]);
     // Check year is valid
     if (find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_FATAL_P(PARAM_VALUES) << "The first row should be a header with the projection years. Found '"<<year<<"' in the header, which isn't one of the projection years.";
+      LOG_FATAL_P(PARAM_VALUES) << "The first row should be a header with the projection years. Found '" << year << "' in the header, which isn't one of the projection years.";
   }
   projection_values_.resize(data.size());
   LOG_FINE() << "rows = " << data.size() << " cols " << columns.size();
@@ -79,7 +78,7 @@ void MultipleConstants::DoReset() {}
  * Update
  */
 void MultipleConstants::DoUpdate() {
-  value_ = projection_values_[model_->get_current_addressable_value()][model_->current_year()] * multiplier_;
+  value_ = projection_values_[model_->get_current_addressable_value()][model_->current_year()];
   LOG_FINE() << "Setting Value to: " << value_ << " dash -i index " << model_->get_current_addressable_value() << " year = " << model_->current_year();
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());
 }

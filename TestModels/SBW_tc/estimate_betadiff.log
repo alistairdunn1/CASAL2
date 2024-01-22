@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Sun Jan 21 18:33:14 2024
+Date: Tue Jan 23 10:55:20 2024
 Seed: 20
-Version: v24.01 (2024-01-19)
+Version: v24.01 (2024-01-22)
 Copyright (c) 2017-2024, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=18892
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=20100
 
 
 *partition[state1]

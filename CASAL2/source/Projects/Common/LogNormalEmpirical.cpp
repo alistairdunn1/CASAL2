@@ -26,6 +26,7 @@ LogNormalEmpirical::LogNormalEmpirical(shared_ptr<Model> model) : Project(model)
   parameters_.Bind<Double>(PARAM_MEAN, &mean_, "The mean of the Gaussian process", "", 0.0);
   parameters_.Bind<unsigned>(PARAM_START_YEAR, &start_year_, "The start year of sampling", "", false);
   parameters_.Bind<unsigned>(PARAM_FINAL_YEAR, &final_year_, "The final year of sampling", "", false);
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value", "", 1.0)->set_lower_bound(0, false);
 }
 
 /**
@@ -45,6 +46,22 @@ void LogNormalEmpirical::DoValidate() {
 
   if (final_year_ <= start_year_)
     LOG_ERROR_P(PARAM_FINAL_YEAR) << final_year_ << " must be greater than start year " << start_year_;
+
+  // if only one multiplier supplied then assume its the same for all years
+  if (multiplier_.size() == 1) {
+    multiplier_.resize(years_.size(), multiplier_[0]);
+  }
+
+  if (multiplier_.size() != 0) {
+    if (multiplier_.size() != years_.size()) {
+      LOG_FATAL_P(PARAM_MULTIPLIER) << "Supply a multiplier for each year. Values for " << multiplier_.size() << " years were provided, but " << years_.size()
+                                    << " years are required";
+    }
+    multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
+  } else {
+    Double val          = 1.0;
+    multiplier_by_year_ = utilities::Map::create(years_, val);
+  }
 }
 
 /**
@@ -110,7 +127,7 @@ void LogNormalEmpirical::DoUpdate() {
   value_ = exp(normal_draw_by_year_[model_->current_year()] - 0.5 * sigma_ * sigma_);
 
   // Store this value to be pulled out next projection year
-  value_ = value_ * multiplier_;
+  value_ = value_ * multiplier_by_year_[model_->current_year()];
 
   LOG_FINE() << "Setting value to: " << value_;
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());

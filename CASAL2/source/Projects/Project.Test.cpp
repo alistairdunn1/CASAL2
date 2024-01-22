@@ -44,9 +44,9 @@ age_lengths age_size
 type derived
 
 @time_step Sep_Feb 
-processes Recruitment Instantaneou_Mortality
+processes Recruitment Instantaneous_Mortality
 @time_step Mar_May 
-processes Instantaneou_Mortality Ageing
+processes Instantaneous_Mortality Ageing
 
 @process Recruitment
 type recruitment_beverton_holt
@@ -63,7 +63,7 @@ age 1
 type ageing
 categories HAK4
 
-@process Instantaneou_Mortality
+@process Instantaneous_Mortality
 type mortality_instantaneous
 m 0.2
 time_step_proportions 0.42 0.58

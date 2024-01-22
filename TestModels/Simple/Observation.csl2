@@ -161,7 +161,7 @@ likelihood multinomial
 time_step step1
 mortality_process instant_mort
 categories stock
-method_of_removal FishingEest
+method_of_removal FishingEast
 min_age 4
 max_age 21
 plus_group true

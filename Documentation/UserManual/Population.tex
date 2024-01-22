@@ -1093,12 +1093,12 @@ This configuration will insure the random walk time-varying process will set the
 A random deviate drawn from a standard normal distribution used. This option has an estimable parameter $\sigma_p$ for each time-varying parameter $p$. For reproducible modelling when using stochastic functionality, set the random seed (see Section~\ref{sec:CommandLineArguments}).
 
 {\small{\begin{verbatim}
-			@time_varying q_time_var
-			type          random_draw
-			parameter     catchability[survey_q].q
-			distribution  normal
-			mean          0
-			sigma         3
+	@time_varying q_time_var
+	type          random_draw
+	parameter     catchability[survey_q].q
+	distribution  normal
+	mean          0
+	sigma         3
 \end{verbatim}}}
 
 If the \texttt{parameter} specified in the \command{time\_varying} block is associated with an \command{estimate} block, then the parameter is constrained to stay within the lower and upper bounds of the \command{estimate} block.
@@ -1108,11 +1108,11 @@ If the \texttt{parameter} specified in the \command{time\_varying} block is asso
 A constraint whilst using this functionality is that a parameter cannot be less than 0.0. If it is then \CNAME\ sets it equal to 0.01.
 
 {\small{\begin{verbatim}
-			@estimate survey_q_est
-			type      uniform
-			parameter catchability[survey_q].q
-			lower_bound 1e-6
-			upper_bound 10
+	@estimate survey_q_est
+	type      uniform
+	parameter catchability[survey_q].q
+	lower_bound 1e-6
+	upper_bound 10
 \end{verbatim}}}
 
 This configuration will insure the random draw time-varying process will set the any new candidate values within the lower and upper bound of the \command{estimate} block.
@@ -1124,42 +1124,42 @@ This configuration will insure the random draw time-varying process will set the
 Examples of syntax for implementing the equation parser are below. For more information on the parser, see \url{https://github.com/nickgammon/parser/blob/master/parser.cpp}
 
 {\small{\begin{verbatim}
-		equation process[Recruitment].r0 * 2 #double the recruitment
+	equation process[Recruitment].r0 * 2 #double the recruitment
 \end{verbatim}}}
 
 mathematical functions such as \texttt{sqrt()}, \texttt{log()},  \texttt{exp()},  \texttt{cos()}, \texttt{sin()}, and \texttt{tan()} can be used
 
 {\small{\begin{verbatim}
-		equation sqrt(process[Recruitment].r0)
+	equation sqrt(process[Recruitment].r0)
 \end{verbatim}}}
 
 exponents can be used with \texttt{pow()}
 
 {\small{\begin{verbatim}
-		equation pow(2, 3)
+	equation pow(2, 3)
 \end{verbatim}}}
 
 the absolute value of an equation using \texttt{abs()}
 
 {\small{\begin{verbatim}
-		equation abs(sqrt(process[Recruitment].r0) * 1.33)
+	equation abs(sqrt(process[Recruitment].r0) * 1.33)
 \end{verbatim}}}
 
 \texttt{if-else} statements can be used
 
 {\small{\begin{verbatim}
-		equation if(process[Recruitment].r0 > 23, 44, 55)
-		## if R0 is greater than 23 return 44 else return 55
+	equation if(process[Recruitment].r0 > 23, 44, 55)
+	## if R0 is greater than 23 return 44 else return 55
 \end{verbatim}}}
 
 \texttt{if-else} statements can also be linked, more complex syntax
 
 {\small{\begin{verbatim}
-# if R0 > 23 return 44
-# else if R0 < 23 & r0 > 10 return 55
-equation if(process[Recruitment].r0 > 23, 44,
-         if(process[Recruitment].r0 > 10, 55, 66))
-else R0 must be less than 10 return 66
+	# if R0 > 23 return 44
+	# else if R0 < 23 & r0 > 10 return 55
+	equation if(process[Recruitment].r0 > 23, 44,
+	         if(process[Recruitment].r0 > 10, 55, 66))
+	else R0 must be less than 10 return 66
 \end{verbatim}}}
 
 Only single values can be referenced, so an equation cannot be applied to a vector, e.g., \subcommand{process[Recruit].recruitment\_multipliers\{1974:1980\}} cannot be referenced. More information on which parameters can be included in the equation parser is available (Section~\ref{sec:syntax}). Any subcommand that has a \texttt{type estimable} could be referenced with the equation parser.
@@ -1169,9 +1169,9 @@ Only single values can be referenced, so an equation cannot be applied to a vect
 For example, the wrong year could be misspecified in the case of removals in year $y$ which is based on the state of the population in year $y-1$
 
 {\small{\begin{verbatim}
-		parameter process[removals].catch
-		year 2015
-		equation derived_quantity[percent_b0].values{2020}
+	parameter process[removals].catch
+	year 2015
+	equation derived_quantity[percent_b0].values{2020}
 \end{verbatim}}}
 
 This example is a valid equation but it will have nonsensical results, since a value for 2020 is to be calculated using values for 2015. Although the equation parser adds flexibility, it is easy to incorrectly specify equations.
@@ -1184,16 +1184,19 @@ the model can be projected. Projection years are after the model run years, and 
 Parameter values for the projected years can be specified in a stochastic way or fixed at some value (the default is the estimated value if the parameter is not time-varying) and these are specified in the \command{project} block,
 
 {\small{\begin{verbatim}
-
-@project Future_ycs  # label
-type       lognormal_empirical  # which method to use
-parameter  process[Recruitment].ycs_values
-years      2012:2016
-multiplier 1
-... # any other parameters
+	@project Future_ycs  # label
+	type       lognormal_empirical  # which method to use
+	parameter  process[Recruitment].ycs_values
+	years      2012:2016
+	multiplier 1
+	... # any other parameters
 \end{verbatim}}}
 
-The subcommands \subcommand{years} and \subcommand{parameter} are common to all projection methods. Subcommand \subcommand{years} specifies the years to apply the new values to for the parameter in \subcommand{parameter}. Note that the years can be before the \textit{final\_year}, e.g., it is normal to vary the last few recruitment multipliers (YCS) in a projection run because they are usually poorly estimated or they have been set to 1.  The argument \argument{multiplier} is a constant which is multiplied with the projected value after it has been generated. The \subcommand{type} subcommand gives the method to use to generate new parameter values.
+The subcommands \subcommand{years} and \subcommand{parameter} are common to all projection methods. Subcommand \subcommand{years} specifies the years to apply the new values to for the parameter in \subcommand{parameter}. Note that the years can be before the \textit{final\_year}, e.g., it is normal to vary the last few recruitment multipliers (YCS) in a projection run because they are usually poorly estimated or they have been set to 1.  
+
+The \subcommand{type} subcommand gives the method to use to generate new parameter values.
+
+The argument \argument{multiplier} is a constant (which may be set the same for all years or a value given for each year) which is multiplied with the projected value (for all but the multiple values method) after it has been generated. 
 
 \CNAME\ allows any estimable parameter to be specified in a \command{project} block and then varied from the estimated value in a projection. The available projection types for these parameters include:
 
@@ -1221,9 +1224,9 @@ The \texttt{-{}-tabular} flag should be used when running projections after a Ba
 
 An example of the command line evocation is
 
-\textit{casal2 -f 1 -i mcmc.txt --tabular $>$ projection.out.txt}
+\textit{casal2 -f 1 -i mcmc.txt --tabular $>$ projection.log}
 
-where \textit{mcmc.txt} is output from a MCMC run, one parameter set per row, which will give one projection per row, and \textit{projection.out.txt} will contain one row for each MCMC run in each of the reports specified in (usually) the \textit{Report.csl2} file (quantities as specified in the \textit{Report.csl2} file).
+where \textit{mcmc.txt} is output from a MCMC run, one parameter set per row, which will give one projection per row, and \textit{projection.log} will contain one row for each MCMC run in each of the reports specified.
 
 For a projection run in \CNAME, the model is initialised and run through the model years from \argument{start\_year} to \argument{final\_year}. During this run mode \CNAME\ stores all parameter values so that projection classes can allow parameters before \subcommand{final\_year} to be projected. The model then is re-run from \argument{start\_year} to \argument{projection\_final\_year}, where any parameter can either be fixed or drawn from a stochastic distribution or process.
 
@@ -1237,29 +1240,27 @@ This section lists all the projections classes available, their functionality, a
 A parameter can either be fixed during all projection years or specified individually for each projection year. This is a deterministic assumption, where the parameter is assumed to be known without error during projection years.
 
 {\small{\begin{verbatim}
-		@project Future_ycs
-		type      constant
-		parameter process[Recruitment].recruitment_multipliers
-		years     2012:2016
-		values    1 2 1 2 0.5  # "values 3" means all years use 3
-		multiplier 1
-		\end{verbatim}}}
-
+	@project Future_ycs
+	type       constant
+	parameter  process[Recruitment].recruitment_multipliers
+	years      2012:2016
+	values     1 2 1 2 0.5 # "values 3" means all years use 3
+\end{verbatim}}}
 
 \paragraph[Multiple Values]{The multiple values projection type, \argument{multiple\_values}}\index{Projections!MultipleValues}\label{sec:Project-MultipleValues}
 
 Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection class. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this class.
 
 {\small{\begin{verbatim}
-@project future_disease_rates
-type multiple_values
-parameter process[dtransition].proportions{disease}  
-years 2024:2026
-table values
-2024 2025 2026
-0.1 0.2 0.3
-0.3 0.4 0.5
-end_table
+	@project future_disease_rates
+	type multiple_values
+	parameter process[dtransition].proportions{disease}  
+	years 2024:2026
+	table values
+	2024 2025 2026
+	0.1 0.2 0.3
+	0.3 0.4 0.5
+	end_table
 \end{verbatim}}}
 
 \paragraph[Empirical sampling]{Sampling from a range of years, type  \argument{empirical\_sampling}}\index{Projections!Empirical sampling}\label{sec:Project-EmpiricalSampling}
@@ -1267,18 +1268,18 @@ end_table
 Parameters that have time components associated with them can be sampled uniformly with replacement over a range of years and used as values for the projected years. The year range to sample from is between \argument{start\_year} and \argument{final\_year}:
 
 {\small{\begin{verbatim}
-		@project   Future_ycs
-		type       empirical_sampling
-		parameter  process[Recruitment].standardised_recruitment_multipliers
-		years     2012:2016
-		start_year 1988     # re-sample from estimated values
-		final_year 2008     # from 1988 to 2008 inclusive
-		multiplier 1
-		\end{verbatim}}}
+	@project   Future_ycs
+	type       empirical_sampling
+	parameter  process[Recruitment].standardised_recruitment_multipliers
+	years     2012:2016
+	start_year 1988     # re-sample from estimated values
+	final_year 2008     # from 1988 to 2008 inclusive
+	multiplier 1
+\end{verbatim}}}
 
-Note that if projecting \argument{recruitment\_multipliers} with the Haist parameterisation of recruitment multipliers, the \emph{unstandardised} values are used. This may cause projections to be other than what was intended unless these (by chance) they have a mean of one. Note that \CNAME\ will not warn nor report an error if this is done. \index{Projections!Haist parameterisation}
+Note that if projecting \argument{recruitment\_multipliers} with the Haist parameterisation of recruitment multipliers, the \emph{unstandardised} values will be used. This may cause projections to be other than what was intended unless these (by chance) they have a mean of one. Note that \CNAME\ will not warn nor report an error if this is done. \index{Projections!Haist parameterisation}
 
-In this specific case, project the \argument{standardised\_recruitment\_multipliers} as these will have a mean of one (by definition). If using \argument{standardised\_recruitment\_multipliers}, note that \CNAME\ versions before v24.01 may not implement this correctly and a more recent version is recommended. \index{Projections! standardised\_recruitment\_multipliers}
+In this specific case, project the \argument{standardised\_recruitment\_multipliers} instead, as these will have a mean of one (by definition). If using \argument{standardised\_recruitment\_multipliers}, note that \CNAME\ versions before v24.01 may not implement this correctly and a more recent version is recommended. \index{Projections! standardised\_recruitment\_multipliers}
 
 Additionally, if not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty could be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is close to one over some pre-defined range. Note that this is recommended in any case, as the prior on recruitments is applied to the unstandardised values when the Haist parameterisation is used. 
 
@@ -1295,29 +1296,29 @@ where $\epsilon_p\stackrel{iid}{\sim}N(\mu,\sigma)$ and $X_p$ is the projected v
 An example of applying this process to draw future year class parameters from a Lognormal distribution with mean 1 and standard deviation 0.8
 
 {\small{\begin{verbatim}
-		@project Future_ycs
-		type     lognormal
-		parameter process[Recruitment].recruitment_multipliers
-		years     2012:2016
-		mean      0     # mean 1 on un-transformed scale
-		sigma     0.8   # log scale
-		multiplier 1
-		\end{verbatim}}}
+	@project Future_ycs
+	type       lognormal
+	parameter  process[Recruitment].recruitment_multipliers
+	years      2012:2016
+	mean       0   # mean 1 on un-transformed scale
+	sigma      0.8 # log scale
+	multiplier 1
+\end{verbatim}}}
 
 \paragraph[Lognormal-Empirical]{Sampling from a Lognormal distribution where the  variance is estimated from values over a specified year range, type  \argument{lognormal\_empirical} }\index{Projections!Lognormal-Empirical}\label{sec:Project-LogNormalEmpirical} \STATUS{Untested}
 
 This method applies a Lognormal draw as in the \argument{Lognormal} method above and specifies a year range from which the standard deviation of the distribution is calculated. Then equation~\eqref{eq:lognormal} is used to generate future values with a specified $\mu$ and empirically calculated $\sigma$,
 
 {\small{\begin{verbatim}
-		@project Future_ycs
-		type      lognormal_empirical
-		parameter process[Recruitment].recruitment_multipliers
-		years     2012:2016
-		mean      0
-		start_year 1988   # range of years to take the
-		final_year 2008   # values for \math{\sigma}
-		multiplier 1
-		\end{verbatim}}}
+	@project Future_ycs
+	type      lognormal_empirical
+	parameter process[Recruitment].recruitment_multipliers
+	years     2012:2016
+	mean      0
+	start_year 1988   # range of years to take the
+	final_year 2008   # values for \math{\sigma}
+	multiplier 1
+\end{verbatim}}}
 
 %\paragraph[User Defined]{Sample from a user-defined function, \argument{user\_defined}}\index{Projections!User Defined}\label{sec:Project-UserDefined} \STATUS{Untested}
 
@@ -1349,36 +1350,36 @@ This method applies a Lognormal draw as in the \argument{Lognormal} method above
 
 \paragraph[Catches]{Specifying catch for projections }\index{Projections!Catches}\label{sec:Project-Catch}
 
-Catches are unique in that they are known inputs in a table format. For example, to project catches that are in a table
+Specifying catches in a projection uses a slightly different format, as catches are in a table format. Here the table name (i.e., method) needs to be appended to specify the parameter to project. This uses the syntax \texttt{block\_type[block\_label].method\_fishinglabel}. 
+
+For example, to project the \argument{fishingPot} catches that are in the following table
 
 {\small{\begin{verbatim}
-# fishing process
-@process Fishing
-type mortality_instantaneous_retained
-m 0.17*6
-time_step_proportions 1
-relative_m_by_age One*6   # For age based model. 
-                          # For length-based models use relative_m_by_length
-categories *
-table catches
-year\begin{center}
-	\begin{center}
-		
-	\end{center}
-\end{center}
-hingPot	Recreation
-1900	0	0	0
-1901	13.2	0	22.9
-1902	26.4	0	23.5
-1903	39.6	0	24
-end_table
-
-# projection block
-@project future_catch
-type      constant
-parameter process[Fishing].method_fishingpot
-years     2020:2029
-values    4000
+	# fishing process
+	@process Fishing
+	type mortality_instantaneous
+	m 0.17*6
+	time_step_proportions 1
+	relative_m_by_age One*6   # For age based model. 
+	                          # For length-based models use relative_m_by_length
+	categories *
+	table catches
+	year  fishingPot other Recreation
+	1900  0          0     0
+	1901  13.2       0     22.9
+	1902  26.4       0     23.5
+	1903  39.6       0     24
+	end_table
 \end{verbatim}}}
 
-This uses the syntax \texttt{block\_type[block\_label].method\_fishinglabel}. \textbf{Note:} the fishing label which is defined in the table needs to be lower case form in the \command{projection} block. Notice the use of \textit{method\_} syntax to identify the right fishery.
+use the parameter label	\argument{process[Fishing].method\_fishingPot}, i.e., 
+
+{\small{\begin{verbatim}
+	# projection block
+	@project future_catch
+	type      constant
+	parameter process[Fishing].method_fishingPot
+	years     2020:2029
+	values    4000
+\end{verbatim}}}
+
