@@ -10,10 +10,9 @@
  */
 
 // headers
-#include "EquationParser.h"
-
 #include "../Model/Model.h"
 #include "../Model/Objects.h"
+#include "EquationParser.h"
 
 // namespaces
 namespace niwa {
@@ -123,7 +122,7 @@ Double& EquationParser::LookupValue(const std::string& name) {
 
   string error = "";
   if (!model_->objects().VerifyAddressableForUse(name, addressable::kLookup, error)) {
-    LOG_FATAL() << "addressable " << name << " could not be verified for use in equation_parser. Error: " << error;
+    LOG_FATAL() << "the addressable " << name << " could not be verified for use in the equation_parser. Error: " << error;
   }
 
   Double* value = model_->objects().GetAddressable(name);

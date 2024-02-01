@@ -32,11 +32,13 @@ public:
   void DoReset() override final;
   void DoUpdate() override final;
 
+private:
+  parameters::Table* data_table_ = nullptr;
+
 protected:
   // members
-  parameters::Table*                                  data_table_ = nullptr;
-  vector<map<unsigned, Double>>                       projection_values_; // dash_i x n_years
-  Double                                              value_;
+  vector<map<unsigned, Double>> projection_values_;  // dash_i x n_years
+  Double                        value_;
 };
 
 } /* namespace projects */

@@ -1218,7 +1218,7 @@ Future catches are also specified in a \command{project} block, one for each fis
 
 For a process called \textit{Fishing} that has three fisheries defined, it would be \textit{process[Fishing].method\_pot} to specify the fishery labelled \textit{pot}.
 
-The \CNAME\ command to run the model in projection mode is \texttt{Casal2 -f 1}. This functionality allows for the exploration of many scenarios with a single set of parameters. The number of projections should be greater than 1 only if applying a projection type that is stochastic.
+The \CNAME\ command to run the model in projection mode is \texttt{Casal2 -f 1}. This functionality allows for the exploration of many scenarios with a single set of parameters. The number of projections should be greater than 1 only if applying a projection type that is stochastic. For projections, a free parameter file must be supplied using \texttt{-i/-I}
 
 The \texttt{-{}-tabular} flag should be used when running projections after a Bayesian analysis. This option will output a tabular report (see Section~\ref{sec:Tabular}) which can then be analysed in \R.
 
@@ -1247,9 +1247,9 @@ A parameter can either be fixed during all projection years or specified individ
 	values     1 2 1 2 0.5 # "values 3" means all years use 3
 \end{verbatim}}}
 
-\paragraph[Multiple Values]{The multiple values projection type, \argument{multiple\_values}}\index{Projections!MultipleValues}\label{sec:Project-MultipleValues}
+\paragraph[Multiple Values]{The multiple values projection type, \argument{multiple\_values}}\index{Projections!Multiple Values}\label{sec:Project-MultipleValues}
 
-Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection class. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this class.
+Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection class. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this.
 
 {\small{\begin{verbatim}
 	@project future_disease_rates
@@ -1257,9 +1257,9 @@ Users can specify a set of values for each projection year for each row in the \
 	parameter process[dtransition].proportions{disease}  
 	years 2024:2026
 	table values
-	2024 2025 2026
-	0.1 0.2 0.3
-	0.3 0.4 0.5
+	#2024 2025 2026
+	  0.1  0.2  0.3
+	  0.3  0.4  0.5
 	end_table
 \end{verbatim}}}
 

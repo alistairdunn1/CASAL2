@@ -9,9 +9,10 @@
  */
 
 // headers
-#include "MultipleConstants.h"
-
+#include "../../Model/Managers.h"
 #include "../../Utilities/To.h"
+#include "../../Utilities/Vector.h"
+#include "MultipleConstants.h"
 
 // namespaces
 namespace niwa {
@@ -22,7 +23,7 @@ namespace projects {
  */
 MultipleConstants::MultipleConstants(shared_ptr<Model> model) : Project(model) {
   data_table_ = new parameters::Table(PARAM_VALUES);
-  parameters_.BindTable(PARAM_VALUES, data_table_, "Table of values for each -i input. Rows are -i value columns are for each year to project for.", "");
+  parameters_.BindTable(PARAM_VALUES, data_table_, "Table of values for each -i input. Rows are -i value columns are for each year to project for.", "", false, false);
 }
 /**
  * Destructor
@@ -33,39 +34,39 @@ MultipleConstants::~MultipleConstants() {
 /**
  * Validate
  */
-void MultipleConstants::DoValidate() {}
+void MultipleConstants::DoValidate() {
+  LOG_TRACE();
+}
 
 /**
  * Build
  */
 void MultipleConstants::DoBuild() {
+  LOG_TRACE();
   // basic validation
-  const vector<string>& columns = data_table_->columns();
-  if (columns.size() != (years_.size()))
-    LOG_FATAL_P(PARAM_VALUES) << " the input column count was " << columns.size() << ", but expected " << years_.size() << " columns. One for each projection year.";
   vector<vector<string>>& data = data_table_->data();
-  LOG_FINE() << "-i count " << model_->get_addressable_values_count();
+  LOG_FINE() << "In MultipleConstants projections: -i count " << model_->get_addressable_values_count();
+
   if (data.size() != (model_->get_addressable_values_count()))
-    LOG_FATAL_P(PARAM_VALUES) << " the input row cound was " << data.size() << ", but expected " << model_->get_addressable_values_count()
-                              << " number of rows. This is each row for the -i or -I file plus the header.";
-  // Check the first row is year followed by the years
-  for (unsigned i = 1; i < columns.size(); ++i) {
-    unsigned year = utilities::ToInline<string, unsigned>(columns[i]);
-    // Check year is valid
-    if (find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_FATAL_P(PARAM_VALUES) << "The first row should be a header with the projection years. Found '" << year << "' in the header, which isn't one of the projection years.";
-  }
+    LOG_ERROR_P(PARAM_VALUES) << "- the number of rows supplied was " << data.size() << ", but " << model_->get_addressable_values_count()
+                              << " were expected. There should be a row for each row of data in supplied free parameter (the -i/-I file)";
+
   projection_values_.resize(data.size());
-  LOG_FINE() << "rows = " << data.size() << " cols " << columns.size();
-  /**
-   * Build our projected data values
-   */
+  // Build our projected data values
   unsigned counter = 0;
   for (vector<string> row : data) {
     for (unsigned i = 0; i < row.size(); ++i) {
       projection_values_[counter][years_[i]] = utilities::ToInline<string, Double>(row[i]);
+      LOG_FINE() << "In MultipleConstants projections: year = " << years_[i] << ", value = " << projection_values_[counter][years_[i]] << " \n";
     }
     counter++;
+  }
+
+  // Basic validation
+  for (unsigned ndx = 0; ndx < projection_values_.size(); ++ndx) {
+    if (projection_values_[ndx].size() != years_.size())
+      LOG_ERROR_P(PARAM_VALUES) << "- row " << ndx + 1 << " has " << projection_values_[ndx].size()
+                                << " columns, but should have the same number of columns as the number of years (" << years_.size() << ")";
   }
 }
 
@@ -79,7 +80,8 @@ void MultipleConstants::DoReset() {}
  */
 void MultipleConstants::DoUpdate() {
   value_ = projection_values_[model_->get_current_addressable_value()][model_->current_year()];
-  LOG_FINE() << "Setting Value to: " << value_ << " dash -i index " << model_->get_current_addressable_value() << " year = " << model_->current_year();
+  LOG_FINE() << "In MultipleConstants projections: setting Value to: " << value_ << " dash -i index " << model_->get_current_addressable_value() + 1
+             << " for year = " << model_->current_year();
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());
 }
 

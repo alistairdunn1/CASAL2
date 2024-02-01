@@ -1,3 +1,5 @@
+set CASAL2_BUILD_THREADS=24
+
 cd BuildSystem
 
 rem call doBuild.bat thirdparty

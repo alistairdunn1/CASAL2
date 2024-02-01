@@ -30,7 +30,13 @@
 
   # process any !includes
   if (include) {
-    print("Processing the !include statements in the csl2 file. Note that the path must be specified to allow the function to locate '!include' files")
+    if (!quiet) {
+      if (path == "") {
+        print("Processing the !include statements in the csl2 file. Note that the path must be specified to allow the function to locate '!include' files")
+      } else {
+        print("Processing the !include statements in the csl2 file")
+      }
+    }
     i <- 1
     while (i != length(file)) {
       if (tolower(substring(file[i], 1, 8)) == "!include") {

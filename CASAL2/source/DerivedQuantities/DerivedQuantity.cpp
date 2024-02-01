@@ -9,13 +9,12 @@
  */
 
 // headers
-#include "DerivedQuantity.h"
-
 #include <limits>
 
 #include "../Categories/Categories.h"
 #include "../Selectivities/Manager.h"
 #include "../TimeSteps/Manager.h"
+#include "DerivedQuantity.h"
 
 // namespaces
 namespace niwa {
@@ -31,18 +30,15 @@ namespace niwa {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 DerivedQuantity::DerivedQuantity(shared_ptr<Model> model) : model_(model), partition_(model) {
+  // clang-format off
   parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the derived quantity", "");
   parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of derived quantity", "");
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The time step in which to calculate the derived quantity", "");
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories to use when calculating the derived quantity", "");
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The list of selectivities to use when calculating the derived quantity", "");
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the derived quantity is calculated", "",
-                    0.5)
-      ->set_range(0.0, 1.0);
-  parameters_
-      .Bind<string>(PARAM_TIME_STEP_PROPORTION_METHOD, &proportion_method_, "The method for interpolating for the proportion through the mortality block", "", PARAM_WEIGHTED_SUM)
-      ->set_allowed_values({PARAM_WEIGHTED_SUM, PARAM_WEIGHTED_PRODUCT});
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the derived quantity is calculated", "", 0.5)->set_range(0.0, 1.0);
+  parameters_.Bind<string>(PARAM_TIME_STEP_PROPORTION_METHOD, &proportion_method_, "The method for interpolating for the proportion through the mortality block", "", PARAM_WEIGHTED_SUM)->set_allowed_values({PARAM_WEIGHTED_SUM, PARAM_WEIGHTED_PRODUCT});
+  // clang-format on
 
   RegisterAsAddressable(PARAM_VALUES, &values_, addressable::kLookup);
 
