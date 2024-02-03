@@ -38,6 +38,12 @@
 \defRef{sec:Project-MultipleValues}
 \label{syntax:Multiple-Values}
 
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (exclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
 \defSub{table values}{The table of data specifying the projected values to use for each row of the supplied free parameter file (\texttt{-i} or \texttt{-I}) with one column of data for each projected year}
 \defType{table with label = values}
 \defDefault{No default}

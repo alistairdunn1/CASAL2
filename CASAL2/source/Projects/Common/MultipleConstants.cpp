@@ -24,6 +24,7 @@ namespace projects {
 MultipleConstants::MultipleConstants(shared_ptr<Model> model) : Project(model) {
   data_table_ = new parameters::Table(PARAM_VALUES);
   parameters_.BindTable(PARAM_VALUES, data_table_, "Table of values for each -i input. Rows are -i value columns are for each year to project for.", "", false, false);
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value", "", 1.0)->set_lower_bound(0, false);
 }
 /**
  * Destructor
@@ -36,6 +37,21 @@ MultipleConstants::~MultipleConstants() {
  */
 void MultipleConstants::DoValidate() {
   LOG_TRACE();
+  // if only one multiplier supplied then assume its the same for all years
+  if (multiplier_.size() == 1) {
+    multiplier_.resize(years_.size(), multiplier_[0]);
+  }
+
+  if (multiplier_.size() != 0) {
+    if (multiplier_.size() != years_.size()) {
+      LOG_FATAL_P(PARAM_MULTIPLIER) << "Supply a multiplier for each year. Values for " << multiplier_.size() << " years were provided, but " << years_.size()
+                                    << " years are required";
+    }
+    multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
+  } else {
+    Double val          = 1.0;
+    multiplier_by_year_ = utilities::Map::create(years_, val);
+  }
 }
 
 /**
@@ -79,9 +95,9 @@ void MultipleConstants::DoReset() {}
  * Update
  */
 void MultipleConstants::DoUpdate() {
-  value_ = projection_values_[model_->get_current_addressable_value()][model_->current_year()];
-  LOG_FINE() << "In MultipleConstants projections: setting Value to: " << value_ << " dash -i index " << model_->get_current_addressable_value() + 1
-             << " for year = " << model_->current_year();
+  value_ = projection_values_[model_->get_current_addressable_value()][model_->current_year()] * multiplier_by_year_[model_->current_year()];
+  LOG_FINE() << "In MultipleConstants projections: setting Value to: " << value_ << ", with multiplier: " << multiplier_by_year_[model_->current_year()] << " and dash -i index "
+             << model_->get_current_addressable_value() + 1 << " for year = " << model_->current_year();
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());
 }
 
