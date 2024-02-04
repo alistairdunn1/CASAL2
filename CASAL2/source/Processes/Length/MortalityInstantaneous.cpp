@@ -10,8 +10,6 @@
  */
 
 // headers
-#include "MortalityInstantaneous.h"
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -20,6 +18,7 @@
 #include "Categories/Categories.h"
 #include "GrowthIncrements/GrowthIncrement.h"
 #include "Model/Managers.h"
+#include "MortalityInstantaneous.h"
 #include "Penalties/Manager.h"
 #include "Selectivities/Manager.h"
 #include "TimeSteps/Manager.h"
@@ -59,7 +58,7 @@ MortalityInstantaneous::MortalityInstantaneous(shared_ptr<Model> model) : Proces
   parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
   parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
   parameters_.Bind<Double>(PARAM_M, &m_input_, "The natural mortality rates for each category", "")->set_lower_bound(0.0);
-  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_ratios_temp_, "The time step proportions for natural mortality", "", false)->set_range(0.0, 1.0);
+  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_proportions_temp_, "The time step proportions for natural mortality", "", false)->set_range(0.0, 1.0);
   parameters_.Bind<bool>(PARAM_BIOMASS, &is_catch_biomass_, "Indicator to denote if the catches are as biomass (true) or abundance (false)", "", true);
   parameters_.Bind<string>(PARAM_RELATIVE_M_BY_LENGTH, &selectivity_labels_, "The M-by-length bin ogives to apply to each category for natural mortality", "");
 
@@ -82,7 +81,7 @@ MortalityInstantaneous::~MortalityInstantaneous() {
  */
 void MortalityInstantaneous::DoValidate() {
   Double total = 0.0;
-  for (Double value : time_step_ratios_temp_) {
+  for (Double value : time_step_proportions_temp_) {
     total += value;
   }
   if (!utilities::math::IsOne(total)) {
@@ -312,8 +311,8 @@ void MortalityInstantaneous::DoBuild() {
   }
 
   /**
-   * Organise our time step ratios. Each time step can
-   * apply a different ratio of M so here we want to verify
+   * Organise our time step proportions. Each time step can
+   * apply a different proportion of M so here we want to verify
    * we have enough
    */
   vector<TimeStep*> time_steps = model_->managers()->time_step()->ordered_time_steps();
@@ -323,18 +322,18 @@ void MortalityInstantaneous::DoBuild() {
       active_time_steps.push_back(i);
   }
 
-  if (time_step_ratios_temp_.size() != active_time_steps.size())
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << " The time step proportions length (" << time_step_ratios_temp_.size()
+  if (time_step_proportions_temp_.size() != active_time_steps.size())
+    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << " The time step proportions length (" << time_step_proportions_temp_.size()
                                              << ") does not match the number of time steps this process has been assigned to (" << active_time_steps.size() << ")";
   Double total_val = 0.0;
-  for (Double value : time_step_ratios_temp_) {
+  for (Double value : time_step_proportions_temp_) {
     total_val += value;
   }
   if (!math::IsOne(total_val)) {
     LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << " needs to sum to one";
   }
 
-  for (unsigned i = 0; i < time_step_ratios_temp_.size(); ++i) time_step_ratios_[active_time_steps[i]] = time_step_ratios_temp_[i];
+  for (unsigned i = 0; i < time_step_proportions_temp_.size(); ++i) time_step_proportions_[active_time_steps[i]] = time_step_proportions_temp_[i];
 
   /**
    * Assign the selectivity, penalty and time step index to each fisher data object
@@ -461,7 +460,7 @@ void MortalityInstantaneous::DoExecute() {
   LOG_TRACE();
   unsigned             time_step_index = model_->managers()->time_step()->current_time_step();
   unsigned             year            = model_->current_year();
-  double               ratio           = time_step_ratios_[time_step_index];
+  double               proportion      = time_step_proportions_[time_step_index];
   std::pair<bool, int> this_year_iter  = findInVector(process_years_, year);
 
   LOG_FINE() << "Year = " << year << " found? = " << this_year_iter.first << " should = " << process_years_[this_year_iter.second];
@@ -474,7 +473,7 @@ void MortalityInstantaneous::DoExecute() {
       selectivity_value               = category.selectivity_->GetLengthResult(i);
       category.exploitation_[i]       = 0.0;
       category.selectivity_values_[i] = selectivity_value;
-      category.exp_values_half_m_[i]  = exp(-0.5 * ratio * (*category.m_) * selectivity_value);  // this exp call should only be called once per length bin + category
+      category.exp_values_half_m_[i]  = exp(-0.5 * proportion * (*category.m_) * selectivity_value);  // this exp call should only be called once per length bin + category
       LOG_FINEST() << "category " << category.category_label_ << " length index " << i << " selectivity " << selectivity_value;
     }
   }

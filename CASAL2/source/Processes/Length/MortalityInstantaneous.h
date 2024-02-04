@@ -51,7 +51,6 @@ class MortalityInstantaneous : public Process {
     map<unsigned, Double> exploitation_by_year_;
     map<unsigned, Double> uobs_by_year_;
 
-
     Double  vulnerability_;
     Double  uobs_fishery_;
     Double  exploitation_;
@@ -136,8 +135,8 @@ private:
   // members from natural mortality
   vector<Double>             m_input_;
   OrderedMap<string, Double> m_;
-  vector<double>             time_step_ratios_temp_;
-  map<unsigned, double>      time_step_ratios_;
+  vector<double>             time_step_proportions_temp_;
+  map<unsigned, double>      time_step_proportions_;
   vector<string>             selectivity_labels_;
   vector<Selectivity*>       selectivities_;
 
@@ -147,11 +146,11 @@ private:
   // map<unsigned, map<string, map<string, vector<Double>>>> removals_by_year_fishery_category_;  // Year,  fishery, category
 
   // Members for reporting
-  vector<unsigned>               time_steps_to_skip_applying_F_mortality_;
-  vector<string>                 fishery_labels_;
+  vector<unsigned> time_steps_to_skip_applying_F_mortality_;
+  vector<string>   fishery_labels_;
 };
 
-} /* namespace age */
+}  // namespace length
 } /* namespace processes */
 } /* namespace niwa */
 

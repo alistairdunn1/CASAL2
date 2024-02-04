@@ -9,8 +9,6 @@
  */
 
 // headers
-#include "RecruitmentRicker.h"
-
 #include <limits>
 #include <numeric>
 
@@ -18,6 +16,7 @@
 #include "DerivedQuantities/Manager.h"
 #include "Estimates/Manager.h"
 #include "InitialisationPhases/Manager.h"
+#include "RecruitmentRicker.h"
 #include "TimeSteps/Manager.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
@@ -39,7 +38,7 @@ RecruitmentRicker::RecruitmentRicker(shared_ptr<Model> model) : Process(model), 
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels", "");
   parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
   parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "");
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "")->set_range(0.0, 1.0);
   parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "", true);
   parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset", "", true);
   parameters_.Bind<Double>(PARAM_STEEPNESS, &steepness_, "Steepness (h)", "", 1.0)->set_range(0.2, 1.0);
@@ -107,11 +106,17 @@ void RecruitmentRicker::DoValidate() {
     LOG_ERROR_P(PARAM_CATEGORIES) << "One proportion is required to be defined per category. There are " << category_labels_.size() << " categories and " << proportions_.size()
                                   << " proportions defined.";
 
+  // check proportions sum to one
   Double running_total = 0.0;
-  for (Double value : proportions_)  // Again, ADOLC prevents std::accum
+  for (Double value : proportions_) {  // ADOLC prevents std::accum
+    if (value <= 0)
+      LOG_WARNING_P(PARAM_PROPORTIONS) << "is zero for one of the categories. Please check that this is specified correctly";
     running_total += value;
-  if (!utilities::math::IsOne(running_total))
-    LOG_ERROR_P(PARAM_PROPORTIONS) << "The sum total is " << running_total << " which should be 1.0";
+  }
+  if (!utilities::math::IsOne(running_total)) {
+    LOG_WARNING_P(PARAM_PROPORTIONS) << "the sum of the proportions is " << running_total << ", but should be 1.0. These have been rescaled to sum to 1.0";
+    for (Double& proportion : proportions_) proportion /= running_total;
+  }
 
   for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
 

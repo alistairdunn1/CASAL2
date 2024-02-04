@@ -44,18 +44,17 @@ public:
 
   const vector<string>& category_labels() const { return category_labels_; }
 
-
 private:
   // Members
   vector<string>             category_labels_;
   vector<Double>             m_input_;
   OrderedMap<string, Double> m_;
-  vector<Double>             ratios_;
-  map<unsigned, Double>      time_step_ratios_;
+  vector<Double>             proportions_;
+  map<unsigned, Double>      time_step_proportions_;
   vector<vector<Double>>     mortality_rates_;
-  vector<string>              selectivity_names_;
-  accessor::Categories partition_;
-  vector<Selectivity*>        selectivities_;
+  vector<string>             selectivity_names_;
+  accessor::Categories       partition_;
+  vector<Selectivity*>       selectivities_;
 };
 
 } /* namespace length */

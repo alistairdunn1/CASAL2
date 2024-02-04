@@ -11,11 +11,10 @@
  */
 
 // Headers
-#include "RecruitmentConstant.h"
-
 #include "../../Utilities/Math.h"
 #include "Categories/Categories.h"
 #include "Logging/Logging.h"
+#include "RecruitmentConstant.h"
 
 // Namespaces
 namespace niwa {
@@ -29,7 +28,7 @@ using niwa::partition::accessors::CategoriesWithAge;
  */
 RecruitmentConstant::RecruitmentConstant(shared_ptr<Model> model) : Process(model) {
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories", "");
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "", true);
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "", true)->set_range(0.0, 1.0);
   parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "");
   parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the recruitment used for annual recruits and initialise the model", "")->set_lower_bound(0.0);
 
@@ -67,15 +66,16 @@ void RecruitmentConstant::DoValidate() {
                                      << ", proportions size " << proportions_.size();
     }
 
-    Double proportion_total = 0.0;
-
-    for (Double proportion : proportions_) proportion_total += proportion;
-
-    if (!utilities::math::IsOne(proportion_total)) {
-      LOG_WARNING() << parameters_.location(PARAM_PROPORTIONS) << ": proportion does not sum to 1.0. Proportion sums to " << AS_DOUBLE(proportion_total)
-                    << ". Auto-scaling proportions to sum to 1.0";
-
-      for (Double& proportion : proportions_) proportion /= proportion_total;
+    // check proportions sum to one
+    Double running_total = 0.0;
+    for (Double value : proportions_) {  // ADOLC prevents std::accum
+      if (value <= 0)
+        LOG_WARNING_P(PARAM_PROPORTIONS) << "is zero for one of the categories. Please check that this is specified correctly";
+      running_total += value;
+    }
+    if (!utilities::math::IsOne(running_total)) {
+      LOG_WARNING_P(PARAM_PROPORTIONS) << "the sum of the proportions is " << running_total << ", but should be 1.0. These have been rescaled to sum to 1.0";
+      for (Double& proportion : proportions_) proportion /= running_total;
     }
 
     for (unsigned i = 0; i < category_labels_.size(); ++i) {

@@ -1,5 +1,6 @@
 
 [INFO] Setting the random number seed to 20
+[WARNING] At line 44 in Population.csl2 the parameter 'proportions' is zero for one of the categories. Please check that this is specified correctly
 [INFO] Estimable parameters were set from the input configuration files
 [WARNING] At line 46 in Observation.csl2 the table obs : The sum of the values for year 1993 was 1.00002 and do not sum to 1.0
 [WARNING] At line 46 in Observation.csl2 the table obs : The sum of the values for year 1994 was 0.99999 and do not sum to 1.0
@@ -2323,4 +2324,4 @@ finished main minimiser loop
 Successful convergence in optimise
 [INFO] Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Function had value 111.247 and 111.247 was expected.
 [INFO] Completed
-[INFO] Total elapsed time: 10 seconds
+[INFO] Total elapsed time: 9 seconds

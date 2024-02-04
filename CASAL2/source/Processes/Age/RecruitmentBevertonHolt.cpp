@@ -9,8 +9,6 @@
  */
 
 // headers
-#include "RecruitmentBevertonHolt.h"
-
 #include <limits>
 #include <numeric>
 
@@ -18,6 +16,7 @@
 #include "DerivedQuantities/Manager.h"
 #include "Estimates/Manager.h"
 #include "InitialisationPhases/Manager.h"
+#include "RecruitmentBevertonHolt.h"
 #include "TimeSteps/Manager.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
@@ -106,11 +105,17 @@ void RecruitmentBevertonHolt::DoValidate() {
     LOG_ERROR_P(PARAM_CATEGORIES) << "One proportion is required to be defined per category. There are " << category_labels_.size() << " categories and " << proportions_.size()
                                   << " proportions defined.";
 
+  // check proportions sum to one
   Double running_total = 0.0;
-  for (Double value : proportions_)  // Again, ADOLC prevents std::accum
+  for (Double value : proportions_) {  // ADOLC prevents std::accum
+    if (value <= 0)
+      LOG_WARNING_P(PARAM_PROPORTIONS) << "is zero for one of the categories. Please check that this is specified correctly";
     running_total += value;
-  if (!utilities::math::IsOne(running_total))
-    LOG_ERROR_P(PARAM_PROPORTIONS) << "The sum total is " << running_total << " which should be 1.0";
+  }
+  if (!utilities::math::IsOne(running_total)) {
+    LOG_WARNING_P(PARAM_PROPORTIONS) << "the sum of the proportions is " << running_total << ", but should be 1.0. These have been rescaled to sum to 1.0";
+    for (Double& proportion : proportions_) proportion /= running_total;
+  }
 
   for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
 

@@ -583,6 +583,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -642,6 +645,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -723,6 +729,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -769,7 +778,10 @@ The null\_process  type has no additional subcommands. Note that this process do
 
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
-\defDefault{true}
+\defDefault{An equal proportion in each category}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -798,9 +810,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{time\_step\_proportions}{The time step proportions for the survival rate $S$}
 \defType{Vector of real numbers}
 \defDefault{true}
-\defLowerBound{0.0 (exclusive)}
+\defLowerBound{0.0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
-\defValue{The proportions must sum to one}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{selectivities}{The selectivity labels for each category}
 \defType{Vector of strings}
