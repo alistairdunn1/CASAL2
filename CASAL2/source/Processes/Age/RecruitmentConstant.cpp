@@ -70,7 +70,7 @@ void RecruitmentConstant::DoValidate() {
     Double running_total = 0.0;
     for (Double value : proportions_) {  // ADOLC prevents std::accum
       if (value <= 0)
-        LOG_WARNING_P(PARAM_PROPORTIONS) << "is zero for one of the categories. Please check that this is specified correctly";
+        LOG_INFO_P(PARAM_PROPORTIONS) << "is zero for one of the categories";
       running_total += value;
     }
     if (!utilities::math::IsOne(running_total)) {
