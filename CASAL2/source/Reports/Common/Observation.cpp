@@ -250,7 +250,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         } else {
           LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
         }
-        label = observation_label_ + ".fits" + "[" + year + "][" + bin + "]";
+        label = observation_label_ + ".fits" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
         cache_ << label << " ";
       }
     }
@@ -273,7 +273,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         } else {
           LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
         }
-        label = observation_label_ + ".observed" + "[" + year + "][" + bin + "]";
+        label = observation_label_ + ".observed" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
         cache_ << label << " ";
       }
     }
@@ -295,7 +295,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         } else {
           LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
         }
-        label = observation_label_ + ".residuals" + "[" + year + "][" + bin + "]";
+        label = observation_label_ + ".residuals" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
         cache_ << label << " ";
       }
     }
@@ -319,7 +319,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
           } else {
             LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
           }
-          label = observation_label_ + ".pearson_residuals" + "[" + year + "][" + bin + "]";
+          label = observation_label_ + ".pearson_residuals" + +"[" + year + "][" + comparison.category_ + "][" + bin + "]";
           cache_ << label << " ";
         }
       }
@@ -344,7 +344,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
           } else {
             LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
           }
-          label = observation_label_ + ".normalised_residuals" + "[" + year + "][" + bin + "]";
+          label = observation_label_ + ".normalised_residuals" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
           cache_ << label << " ";
         }
       }
