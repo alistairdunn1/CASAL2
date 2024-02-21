@@ -877,6 +877,11 @@ void MortalityInstantaneous::FillTabularReportCache(ostringstream& cache, bool f
       for (auto catches : fishery.catches_) cache << "catch[" << fishery.label_ << "][" << catches.first << "] ";
       for (auto actual_catches : fishery.actual_catches_) cache << "actual_catches[" << fishery.label_ << "][" << actual_catches.first << "] ";
     }
+    for (auto& category : categories_) {
+      for (unsigned i = 0; i < category.category_->data_.size(); ++i) {
+        cache << "m_by_age[" << category.category_label_ << "][" << i + 1 << "] ";
+      }
+    }
     cache << REPORT_EOL;
   }
 
@@ -886,6 +891,11 @@ void MortalityInstantaneous::FillTabularReportCache(ostringstream& cache, bool f
     for (auto uobs_pressure : fishery.uobs_by_year_) cache << AS_DOUBLE(uobs_pressure.second) << " ";
     for (auto catches : fishery.catches_) cache << AS_DOUBLE(catches.second) << " ";
     for (auto actual_catches : fishery.actual_catches_) cache << AS_DOUBLE(actual_catches.second) << " ";
+  }
+  for (auto& category : categories_) {
+    for (unsigned i = 0; i < category.category_->data_.size(); ++i) {
+      cache << category.m_at_age_[i] << " ";
+    }
   }
   cache << REPORT_EOL;
 }
