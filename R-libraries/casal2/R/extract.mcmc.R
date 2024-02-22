@@ -91,7 +91,7 @@
     colnames(OBJ_Dataframe) <- as.character(obj_header)
 
     if (nrow(OBJ_Dataframe) != nrow(Dataframe)) {
-      anti_join(OBJ_Data_frame, Dataframe, by = ("sample"))
+      anti_join(OBJ_Dataframe, Dataframe, by = ("sample"))
       stop(paste0(
         "There were a different number of rows in the objectives file (", length(OBJ_Dataframe),
         ") than the samples file (", nrow(Dataframe), "). These should be the same. Please check the output"
