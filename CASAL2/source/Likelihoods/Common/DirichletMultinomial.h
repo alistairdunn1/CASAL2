@@ -25,8 +25,8 @@ public:
   // Methods
   DirichletMultinomial(shared_ptr<Model> model);
   virtual ~DirichletMultinomial() = default;
-  void   DoValidate() override final;
-  void   DoVerify(shared_ptr<Model> model) override final;
+  void DoValidate() override final;
+  void DoVerify(shared_ptr<Model> model) override final;
 
   Double AdjustErrorValue(const Double process_error, const Double error_value) override final;
   void   SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons) override final;
@@ -34,8 +34,7 @@ public:
   void   GetScores(map<unsigned, vector<observations::Comparison> >& comparisons) override final;
 
 protected:
-  Double                      theta_;
-
+  Double theta_;
 };
 
 } /* namespace likelihoods */

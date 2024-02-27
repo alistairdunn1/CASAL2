@@ -50,10 +50,11 @@ void Dirichlet::GetScores(map<unsigned, vector<observations::Comparison> >& comp
     for (observations::Comparison& comparison : year_iterator->second) {
       Double error_value = AdjustErrorValue(comparison.process_error_, comparison.error_value_) * error_value_multiplier_;
       Double alpha       = math::ZeroFun(comparison.expected_, comparison.delta_) * error_value;
-      Double a2_a3       = math::LnGamma(alpha) - ((alpha - 1.0) * log(math::ZeroFun(comparison.observed_, comparison.delta_)));
+      Double dA2         = math::LnGamma(alpha);
+      Double dA3         = (alpha - 1.0) * log(math::ZeroFun(comparison.observed_, comparison.delta_));
 
       comparison.adjusted_error_ = error_value;
-      comparison.score_          = a2_a3 * multiplier_;
+      comparison.score_          = (dA2 - dA3) * multiplier_;
     }
   }
 }
@@ -83,8 +84,7 @@ void Dirichlet::SimulateObserved(map<unsigned, vector<observations::Comparison> 
       comparison.adjusted_error_ = error_value;
     }
 
-    for (observations::Comparison& comparison : iterator->second) 
-      comparison.observed_ /= totals[comparison.category_];
+    for (observations::Comparison& comparison : iterator->second) comparison.observed_ /= totals[comparison.category_];
   }
 }
 
@@ -95,17 +95,17 @@ void Dirichlet::SimulateObserved(map<unsigned, vector<observations::Comparison> 
  */
 
 Double Dirichlet::GetInitialScore(map<unsigned, vector<observations::Comparison> >& comparisons, unsigned year) {
-  Double score = 0.0;
-  Double a1    = 0.0;
+  Double score       = 0.0;
+  Double dA1         = 0.0;
+  Double error_value = 0.0;
 
   for (observations::Comparison& comparison : comparisons[year]) {
     // Calculate score
-    Double temp_score = AdjustErrorValue(comparison.process_error_, comparison.error_value_) * error_value_multiplier_;
-    LOG_FINEST() << "Adding: " << temp_score << " = AdjustErrorValue(" << comparison.process_error_ << ", " << comparison.error_value_ << ")  * " << error_value_multiplier_ << ")";
-    a1 += math::ZeroFun(comparison.expected_, comparison.delta_) * temp_score;
+    error_value = AdjustErrorValue(comparison.process_error_, comparison.error_value_) * error_value_multiplier_;
+    dA1 += math::ZeroFun(comparison.expected_, comparison.delta_) * error_value;
   }
 
-  score = -math::LnGamma(a1);
+  score = -math::LnGamma(dA1);
   return score * multiplier_;
 }
 

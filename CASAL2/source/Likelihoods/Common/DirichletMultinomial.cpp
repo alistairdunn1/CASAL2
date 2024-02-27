@@ -25,10 +25,12 @@ namespace likelihoods {
 using std::set;
 namespace math = niwa::utilities::math;
 
+// TODO: update theuser manual for Dirichlet-Multinomial
+
 DirichletMultinomial::DirichletMultinomial(shared_ptr<Model> model) : Likelihood(model) {
   parameters_.Bind<string>(PARAM_LABEL, &label_, "Label of the Dirichlet-multinomial distribution", "");
   parameters_.Bind<string>(PARAM_TYPE, &type_, "Type of likelihood", "");
-  parameters_.Bind<Double>(PARAM_THETA, &theta_, "Theta parameter (account for overdispersion)", "")->set_lower_bound(0.0);
+  parameters_.Bind<Double>(PARAM_THETA, &theta_, "Theta parameter (account for overdispersion)", "", false)->set_lower_bound(0.0);
   // parameters_.Bind<string>(PARAM_OVERDISPERSION_TYPE, &theta_model_, "Is theta linear or saturated", "", PARAM_LINEAR)->set_allowed_values({PARAM_LINEAR,PARAM_SATURATED});
   RegisterAsAddressable(PARAM_THETA, &theta_);
 }
@@ -51,7 +53,7 @@ void DirichletMultinomial::DoVerify(shared_ptr<Model> model) {
   if ((model->run_mode() == RunMode::kEstimation) || (model->run_mode() == RunMode::kProfiling) || (model->run_mode() == RunMode::kMCMC)
       || (model->run_mode() == RunMode::kTesting)) {
     if (!IsAddressableUsedFor(PARAM_THETA, addressable::kTransformation)) {
-      LOG_ERROR_P(PARAM_THETA) << " could not find an @" << PARAM_PARAMETER_TRANSFORMATION << " block for " << PARAM_THETA << ", this is recommended.";
+      LOG_WARNING_P(PARAM_THETA) << " could not find an @" << PARAM_PARAMETER_TRANSFORMATION << " block for " << PARAM_THETA << ", this is recommended.";
     }
   }
 }
@@ -99,7 +101,7 @@ void DirichletMultinomial::GetScores(map<unsigned, vector<observations::Comparis
  */
 
 void DirichletMultinomial::SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons) {
-  LOG_FATAL() << "Simulation for DirichletMultinomial not implemented yet";
+  LOG_FATAL() << "Simulations for " << PARAM_DIRICHLET_MULTINOMIAL << " are not yet implemented";
 }
 
 /**

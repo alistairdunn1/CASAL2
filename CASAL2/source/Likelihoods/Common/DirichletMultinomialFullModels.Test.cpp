@@ -11,15 +11,14 @@
 #ifdef TESTMODE
 
 // headers
-#include "../../TestResources/Models/TwoSexNoEstimates.h"
-#include "../../TestResources/TestFixtures/InternalEmptyModel.h"
 #include "../../BaseClasses/Object.h"
 #include "../../Model/Model.h"
-#include "../../Model/Objects.h"
 #include "../../Model/Objects.Mock.h"
+#include "../../Model/Objects.h"
 #include "../../ObjectiveFunction/ObjectiveFunction.h"
-
 #include "../../TestResources/MockClasses/Model.h"
+#include "../../TestResources/Models/TwoSexNoEstimates.h"
+#include "../../TestResources/TestFixtures/InternalEmptyModel.h"
 // namespaces
 namespace niwa {
 namespace likelihoods {
@@ -27,7 +26,7 @@ using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
 using std::endl;
 /**
- * just a nonsence observation with dirichlet multinomial to test validation implementation
+ * just a nonsense observation with dirichlet multinomial to test validation implementation
  */
 const std::string temp_obs_with_likelihood =
     R"(
@@ -60,7 +59,7 @@ TEST_F(InternalEmptyModel, DirichletMultinomial_expect_fail_theta_needs_transfor
   AddConfigurationLine(temp_obs_with_likelihood, __FILE__, 31);
   LoadConfiguration();
   // this should error saying theta needs a transformation
-  EXPECT_THROW(model_->Start(RunMode::kEstimation), std::string); 
+  EXPECT_THROW(model_->Start(RunMode::kEstimation), std::string);
 }
 
 } /* namespace likelihoods */
