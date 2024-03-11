@@ -40,6 +40,7 @@ ProportionsMatureByAge::ProportionsMatureByAge(shared_ptr<Model> model) : Observ
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
 
+  // clang-format off
   parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
   parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in", "");
@@ -47,15 +48,12 @@ ProportionsMatureByAge::ProportionsMatureByAge(shared_ptr<Model> model) : Observ
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
   parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use", "", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of proportions at age mature ", "", false);
-  // TODO:  is tolerance missing?
+  // TODO:  add tolerance
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note the units depend on the likelihood)", "", false);
-  parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_,
-                           "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)", "", true);
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+  parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_, "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)", "", true);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "", Double(0.5))->set_range(0.0, 1.0);
 
+  // clang-format on
   mean_proportion_method_ = false;
 
   allowed_likelihood_types_.push_back(PARAM_BINOMIAL);

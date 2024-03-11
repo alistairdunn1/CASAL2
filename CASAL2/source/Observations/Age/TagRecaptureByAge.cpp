@@ -34,6 +34,7 @@ namespace age {
 TagRecaptureByAge::TagRecaptureByAge(shared_ptr<Model> model) : Observation(model) {
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
   scanned_table_    = new parameters::Table(PARAM_SCANNED);
+
   // clang-format off
   parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
   parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");

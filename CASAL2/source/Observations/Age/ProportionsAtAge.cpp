@@ -52,6 +52,8 @@ ProportionsAtAge::ProportionsAtAge(shared_ptr<Model> model) : Observation(model)
   parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1", "", false);
   // clang-format on
 
+  RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
+
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
   allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
   allowed_likelihood_types_.push_back(PARAM_DIRICHLET);

@@ -38,23 +38,20 @@ namespace length {
 ProportionsCategoryByLength::ProportionsCategoryByLength(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
+
+  // clang-format off
   parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins (minimum values) for the observations.", "", true);
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities for categories", "", true);
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? if false the last length_bin is an maximum value", "",
-                         true);  // default to the model value
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? if false the last length_bin is an maximum value", "", true);  // default to the model value
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in", "");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of proportions at length mature ", "", false);
   // TODO:  is tolerance missing?
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note the units depend on the likelihood)", "", false);
-  parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_,
-                           "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)", "", true);
+  parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_, "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)", "", true);
   parameters_.Bind<string>(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES, &total_selectivity_labels_, "The labels of the selectivities for total categories", "", true);
-
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "", Double(0.5))->set_range(0.0, 1.0);
+  // clang-format on
 
   mean_proportion_method_ = false;
 

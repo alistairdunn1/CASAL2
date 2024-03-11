@@ -35,19 +35,20 @@ namespace length {
  */
 TagRecaptureByLengthForGrowth::TagRecaptureByLengthForGrowth(shared_ptr<Model> model) : Observation(model) {
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
-  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins", "", true);  // optional defaults to model length bins if ignroed
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? (defaults to @model value)", "", true);  // default to the model value
 
+  // clang-format off
+  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins", "", true);  // optional defaults to model length bins if ignored
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? (defaults to @model value)", "", true);  // default to the model value
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
   // TODO:  is tolerance missing?
   parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error", "", true);
   parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "", Double(0.5))->set_range(0.0, 1.0);
+  // clang-format on
+
+  RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
 
   mean_proportion_method_ = true;
 
@@ -80,7 +81,7 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
     LOG_FINE() << "using bespoke length bins";
     // allow for the use of observation-defined length bins, as long as all values are in the set of model length bin values
     using_model_length_bins = false;
-    // check users haven't just respecified the moedl length bins
+    // check users haven't just respecified the model length bins
     bool length_bins_match = false;
     LOG_FINE() << length_bins_.size() << "  " << model_length_bins.size();
     if (length_bins_.size() == model_length_bins.size()) {
@@ -94,7 +95,7 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
       LOG_FINE() << "using have actually just respecified model bins so we are ignoring bespoke length bin code";
       using_model_length_bins = true;
     } else {
-      // Need to validate length bins are subclass of mdoel length bins.
+      // Need to validate length bins are subclass of model length bins.
       if (!model_->are_length_bin_compatible_with_model_length_bins(length_bins_)) {
         LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bins need to be a subset of the model length bins. See manual for more information";
       }
@@ -265,7 +266,7 @@ void TagRecaptureByLengthForGrowth::DoBuild() {
 }
 
 /**
- * This method is called at the start of the taggeded
+ * This method is called at the start of the tagged
  * time step for this observation.
  *
  * Build the cache for the partition

@@ -48,6 +48,8 @@ ProportionsByCategory::ProportionsByCategory(shared_ptr<Model> model) : Observat
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
 
+  RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
+
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
   allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
 }

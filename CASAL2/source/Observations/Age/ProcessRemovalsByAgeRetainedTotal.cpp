@@ -38,7 +38,8 @@ ProcessRemovalsByAgeRetainedTotal::ProcessRemovalsByAgeRetainedTotal(shared_ptr<
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
 
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
+  // clang-format off
+parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
   parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
   parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group?", "", true);
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
@@ -49,20 +50,19 @@ ProcessRemovalsByAgeRetainedTotal::ProcessRemovalsByAgeRetainedTotal(shared_ptr<
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
   parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality instantaneous process for the observation", "");
-  parameters_.Bind<bool>(PARAM_SIMULATED_DATA_SUM_TO_ONE, &simulated_data_sum_to_one_, "Whether simulated data is discrete or scaled by totals to be proportions for each year", "",
-                         true);
+  parameters_.Bind<bool>(PARAM_SIMULATED_DATA_SUM_TO_ONE, &simulated_data_sum_to_one_, "Whether simulated data is discrete or scaled by totals to be proportions for each year", "", true);
   parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1", "", false);
-
-  mean_proportion_method_ = false;
+  // clang-format on
 
   RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
+
+  mean_proportion_method_ = false;
 
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
   allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
   allowed_likelihood_types_.push_back(PARAM_DIRICHLET);
   allowed_likelihood_types_.push_back(PARAM_DIRICHLET_MULTINOMIAL);
   allowed_likelihood_types_.push_back(PARAM_LOGISTIC_NORMAL);
-
   allowed_mortality_types_.push_back(PARAM_MORTALITY_INSTANTANEOUS_RETAINED);
 }
 

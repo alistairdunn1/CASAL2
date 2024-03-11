@@ -32,6 +32,7 @@ namespace utils = niwa::utilities;
  */
 Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
   obs_table_ = new parameters::Table(PARAM_OBS);
+
   // clang-format off
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
   parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)", "");

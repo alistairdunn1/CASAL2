@@ -48,6 +48,8 @@ ProportionsMigrating::ProportionsMigrating(shared_ptr<Model> model) : Observatio
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
   parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The process label", "");
 
+  RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
+
   mean_proportion_method_ = false;
 
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
