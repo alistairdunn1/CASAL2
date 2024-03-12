@@ -427,7 +427,7 @@
 
 \defSub{table catches}{The table of data specifying the catches for each fishery and year}
 \defDefault{No default}
-\defValue{A column of catches as biomass or abundance; or a column of exploitation rates of biomass or abundance}
+\defValue{A column of catches as biomass or abundance; or a column of exploitation rates of biomass or abundance. Valid column names are \argument{year} and \argument{catches}}
 \defLowerBound{0 (inclusive)}
 \defNote{See below for example}
 \begin{verbatim}
@@ -438,15 +438,15 @@
 	end_table
 \end{verbatim}
 
-\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery.Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
+\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery. Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
 \defDefault{No default}
-\defValue{Valid column names are: method, category, selectivity, u\_max, time\_step, and penalty; and optionally biomass, u, and age\_weight\_label}
+\defValue{Valid column names are: \argument{method}, \argument{category}, \argument{selectivity}, \argument{u\_max}, \argument{time\_step}, and \argument{penalty}; and optionally \argument{biomass}, \argument{u}, and \argument{age\_weight\_label}}
 \defNote{See below for example}
 \begin{verbatim}
 	table method
-	method         category selectivity u_max time_step penalty
-	Fishery1_label male     fish_sel    1     step1     CatchMustBeTaken
-	Fishery2_label male     fish_sel    1     step1     CatchMustBeTaken
+	method category selectivity u_max time_step penalty biomass u
+	Fishery1_label male fish_sel 0.99 step1 CatchMustBeTaken true false
+	Fishery2_label male fish_sel 0.99 step1 CatchMustBeTaken true false
 	end_table
 \end{verbatim}
 

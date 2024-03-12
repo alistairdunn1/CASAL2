@@ -583,15 +583,15 @@ For example, to apply natural mortality of $0.20$ across three time steps on bot
 	end table
 
 	table method
-	method      category selectivity u_max time_step penalty      biomass U
+	method      category selectivity u_max time_step penalty      biomass u
 	FishingWest stock    westFSel    0.7   step1     CatchPenalty true    true
 	FishingEast stock    eastFSel    0.7   step1     CatchPenalty true    true
 	end_table
 	\end{verbatim}}}
 
-For catches specified as removals as abundance, the column \argument{biomass} in the \argument{methods} table is set to \argument{false}. Exploitation rates can be specified (in which case, the column of catches is not a U) with valid range from $0-1$), by setting the \argument{method} table column \argument{U} to \argument{true}.
+For catches specified as removals as abundance, the column \argument{biomass} in the \argument{methods} table is set to \argument{false}. Exploitation rates can be specified (in which case, the column of catches is not a $U$) with valid range from $0-1$), by setting the \argument{method} table column \argument{u} to \argument{true}.
 
-The columns \argument{biomass} and \argument{U} are optional, and if omitted, default to \argument{biomass=true} (i.e., the catches are in biomass not abundance) and \argument{U=false} (i.e., the removals are the amount, not an exploitation rate) respectively. 
+The columns \argument{biomass} and \argument{u} are optional, and if omitted, default to \argument{biomass=true} (i.e., the catches are in biomass not abundance) and \argument{u=false} (i.e., the removals are the amount, not an exploitation rate) respectively. 
 
 For referencing catch parameters for use in projecting, time-varying, and estimating, the syntax is
 {\small{\begin{verbatim}
