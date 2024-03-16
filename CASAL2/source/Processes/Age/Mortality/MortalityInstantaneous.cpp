@@ -740,7 +740,11 @@ void MortalityInstantaneous::DoExecute() {
             if (fishery.penalty_)
               fishery.penalty_->Trigger(fishery.catches_[year], fishery.actual_catches_[year]);
           } else {
-            fishery.actual_catches_[year]       = fishery.catches_[year];
+            if (fishery.catch_as_u_) {
+              fishery.actual_catches_[year] = fishery.vulnerability_ * fishery.exploitation_;
+            } else {
+              fishery.actual_catches_[year] = fishery.catches_[year];
+            }
             fishery.exploitation_by_year_[year] = fishery.exploitation_;
           }
           fishery.uobs_by_year_[year] = fishery.uobs_fishery_;
