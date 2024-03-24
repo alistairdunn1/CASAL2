@@ -547,7 +547,7 @@ This process allows for multiple removal events, e.g., a fisheries model with mu
 The equations for instantaneous mortality are based on Pope's discrete catch equation, which assumes catch is known without error. \CNAME\ will try and take the exact catch specified in the input.
 
 \begin{itemize}
-	\item An exploitation rate (actually a proportion) is calculated for each fishery, as the catch divided by the selected-and-retained abundance or biomass termed vulnerable biomass. Vulnerable biomass is calculated by accounting for half natural mortality (\(M_{a,c}\)) that occurs at time-step which is defined by the subcommand \subcommand{time\_step\_proportions} and denoted by \(p_t\),
+	\item An exploitation rate (a proportion) is calculated for each fishery, as the catch divided by the selected-and-retained abundance or biomass termed vulnerable biomass. Vulnerable biomass is calculated by accounting for half natural mortality (\(M_{a,c}\)) that occurs at time-step which is defined by the subcommand \subcommand{time\_step\_proportions} and denoted by \(p_t\),
 	$$U_{f} = \frac{C_f}{\sum\limits_{c}\sum\limits_a \bar{w}_{a,c} S_{f,a,c} n_{a,c} exp(-0.5 p_t M_{a,c})} \ ,$$
 	where \(S_{f,a,c}\) is the fishery selectivity for age \(a\) and category \(c\), \(\bar{w}_{a,c}\) is mean weight and \(n_{a,c}\) numbers at age before applying fishing. The categories \(c\) are user defined for each fishery \(f\), which are defined in the \subcommand{table method} (see below for an example).
 	\item The fishing pressure associated with method $f$ is defined as the maximum proportion of fish taken from any element of the partition in the area affected by the method $f$
@@ -620,7 +620,6 @@ To calculate weight by empirical weight-at-age matrices as described in Section~
 		FishingEast stock    eastFSel    0.7   step1     CatchPenalty jan_weight_at_age
 		end_table
 \end{verbatim}}}
-
 
 \paragraph{Instantaneous mortality with retained catch and discards}\label{sec:Process-MortalityInstantaneousRetained}
 
