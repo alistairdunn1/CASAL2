@@ -13,6 +13,7 @@
 
 #include "../DerivedQuantities/Age/Abundance.h"
 #include "../DerivedQuantities/Age/Biomass.h"
+#include "../DerivedQuantities/Age/BiomassIndex.h"
 #include "../DerivedQuantities/Length/Abundance.h"
 #include "../DerivedQuantities/Length/Biomass.h"
 #include "../DerivedQuantities/Manager.h"
@@ -38,8 +39,12 @@ DerivedQuantity* Factory::Create(shared_ptr<Model> model, const string& object_t
     if (object_type == PARAM_DERIVED_QUANTITY || object_type == PARAM_DERIVED_QUANTITIES) {
       if (sub_type == PARAM_ABUNDANCE)
         result = new age::Abundance(model);
+      // else if (sub_type == PARAM_ABUNDANCE_INDEX)
+      // result = new age::Abundance_index(model);
       else if (sub_type == PARAM_BIOMASS)
         result = new age::Biomass(model);
+      else if (sub_type == PARAM_BIOMASS_INDEX)
+        result = new age::BiomassIndex(model);
     }
   } else if (partition_type == PartitionType::kLength || model->partition_type() == PartitionType::kLength) {
     if (object_type == PARAM_DERIVED_QUANTITY || object_type == PARAM_DERIVED_QUANTITIES) {

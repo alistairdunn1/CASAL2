@@ -9,12 +9,13 @@
  */
 
 // headers
+#include "DerivedQuantity.h"
+
 #include <limits>
 
 #include "../Categories/Categories.h"
 #include "../Selectivities/Manager.h"
 #include "../TimeSteps/Manager.h"
-#include "DerivedQuantity.h"
 
 // namespaces
 namespace niwa {
@@ -58,8 +59,8 @@ void DerivedQuantity::Validate() {
     mean_proportion_method_ = false;
 
   if (category_labels_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "selectivities count (" << selectivity_labels_.size() << ") "
-                                     << " is not the same as the categories count (" << category_labels_.size() << ")";
+    LOG_ERROR_P(PARAM_SELECTIVITIES) << "selectivities count (" << selectivity_labels_.size() << ") " << " is not the same as the categories count (" << category_labels_.size()
+                                     << ")";
   DoValidate();
 }
 
@@ -140,7 +141,7 @@ Double DerivedQuantity::GetValue(unsigned year) {
     result = (*(initialisation_values_.rbegin() + 1)->begin());  // first value of last init phase
   }
 
-  // Make an exception for intialisation phases such as derived which only requires to go back one year
+  // Make an exception for initialisation phases such as derived which only requires to go back one year
   if (model_->b0_initialised(label_)) {
     result = (*initialisation_values_.rbegin()->rbegin());
   }

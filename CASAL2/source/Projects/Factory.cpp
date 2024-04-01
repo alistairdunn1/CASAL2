@@ -15,6 +15,8 @@
 #include "../Model/Model.h"
 #include "../Projects/Common/Constant.h"
 #include "../Projects/Common/EmpiricalSampling.h"
+#include "../Projects/Common/HarvestStrategyConstantCatch.h"
+#include "../Projects/Common/HarvestStrategyConstantU.h"
 #include "../Projects/Common/LogNormal.h"
 #include "../Projects/Common/LogNormalEmpirical.h"
 #include "../Projects/Common/MultipleConstants.h"
@@ -47,8 +49,12 @@ Project* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       result = new EmpiricalSampling(model);
     else if (sub_type == PARAM_MULTIPLE_VALUES)
       result = new MultipleConstants(model);
-    //else if (sub_type == PARAM_USER_DEFINED)
-    //  result = new UserDefined(model);
+    else if (sub_type == PARAM_HS_CONSTANT_U)
+      result = new HarvestStrategyConstantU(model);
+    else if (sub_type == PARAM_HS_CONSTANT_CATCH)
+      result = new HarvestStrategyConstantCatch(model);
+    // else if (sub_type == PARAM_USER_DEFINED)
+    //   result = new UserDefined(model);
     if (result)
       model->managers()->project()->AddObject(result);
   }
