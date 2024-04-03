@@ -146,7 +146,7 @@ void HarvestStrategyRampU::DoUpdate() {
     LOG_FINE() << "HarvestStrategyRampU: u=" << u << ", biomass_index=" << biomass << " reference_index=" << ref_biomass << " in year=" << model_->current_year()
                << " using index_year=" << index_year << " with update_counter=" << update_counter_ << ", year_delta=" << year_delta_ << ", and result of test=" << do_update;
 
-    this_catch_  = biomass * u;
+    this_catch_  = biomass * u * multiplier_[model_->current_year()];
     Double delta = (this_catch_ - last_catch_) / last_catch_;
     Double sign  = (delta >= 0) ? 1.0 : -1.0;
 

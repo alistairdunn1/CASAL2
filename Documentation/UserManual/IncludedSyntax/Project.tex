@@ -24,11 +24,11 @@
 \label{syntax:Project-Constant}
 
 \defSub{values}{The values to assign to the addressable}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{No default}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
@@ -39,7 +39,7 @@
 \label{syntax:Multiple-Values}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
@@ -75,7 +75,7 @@
 \defDefault{No default}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
@@ -86,16 +86,16 @@
 \label{syntax:Project-LogNormal}
 
 \defSub{mean}{The mean of the lognormal process}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 
 \defSub{sigma}{The standard deviation (sigma) of the lognormal sampling}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{No default}
 \defLowerBound{0.0 (inclusive)}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
@@ -106,7 +106,7 @@
 \label{syntax:Project-LogNormalEmpirical}
 
 \defSub{mean}{The mean of the Gaussian process}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 
 \defSub{start\_year}{The start year of sampling}
@@ -118,7 +118,7 @@
 \defDefault{No default}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
@@ -129,22 +129,22 @@
 \label{syntax:Project-HarvestStrategyConstantCatch}
 
 \defSub{catch}{The catch to apply}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{alpha}{The multiplier on the proportional change in biomass applied to the catch}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
 \defLowerBound{0 (exclusive)}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 \defNote(Use max\_delta = 0 to have no maximum)
@@ -160,12 +160,12 @@
 \defLowerBound{1 (inclusive)}
 
 \defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{1.0}
 \defLowerBound{0 (exclusive)}
 
@@ -179,17 +179,17 @@
 \label{syntax:Project-HarvestStrategyConstantU}
 
 \defSub{u}{The exploitation rate to apply}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 \defNote(Use max\_delta = 0 to have no maximum)
@@ -205,12 +205,12 @@
 \defLowerBound{1 (inclusive)}
 
 \defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{1.0}
 \defLowerBound{0 (exclusive)}
 
@@ -224,12 +224,12 @@
 \label{syntax:Project-HarvestStrategyRampU}
 
 \defSub{u}{The exploitation rates to apply}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{reference\_points}{The reference points for each exploitation rate}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
@@ -238,12 +238,12 @@
 \defDefault{No default}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 \defNote(Use max\_delta = 0 to have no maximum)
@@ -259,12 +259,12 @@
 \defLowerBound{1 (inclusive)}
 
 \defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0}
 \defLowerBound{0 (inclusive)}
 
 \defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{1.0}
 \defLowerBound{0 (exclusive)}
 

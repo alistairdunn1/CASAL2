@@ -101,7 +101,7 @@ void HarvestStrategyConstantU::DoUpdate() {
 
   if (do_update) {  // its in year_delta, so do an update
     this_catch_  = biomass * u_;
-    Double delta = (this_catch_ - last_catch_) / last_catch_;
+    Double delta = (this_catch_ - last_catch_) / last_catch_ * multiplier_[model_->current_year()];
     Double sign  = (delta >= 0) ? 1.0 : -1.0;
 
     LOG_FINE() << "HarvestStrategyConstantU: catch=" << this_catch_;
