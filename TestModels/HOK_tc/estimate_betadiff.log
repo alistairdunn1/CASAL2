@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Sun Feb 04 13:07:04 2024
+Date: Wed Apr 03 13:17:37 2024
 Seed: 20
-Version: v24.02 (2024-02-03)
+Version: v24.04 (2024-04-01)
 Copyright (c) 2017-2024, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=24016
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=20576
 
 
 *partition[state1]
@@ -8846,6 +8846,9 @@ Values {vector}
 *info[messages_encountered]
 Values {string}
 Setting the random number seed to 20
+At line 94 in CommonPopulation.csl2 the parameter 'proportions' is zero for one of the categories
+At line 94 in CommonPopulation.csl2 the parameter 'proportions' is zero for one of the categories
+At line 104 in CommonPopulation.csl2 the parameter 'proportions' is zero for one of the categories
 Estimable parameters were set from the input configuration files
 Creating default report for catchability CSacous
 Creating default report for catchability WCacous
@@ -8910,9 +8913,6 @@ Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Funct
 
 *warnings[messages_encountered]
 Values {string}
-At line 94 in CommonPopulation.csl2 the parameter 'proportions' is zero for one of the categories. Please check that this is specified correctly
-At line 94 in CommonPopulation.csl2 the parameter 'proportions' is zero for one of the categories. Please check that this is specified correctly
-At line 104 in CommonPopulation.csl2 the parameter 'proportions' is zero for one of the categories. Please check that this is specified correctly
 In the age-length relationship 'age_length_W', the CVs are set to zero. In this relationship, the calculations of the density of lengths at age may fail. The CVs should be usually be set to values greater than zero if length data are being used in this model with this age-length relationship.
 In the age-length relationship 'age_length_E', the CVs are set to zero. In this relationship, the calculations of the density of lengths at age may fail. The CVs should be usually be set to values greater than zero if length data are being used in this model with this age-length relationship.
 At line 185 in Observation.csl2 the table obs : The sum of the values for year 1989 was 1 and do not sum to 1.0

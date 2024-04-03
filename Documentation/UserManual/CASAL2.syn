@@ -102,6 +102,7 @@ Estimation_Result
 Exogenous
 Free
 Hamiltonian
+Harvest_Strategy_Constant_U
 Hessian_Matrix
 Increasing
 Initialisation
@@ -189,6 +190,7 @@ age_length
 average_difference
 basic
 bernoulli
+biomass_index
 compound_all
 compound_left
 compound_middle
@@ -197,6 +199,8 @@ de_solver
 difference_parameter
 exponential
 growth_increment
+harvest_strategy_constant_catch
+harvest_strategy_ramp_u
 inverse
 log
 log_sum
@@ -259,7 +263,9 @@ b0_initialisation_phase
 b_max
 base_weight_units
 beta
+bias
 biomass
+biomass_index_lag_years
 burn_in
 by_length
 c
@@ -277,6 +283,7 @@ correlation_adjustment_diff
 covariance
 covariance_adjustment_method
 crossover_probability
+current_catch
 cv
 cv_first
 cv_last
@@ -309,6 +316,7 @@ f_iterations
 file_name
 final_year
 first_recent_year_with_no_bias
+first_year
 first_year_with_bias
 fishbox_weight
 fishing_mortality
@@ -363,6 +371,7 @@ lower_bound
 m
 max_age
 max_correlation
+max_delta
 max_f
 max_generations
 mcmc_fixed
@@ -370,6 +379,7 @@ mean
 method
 method_of_removal
 min_age
+min_delta
 min_sigma
 mortality_instantaneous_process
 mortality_process
@@ -413,6 +423,8 @@ r
 r0
 rates
 recruitment_multipliers
+reference_index
+reference_points
 relative_m_by_age
 relative_m_by_length
 relative_u_by_age
@@ -470,6 +482,7 @@ type
 u
 u_max
 units
+update_frequency_years
 upper_bound
 v
 value

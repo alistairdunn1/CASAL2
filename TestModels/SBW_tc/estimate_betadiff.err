@@ -1,7 +1,7 @@
 
 [INFO] Setting the random number seed to 20
-[WARNING] At line 35 in Population.csl2 the parameter 'proportions' is zero for one of the categories. Please check that this is specified correctly
-[WARNING] At line 35 in Population.csl2 the parameter 'proportions' is zero for one of the categories. Please check that this is specified correctly
+[INFO] At line 35 in Population.csl2 the parameter 'proportions' is zero for one of the categories
+[INFO] At line 35 in Population.csl2 the parameter 'proportions' is zero for one of the categories
 [INFO] Estimable parameters were set from the input configuration files
 [WARNING] At line 78 in Observation.csl2 the table obs : The sum of the values for year 1979 was 1.0001 and do not sum to 1.0
 [WARNING] At line 78 in Observation.csl2 the table obs : The sum of the values for year 1980 was 1.0002 and do not sum to 1.0
@@ -4353,4 +4353,4 @@ Successful convergence in optimise
 [WARNING] estimated parameter 'observation[TangaroaAcousticMature].process_error' with value 0.0001 was within 0.001 of the lower bound of 0.0001
 [INFO] Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Function had value 962.721 and 962.721 was expected.
 [INFO] Completed
-[INFO] Total elapsed time: 12 seconds
+[INFO] Total elapsed time: 10 seconds

@@ -12,9 +12,11 @@
 #include "../../AgeWeights/Manager.h"
 #include "../../InitialisationPhases/Manager.h"
 #include "../../TimeSteps/Manager.h"
+#include "../../Utilities/Math.h"
 #include "../../Utilities/RandomNumberGenerator.h"
 
 // namespaces
+namespace math = niwa::utilities::math;
 namespace niwa {
 namespace derivedquantities {
 namespace age {
@@ -164,18 +166,22 @@ void BiomassIndex::Execute() {
     if (time_step_proportion_ == 0.0) {
       biomass_ = AS_DOUBLE(cache_value_) * rng_value;
       biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_ = math::ZeroFun(biomass_, math::ZERO);
       initialisation_values_[initialisation_phase].push_back(biomass_);
     } else if (time_step_proportion_ == 1.0) {
       biomass_ = AS_DOUBLE(value) * rng_value;
       biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_ = math::ZeroFun(biomass_, math::ZERO);
       initialisation_values_[initialisation_phase].push_back(biomass_);
     } else if (mean_proportion_method_) {
       biomass_ = AS_DOUBLE((cache_value_ + ((value - cache_value_) * time_step_proportion_))) * rng_value;
       biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_ = math::ZeroFun(biomass_, math::ZERO);
       initialisation_values_[initialisation_phase].push_back(biomass_);
     } else {
       biomass_ = AS_DOUBLE((pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_))) * rng_value;
       biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_ = math::ZeroFun(biomass_, math::ZERO);
       initialisation_values_[initialisation_phase].push_back(biomass_);
     }
 
@@ -202,18 +208,22 @@ void BiomassIndex::Execute() {
     if (time_step_proportion_ == 0.0) {
       biomass_                        = AS_DOUBLE(cache_value_) * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                        = math::ZeroFun(biomass_, math::ZERO);
       values_[model_->current_year()] = biomass_;
     } else if (time_step_proportion_ == 1.0) {
       biomass_                        = AS_DOUBLE(value) * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                        = math::ZeroFun(biomass_, math::ZERO);
       values_[model_->current_year()] = biomass_;
     } else if (mean_proportion_method_) {
       biomass_                        = AS_DOUBLE((cache_value_ + ((value - cache_value_) * time_step_proportion_))) * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                        = math::ZeroFun(biomass_, math::ZERO);
       values_[model_->current_year()] = biomass_;
     } else {
       biomass_                        = AS_DOUBLE((pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_))) * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                        = math::ZeroFun(biomass_, math::ZERO);
       values_[model_->current_year()] = biomass_;
     }
   }

@@ -184,6 +184,13 @@
 
 \defSub{age\_weight\_labels}{The labels for the age-weights that correspond to each category for the biomass calculation}
 
+\commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}
+
+\defSub{distribution}{The type of distribution for the biomass index}
+\defSub{cv}{The cv for the uncertainty for the distribution when generating the biomass index}
+\defSub{bias}{The bias (a positive or negative proportion) when generating the biomass index}
+\defSub{rho}{The autocorrelation in annual values when generating the biomass index}
+
 \defComLab{estimate}{Define an object of type \emph{Estimate}}
 
 \defSub{label}{The label of the estimate}
@@ -1245,6 +1252,42 @@
 \defSub{start\_year}{The start year of sampling}
 \defSub{final\_year}{The final year of sampling}
 \defSub{multiplier}{Multiplier that is applied to the projected value}
+
+\commandlabsubarg{Project}{type}{harvest\_strategy\_constant\_catch}
+
+\defSub{catch}{The catch to apply}
+\defSub{alpha}{The multiplier on the proportional change in biomass applied to the catch}
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+
+\commandlabsubarg{Project}{type}{Harvest\_Strategy\_Constant\_U}
+
+\defSub{u}{The exploitation rate to apply}
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+
+\commandlabsubarg{Project}{type}{harvest\_strategy\_ramp\_u}
+
+\defSub{u}{The exploitation rates to apply}
+\defSub{reference\_points}{The reference points for each exploitation rate}
+\defSub{reference\_index}{The biomass index for reference points (i.e., the derived quantity label for the calculation of reference points)}
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
 
 \defComLab{report}{Define an object of type \emph{Report}}
 

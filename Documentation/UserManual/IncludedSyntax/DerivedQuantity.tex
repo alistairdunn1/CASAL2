@@ -49,3 +49,27 @@ The Abundance type has no additional subcommands.
 \defType{Vector of strings}
 \defDefault{No default}
 
+\subsubsection{Derived Quantity of type Biomass Index}
+\commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}.
+\defRef{sec:DerivedQuantity-BiomassIndex}
+\label{syntax:DerivedQuantity-BiomassIndex}
+
+\defSub{distribution}{The type of distribution for the biomass index}
+\defType{String}
+\defDefault{lognormal}
+\defValue{Either \texttt{normal} or \texttt{lognormal}}
+
+\defSub{cv}{The cv for the uncertainty for the distribution when generating the biomass index}
+\defType{Real number}
+\defDefault{0.2}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{bias}{The bias (a positive or negative proportion) when generating the biomass index}
+\defType{Real number}
+\defDefault{0.0}
+
+\defSub{rho}{The autocorrelation in annual values when generating the biomass index}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0.0 (inclusive)}
+

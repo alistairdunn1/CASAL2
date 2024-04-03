@@ -71,7 +71,6 @@ void HarvestStrategyConstantCatch::DoBuild() {
   biomass_index_ = model_->managers()->derived_quantity()->GetDerivedQuantity(biomass_index_label_);
   if (!biomass_index_) {
     LOG_ERROR_P(PARAM_BIOMASS_INDEX) << "The " << PARAM_BIOMASS_INDEX << " derived_quantity (" << biomass_index_label_ << ") was not found.";
-    biomass_index_phase_ = model_->managers()->initialisation_phase()->GetPhaseIndex(biomass_index_label_);
   }
   update_counter_ = 0;
   last_catch_     = current_catch_;
@@ -99,8 +98,9 @@ void HarvestStrategyConstantCatch::DoUpdate() {
     update_counter_++;
 
   bool do_update = ((model_->current_year() == first_year_) || ((model_->current_year() > first_year_) && (update_counter_ % (int)year_delta_) == 0));
-  LOG_FINE() << "HarvestStrategyConstantCatch: catch=" << catch_ << ", and with biomass_index=" << biomass << " in year=" << model_->current_year()
-             << " using index_year=" << index_year << " with update_counter=" << update_counter_ << " and year_delta=" << year_delta_ << ", and result of test=" << do_update;
+
+  LOG_FINE() << "HarvestStrategyConstantCatch: u=" << catch_ << ", biomass_index=" << biomass << " in year=" << model_->current_year() << " using index_year=" << index_year
+             << " with update_counter=" << update_counter_ << ", year_delta=" << year_delta_ << ", and result of test=" << do_update;
 
   if (do_update) {  // its in year_delta, so do an update
     this_catch_  = (((biomass - previous_biomass) / previous_biomass * alpha_) + 1) * catch_;
