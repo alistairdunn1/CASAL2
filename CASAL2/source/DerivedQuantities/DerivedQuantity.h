@@ -18,6 +18,7 @@
 
 // headers
 #include "../BaseClasses/Executor.h"
+#include "../BaseClasses/Object.h"
 #include "../Partition/Accessors/Categories.h"
 
 // namespaces
@@ -36,7 +37,7 @@ public:
   virtual ~DerivedQuantity() = default;
   void   Validate();
   void   Build();
-  void   Verify(shared_ptr<Model> model){};
+  void   Verify(shared_ptr<Model> model) {};
   void   Reset();
   Double GetValue(unsigned year);
   Double GetInitialisationValue(unsigned phase = 0, unsigned index = 0);

@@ -14,12 +14,16 @@
 
 // headers
 #include "../../AgeWeights/AgeWeight.h"
+#include "../../Catchabilities/Common/Nuisance.h"
 #include "../../DerivedQuantities/DerivedQuantity.h"
+#include "../../Model/Model.h"
 
 // namespaces
 namespace niwa {
 namespace derivedquantities {
 namespace age {
+
+using catchabilities::Nuisance;
 
 // classes
 class BiomassIndex : public niwa::DerivedQuantity {
@@ -37,12 +41,19 @@ protected:
   vector<AgeWeight*> age_weights_;
   bool               use_age_weights_ = false;
   string             distribution_;
+  string             catchability_label_;
+  double             catchability_value_    = 1.0;
+  Catchability*      catchability_          = nullptr;
+  Nuisance*          nuisance_catchability_ = nullptr;
+  bool               nuisance_q_            = false;
   double             biomass_;
   double             last_biomass_;
   double             cv_    = 0;
   double             sigma_ = 0;
   double             bias_  = 0;
   double             rho_   = 0;
+
+  shared_ptr<Model> model_ = nullptr;
 };
 
 } /* namespace age */

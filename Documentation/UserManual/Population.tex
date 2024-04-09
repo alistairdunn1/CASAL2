@@ -408,13 +408,13 @@ Some processes require a population value derived from the population state as a
 
 Derived quantities can be calculated as either abundance or biomass. Abundance-derived quantities are the sum over the specified categories (after applying a selectivity)\label{sec:DerivedQuantity-Abundance}. Biomass-derived quantities are calculated similarly\label{sec:DerivedQuantity-Biomass}. 
 
-In addition, a derived quantity (e.g., \texttt{biomass\_index}) can have random error, autocorrelation, and bias added (however, these should never be used as quantities for determining recruitment or other parameters in estimation or MCMCs).\label{sec:DerivedQuantity-BiomassIndex}
+In addition, a derived quantity (e.g., of type \texttt{biomass\_index}) can have random error, autocorrelation, and bias added (however, these should never be used as quantities for determining recruitment or other parameters in estimation or MCMCs).\label{sec:DerivedQuantity-BiomassIndex} Additionally, a derived quantity of type \argument{biomass\_index} can be modified by a catchability ($q$) coefficient, for example, to reproduce a biomass index that may be obtained from a survey.
 
 Derived quantities are also calculated during the initialisation phases. Therefore, the time step during each initialisation phase must be specified. If the initialisation time steps are not specified, the derived quantity will be calculated during the initialisation phases. 
 
-A common use of an derived quantities is as input into a stock-recruit relationship  which requires an equilibrium biomass ($B_0$) and annual spawning stock biomass values ($SSB_y$) to calculate recruitment into the first \ifAgeBased age \else length \fi class. $SSB_y$ is an derived quantity based on the mature biomass, usually at spawning time.
+A common use of an derived quantities is as input into a stock-recruit relationship  which requires an equilibrium biomass ($B_0$) and annual spawning stock biomass values ($SSB_y$) to calculate recruitment into the first \ifAgeBased age \else length \fi class. $SSB_y$ is an derived quantity based on the mature biomass, usually at spawning time. Additionally a derived quantity of type \argument{biomass\_index} could be used to inform a harvest strategy simulation.
 
-Derived quantities can be associated with a \textit{time evaluation interval}; see Section~\ref{sec:Process-Mortality} for more detail on mortality blocks. In this case, the point of calculation can be set to any point within the mortality block, e.g., when 75\% of the deaths from natural mortality plus catch has occurred, which is based on interpolating between the start and end of the block as the partition is known at those points.  Two  methods are available: \texttt{weighted\_sum} and \texttt{weighted\_product}, and are defined as
+Derived quantities can be associated with a \textit{time evaluation interval}; see Section~\ref{sec:Process-Mortality} for more detail on mortality blocks. In this case, the point of calculation can be set to any point within the mortality block, e.g., when 75\% of the deaths from natural mortality plus catch has occurred, which is based on interpolating between the start and end of the block as the partition is known at those points. Two methods are available: \texttt{weighted\_sum} and \texttt{weighted\_product}, and are defined as
 
 \begin{itemize}
 	\item \texttt{weighted\_sum}: after proportion $p$ through the mortality block, the partition elements are given by $n_{p,j} = (1 - p)n_j + p'_j$
@@ -432,8 +432,25 @@ type          biomass
 time_step     step_one
 categories    mature.male mature.female
 selectivities One
-time_step_proportion        0.5
+time_step_proportion 0.5
 time_step_proportion_method weighted_sum
+\end{verbatim}}}
+
+
+To generate a biomass index derived quantity for a harvest strategy calculation, generated at the end of the first time step (labelled \texttt{step\_one}), over all "mature" male and female categories and halfway through the mortality block using the \texttt{weighted\_sum} method with variance (normally distributed with CV = $cv$) and autocorrelation (rho) the syntax is
+
+{\small{\begin{verbatim}
+			@derived_quantity SSB_index
+			type          biomass_index
+			time_step     step_one
+			categories    mature.male mature.female
+			selectivities One
+			time_step_proportion 0.5
+			time_step_proportion_method weighted_sum
+			distribution normal
+			cv 0.2
+			rho 0.1
+			bias 0.0
 \end{verbatim}}}
 
 \subsection{\I{Growth}\label{sec:Growth}}
