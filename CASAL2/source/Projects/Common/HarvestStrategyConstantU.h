@@ -45,6 +45,7 @@ private:
   unsigned         first_year_;
   DerivedQuantity* biomass_index_       = nullptr;
   unsigned         biomass_index_phase_ = 0;
+  Double           biomass_index_scalar_;
   Double           last_catch_;
   Double           this_catch_;
   Double           current_catch_;

@@ -45,7 +45,8 @@ private:
   unsigned         year_lag_;
   unsigned         year_delta_;
   unsigned         first_year_;
-  DerivedQuantity* biomass_index_       = nullptr;
+  DerivedQuantity* biomass_index_ = nullptr;
+  Double           biomass_index_scalar_;
   DerivedQuantity* reference_index_     = nullptr;
   unsigned         biomass_index_phase_ = 0;
   Double           last_catch_;

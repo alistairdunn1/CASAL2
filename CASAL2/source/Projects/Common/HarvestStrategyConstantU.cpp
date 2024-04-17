@@ -28,7 +28,8 @@ namespace projects {
 HarvestStrategyConstantU::HarvestStrategyConstantU(shared_ptr<Model> model) : Project(model), model_(model) {
   // clang-format off
   parameters_.Bind<string>(PARAM_BIOMASS_INDEX, &biomass_index_label_, "The biomass index label (i.e., the derived quantity label)", "");
-  parameters_.Bind<Double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_lower_bound(0, true);
+  parameters_.Bind<Double>(PARAM_BIOMASS_INDEX_SCALAR, &biomass_index_scalar_, "The biomass index re-scaling parameter", "", 1.0)->set_lower_bound(0, false);
+  parameters_.Bind<Double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, true);
   parameters_.Bind<Double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated", "", 0.0)->set_lower_bound(0, true);
   parameters_.Bind<Double>(PARAM_MAX_DELTA, &max_delta_, "The maximum difference (proportion) in catch that can be applied (no maximum = 0)", "", 0.0)->set_lower_bound(0, true);
   parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates", "", 1)->set_lower_bound(1, true);
@@ -100,7 +101,7 @@ void HarvestStrategyConstantU::DoUpdate() {
              << " with update_counter=" << update_counter_ << ", year_delta=" << year_delta_ << ", and result of test=" << do_update;
 
   if (do_update) {  // its in year_delta, so do an update
-    this_catch_  = biomass * u_ * multiplier_by_year_[model_->current_year()];
+    this_catch_  = (biomass * biomass_index_scalar_) * u_ * multiplier_by_year_[model_->current_year()];
     Double delta = (this_catch_ - last_catch_) / last_catch_;
     Double sign  = (delta >= 0) ? 1.0 : -1.0;
 
@@ -121,7 +122,8 @@ void HarvestStrategyConstantU::DoUpdate() {
     }
   }
 
-  LOG_FINE() << "HarvestStrategyConstantU: DoUpdateFunc in year=" << model_->current_year() << ", and with biomass_index=" << biomass << " and catch value=" << value_;
+  LOG_FINE() << "HarvestStrategyConstantU: DoUpdateFunc in year=" << model_->current_year() << ", and with biomass_index=" << biomass << ", scalar=" << biomass_index_scalar_
+             << " and catch value = " << value_;
 
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());
 }

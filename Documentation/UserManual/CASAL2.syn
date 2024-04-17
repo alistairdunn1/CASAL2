@@ -265,7 +265,9 @@ base_weight_units
 beta
 bias
 biomass
+biomass_index
 biomass_index_lag_years
+biomass_index_scalar
 burn_in
 by_length
 c

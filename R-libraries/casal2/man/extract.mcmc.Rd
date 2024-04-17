@@ -24,7 +24,7 @@ extract.mcmc(
 
 \item{fileEncoding}{Optional, allows the R-library to read in files that have been encoded in alternative UTF formats, see the manual for the error message that would indicate when to use this switch.}
 
-\item{quiet}{suppress print or cat statements to screen.}
+\item{quiet}{suppress information messages.}
 }
 \value{
 a 'casal2MCMC' that can be integrated using the str() function.

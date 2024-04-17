@@ -65,11 +65,11 @@ void Bindable<T>::Bind() {
    */
   if (range_.lower_flagged_ || range_.upper_flagged_) {
     if (range_.lower_flagged_ && (*target_ < range_.lower_bound_ || (*target_ == range_.lower_bound_ && !range_.lower_inclusive_)))
-      LOG_ERROR() << location() << ", the value of the parameter '" << label_ << "' (" << *target_ << ") "
-                  << "is less than the allowed lower bound (" << range_.lower_bound_ << ")";
+      LOG_ERROR() << location() << ", the value of the parameter '" << label_ << "' (" << *target_ << ") " << "is less than the allowed lower bound (" << range_.lower_bound_
+                  << ")";
     if (range_.upper_flagged_ && (*target_ > range_.upper_bound_ || (*target_ == range_.upper_bound_ && !range_.upper_inclusive_)))
-      LOG_ERROR() << location() << ", the value of the parameter '" << label_ << "' (" << *target_ << ") "
-                  << "is greater than the allowed upper bound (" << range_.upper_bound_ << ")";
+      LOG_ERROR() << location() << ", the value of the parameter '" << label_ << "' (" << *target_ << ") " << "is greater than the allowed upper bound (" << range_.upper_bound_
+                  << ")";
   }
   if (allowed_values_.size() != 0) {
     if (std::find(allowed_values_.begin(), allowed_values_.end(), *target_) == allowed_values_.end())
@@ -101,7 +101,7 @@ void Bindable<T>::set_allowed_values(std::initializer_list<T> list) {
  * @param lower_bound The lowest value the object can be (default inclusive)
  * @param upper_bound The highest value the object can be (default inclusive)
  * @param lower_inclusive Is the lower bound value inclusive (default true)
- * @param upper_inclusie Is the upper bound value inclusive (default true)
+ * @param upper_inclusive Is the upper bound value inclusive (default true)
  */
 template <typename T>
 void Bindable<T>::set_range(T lower_bound, T upper_bound, bool lower_inclusive, bool upper_inclusive) {

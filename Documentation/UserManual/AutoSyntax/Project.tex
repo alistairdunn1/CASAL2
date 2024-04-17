@@ -104,10 +104,16 @@
 \defRef{sec:Project-HarvestStrategyConstantU}
 \label{syntax:Project-HarvestStrategyConstantU}
 
+\defSub{biomass\_index\_scalar}{The biomass index re-scaling parameter}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
+
 \defSub{u}{The exploitation rate to apply}
 \defType{Real number (estimable)}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
+\defUpperBound{1 (inclusive)}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
 \defType{Real number (estimable)}
@@ -148,10 +154,16 @@
 \defRef{sec:Project-HarvestStrategyRampU}
 \label{syntax:Project-HarvestStrategyRampU}
 
-\defSub{u}{The exploitation rates to apply}
+\defSub{biomass\_index\_scalar}{The biomass index re-scaling parameter}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
+
+\defSub{u}{The exploitation rate to apply}
 \defType{Vector of real numbers (estimable)}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
+\defUpperBound{1 (inclusive)}
 
 \defSub{reference\_points}{The reference points for each exploitation rate}
 \defType{Vector of real numbers (estimable)}

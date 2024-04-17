@@ -154,6 +154,11 @@
 \defDefault{1}
 \defLowerBound{1 (inclusive)}
 
+\defSub{biomass\_index}{The biomass index for calculating the changes in catch}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
 \defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
 \defType{Non-negative integer}
 \defDefault{1}
@@ -178,10 +183,11 @@
 \defRef{sec:Project-HarvestStrategyConstantU}
 \label{syntax:Project-HarvestStrategyConstantU}
 
-\defSub{u}{The exploitation rate to apply}
+\defSub{u}{The exploitation rate to apply ($U$)}
 \defType{Real number}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
+\defUpperBound{1 (inclusive)}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
 \defType{Real number}
@@ -198,6 +204,16 @@
 \defType{Non-negative integer}
 \defDefault{1}
 \defLowerBound{1 (inclusive)}
+
+\defSub{biomass\_index}{The biomass index for calculating the changes in $U$}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
+\defSub{biomass\_index\_scalar}{A multiplicative scalar on the biomass index used for calculating the changes in $U$}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
 
 \defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
 \defType{Non-negative integer}
@@ -236,6 +252,7 @@
 \defSub{reference\_index}{The biomass index for reference points (i.e., the derived quantity label for the calculation of reference points)}
 \defType{String}
 \defDefault{No default}
+\defValue{A valid derived quantity label}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
 \defType{Real number}
@@ -252,6 +269,16 @@
 \defType{Non-negative integer}
 \defDefault{1}
 \defLowerBound{1 (inclusive)}
+
+\defSub{biomass\_index}{The biomass index for calculating the changes in $U$}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
+\defSub{biomass\_index\_scalar}{A multiplicative scalar on the biomass index used for calculating the changes in $U$}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
 
 \defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
 \defType{Non-negative integer}

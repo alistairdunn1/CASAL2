@@ -183,6 +183,7 @@
 #define PARAM_BIOMASS_DENSITY                     "biomass_density"
 #define PARAM_BIOMASS_EVENT_MORTALITY             "biomass_event_mortality"
 #define PARAM_BIOMASS_INDEX                       "biomass_index"
+#define PARAM_BIOMASS_INDEX_SCALAR                "biomass_index_scalar"
 #define PARAM_BOBYQA_INITIAL_TRUST_RADIUS         "bobyqa_initial_trust_radius"
 #define PARAM_BOBYQA_INTERPOLATION_POINTS         "bobyqa_interpolation_points"
 #define PARAM_BOBYQA_MAX_EVALUATIONS              "bobyqa_max_evaluations"
