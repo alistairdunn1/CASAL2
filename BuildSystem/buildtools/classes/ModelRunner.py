@@ -41,6 +41,7 @@ class ModelRunner:
             "TwoSexHybridMortality",
             "SBW",
             "Simple",
+            "SimpleNoStdYCS",
             "SimpleRicker",
             "SimpleWithMultiSelectivity",
             "ComplexTag",
@@ -69,6 +70,7 @@ class ModelRunner:
             "TwoSexHybridMortality",
             "SBW",
             "Simple",
+            "SimpleNoStdYCS",
             "SimpleRicker",
             "SexedLengthBased",
         }  # requires a config-adolc.csl2 file
@@ -93,6 +95,7 @@ class ModelRunner:
         }
         run_projections_list = {
             "Simple",
+            "SimpleNoStdYCS",
         }
         dir_list = os.listdir("../TestModels/")
         cwd = os.path.normpath(os.getcwd())
