@@ -107,8 +107,8 @@ void HarvestStrategyConstantU::DoUpdate() {
 
     LOG_FINE() << "HarvestStrategyConstantU: catch=" << this_catch_;
 
-    if (fabs(AS_DOUBLE(delta)) > AS_DOUBLE(min_delta_)) {                         // change is greater than the min_delta_
-      if (fabs(AS_DOUBLE(delta)) < AS_DOUBLE(max_delta_) || max_delta_ <= 0.0) {  // change is less than than the max_delta_ (but acccount for special case of max_delta_ = 0)
+    if (fabs(AS_DOUBLE(delta)) >= AS_DOUBLE(min_delta_)) {                           // change is greater than the min_delta_
+      if (max_delta_ <= 0.0 || (fabs(AS_DOUBLE(delta)) <= AS_DOUBLE(max_delta_))) {  // change is less than than the max_delta_ (but acccount for special case of max_delta_ = 0)
         // update the catch
         value_          = this_catch_;
         last_catch_     = value_;
@@ -119,6 +119,8 @@ void HarvestStrategyConstantU::DoUpdate() {
         last_catch_     = value_;
         update_counter_ = 0;
       }
+    } else {
+      value_ = last_catch_;
     }
   }
 

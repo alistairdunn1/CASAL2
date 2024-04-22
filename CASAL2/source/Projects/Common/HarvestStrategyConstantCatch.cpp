@@ -91,8 +91,7 @@ void HarvestStrategyConstantCatch::DoUpdate() {
   int    index_year       = model_->current_year() - year_lag_;
   Double biomass          = biomass_index_->GetValue(index_year);
   Double previous_biomass = biomass_index_->GetValue(index_year - year_lag_);
-
-  value_ = last_catch_;
+  value_                  = last_catch_;
 
   if (model_->current_year() >= first_year_)
     update_counter_++;
@@ -109,8 +108,8 @@ void HarvestStrategyConstantCatch::DoUpdate() {
 
     LOG_FINE() << "HarvestStrategyConstantCatch: catch=" << this_catch_;
 
-    if (fabs(AS_DOUBLE(delta)) > AS_DOUBLE(min_delta_)) {                         // change is greater than the min_delta_
-      if (fabs(AS_DOUBLE(delta)) < AS_DOUBLE(max_delta_) || max_delta_ <= 0.0) {  // change is less than than the max_delta_ (but acccount for special case of max_delta_ = 0)
+    if (fabs(AS_DOUBLE(delta)) >= AS_DOUBLE(min_delta_)) {                           // change is greater than the min_delta_
+      if (max_delta_ <= 0.0 || (fabs(AS_DOUBLE(delta)) <= AS_DOUBLE(max_delta_))) {  // change is less than than the max_delta_ (but acccount for special case of max_delta_ = 0)
         // update the catch
         value_          = this_catch_;
         last_catch_     = value_;
@@ -121,6 +120,8 @@ void HarvestStrategyConstantCatch::DoUpdate() {
         last_catch_     = value_;
         update_counter_ = 0;
       }
+    } else {
+      value_ = last_catch_;
     }
   }
 
