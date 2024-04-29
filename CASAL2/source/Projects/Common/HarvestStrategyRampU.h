@@ -53,6 +53,8 @@ private:
   Double           this_catch_;
   Double           current_catch_;
   int              update_counter_ = 0;
+  string           initialisation_phase_label_;
+  unsigned         initialisation_phase_;
 
 protected:
   shared_ptr<Model> model_ = nullptr;

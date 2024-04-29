@@ -154,7 +154,7 @@
 \defRef{sec:Project-HarvestStrategyRampU}
 \label{syntax:Project-HarvestStrategyRampU}
 
-\defSub{biomass\_index\_scalar}{The biomass index re-scaling parameter}
+\defSub{biomass\_index\_scalar}{The biomass value re-scaling parameter}
 \defType{Real number (estimable)}
 \defDefault{1.0}
 \defLowerBound{0 (exclusive)}
@@ -170,7 +170,7 @@
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 
-\defSub{reference\_index}{The biomass index for reference points}
+\defSub{reference\_index}{The biomass for calculating the status relative to the reference points (i.e., a derived quantity label)}
 \defType{String}
 \defDefault{No default}
 
@@ -199,14 +199,18 @@
 \defDefault{0}
 \defLowerBound{0 (inclusive)}
 
-\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{multiplier}{Multiplier that is applied to the calculated catch value under the harvest strategy rule}
 \defType{Vector of real numbers (estimable)}
 \defDefault{1.0}
 \defLowerBound{0 (exclusive)}
 
-\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+\defSub{first\_year}{The first year in which to apply the harvest strategy rule}
 \defType{Non-negative integer}
 \defDefault{0}
+
+\defSub{b0\_initialisation\_phase}{The initialisation phase label that the initial biomass is from}
+\defType{String}
+\defDefault{No default}
 
 \subsubsection{Project of type Log\_Normal}
 \commandlabsubarg{Project}{type}{Log\_Normal}.

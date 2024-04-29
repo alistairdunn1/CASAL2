@@ -5,11 +5,13 @@
  * @date 13/7/17
  * @section LICENSE
  *
- * Copyright NIWA Science ©2017 - www.niwa.co.nz
+ * Copyright NIWA Science ï¿½2017 - www.niwa.co.nz
  */
 #ifdef TESTMODE
 
 // Headers
+#include "ElementDifference.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -17,7 +19,6 @@
 
 #include "../../Model/Model.h"
 #include "../../TestResources/MockClasses/Model.h"
-#include "ElementDifference.h"
 
 // Namespaces
 namespace niwa {
@@ -30,8 +31,8 @@ using ::testing::Return;
  */
 class MockElementDifference : public ElementDifference {
 public:
-  MockElementDifference(shared_ptr<Model> model, double multipler, double* second_parameter, double* parameter) : ElementDifference(model) {
-    multiplier_         = multipler;
+  MockElementDifference(shared_ptr<Model> model, double multiplier, double* second_parameter, double* parameter) : ElementDifference(model) {
+    multiplier_         = multiplier;
     addressable_        = parameter;
     second_addressable_ = second_parameter;
   }

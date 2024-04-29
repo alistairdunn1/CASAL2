@@ -729,6 +729,7 @@
 #define PARAM_STEP_SIZE                           "step_size"
 #define PARAM_STRING                              "categorical"
 #define PARAM_STUDENTS_T                          "students_t"
+#define PARAM_SUM                                 "sum"
 #define PARAM_SUM_TO_ONE                          "sum_to_one"
 #define PARAM_SURVIVAL_CONSTANT_RATE              "survival_constant_rate"
 #define PARAM_T                                   "t"
