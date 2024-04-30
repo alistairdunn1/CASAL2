@@ -1256,19 +1256,20 @@ For a projection run in \CNAME, the model is initialised and run through the mod
 
 This section lists all the projections classes available, their functionality, and an example of the syntax.
 
-\paragraph[Constant]{Constant: The constant projection type, \argument{constant}}\index{Projections!Constant}\label{sec:Project-Constant}
+\paragraph[Constant]{Constant:} The constant projection type \argument{constant} \index{Projections!Constant}\label{sec:Project-Constant}
 
 A parameter can either be fixed during all projection years or specified individually for each projection year. This is a deterministic assumption, where the parameter is assumed to be known without error during projection years.
 
 {\small{\begin{verbatim}
 	@project Future_ycs
-	type       constant
-	parameter  process[Recruitment].recruitment_multipliers
-	years      2012:2016
-	values     1 2 1 2 0.5 # "values 3" means all years use 3
+	type constant
+	parameter process[Recruitment].recruitment_multipliers
+	years 2012:2016
+	values 1.0 2.0 1.0 2.0 0.5 # one value per year. Alternatively, a single value means all years use the same value
+	
 \end{verbatim}}}
 
-\paragraph[Multiple Values]{Multiple Values: The multiple values projection type, \argument{multiple\_values}}\index{Projections!Multiple Values}\label{sec:Project-MultipleValues}
+\paragraph[Multiple Values]{Multiple Values:} The multiple values projection type \argument{multiple\_values} \index{Projections!Multiple Values}\label{sec:Project-MultipleValues}
 
 Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection class. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this.
 
@@ -1278,23 +1279,23 @@ Users can specify a set of values for each projection year for each row in the \
 	parameter process[dtransition].proportions{disease}  
 	years 2024:2026
 	table values
-	#2024 2025 2026
+	# 2024 2025 2026
 	  0.1  0.2  0.3
 	  0.3  0.4  0.5
 	end_table
 \end{verbatim}}}
 
-\paragraph[Empirical sampling]{Empirical sampling: Sampling from a range of years, type  \argument{empirical\_sampling}}\index{Projections!Empirical sampling}\label{sec:Project-EmpiricalSampling}
+\paragraph[Empirical sampling]{Empirical sampling:} Sampling from a range of years \argument{empirical\_sampling} \index{Projections!Empirical sampling}\label{sec:Project-EmpiricalSampling}
 
 Parameters that have time components associated with them can be sampled uniformly with replacement over a range of years and used as values for the projected years. The year range to sample from is between \argument{start\_year} and \argument{final\_year}:
 
 {\small{\begin{verbatim}
-	@project   Future_ycs
-	type       empirical_sampling
-	parameter  process[Recruitment].standardised_recruitment_multipliers
-	years     2012:2016
-	start_year 1988     # re-sample from estimated values
-	final_year 2008     # from 1988 to 2008 inclusive
+	@project Future_ycs
+	type empirical_sampling
+	parameter process[Recruitment].standardised_recruitment_multipliers
+	years 2012:2016
+	start_year 1988 # re-sample from estimated values
+	final_year 2008 # from 1988 to 2008 inclusive
 	multiplier 1
 \end{verbatim}}}
 
@@ -1304,9 +1305,9 @@ In this specific case, project the \argument{standardised\_recruitment\_multipli
 
 Additionally, if not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty could be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is close to one over some pre-defined range. Note that this is recommended in any case, as the prior on recruitments is applied to the unstandardised values when the Haist parameterisation is used. 
 
-\paragraph[Lognormal]{Lognormal: Sampling from a Lognormal distribution, type  \argument{lognormal}}\index{Projections!Lognormal}\label{sec:Project-LogNormal}
+\paragraph[Lognormal]{Lognormal:} Sampling from a lognormal distribution \argument{lognormal} \index{Projections!Lognormal}\label{sec:Project-LogNormal}
 
-The parameters are drawn from a Gaussian (Normal) distribution in log space and exponentiated  to result in the Lognormal distribution
+The parameters are drawn from a Gaussian (Normal) distribution in log space and exponentiated to result in the lognormal distribution
 
 \begin{equation}\label{eq:lognormal}
 X_p = exp(\epsilon_p - \sigma^2 / 2)
@@ -1314,108 +1315,32 @@ X_p = exp(\epsilon_p - \sigma^2 / 2)
 
 where $\epsilon_p\stackrel{iid}{\sim}N(\mu,\sigma)$ and $X_p$ is the projected value for parameter $X$, and $\mu$ and $\sigma$ are the mean and standard deviation on the log scale.
 
-An example of applying this process to draw future year class parameters from a Lognormal distribution with mean 1 and standard deviation 0.8
+An example of applying this process to draw future year class parameters from a lognormal distribution with mean 1 and standard deviation 0.8
 
 {\small{\begin{verbatim}
 	@project Future_ycs
-	type       lognormal
-	parameter  process[Recruitment].recruitment_multipliers
-	years      2012:2016
-	mean       0   # mean 1 on un-transformed scale
-	sigma      0.8 # log scale
-	multiplier 1
-\end{verbatim}}}
-
-\paragraph[Lognormal-Empirical]{Lognormal-Empirical: Sampling from a Lognormal distribution where the  variance is estimated from values over a specified year range, type  \argument{lognormal\_empirical} }\index{Projections!Lognormal-Empirical}\label{sec:Project-LogNormalEmpirical} 
-
-This method applies a Lognormal draw as in the \argument{Lognormal} method above and specifies a year range from which the standard deviation of the distribution is calculated. Then equation~\eqref{eq:lognormal} is used to generate future values with a specified $\mu$ and empirically calculated $\sigma$,
-
-{\small{\begin{verbatim}
-	@project Future_ycs
-	type      lognormal_empirical
+	type lognormal
 	parameter process[Recruitment].recruitment_multipliers
-	years     2012:2016
-	mean      0
-	start_year 1988   # range of years to take the
-	final_year 2008   # values for \math{\sigma}
+	years 2012:2016
+	mean 0 # mean 1 on un-transformed scale
+	sigma 0.8 # log scale
 	multiplier 1
 \end{verbatim}}}
 
-\paragraph[HarvestStrategyConstantCatch]{Harvest Strategy Constant Catch: specify a constant catch harvest strategy \argument{harvest\_strategy\_constant\_catch}}\index{Projections!HarvestStrategyConstantCatch}\label{sec:Project-HarvestStrategyConstantCatch} 
+\paragraph[Lognormal-Empirical]{Lognormal-Empirical:} Sampling from a lognormal distribution where the variance is estimated from values over a specified year range \argument{lognormal\_empirical} \index{Projections!Lognormal-Empirical}\label{sec:Project-LogNormalEmpirical} 
 
-This method applies a harvest strategy from a biomass index (i.e., a derived quantity). The harvest strategy is a constant catch method where the catch is updated according to a proportional change in the biomass index. 
-
-The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
-
-\TODO{add arguments and explanation}
+This method applies a lognormal draw as in the \argument{Lognormal} method above and specifies a year range from which the standard deviation of the distribution is calculated. Then equation~\eqref{eq:lognormal} is used to generate future values with a specified $\mu$ and empirically calculated $\sigma$,
 
 {\small{\begin{verbatim}
-			@project Future_ycs
-			type      harvest\_strategy\_constant\_catch
-			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
-			years     2012:2016
-            biomass_index SSB
-            catch 963.9
-            alpha 1.0
-            min_delta 0.1
-            max_delta 0.3
-            update_frequency_years 3
-            biomass_index_lag_years 2
-            current_catch 963.9
-            first_year 2009
-			multiplier 1
+	@project Future_ycs
+	type lognormal_empirical
+	parameter process[Recruitment].recruitment_multipliers
+	years 2012:2016
+	mean 0
+	start_year 1988 # range of years to take the
+	final_year 2008 # values for \math{\sigma}
+	multiplier 1
 \end{verbatim}}}
-
-\paragraph[HarvestStrategyConstantU]{Harvest Strategy Constant U: specify a constant U harvest strategy \argument{harvest\_strategy\_constant\_u}}\index{Projections!HarvestStrategyConstantU}\label{sec:Project-HarvestStrategyConstantU} 
-
-This method applies a harvest strategy from a biomass index (i.e., a derived quantity). The harvest strategy is a constant $U$ method where the catch is updated according to constant exploitation rate ($U$).
-
-The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
-
-\TODO{add arguments and explanation}
-
-{\small{\begin{verbatim}
-			@project Future_ycs
-			type      harvest\_strategy\_constant\_U
-			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
-			years     2012:2016
-			biomass_index SSB
-			u 0.15
-			min_delta 0.1
-			max_delta 0.3
-			update_frequency_years 3
-			biomass_index_lag_years 2
-			current_catch 963.9
-			first_year 2009
-			multiplier 1
-\end{verbatim}}}
-
-\paragraph[HarvestStrategyRampU]{Harvest Strategy Constant U: specify a ramp U harvest strategy \argument{harvest\_strategy\_ramp\_u}}\index{Projections!HarvestStrategyRampU}\label{sec:Project-HarvestStrategyRampU} 
-
-This method applies a harvest strategy from a biomass index (i.e., a derived quantity) using a ramp rule. The harvest strategy is a $U$ where the catch is updated according to a ramp rule for the exploitation rate ($U$).
-
-The biomass index and reference index are derived quantities. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
-
-\TODO{add arguments and explanation}
-
-{\small{\begin{verbatim}
-			@project Future_ycs
-			type      harvest\_strategy\_constant\_U
-			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
-			years     2012:2016
-			biomass_index SSB
-			reference_index SSB
-			u                0.00 0.00 0.10 0.25
-			reference_points 0.00 0.10 0.20 0.40 
-			min_delta 0.1
-			max_delta 0.3
-			update_frequency_years 3
-			biomass_index_lag_years 2
-			current_catch 963.9
-			first_year 2009
-			multiplier 1
-\end{verbatim}}}
-
 
 %\paragraph[User Defined]{Sample from a user-defined function, \argument{user\_defined}}\index{Projections!User Defined}\label{sec:Project-UserDefined} \STATUS{Untested}
 
@@ -1445,7 +1370,7 @@ The biomass index and reference index are derived quantities. A derived quantity
 
 %Care should be taken when writing user-defined equations. The above equation is: if $\%B_{2014} \leq 0.1$ then set next year's catch to 0.0, else if $\%B_{2014} > 0.1 \text{ } \& \text{ } \%B_{2014} \leq 0.2$ then set next year's catch equal to $\%B_{2014} \times SSB_{2014}$, else set next year's catch to $0.2 SSB_{2014}$.
 
-\paragraph[Catches]{Specifying catch for projections }\index{Projections!Catches}\label{sec:Project-Catch}
+\paragraph[Catches]{Catches:} Specifying catch for projections \index{Projections!Catches}\label{sec:Project-Catch}
 
 Specifying catches in a projection uses a slightly different format, as catches are in a table format. Here the table name (i.e., method) needs to be appended to specify the parameter to project. This uses the syntax \texttt{block\_type[block\_label].method\_fishinglabel}. 
 
@@ -1479,4 +1404,93 @@ use the parameter label	\argument{process[Fishing].method\_fishingPot}, i.e.,
 	years     2020:2029
 	values    4000
 \end{verbatim}}}
+
+\paragraph[HarvestStrategyConstantCatch]{Harvest Strategy Constant Catch:} Specify catches for projections using a constant catch harvest strategy \argument{harvest\_strategy\_constant\_catch} \index{Projections!HarvestStrategyConstantCatch}\label{sec:Project-HarvestStrategyConstantCatch} 
+
+This method applies a harvest strategy from a biomass index (i.e., a derived quantity). The harvest strategy is a constant catch method where the catch is updated according to a proportional change in the biomass index. 
+
+The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
+
+The constant catch harvest strategy applies a catch equal to \argument{alpha} times the proportional change in the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+
+The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
+
+{\small{\begin{verbatim}
+			@project Future_ycs
+			type      harvest_strategy_constant_catch
+			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
+			years     2012:2016
+			biomass_index SSB
+			catch 963.9
+			alpha 1.0
+			min_delta 0.1
+			max_delta 0.3
+			update_frequency_years 3
+			biomass_index_lag_years 2
+			current_catch 963.9
+			first_year 2009
+			multiplier 1
+\end{verbatim}}}
+
+\paragraph[HarvestStrategyConstantU]{Harvest Strategy Constant U:} Specify catches for projections using a constant $U$ harvest strategy \argument{harvest\_strategy\_constant\_u} \index{Projections!HarvestStrategyConstantU}\label{sec:Project-HarvestStrategyConstantU} 
+
+This method applies a harvest strategy from a biomass index (i.e., a derived quantity). The harvest strategy is a constant $U$ method where the catch is updated according to constant exploitation rate ($U$).
+
+The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
+
+The constant $U$ harvest strategy applies a catch equal to \argument{U} times the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+
+The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
+
+{\small{\begin{verbatim}
+			@project Future_ycs
+			type      harvest_strategy_constant_u
+			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
+			years     2012:2016
+			biomass_index SSB
+			u 0.15
+			min_delta 0.1
+			max_delta 0.3
+			update_frequency_years 3
+			biomass_index_lag_years 2
+			current_catch 963.9
+			first_year 2009
+			multiplier 1
+\end{verbatim}}}
+
+\paragraph[HarvestStrategyRampU]{Harvest Strategy Ramp U:} Specify catches for projections using a ramp $U$ harvest strategy \argument{harvest\_strategy\_ramp\_u} \index{Projections!HarvestStrategyRampU} \label{sec:Project-HarvestStrategyRampU} 
+
+This method applies a harvest strategy using a ramp rule. The harvest strategy is an exploitation rate $\hat{U}$ where the catch is updated according to a ramp rule using \argument{u} and the \argument{reference\_index} to calculate $\hat{U}$, with this then multiplied by the \argument{biomass\_index} to determine the catch to apply.
+
+The biomass index and reference index are derived quantities. Derived quantities of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate. The \argument{biomass\_index} and \argument{reference\_index} can be the same derived quantity.
+
+The ramp $U$ harvest strategy calculates the $\hat{U}$ to be applied from a ramp rule defined by a vector of \argument{u}'s and a equal length vector of \argument{reference\_points}. Here, the value of $\hat{U}$ is a linear interpolation of the values of \argument{u} at the inflection points defined by the \argument{reference\_points}. 
+
+Both the \argument{reference\_index} and \argument{biomass\_index} are derived quantities where their value is equal to the value of the current year less the \argument{biomass\_index\_lag\_years}. The \argument{reference\_index} is then divided by its value from the initialisation phase (i.e., is a proportion). 
+
+The ramp rule harvest strategy applies a catch equal to $\hat{U}$ times the biomass index (scaled by \argument{multiplier}). It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+
+In addition, the value of $\hat{U}$ that is used is equal to the lowest value of \argument{u} when the reference index is less than the first value of \argument{reference\_points}, and equal to the highest value of \argument{u} when the reference index is greater than last value of \argument{reference\_points}. Otherwise, $\hat{U}$ is derived using linear interpolation between inflection points of the reference index.
+
+
+The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
+
+{\small{\begin{verbatim}
+			@project Future_ycs
+			type      harvest_strategy_ramp_u
+			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
+			years     2012:2016
+			biomass_index SSB
+			reference_index SSB
+			u                0.00 0.00 0.10 0.25
+			reference_points 0.00 0.10 0.20 0.40 
+			min_delta 0.1
+			max_delta 0.3
+			update_frequency_years 3
+			biomass_index_lag_years 2
+			current_catch 963.9
+			first_year 2009
+			multiplier 1
+\end{verbatim}}}
+
 
