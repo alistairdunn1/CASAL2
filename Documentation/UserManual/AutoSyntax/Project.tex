@@ -155,34 +155,34 @@
 \label{syntax:Project-HarvestStrategyRampU}
 
 \defSub{biomass\_index\_scalar}{The biomass value re-scaling parameter}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{1.0}
-\defLowerBound{0 (exclusive)}
+\defLowerBound{0.0 (exclusive)}
 
 \defSub{u}{The exploitation rate to apply}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{0.0}
 \defLowerBound{0 (inclusive)}
 \defUpperBound{1 (inclusive)}
 
 \defSub{reference\_points}{The reference points for each exploitation rate}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{0.0}
-\defLowerBound{0 (inclusive)}
+\defLowerBound{0.0 (inclusive)}
 
 \defSub{reference\_index}{The biomass for calculating the status relative to the reference points (i.e., a derived quantity label)}
 \defType{String}
 \defDefault{No default}
 
 \defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
-\defLowerBound{0 (inclusive)}
+\defLowerBound{0.0 (inclusive)}
 
 \defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied (no maximum = 0)}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
-\defLowerBound{0 (inclusive)}
+\defLowerBound{0.0 (inclusive)}
 
 \defSub{update\_frequency\_years}{The number of years between updates}
 \defType{Non-negative integer}
@@ -195,14 +195,14 @@
 \defLowerBound{1 (inclusive)}
 
 \defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
-\defType{Real number (estimable)}
-\defDefault{0}
-\defLowerBound{0 (inclusive)}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0.0 (inclusive)}
 
 \defSub{multiplier}{Multiplier that is applied to the calculated catch value under the harvest strategy rule}
 \defType{Vector of real numbers (estimable)}
 \defDefault{1.0}
-\defLowerBound{0 (exclusive)}
+\defLowerBound{0.0 (exclusive)}
 
 \defSub{first\_year}{The first year in which to apply the harvest strategy rule}
 \defType{Non-negative integer}

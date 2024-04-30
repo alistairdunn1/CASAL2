@@ -46,8 +46,8 @@ protected:
   Catchability*      catchability_          = nullptr;
   Nuisance*          nuisance_catchability_ = nullptr;
   bool               nuisance_q_            = false;
-  double             biomass_;
-  double             last_biomass_;
+  Double             biomass_;
+  Double             last_biomass_;
   double             cv_    = 0;
   double             sigma_ = 0;
   double             bias_  = 0;

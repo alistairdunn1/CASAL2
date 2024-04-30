@@ -57,12 +57,12 @@ The Abundance type has no additional subcommands.
 \defSub{distribution}{The type of distribution for the biomass index}
 \defType{String}
 \defDefault{lognormal}
-\defValue{Either \texttt{normal} or \texttt{lognormal}}
+\defValue{Either \texttt{normal}, \texttt{lognormal}, or \texttt{none}}
 
 \defSub{cv}{The cv for the uncertainty for the distribution when generating the biomass index}
 \defType{Real number}
 \defDefault{0.2}
-\defLowerBound{0.0 (exclusive)}
+\defLowerBound{0.0 (exclusive) for the \texttt{normal} or \texttt{lognormal}}
 
 \defSub{bias}{The bias (a positive or negative proportion) when generating the biomass index}
 \defType{Real number}

@@ -31,8 +31,8 @@ namespace age {
 BiomassIndex::BiomassIndex(shared_ptr<Model> model) : DerivedQuantity(model), model_(model) {
   // clang-format off
   parameters_.Bind<string>(PARAM_AGE_WEIGHT_LABELS, &age_weight_labels_, "The labels for the age-weights that correspond to each category for the biomass_index calculation", "","");
-  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The type of distribution for the biomass index", "","lognormal")->set_allowed_values({PARAM_NORMAL, PARAM_LOGNORMAL});
-  parameters_.Bind<double>(PARAM_CV, &cv_, "The cv for the uncertainty for the distribution when generating the biomass index", "", 0.2)->set_lower_bound(0.0, false);
+  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The type of distribution for the biomass index", "","lognormal")->set_allowed_values({PARAM_NORMAL, PARAM_LOGNORMAL, PARAM_NONE});
+  parameters_.Bind<double>(PARAM_CV, &cv_, "The cv for the uncertainty for the distribution when generating the biomass index", "", 0.2)->set_lower_bound(0.0, true);
   parameters_.Bind<double>(PARAM_BIAS, &bias_, "The bias (a positive or negative proportion) when generating the biomass index", "", 0.0);
   parameters_.Bind<double>(PARAM_RHO, &rho_, "The autocorrelation in annual values when generating the biomass index", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The catchability to use when generating the biomass index", "", "");
@@ -48,6 +48,9 @@ void BiomassIndex::DoValidate() {
     if (age_weight_labels_.size() != category_labels_.size())
       LOG_ERROR_P(PARAM_AGE_WEIGHT_LABELS) << "If age_weight_labels are used, one is required for each category. There are " << age_weight_labels_.size()
                                            << " age_weight_labels, but there are " << category_labels_.size() << " category_labels";
+  }
+  if (distribution_ != PARAM_NONE && cv_ <= 0) {
+    LOG_ERROR_P(PARAM_CV) << "if the " PARAM_DISTRIBUTION << " is " << PARAM_NORMAL << " or " << PARAM_LOGNORMAL << ", then the " << PARAM_CV << " must be greater than 0";
   }
 }
 
@@ -68,8 +71,12 @@ void BiomassIndex::DoBuild() {
   }
   if (distribution_ == PARAM_LOGNORMAL) {
     sigma_ = sqrt(cv_ * cv_ + 1.0);
-  } else {
+  } else if (distribution_ == PARAM_NORMAL) {
     sigma_ = cv_;
+  } else if (distribution_ == PARAM_NONE) {
+    sigma_ = 0;
+  } else {
+    LOG_ERROR_P(PARAM_DISTRIBUTION) << "is not a valid distribution type";
   }
   if (catchability_label_ != "") {
   } else {
@@ -143,6 +150,8 @@ void BiomassIndex::Execute() {
     rng_value = rng.lognormal(1.0, cv_) * (1.0 + bias_);
   } else if (distribution_ == PARAM_NORMAL) {
     rng_value = rng.normal(1.0, cv_) * (1.0 + bias_);
+  } else if (distribution_ == PARAM_NONE) {
+    rng_value = 1.0 + bias_;
   } else {
     LOG_ERROR_P(PARAM_DISTRIBUTION) << "is not a valid distribution type";
   }
@@ -183,27 +192,26 @@ void BiomassIndex::Execute() {
       initialisation_values_.resize(initialisation_phase + 1);
 
     if (time_step_proportion_ == 0.0) {
-      biomass_ = AS_DOUBLE(cache_value_) * rng_value;
+      biomass_ = cache_value_ * rng_value;
       biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
       biomass_ = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       initialisation_values_[initialisation_phase].push_back(biomass_);
     } else if (time_step_proportion_ == 1.0) {
-      biomass_ = AS_DOUBLE(value) * rng_value;
+      biomass_ = value * rng_value;
       biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
       biomass_ = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      ;
       initialisation_values_[initialisation_phase].push_back(biomass_);
     } else if (mean_proportion_method_) {
-      biomass_ = AS_DOUBLE((cache_value_ + ((value - cache_value_) * time_step_proportion_))) * rng_value;
-      biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
-      biomass_ = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      ;
+      Double temp = cache_value_ + ((value - cache_value_) * time_step_proportion_);
+      biomass_    = temp * rng_value;
+      biomass_    = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_    = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       initialisation_values_[initialisation_phase].push_back(biomass_);
     } else {
-      biomass_ = AS_DOUBLE((pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_))) * rng_value;
-      biomass_ = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
-      biomass_ = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      ;
+      Double temp = pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_);
+      biomass_    = temp * rng_value;
+      biomass_    = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_    = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       initialisation_values_[initialisation_phase].push_back(biomass_);
     }
 
@@ -228,22 +236,24 @@ void BiomassIndex::Execute() {
     }
 
     if (time_step_proportion_ == 0.0) {
-      biomass_                        = AS_DOUBLE(cache_value_) * rng_value;
+      biomass_                        = cache_value_ * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
       biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       values_[model_->current_year()] = biomass_;
     } else if (time_step_proportion_ == 1.0) {
-      biomass_                        = AS_DOUBLE(value) * rng_value;
+      biomass_                        = value * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
       biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       values_[model_->current_year()] = biomass_;
     } else if (mean_proportion_method_) {
-      biomass_                        = AS_DOUBLE((cache_value_ + ((value - cache_value_) * time_step_proportion_))) * rng_value;
+      Double temp                     = cache_value_ + ((value - cache_value_) * time_step_proportion_);
+      biomass_                        = temp * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
       biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       values_[model_->current_year()] = biomass_;
     } else {
-      biomass_                        = AS_DOUBLE((pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_))) * rng_value;
+      Double temp                     = pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_);
+      biomass_                        = temp * rng_value;
       biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
       biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
       values_[model_->current_year()] = biomass_;

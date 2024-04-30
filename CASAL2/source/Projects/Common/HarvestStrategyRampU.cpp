@@ -28,16 +28,16 @@ namespace projects {
 HarvestStrategyRampU::HarvestStrategyRampU(shared_ptr<Model> model) : Project(model), model_(model) {
   // clang-format off
   parameters_.Bind<string>(PARAM_BIOMASS_INDEX, &biomass_index_label_, "The biomass used to calculate the catch from the U (i.e., a derived quantity label)", "");
-  parameters_.Bind<Double>(PARAM_BIOMASS_INDEX_SCALAR, &biomass_index_scalar_, "The biomass value re-scaling parameter", "", 1.0)->set_lower_bound(0, false);
-  parameters_.Bind<Double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, true);
-  parameters_.Bind<Double>(PARAM_REFERENCE_POINTS, &reference_points_, "The reference points for each exploitation rate", "", 0.0)->set_lower_bound(0, true);
+  parameters_.Bind<double>(PARAM_BIOMASS_INDEX_SCALAR, &biomass_index_scalar_, "The biomass value re-scaling parameter", "", 1.0)->set_lower_bound(0.0, false);
+  parameters_.Bind<double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, true);
+  parameters_.Bind<double>(PARAM_REFERENCE_POINTS, &reference_points_, "The reference points for each exploitation rate", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<string>(PARAM_REFERENCE_INDEX, &reference_index_label_, "The biomass for calculating the status relative to the reference points (i.e., a derived quantity label)", "");
-  parameters_.Bind<Double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated", "", 0.0)->set_lower_bound(0, true);
-  parameters_.Bind<Double>(PARAM_MAX_DELTA, &max_delta_, "The maximum difference (proportion) in catch that can be applied (no maximum = 0)", "", 0.0)->set_lower_bound(0, true);
+  parameters_.Bind<double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<double>(PARAM_MAX_DELTA, &max_delta_, "The maximum difference (proportion) in catch that can be applied (no maximum = 0)", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates", "", 1)->set_lower_bound(1, true);
   parameters_.Bind<unsigned>(PARAM_YEAR_LAG, &year_lag_, "The lag (years) of the derived_quantity that is used for the calculation of the catch", "", 1)->set_lower_bound(1, true);
-  parameters_.Bind<Double>(PARAM_CURRENT_CATCH, &current_catch_, "The current catch to apply at the start of the projections (applied until first_year)", "", 0)->set_lower_bound(0, true);
-  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the calculated catch value under the harvest strategy rule", "", 1.0)->set_lower_bound(0, false);
+  parameters_.Bind<double>(PARAM_CURRENT_CATCH, &current_catch_, "The current catch to apply at the start of the projections (applied until first_year)", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the calculated catch value under the harvest strategy rule", "", 1.0)->set_lower_bound(0.0, false);
   parameters_.Bind<unsigned>(PARAM_FIRST_YEAR, &first_year_, "The first year in which to apply the harvest strategy rule", "", 0);
   parameters_.Bind<string>(PARAM_B0_PHASE, &initialisation_phase_label_, "The initialisation phase label that the initial biomass is from", "", "");
   // clang-format on
@@ -60,7 +60,7 @@ void HarvestStrategyRampU::DoValidate() {
     }
     multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
   } else {
-    Double val          = 1.0;
+    double val          = 1.0;
     multiplier_by_year_ = utilities::Map::create(years_, val);
   }
 
@@ -123,7 +123,7 @@ void HarvestStrategyRampU::DoUpdate() {
   unsigned index_year  = model_->current_year() - year_lag_;
   Double   ref_biomass = reference_index_->GetValue(index_year) / reference_index_->GetLastValueFromInitialisation(initialisation_phase_);
   Double   biomass     = biomass_index_->GetValue(index_year);
-  Double   u           = 0.0;
+  double   u           = 0.0;
   value_               = last_catch_;
 
   if (model_->current_year() >= first_year_)
@@ -137,13 +137,18 @@ void HarvestStrategyRampU::DoUpdate() {
       if (ref_biomass < reference_points_[reference_points_.size() - 1]) {
         for (unsigned i = 1; i < reference_points_.size(); ++i) {
           if (reference_points_[i] > ref_biomass) {
-            Double a = 0.0;
-            Double b = 0.0;
-            Double f = 0.0;
-            a        = u_[i - 1];
-            b        = u_[i];
-            f        = (ref_biomass - reference_points_[i - 1]) / (reference_points_[i] - reference_points_[i - 1]);
-            u        = a * (1.0 - f) + (b * f);
+            //           std::cerr << "Here 4\n";
+            double a     = 0.0;
+            double b     = 0.0;
+            double f     = 0.0;
+            a            = u_[i - 1];
+            b            = u_[i];
+            double temp1 = AS_DOUBLE(ref_biomass) - reference_points_[i - 1];
+            double temp2 = reference_points_[i] - reference_points_[i - 1];
+            f            = temp1 / temp2;
+            // f     = (ref_biomass - reference_points_[i - 1]) / (reference_points_[i] - reference_points_[i - 1]);
+            u = a * (1.0 - f) + (b * f);
+            LOG_FINEST() << "HarvestStrategyRampU:u=" << u << " ref_biomass=" << ref_biomass << " reference_points[i]=" << reference_points_[i] << "\n";
             break;
           }
         }
@@ -159,14 +164,15 @@ void HarvestStrategyRampU::DoUpdate() {
                << "] in year=" << model_->current_year() << " using index_year=" << index_year << " with update_counter=" << update_counter_ << ", year_delta=" << year_delta_
                << ", and result of do_update=" << do_update;
 
-    this_catch_  = (biomass * biomass_index_scalar_) * u * multiplier_by_year_[model_->current_year()];
-    Double delta = (this_catch_ - last_catch_) / last_catch_;
-    Double sign  = (delta >= 0) ? 1.0 : -1.0;
+    Double temp_catch = (biomass * biomass_index_scalar_) * u * multiplier_by_year_[model_->current_year()];
+    this_catch_       = AS_DOUBLE(temp_catch);
+    double delta      = (this_catch_ - last_catch_) / last_catch_;
+    double sign       = (delta >= 0) ? 1.0 : -1.0;
 
     LOG_FINE() << "HarvestStrategyRampU: catch=" << this_catch_ << " and last_catch=" << last_catch_;
 
-    if (fabs(AS_DOUBLE(delta)) >= AS_DOUBLE(min_delta_)) {                           // change is greater than the min_delta_
-      if (max_delta_ <= 0.0 || (fabs(AS_DOUBLE(delta)) <= AS_DOUBLE(max_delta_))) {  // change is less than than the max_delta_ (but acccount for special case of max_delta_ = 0)
+    if (fabs(delta) >= min_delta_) {                           // change is greater than the min_delta_
+      if (max_delta_ <= 0.0 || (fabs(delta) <= max_delta_)) {  // change is less than than the max_delta_ (but acccount for special case of max_delta_ = 0)
         // update the catch
         value_          = this_catch_;
         last_catch_     = value_;
