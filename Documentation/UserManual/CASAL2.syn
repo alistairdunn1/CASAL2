@@ -264,6 +264,7 @@ b_max
 base_weight_units
 beta
 bias
+bias_adjustment
 biomass
 biomass_index
 biomass_index_lag_years

@@ -14,6 +14,7 @@
 #include "../../Model/Managers.h"
 #include "../../Model/Model.h"
 #include "../../Reports/Manager.h"
+#include "../../Utilities/Math.h"
 #include "../../Utilities/RandomNumberGenerator.h"
 #include "../../Utilities/To.h"
 #include "InitialisationPhases/Manager.h"
@@ -22,6 +23,8 @@
 namespace niwa {
 namespace projects {
 
+namespace math = niwa::utilities::math;
+
 /**
  * Default constructor
  */
@@ -29,7 +32,7 @@ HarvestStrategyRampU::HarvestStrategyRampU(shared_ptr<Model> model) : Project(mo
   // clang-format off
   parameters_.Bind<string>(PARAM_BIOMASS_INDEX, &biomass_index_label_, "The biomass used to calculate the catch from the U (i.e., a derived quantity label)", "");
   parameters_.Bind<double>(PARAM_BIOMASS_INDEX_SCALAR, &biomass_index_scalar_, "The biomass value re-scaling parameter", "", 1.0)->set_lower_bound(0.0, false);
-  parameters_.Bind<double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, true);
+  parameters_.Bind<double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, false);
   parameters_.Bind<double>(PARAM_REFERENCE_POINTS, &reference_points_, "The reference points for each exploitation rate", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<string>(PARAM_REFERENCE_INDEX, &reference_index_label_, "The biomass for calculating the status relative to the reference points (i.e., a derived quantity label)", "");
   parameters_.Bind<double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated", "", 0.0)->set_lower_bound(0.0, true);
@@ -40,6 +43,7 @@ HarvestStrategyRampU::HarvestStrategyRampU(shared_ptr<Model> model) : Project(mo
   parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the calculated catch value under the harvest strategy rule", "", 1.0)->set_lower_bound(0.0, false);
   parameters_.Bind<unsigned>(PARAM_FIRST_YEAR, &first_year_, "The first year in which to apply the harvest strategy rule", "", 0);
   parameters_.Bind<string>(PARAM_B0_PHASE, &initialisation_phase_label_, "The initialisation phase label that the initial biomass is from", "", "");
+  parameters_.Bind<bool>(PARAM_BIAS_ADJUSTMENT, &adjust_bias_, "Indicator whether to adjust for the mean bias in the calculation of the reference biomass", "", false);
   // clang-format on
 
   initialisation_phase_ = 0;
@@ -95,6 +99,7 @@ void HarvestStrategyRampU::DoValidate() {
 void HarvestStrategyRampU::DoBuild() {
   biomass_index_   = model_->managers()->derived_quantity()->GetDerivedQuantity(biomass_index_label_);
   reference_index_ = model_->managers()->derived_quantity()->GetDerivedQuantity(reference_index_label_);
+
   if (!biomass_index_) {
     LOG_ERROR_P(PARAM_BIOMASS_INDEX) << "The " << PARAM_BIOMASS_INDEX << " derived_quantity (" << biomass_index_label_ << ") was not found.";
   }
@@ -122,9 +127,11 @@ void HarvestStrategyRampU::DoReset() {
 void HarvestStrategyRampU::DoUpdate() {
   unsigned index_year  = model_->current_year() - year_lag_;
   Double   ref_biomass = reference_index_->GetValue(index_year) / reference_index_->GetLastValueFromInitialisation(initialisation_phase_);
-  Double   biomass     = biomass_index_->GetValue(index_year);
-  double   u           = 0.0;
-  value_               = last_catch_;
+  if (adjust_bias_)
+    ref_biomass = ref_biomass * reference_index_->GetBiasAdjustment();
+  Double biomass = biomass_index_->GetValue(index_year);
+  double u       = 0.0;
+  value_         = last_catch_;
 
   if (model_->current_year() >= first_year_)
     update_counter_++;
@@ -136,18 +143,13 @@ void HarvestStrategyRampU::DoUpdate() {
     if (ref_biomass > reference_points_[0]) {
       if (ref_biomass < reference_points_[reference_points_.size() - 1]) {
         for (unsigned i = 1; i < reference_points_.size(); ++i) {
-          if (reference_points_[i] > ref_biomass) {
-            //           std::cerr << "Here 4\n";
-            double a     = 0.0;
-            double b     = 0.0;
-            double f     = 0.0;
-            a            = u_[i - 1];
-            b            = u_[i];
+          if (ref_biomass > reference_points_[i - 1] && ref_biomass <= reference_points_[i]) {
+            double a     = u_[i - 1];
+            double b     = u_[i];
             double temp1 = AS_DOUBLE(ref_biomass) - reference_points_[i - 1];
             double temp2 = reference_points_[i] - reference_points_[i - 1];
-            f            = temp1 / temp2;
-            // f     = (ref_biomass - reference_points_[i - 1]) / (reference_points_[i] - reference_points_[i - 1]);
-            u = a * (1.0 - f) + (b * f);
+            double f     = temp1 / temp2;  // temp2 must be greater than zero (in DoValidate)
+            u            = a * (1.0 - f) + (b * f);
             LOG_FINEST() << "HarvestStrategyRampU:u=" << u << " ref_biomass=" << ref_biomass << " reference_points[i]=" << reference_points_[i] << "\n";
             break;
           }
@@ -166,7 +168,7 @@ void HarvestStrategyRampU::DoUpdate() {
 
     Double temp_catch = (biomass * biomass_index_scalar_) * u * multiplier_by_year_[model_->current_year()];
     this_catch_       = AS_DOUBLE(temp_catch);
-    double delta      = (this_catch_ - last_catch_) / last_catch_;
+    double delta      = (this_catch_ - last_catch_) / math::ZeroFun(last_catch_, math::ZERO);
     double sign       = (delta >= 0) ? 1.0 : -1.0;
 
     LOG_FINE() << "HarvestStrategyRampU: catch=" << this_catch_ << " and last_catch=" << last_catch_;

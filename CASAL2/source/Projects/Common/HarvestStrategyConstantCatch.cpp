@@ -14,6 +14,7 @@
 #include "../../Model/Managers.h"
 #include "../../Model/Model.h"
 #include "../../Reports/Manager.h"
+#include "../../Utilities/Math.h"
 #include "../../Utilities/RandomNumberGenerator.h"
 #include "../../Utilities/To.h"
 #include "InitialisationPhases/Manager.h"
@@ -21,6 +22,8 @@
 // namespaces
 namespace niwa {
 namespace projects {
+
+namespace math = niwa::utilities::math;
 
 /**
  * Default constructor
@@ -103,7 +106,7 @@ void HarvestStrategyConstantCatch::DoUpdate() {
 
   if (do_update) {  // its in year_delta, so do an update
     this_catch_  = (((biomass - previous_biomass) / previous_biomass * alpha_) + 1) * catch_ * multiplier_by_year_[model_->current_year()];
-    Double delta = (this_catch_ - last_catch_) / last_catch_;
+    Double delta = (this_catch_ - last_catch_) / math::ZeroFun(last_catch_, math::ZERO);
     Double sign  = (delta >= 0) ? 1.0 : -1.0;
 
     LOG_FINE() << "HarvestStrategyConstantCatch: catch=" << this_catch_;

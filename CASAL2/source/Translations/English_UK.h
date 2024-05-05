@@ -176,6 +176,7 @@
 #define PARAM_BEVERTON_HOLT                       "beverton_holt"
 #define PARAM_BH_RECRUITMENT                      "bh_recruitment"
 #define PARAM_BIAS                                "bias"
+#define PARAM_BIAS_ADJUSTMENT                     "bias_adjustment"
 #define PARAM_BINOMIAL                            "binomial"
 #define PARAM_BINOMIAL_APPROX                     "binomial_approx"
 #define PARAM_BIN_LABELS                          "bin_labels"

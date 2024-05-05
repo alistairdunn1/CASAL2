@@ -1466,12 +1466,11 @@ The biomass index and reference index are derived quantities. Derived quantities
 
 The ramp $U$ harvest strategy calculates the $\hat{U}$ to be applied from a ramp rule defined by a vector of \argument{u}'s and a equal length vector of \argument{reference\_points}. Here, the value of $\hat{U}$ is a linear interpolation of the values of \argument{u} at the inflection points defined by the \argument{reference\_points}. 
 
-Both the \argument{reference\_index} and \argument{biomass\_index} are derived quantities where their value is equal to the value of the current year less the \argument{biomass\_index\_lag\_years}. The \argument{reference\_index} is then divided by its value from the initialisation phase (i.e., is a proportion). 
+Both the \argument{reference\_index} and \argument{biomass\_index} are derived quantities where their value is equal to the value of the current year less the \argument{biomass\_index\_lag\_years}. The \argument{reference\_index} is then divided by its value from the initialisation phase (i.e., is a proportion). Note that if a lognormal distribution is assumed for \argument{reference\_biomass}, the ratio of the initial to current biomass may need to be adjusted for the bias in the expectation. This can be applied using \argument{bias\_adjustment=true}. 
 
 The ramp rule harvest strategy applies a catch equal to $\hat{U}$ times the biomass index (scaled by \argument{multiplier}). It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
 
 In addition, the value of $\hat{U}$ that is used is equal to the lowest value of \argument{u} when the reference index is less than the first value of \argument{reference\_points}, and equal to the highest value of \argument{u} when the reference index is greater than last value of \argument{reference\_points}. Otherwise, $\hat{U}$ is derived using linear interpolation between inflection points of the reference index.
-
 
 The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
 

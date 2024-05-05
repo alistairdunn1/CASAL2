@@ -14,6 +14,7 @@
 #include "../../Model/Managers.h"
 #include "../../Model/Model.h"
 #include "../../Reports/Manager.h"
+#include "../../Utilities/Math.h"
 #include "../../Utilities/RandomNumberGenerator.h"
 #include "../../Utilities/To.h"
 #include "InitialisationPhases/Manager.h"
@@ -22,6 +23,8 @@
 namespace niwa {
 namespace projects {
 
+namespace math = niwa::utilities::math;
+
 /**
  * Default constructor
  */
@@ -29,7 +32,7 @@ HarvestStrategyConstantU::HarvestStrategyConstantU(shared_ptr<Model> model) : Pr
   // clang-format off
   parameters_.Bind<string>(PARAM_BIOMASS_INDEX, &biomass_index_label_, "The biomass index label (i.e., the derived quantity label)", "");
   parameters_.Bind<Double>(PARAM_BIOMASS_INDEX_SCALAR, &biomass_index_scalar_, "The biomass index re-scaling parameter", "", 1.0)->set_lower_bound(0, false);
-  parameters_.Bind<Double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, true);
+  parameters_.Bind<Double>(PARAM_U, &u_, "The exploitation rate to apply", "", 0.0)->set_range(0, 1, true, false);
   parameters_.Bind<Double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated", "", 0.0)->set_lower_bound(0, true);
   parameters_.Bind<Double>(PARAM_MAX_DELTA, &max_delta_, "The maximum difference (proportion) in catch that can be applied (no maximum = 0)", "", 0.0)->set_lower_bound(0, true);
   parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates", "", 1)->set_lower_bound(1, true);
@@ -102,7 +105,7 @@ void HarvestStrategyConstantU::DoUpdate() {
 
   if (do_update) {  // its in year_delta, so do an update
     this_catch_  = (biomass * biomass_index_scalar_) * u_ * multiplier_by_year_[model_->current_year()];
-    Double delta = (this_catch_ - last_catch_) / last_catch_;
+    Double delta = (this_catch_ - last_catch_) / math::ZeroFun(last_catch_, math::ZERO);
     Double sign  = (delta >= 0) ? 1.0 : -1.0;
 
     LOG_FINE() << "HarvestStrategyConstantU: catch=" << this_catch_;

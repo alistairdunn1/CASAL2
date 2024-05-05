@@ -34,7 +34,7 @@ BiomassIndex::BiomassIndex(shared_ptr<Model> model) : DerivedQuantity(model), mo
   parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The type of distribution for the biomass index", "","lognormal")->set_allowed_values({PARAM_NORMAL, PARAM_LOGNORMAL, PARAM_NONE});
   parameters_.Bind<double>(PARAM_CV, &cv_, "The cv for the uncertainty for the distribution when generating the biomass index", "", 0.2)->set_lower_bound(0.0, true);
   parameters_.Bind<double>(PARAM_BIAS, &bias_, "The bias (a positive or negative proportion) when generating the biomass index", "", 0.0);
-  parameters_.Bind<double>(PARAM_RHO, &rho_, "The autocorrelation in annual values when generating the biomass index", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<double>(PARAM_RHO, &rho_, "The autocorrelation between annual values when generating the biomass index", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The catchability to use when generating the biomass index", "", "");
   // clang-format on
 }
@@ -70,11 +70,14 @@ void BiomassIndex::DoBuild() {
     }
   }
   if (distribution_ == PARAM_LOGNORMAL) {
-    sigma_ = sqrt(cv_ * cv_ + 1.0);
+    sigma_                      = sqrt(cv_ * cv_ + 1.0);
+    bias_adjustment_multiplier_ = 1.0 / (cv_ * cv_ + 1);
   } else if (distribution_ == PARAM_NORMAL) {
-    sigma_ = cv_;
+    sigma_                      = cv_;
+    bias_adjustment_multiplier_ = 1.0;
   } else if (distribution_ == PARAM_NONE) {
-    sigma_ = 0;
+    sigma_                      = 0.0;
+    bias_adjustment_multiplier_ = 1.0;
   } else {
     LOG_ERROR_P(PARAM_DISTRIBUTION) << "is not a valid distribution type";
   }
@@ -123,7 +126,6 @@ void BiomassIndex::PreExecute() {
       }
     }
   }
-
   LOG_TRACE();
 }
 

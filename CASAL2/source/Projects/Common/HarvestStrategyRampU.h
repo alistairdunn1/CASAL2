@@ -40,6 +40,7 @@ private:
   vector<double>   u_;
   vector<double>   reference_points_;
   double           value_;
+  bool             adjust_bias_;
   double           min_delta_;
   double           max_delta_;
   unsigned         year_lag_;
