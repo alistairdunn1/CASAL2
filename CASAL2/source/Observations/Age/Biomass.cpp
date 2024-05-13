@@ -88,35 +88,40 @@ void Biomass::DoValidate() {
   unsigned                vals_expected = 1 + num_obs + 1;  // year, observation value(s), error value
   vector<vector<string>>& obs_data      = obs_table_->data();
   if (obs_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_OBS) << " has " << obs_data.size() << " rows defined, but "
-                           << "does not match the number of years provided " << years_.size();
+    LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but does not match the number of years provided (number of years = " << years_.size() << ")";
   }
 
   LOG_MEDIUM() << "Number of categories: " << num_obs << ", number of years: " << years_.size() << ", number of observation columns: " << obs_data.size();
 
-  unsigned year      = 0;
-  double   obs_value = 0;
-  double   err_value = 0;
+  unsigned         year      = 0;
+  double           obs_value = 0;
+  double           err_value = 0;
+  vector<unsigned> table_years;
   for (vector<string>& obs_data_line : obs_data) {
     if (obs_data_line.size() != vals_expected) {
-      LOG_ERROR_P(PARAM_OBS) << " has " << obs_data_line.size() << " values defined, but does not match " << vals_expected;
+      LOG_ERROR_P(PARAM_OBS) << "has " << obs_data_line.size() << " values defined, but does not match " << vals_expected;
     }
 
     if (!utilities::To<unsigned>(obs_data_line.front(), year))
       LOG_ERROR_P(PARAM_OBS) << " value " << obs_data_line.front() << " could not be converted to an unsigned integer. It should be the year for this line";
     if (std::find(years_.begin(), years_.end(), year) == years_.end())
       LOG_ERROR_P(PARAM_OBS) << " year " << year << " is not a valid year for this observation";
-
+    // Check to validate each row specifies a unique year
+    if (std::find(table_years.begin(), table_years.end(), year) == table_years.end())
+      table_years.push_back(year);
+    else
+      LOG_ERROR_P(PARAM_OBS) << "the year " << year << " occurs more than once in the table of data. Please check the input file";
+    // Input and check table data
     for (unsigned i = 1; i <= num_obs; ++i) {
       if (!utilities::To<double>(obs_data_line[i], obs_value))
-        LOG_ERROR_P(PARAM_OBS) << " value " << obs_data_line[i] << " could not be converted to a Double. It should be the observation value for this line";
+        LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line[i] << " could not be converted to a Double. It should be the observation value for this line";
       if (obs_value <= 0.0)
         LOG_ERROR_P(PARAM_OBS) << ": observation value " << obs_value << " for year " << year << " cannot be less than or equal to 0.0";
       proportions_by_year_[year].push_back(obs_value);
     }
 
     if (!utilities::To<double>(obs_data_line.back(), err_value))
-      LOG_ERROR_P(PARAM_OBS) << " value " << obs_data_line.back() << " could not be converted to a Double. It should be the error value for this line";
+      LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line.back() << " could not be converted to a Double. It should be the error value for this line";
     if (err_value <= 0.0)
       LOG_ERROR_P(PARAM_OBS) << ": error value " << err_value << " for year " << year << " cannot be less than or equal to 0.0";
     error_values_by_year_[year] = err_value;
