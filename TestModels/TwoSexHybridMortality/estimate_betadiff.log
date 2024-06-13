@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Tue May 14 12:40:13 2024
+Date: Thu Jun 13 12:43:43 2024
 Seed: 20
-Version: v24.05 (2024-05-13)
+Version: v24.05 (2024-05-14)
 Copyright (c) 2017-2024, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=31200
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=11216
 
 
 *partition[state1]
@@ -3106,6 +3106,6 @@ At line 228 in Observation.csl2 the table obs : The sum of the values for year 1
 At line 228 in Observation.csl2 the table obs : The sum of the values for year 1998 was 0.9999 and do not sum to 1.0
 At line 228 in Observation.csl2 the table obs : The sum of the values for year 2000 was 0.9997 and do not sum to 1.0
 At line 228 in Observation.csl2 the table obs : The sum of the values for year 2001 was 0.9997 and do not sum to 1.0
-estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 0.001 of the upper bound of 200
+estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 1e-4 of the upper bound of 200. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 *end
 

@@ -9,6 +9,8 @@
  */
 
 // headers
+#include "RecruitmentRicker.h"
+
 #include <limits>
 #include <numeric>
 
@@ -16,7 +18,6 @@
 #include "DerivedQuantities/Manager.h"
 #include "Estimates/Manager.h"
 #include "InitialisationPhases/Manager.h"
-#include "RecruitmentRicker.h"
 #include "TimeSteps/Manager.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
@@ -120,6 +121,9 @@ void RecruitmentRicker::DoValidate() {
 
   for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
 
+  if (recruitment_multipliers_.size() == 1) {
+    recruitment_multipliers_.resize(years_.size(), recruitment_multipliers_[0]);
+  }
   if (recruitment_multipliers_.size() != years_.size()) {
     LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "There are " << years_.size() << " model years and " << recruitment_multipliers_.size() << " " << PARAM_RECRUITMENT_MULTIPLIERS
                                                << " defined. These inputs must be of equal length.";

@@ -403,8 +403,8 @@
 [INFO] About to evaluate function with x = 56927.230481 0.055215 9.498095 5.486298 10.725286 10.781665 3.485878 6.841593 6.464003 3.004980 7.816334 1.021613 1.040927 1.055632 1.064591 1.067342 1.061697 1.044991 1.025672 1.014116 0.532277 0.579667 0.687725 0.517296 0.748355 0.620574 0.917260 1.288950 0.901239 0.709366 0.590655 0.454555 0.286175 0.263139 0.191022 0.278473 0.181722 0.264444 0.720415 0.409684 0.334715 0.148854 0.240127 0.208036 0.190662 0.223483 3.000000 3.000000 
 [INFO] Convergence check: current value is 7.3622e-07 and convergence tolerance is 1e-08
 [IMPORTANT] FMM: Small step size convergence
-[WARNING] estimated parameter 'process[Recruitment].recruitment_multipliers{2011}' with value 3 was within 0.001 of the upper bound of 3
-[WARNING] estimated parameter 'process[Recruitment].recruitment_multipliers{2012}' with value 3 was within 0.001 of the upper bound of 3
+[WARNING] estimated parameter 'process[Recruitment].recruitment_multipliers{2011}' with value 3 was within 1e-4 of the upper bound of 3. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
+[WARNING] estimated parameter 'process[Recruitment].recruitment_multipliers{2012}' with value 3 was within 1e-4 of the upper bound of 3. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 [INFO] Assert Passed: The Assert with label 'obj' for the Objective Function had value 684.287 and 684.287 was expected.
 [INFO] Completed
 [INFO] Total elapsed time: 3 seconds

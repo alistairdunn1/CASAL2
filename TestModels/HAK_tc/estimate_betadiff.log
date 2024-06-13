@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
 Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Tue May 14 12:46:00 2024
+Date: Thu Jun 13 12:39:14 2024
 Seed: 20
-Version: v24.05 (2024-05-13)
+Version: v24.05 (2024-05-14)
 Copyright (c) 2017-2024, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=22112
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=14256
 
 
 *partition[state1]
@@ -3667,6 +3667,6 @@ At line 101 in Observation.csl2 the table obs : The sum of the values for year 2
 At line 101 in Observation.csl2 the table obs : The sum of the values for year 2015 was 1.0001 and do not sum to 1.0
 At line 101 in Observation.csl2 the table obs : The sum of the values for year 2017 was 1.0002 and do not sum to 1.0
 Estimates were removed because of matching lower and upper bounds. Originally had 52 estimates, now have 51
-estimated parameter 'catchability[CPUEq].q' with value 2.53574e-05 was within 0.001 of the lower bound of 1e-08
+estimated parameter 'catchability[CPUEq].q' with value 2.53574e-05 was within 1e-4 of the lower bound of 1e-08. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 *end
 

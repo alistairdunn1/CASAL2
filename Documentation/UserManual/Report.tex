@@ -1,12 +1,14 @@
 \section{\I{The report section: output and reports}\label{sec:Report}}\index{Reports}\index{Reports section}
 
-The command and subcommand syntax for the estimation section is given in Section \ref{syntax:Report}.
+\CNAME generates a range of outputs, both information and error messages, and reports that summarise the model outputs. The report section is where the reports are defined that are used to summarise and print model output. 
 
-The report section specifies the printouts and other output from the model. \CNAME\ does not, in general, produce any output unless specified by a valid \command{report} block.
+The command and subcommand syntax for the report section is given in Section \ref{syntax:Report}.
+
+The report section specifies the printouts and other output from the model. \CNAME\ does not, in general, produce any model specific output unless specified by a valid \command{report} block.
 
 \subsection{Report command block format}
 
-Reports from \CNAME\ can be defined to print partition and states objects at a particular point in time, observation summaries, estimated and derived parameter values, and objective function values. Many of the reports below will print a specific \command{}. The most useful report is the default report (see Section~\ref{sec:Report-Default}) which will auto generate many of the reports users require.
+Reports from \CNAME\ can be defined to print partition and states objects at a particular point in time, observation summaries, estimated and derived parameter values, and objective function values. The most useful report is the default report (see Section~\ref{sec:Report-Default}) which will auto generate many of the reports users require.
 
 \begin{verbatim}
 		@report default

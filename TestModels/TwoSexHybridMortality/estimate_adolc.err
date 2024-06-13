@@ -136,7 +136,7 @@
 [INFO] Convergence check value = 4.74684e-06. Convergence tolerance = 1e-06 objective score 1782.95
 [INFO] Convergence check value = 1.55553e-06. Convergence tolerance = 1e-06 objective score 1782.95
 [INFO] Convergence check value = 1.13921e-07. Convergence tolerance = 1e-06 objective score 1782.95
-[WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 0.001 of the upper bound of 200
+[WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 1e-4 of the upper bound of 200. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 [INFO] Assert Passed: The Assert with label 'obj' for the Objective Function had value 1782.95 and 1782.95 was expected.
 [INFO] Completed
 [INFO] Total elapsed time: 6 seconds

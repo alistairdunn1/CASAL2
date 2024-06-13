@@ -45,12 +45,14 @@ void EstimateValue::DoExecute(shared_ptr<Model> model) {
       LOG_FATAL() << "estimated parameter '" << estimate->parameter() << "' with value " << estimate->value() << " must be less than the upper bound of "
                   << estimate->upper_bound();
     }
-    if (fabs(estimate->value() - estimate->lower_bound()) < 0.001) {
-      LOG_WARNING() << "estimated parameter '" << estimate->parameter() << "' with value " << estimate->value() << " was within 0.001 of the lower bound of "
-                    << estimate->lower_bound();
-    } else if (fabs(estimate->upper_bound() - estimate->value()) < 0.001) {
-      LOG_WARNING() << "estimated parameter '" << estimate->parameter() << "' with value " << estimate->value() << " was within 0.001 of the upper bound of "
-                    << estimate->upper_bound();
+    if (fabs(estimate->value() - estimate->lower_bound()) < 1e-4) {
+      LOG_WARNING()
+          << "estimated parameter '" << estimate->parameter() << "' with value " << estimate->value() << " was within 1e-4 of the lower bound of " << estimate->lower_bound()
+          << ". Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem";
+    } else if (fabs(estimate->upper_bound() - estimate->value()) < 1e-4) {
+      LOG_WARNING()
+          << "estimated parameter '" << estimate->parameter() << "' with value " << estimate->value() << " was within 1e-4 of the upper bound of " << estimate->upper_bound()
+          << ". Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem";
     }
   }
 

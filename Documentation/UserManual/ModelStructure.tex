@@ -1,8 +1,10 @@
 \section{\I{Partition \& Categories}\label{sec:PartitionCategories}}
 
-Dividing the population into different categories is fundamental to modelling the dynamics of a fish stock. CASAL had a fixed set of hard-wired categories (e.g., factors like sex, maturity, area, or stock) and each category type had a predefined set of allowed processes (or transitions in CASAL-speak), e.g., immature fish moving into the mature category \citep{1388}. This made sense when CASAL was coded, but now it is seen as a limitation, e.g., changing sex was not allowed and only male and female sexes were allowed, not an unknown sex that sometimes occurs in data. \TODO{shift to intro or drop?}
+Dividing the population into categories is fundamental to modelling the dynamics of a fish stock. The grouping of the population into categories and either ages or lengths is called the partition. 
 
-In \CNAME\, the concept of user defined categories was introduced to allow for more flexibility in grouping the subpopulations. Note that \CNAME\ does not know about sex or area and their properties; these are explicitly defined by the user by specifying processes that act on the categories in the input files. The cost is that users need to follow good practice to achieve clarity and readability of the input files, i.e., poor specifications can result in input files that are more difficult to understand.
+In \CNAME\, the concept of user defined categories allows for flexibility in grouping of categories or parts of the modelled population. Note that \CNAME\ does not know about sex or area and their properties; these are explicitly defined by the user by specifying processes that act on the categories. The cost is that users need to follow good practice to achieve clarity and readability of the input files, i.e., poor specifications can result in input files that are more difficult to understand.
+
+CASAL had a fixed set of hard-wired categories (e.g., factors like sex, maturity, area, or stock) and each category type had a predefined set of allowed processes (or transitions in CASAL-speak), e.g., immature fish moving into the mature category \citep{1388}. This made sense when CASAL was coded, but now it is seen as a limitation, e.g., changing sex was not allowed and only male and female sexes were allowed, not an unknown sex that sometimes occurs in data. 
 
 \subsection{Specifying the partition using categories}
 

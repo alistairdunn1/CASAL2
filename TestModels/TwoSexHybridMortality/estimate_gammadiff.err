@@ -451,7 +451,7 @@
 [INFO] About to evaluate function with x = 132864.108666 0.086609 0.162635 5.586005 2.007842 25.420463 4.923529 1.501887 199.999999 7.512990 2.401073 20.868658 7.136903 2.149505 34.369342 10.588760 3.110045 0.566571 0.797285 0.719999 0.828531 0.830360 0.734273 0.675570 0.508235 0.445336 0.496629 0.504731 0.425315 0.377237 0.445167 0.540258 0.611067 0.509393 0.514615 0.442504 0.464394 0.579592 0.772843 0.924524 0.650376 0.602242 0.574973 0.650238 0.536878 0.496546 0.479017 0.440547 0.481075 0.523024 0.435825 0.641066 0.474345 0.535520 0.687228 
 [INFO] Convergence check: current value is 2.15152e-08 and convergence tolerance is 1e-08
 [IMPORTANT] FMM: Small step size convergence
-[WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 0.001 of the upper bound of 200
+[WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 1e-4 of the upper bound of 200. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 [INFO] Assert Passed: The Assert with label 'obj' for the Objective Function had value 1782.95 and 1782.95 was expected.
 [INFO] Completed
 [INFO] Total elapsed time: 9 seconds
