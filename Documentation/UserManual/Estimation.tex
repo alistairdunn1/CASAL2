@@ -150,7 +150,7 @@ and penalty
 	&if(X - 0.9999 < 0) & penalty += (X - 0.9999)^2
 \end{align}
 %
-This can be seen  \href{https://github.com/NIWAFisheriesModelling/CASAL2/blob/1b1ed731537dc551674c911da3bf387273a97a92/CASAL2/source/Utilities/Math.h#L245}{here}.
+% This can be seen  \href{https://github.com/NIWAFisheriesModelling/CASAL2/blob/1b1ed731537dc551674c911da3bf387273a97a92/CASAL2/source/Utilities/Math.h#L245}{here}.
 
 The Tan transform uses transformation
 
@@ -236,7 +236,7 @@ There are currently three options for the starting point of the MCMC. It can be 
 
 Note that if a number of parameters are at bounds at the start point, then a random jump from this point may fail to find a suitable candidate that is within bounds. A total of 10~000 attempts are made before the algorithm exits with an error. The subcommand  {\subcommand{adjust\_parameters\_at\_bounds}} can be used to identify these parameters and set their start point at a random uniformly generated point between the lower and upper bounds.
 
-The chain moves in natural space, i.e., no transformations are applied to the estimated parameters. The default proposal distribution is a either  a multivariate normal or a multivariate Student's $t$ distribution centred on the current point, with covariance matrix equal to a matrix based on the approximate covariance produced by the minimiser, multiplied by a step size factor.
+The chain moves in natural space, i.e., no transformations are applied to the estimated parameters. The default proposal distribution is a either  a multivariate normal or a multivariate Student's $t$ distribution centred on the current point, with covariance matrix equal to a matrix based on the approximate covariance produced by the minimiser, multiplied by the step-size factor.
 
 The following steps define how the initial covariance matrix of the proposal distribution is calculated:
 
@@ -260,7 +260,7 @@ for $i \ne j$, and ${\mathop{\rm var}} \left( i \right)^\prime   = k$
 
 This allows each estimated parameter to move in the MCMC even if its variance is very small according to the inverse Hessian. In both cases, the \commandsub{mcmc}{min\_difference} parameter defaults to $0.0001$.
 
-\item The \commandsub{mcmc}{stepsize} (a scalar factor applied to the covariance matrix to improve the acceptance probability) is set by the user. The default is $2.4d^{-0.5}$ where $d$ is the number of estimated parameters, as recommended by Gelman et al. \citep{823}.
+\item The \commandsub{mcmc}{step\_size} (a scalar factor applied to the covariance matrix to improve the acceptance probability) is set by the user. The default is $2.4d^{-0.5}$ where $d$ is the number of estimated parameters, as recommended by Gelman et al. \citep{823}.
 \end{enumerate}
 
 The proposal distribution can also change adaptively during the chain, using two different mechanisms. Both are offered as means of improving the convergence properties of the chain. It is important to note that any adaptive behaviour must finish before the end of the burn-in period, i.e., the proposal distribution must be finalised before the kept portion of the chain starts.
@@ -268,15 +268,13 @@ The proposal distribution can also change adaptively during the chain, using two
 The adaptive mechanisms are:
 
 \begin{itemize}
-\item The step size changes adaptively at one or more sample numbers (See next paragraph for details on the step size adaptation methods)
+\item The step-size changes adaptively at one or more sample numbers (See next paragraph for details on the step-size adaptation methods)
 \item The entire covariance matrix changes adaptively at one or more sample numbers. At each adaptation, the covariance matrix is replaced with an empirical covariance matrix, derived from the MCMC chain. The idea is that an empirical covariance is a better approximation of the proposal distribution than the inverse of the Hessian matrix, and can improve convergence and mixing of the chain.
 \end{itemize}
 
-The two options to adapt the step size are \texttt{double\_half} or \texttt{ratio}, which is chosen with the input parameter \texttt{adapt\_stepsize\_method}. The \texttt{double\_half} method is used in CASAL (see \cite{823} for justification).
+The two options to adapt the step-size are \texttt{double\_half} or \texttt{ratio}, defined by the subcommand \texttt{adapt\_stepsize\_method}. The \texttt{double\_half} method is the same as the method used in CASAL for adapting the step-size (see \cite{823} for justification). The algorithm for \texttt{double\_half} is, at each adaptation, the step-size is doubled if the acceptance rate since the last adaptation is more than $0.5$, or halved if the acceptance rate is less than $0.2$. The \texttt{ratio} method adapts the current step-size by the acceptance rate since the last adaptation multiplied by 4.1667 so-as to approach an acceptance rate of $\approx$ 0.24. See \cite{mcmc_rate} for justification on the choice of that acceptance rate.
 
-The algorithm for \texttt{double\_half} is, at each adaptation, the step size is doubled if the acceptance rate since the last adaptation is more than $0.5$, or halved if the acceptance rate is less than $0.2$. The \texttt{ratio} is taken from SPM. It adapts the current step size by the acceptance rate since the last adaptation multiplied by 4.1667 to approach an acceptance rate of $\approx$ 0.24. See \cite{mcmc_rate} for justification on that acceptance rate.
-
-The \texttt{stepsize} parameter is now on a completely different scale, and must be rescaled. It is set to a user-specified value (which may or may not be the same as the initial step size). Set the step size adaptations to occur after this, so that the step size can be readjusted to an appropriate value which gives good acceptance probabilities with the new matrix.
+The \texttt{step\_size} parameter is now on a different scale, and must be rescaled. It is set to a user-specified value (which may or may not be the same as the initial step-size). Set the step-size adaptations to occur after this, so that the step-size can be readjusted to an appropriate value which gives good acceptance probabilities with the new matrix.
 
 All modified versions of the covariance matrix are printed to the standard output, but only the initial covariance matrix (inverse Hessian) is saved to the objectives file (see Section \ref{syntax:Report-MCMCCovariance}). \label{sec:Report-MCMCCovariance}  
 
