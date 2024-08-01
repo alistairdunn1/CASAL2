@@ -10,7 +10,9 @@ Definitions for each type of observation are described below, including how the 
 
 There are two main types of observations available in \CNAME. The first type is observations that are associated with a process, and the second are associated with a mortality block (See Section \ref{sec:Process-Mortality}.
 
-Observations for a process are indicated by their type --- these use the word process as a part of the type name, e,.g., \defComArg{observation}{type}{abundance} is an observation of relative abundance that occurs during a mortality block within a time step, and \defComArg{observation}{type}{process\_abundance} is a observation  of relative abundance that occurs during a process within a time step.
+Observations for a process are indicated by their type --- these use the word process as a part of the type name, e,.g., \commandsubarg{observation}{type}{abundance} is an observation of relative abundance that occurs during a mortality block within a time step, and \commandsubarg{observation}{type}{process\_abundance} is a observation  of relative abundance that occurs during a process within a time step.
+
+A robustification constant is used in the likelihood (\argument{delta}) to avoid divide by zero errors. This defaults to 1e-11. \index{robustification constant}\index{Divide by zero in likelihoods!delta}
 
 \subsubsection{\I{Mortality block associated observations}}\label{sec:MortalityBlockObservations}
 
