@@ -416,7 +416,7 @@ Vectors of parameters can be independently (but not necessarily identically) dis
 
 \subsection{Penalties}\label{sec:Penalty}\label{sec:Penalty-Process}
 
-Penalties are associated with processes and can be used to enforce parameter value or derived quantity restrictions or model outputs that are invalid by adding a penalty to the objective function. For example, estimated parameter values can be restricted so that a known mortality event removes enough individuals from the population within an event mortality process. \CNAME\ requires penalty functions for processes that remove or shift a \emph{number} of individuals between categories or from the partition. Many of the penalties that were available in CASAL have been moved to be additional priors in \CNAME (see Section~\ref{sec:AdditionalPriors}).
+Penalties are associated with processes and can be used to enforce parameter value or derived quantity restrictions or model outputs that are invalid by adding a penalty to the objective function. For example, estimated parameter values can be restricted so that a known mortality event removes enough individuals from the population within an event mortality process. \CNAME\ requires penalty functions for processes that remove or shift a \emph{number} of individuals between categories or from the partition. Many of the penalties that were available in CASAL are implemented as additional priors in \CNAME (see Section~\ref{sec:AdditionalPriors}).
 
 For penalties, a multiplier is required to be specified, and the objective function is increased by this multiplier multiplied by the penalty value. In some cases the multiplier may need to be quite large to prohibit some model behaviour.
 
@@ -462,20 +462,21 @@ Penalty = (log(X_1) - log(X_2))^2
 
 where, for example, $X_1$ is observed catch biomass and $X_2$ is the estimated catch biomass. Penalties are usually applied in situations when numbers or weight are known. Another example is for tagging, where the number of individuals that were tagged in a given year is known, so a penalty can be used to restrict the model to estimate reasonable values for the numbers of tagged individuals in that year.
 
-\subsection{Additional priors\label{sec:AdditionalPriors}}
+\subsection{Additional priors\label{sec:AdditionalPriors}}\index{Additional priors}
 
-Additional priors can be thought of as the inverse of penalties \TODO{please rephrase}. For CASAL models, most of the legacy \command{penalty} blocks have now been implemented as \command{additional\_prior} blocks. They restrict parameters in user-defined spaces \TODO{please rephrase}.
+Additional priors are optional additional priors or penalties that can be applied to encourage vectors to be smooth or have some average, or apply a prior to parameter or group of parameters.
 
-The types of additional priors available in \CNAME\ are \texttt{vector\_smoothing}, \texttt{vector\_averaging}, \texttt{uniform\_log}, \texttt{lognormal}, \texttt{element\_difference}, and \texttt{Beta}:
+The types of additional priors available include smoothing and averaging of vector parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are:
 
 \begin{itemize}
-	\item \texttt{vector\_smoothing}\label{sec:AdditionalPrior-VectorSmoothing}
+	\item \texttt{vector\_smoothing}\label{sec:AdditionalPrior-VectorSmoothing}\index{Additional prior!Vector smoothing}
 
 	This prior can be applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be "smoothed" can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
 
 	\item \texttt{vector\_average}\label{sec:AdditionalPrior-VectorAverage}
+	\index{Additional prior!Vector average}
 
-	This prior can be applied to a vector parameter, $v$, with the value of the prior $P$ being one of three options: 
+	This prior can be applied to a vector parameter, $v$, with the value of the prior $P$ being one of three methods: 
 	\begin{enumerate} 
 		\item $P=(\text{mean}(v)-k)^2$, e.g., using \commandlabsubarg{vector\_average}{method}{k}, or
 		\item $P=\text{mean}(log(v))-k$, e.g., using \commandlabsubarg{vector\_average}{method}{l}, or
@@ -484,66 +485,99 @@ The types of additional priors available in \CNAME\ are \texttt{vector\_smoothin
 
 	The vector\_average additional prior restricts the vector to average arithmetically with \subcommand{method=k} or \subcommand{method=m}, or geometrically to $exp(k)$ when \subcommand{method=m}. Typically used with $k=1$ with \subcommand{method=k} or \subcommand{method=l}, or $k=0$ with \subcommand{method=m}, to restrict the recruitment\_multipliers to centre on $1$. Optionally, indices can be chosen or excluded outside a given set of bounds.
 
-	\item\texttt{lognormal} with mean $\mu$ and c.v. $c$\label{sec:AdditionalPrior-LogNormal}
+	Methods available for the type \texttt{vector\_average} are \subcommand{l}, \subcommand{k}, \subcommand{m}. For a target vector parameter $\textbf{X}$ and target mean $k$, the contribution to the objective score is
+	
+	\begin{itemize}
+		\item \subcommand{method k}
+		
+		$- \log \left(\pi \left(p \right) \right) = \left(\bar{X} - k\right)^2$
+		
+		\item \subcommand{method l}
+		
+		$- \log \left(\pi \left(p \right) \right) = \left(\overline{ln\left(X\right)} - k\right)^2$
+		
+		\item \subcommand{method m}
+		
+		$- \log \left(\pi \left(p \right) \right) = \left(ln\left(\bar{X}\right) - k\right)^2$
+	\end{itemize}
+	
+	where $\overline{ln\left(X\right)}$ is the mean of the logged values.
+	
+	\item\texttt{lognormal} with mean $\mu$ and c.v. $c$\label{sec:AdditionalPrior-LogNormal}\index{Additional prior!lognormal}
+	
+	Apply a lognormal prior to a single parameter,
 
 	\begin{equation}
 	- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
 	\end{equation}
 
-	\item\texttt{uniform\_log}\label{sec:AdditionalPrior-UniformLog}
+	\item\texttt{uniform}\label{sec:AdditionalPrior-UniformLog}
+	\index{Additional prior!Uniform}
+	
+	Apply a uniform prior to a single parameter,
+	
+	\begin{equation}
+		- \log \left(\pi \left(p \right) \right) = 0
+	\end{equation}
+	
+	\item\texttt{uniform\_log}\label{sec:AdditionalPrior-Uniform}
+	\index{Additional prior!Uniform log}
+
+	Apply a uniform\_log prior to a single parameter,
 
 	\begin{equation}
-	- \log \left(\pi \left(p \right) \right) = \log \left( p \right)
+		- \log \left(\pi \left(p \right) \right) = \log \left( p \right)
 	\end{equation}
 
-	\item\texttt{element\_difference}\label{sec:AdditionalPrior-ElementDifference}
+	\item\texttt{element\_difference}\label{sec:AdditionalPrior-ElementDifference}\index{Additional prior!Element difference}
+	
+	Apply a penalty to encourage two vectors of equal length to be similar,
 
 	\begin{equation}
 	- \log \left(\pi \left(p_1,p_2 \right) \right) = \sum_{i = 1}^n \left( p_{1,i} - p_{2,i} \right)^2
 	\end{equation}
 
-	\item\texttt{Beta}\label{sec:AdditionalPrior-Beta}
+	\item\texttt{Beta}\label{sec:AdditionalPrior-Beta}\index{Additional prior!Beta}
 
-	{Beta\index{Beta additional prior}\index{Additional Priors ! Beta} with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$, for parameter value = $p$}
+	Apply a Beta prior to a single parameter, \index{Beta additional prior}\index{Additional.  Priors ! Beta} with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$, for parameter value = $p$
 
 	\begin{equation}
 	- \log \left(\pi \left( p \right) \right) = \left( 1 - m \right) \log \left( p - A \right) + \left( 1 - n \right)\log \left( B - p \right)
 	\end{equation}
 
 	where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $m=\tau \nu$ and $n=\tau(1-\nu)$. The beta prior is undefined when $\tau \leq 0$.
+	
+	\item\texttt{Sum}\label{sec:AdditionalPrior-Sum}\index{Additional prior!Sum}
+	
+	Apply a prior on the sum of a list of parameters, using either a normal or lognormal distribution.
+	
+	The normal distribution has mean $\mu$ and standard deviation with c.v $c$
+	
+	\begin{equation}
+		- \log \left(\pi \left(p \right) \right) = 0.5\left(\frac{p - \mu}{c\mu} \right)^2
+	\end{equation}
+	
+	And the lognormal distribution has mean $\mu$ and c.v. $c$
+	
+	\begin{equation}
+		- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
+	\end{equation}
+	
+	where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 \right)}$.
+	
 \end{itemize}
 
-Methods available for the type \texttt{vector\_average} are \subcommand{l}, \subcommand{k}, \subcommand{m}. For a target vector parameter $\textbf{X}$ and target mean $k$, the contribution to the objective score is
-
-\begin{itemize}
-	\item \subcommand{method k}
-
-	$- \log \left(\pi \left(p \right) \right) = \left(\bar{X} - k\right)^2$
-
-	\item \subcommand{method l}
-
-	$- \log \left(\pi \left(p \right) \right) = \left(\overline{ln\left(X\right)} - k\right)^2$
-
-	\item \subcommand{method m}
-
-	$- \log \left(\pi \left(p \right) \right) = \left(ln\left(\bar{X}\right) - k\right)^2$
-\end{itemize}
-
-where $\overline{ln\left(X\right)}$ is the mean of the logged values.
-
-There are a range of parameters and derived values that additional priors can be applied to. Here are a list of non-estimated (all parameters that can be estimated can have an additional prior attached to them) parameters that additional priors can be applied to.
+All parameters that can be estimated can also have an additional prior. For parameters that are not estimated within a specific model run, additional priors can be applied to.
 
 \begin{itemize}
 	\item \subcommand{selectivity[Selectivity\_label].values\{i:j\}}.
 
-	This subcommand applies a selectivity to the value by age (for ages $i$ through $j$). This option is available only for certain types of selectivities (\subcommand{all\_values}, \subcommand{all\_values\_bounded}, \subcommand{double\_exponential}). See the Hoki stock assessment for an example of applying additional priors on selectivities.
+	This subcommand applies a selectivity to the value by age (for ages $i$ through $j$). This option is available only for certain types of selectivities (\subcommand{all\_values}, \subcommand{all\_values\_bounded}, \subcommand{double\_exponential}). 
 
 	\item \subcommand{catchability[Catchability\_label].q}
 
-	This subcommand is for catchabilities that are of type \subcommand{nuisance} only. Since \subcommand{nuisance} $q$s are not free parameters, additional priors can be applied to replicate CASAL models with \command{estimate} blocks in nuisance $q$s. If a CASAL model applied a uniform prior, then this has a null effect and this functionality can be ignored when converting to a \CNAME\ model.
+	This subcommand is for catchabilities that are of type \subcommand{nuisance} only. Since \subcommand{nuisance} $q$s are not free parameters, additional priors can be applied to replicate CASAL models with \command{estimate} blocks in nuisance $q$s.
 \end{itemize}
-
-This list may be useful for users who are trying to apply the equivalent CASAL penalties in a \CNAME\ model.
 
 \subsection{\I{Parameter transformations}\label{sec:Transformation}}
 \CNAME\ has multiple methods to transform a parameter into a different \enquote{space}. Transformations are implemented to try and achieve \enquote{better} model optimisation. Complex population models can have highly correlated parameters so transforming them is a method of addressing confounded parameters, and \enquote{help} the minimisers find a \enquote{global} solution faster. To read more about transformations and get a better understanding of why they are used, see \cite{gilks1995markov}, specifically chapter 6.

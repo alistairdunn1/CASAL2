@@ -1,4 +1,4 @@
 "Version" <-
 function() {
-  return("24.05")
+  return("24.08")
 }

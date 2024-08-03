@@ -29,7 +29,9 @@ namespace additionalpriors {
  *
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
-UniformLog::UniformLog(shared_ptr<Model> model) : AdditionalPrior(model) {}
+UniformLog::UniformLog(shared_ptr<Model> model) : AdditionalPrior(model) {
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter for the additional prior", "");
+}
 
 /**
  * Build the object

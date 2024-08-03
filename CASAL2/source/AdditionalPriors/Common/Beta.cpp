@@ -31,6 +31,7 @@ namespace additionalpriors {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Beta::Beta(shared_ptr<Model> model) : AdditionalPrior(model) {
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter for the additional prior", "");
   parameters_.Bind<Double>(PARAM_MU, &mu_, "Beta distribution mean (mu) parameter", "");
   parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "Beta distribution variance (sigma) parameter", "")->set_lower_bound(0.0, false);
   parameters_.Bind<Double>(PARAM_A, &a_, "Beta distribution lower bound, of the range (A) parameter", "");

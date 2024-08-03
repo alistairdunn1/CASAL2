@@ -50,9 +50,9 @@ AdditionalPrior* Manager::GetAdditionalPrior(string_view parameter) {
  * @param parameter The parameter the additional prior is targeting
  * @return True if found, false otherwise
  */
-bool Manager::HasAdditionalPriorExcludingRatioType(string_view parameter) {
+bool Manager::HasAdditionalPriorExcludingType(string_view parameter, string type) {
   for (AdditionalPrior* additional_prior : objects_) {
-    if ((additional_prior->parameter() == parameter) && (additional_prior->type() != PARAM_RATIO)) {
+    if ((additional_prior->parameter() == parameter) && (additional_prior->type() != type)) {
       LOG_FINE() << "param looking for = " << parameter << " this param " << additional_prior->parameter() << " type = " << additional_prior->type();
       return true;
     }
@@ -66,9 +66,9 @@ bool Manager::HasAdditionalPriorExcludingRatioType(string_view parameter) {
  * @param parameter The parameter string
  * @return An AdditionalPrior pointer
  */
-AdditionalPrior* Manager::GetAdditionalPriorExcludingRatioType(string_view parameter) {
+AdditionalPrior* Manager::GetAdditionalPriorExcludingType(string_view parameter, string type) {
   for (AdditionalPrior* additional_prior : objects_) {
-    if ((additional_prior->parameter() == parameter) && (additional_prior->type() != PARAM_RATIO))
+    if ((additional_prior->parameter() == parameter) && (additional_prior->type() != type))
       return additional_prior;
   }
   return nullptr;

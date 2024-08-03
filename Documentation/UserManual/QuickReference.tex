@@ -4,11 +4,11 @@
 \defComLab{additional\_prior}{Define an object of type \emph{Additional\_Prior}}
 
 \defSub{label}{The label for the additional prior}
-\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{type}{The additional prior type}
 
 \commandlabsubarg{additional\_prior}{type}{Beta}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{mu}{Beta distribution mean $\mu$ parameter}
 \defSub{sigma}{Beta distribution variance $\sigma$ parameter}
 \defSub{a}{Beta distribution lower bound, of the range $A$ parameter}
@@ -16,30 +16,46 @@
 
 \commandlabsubarg{additional\_prior}{type}{Element\_Difference}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{second\_parameter}{The name of the second parameter for comparing}
 \defSub{multiplier}{Multiply the penalty by this factor}
 
 \commandlabsubarg{additional\_prior}{type}{Log\_Normal}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{mu}{The lognormal prior mean (mu) parameter}
 \defSub{cv}{The lognormal CV parameter}
 
+\commandlabsubarg{additional\_prior}{type}{Uniform}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+
 \commandlabsubarg{additional\_prior}{type}{Uniform\_Log}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 
 \commandlabsubarg{additional\_prior}{type}{Vector\_Average}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{method}{Which calculation method to use: k, l, or m}
 \defSub{k}{The k value to use in the calculation}
 \defSub{multiplier}{Multiplier for the penalty amount}
 
 \commandlabsubarg{additional\_prior}{type}{Vector\_Smoothing}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{log\_scale}{Should the sums of squares be calculated on the log scale?}
 \defSub{multiplier}{Multiply the penalty by this factor}
 \defSub{lower\_bound}{The first element to apply the penalty to in the vector}
 \defSub{upper\_bound}{The last element to apply the penalty to in the vector}
 \defSub{r}{The rth difference that the penalty is applied to}
+
+\commandlabsubarg{additional\_prior}{type}{Sum}
+
+\defSub{parameters}{The names of the parameters for summing}
+\defSub{distribution}{The additional prior distribution to apply}
+\defSub{mu}{Mean of the distribution}
+\defSub{cv}{cv of the distribution}
 
 \defComLab{ageing\_error}{Define an object of type \emph{Ageing\_Error}}
 

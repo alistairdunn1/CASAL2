@@ -57,7 +57,11 @@
       "thread": "cpp",
       "memory_resource": "cpp",
       "*.r": "r",
-      "ostream": "cpp"
+      "ostream": "cpp",
+      "deque": "cpp",
+      "string": "cpp",
+      "vector": "cpp",
+      "rope": "cpp"
     },
     "[python]": {
       "editor.defaultFormatter": "ms-python.black-formatter"
