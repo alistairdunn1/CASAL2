@@ -466,106 +466,99 @@ where, for example, $X_1$ is observed catch biomass and $X_2$ is the estimated c
 
 Additional priors are optional additional priors or penalties that can be applied to encourage vectors to be smooth or have some average, or apply a prior to parameter or group of parameters.
 
-The types of additional priors available include smoothing and averaging of vector parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are:
+The types of additional priors available include smoothing and averaging of vector parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are described below.
 
+\subsubsection{Vector smoothing}\label{sec:AdditionalPrior-VectorSmoothing}\index{Additional prior!Vector smoothing}
+
+The \subcommand{vector\_smoothing} additional prior is applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be "smoothed" can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
+
+\subsubsection{Vector average}\label{sec:AdditionalPrior-VectorAverage}\index{Additional prior!Vector average}
+
+The \subcommand{vector\_average} additional prior is applied to a vector parameter and restricts the vector to average arithmetically with \subcommand{method=k} or \subcommand{method=m}, or geometrically to $exp(k)$ when \subcommand{method=m}. Typically used with $k=1$ with \subcommand{method=k} or \subcommand{method=l}, or $k=0$ with \subcommand{method=m}, to restrict the recruitment\_multipliers to centre on $1$. Optionally, indices can be chosen or excluded outside a given set of bounds.
+
+Methods available for the type \texttt{vector\_average} are \subcommand{l}, \subcommand{k}, \subcommand{m}. For a target vector parameter $\textbf{X}$ and target mean $k$, the contribution to the objective score is
+	
 \begin{itemize}
-	\item \texttt{vector\_smoothing}\label{sec:AdditionalPrior-VectorSmoothing}\index{Additional prior!Vector smoothing}
-
-	This prior can be applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be "smoothed" can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
-
-	\item \texttt{vector\_average}\label{sec:AdditionalPrior-VectorAverage}
-	\index{Additional prior!Vector average}
-
-	This prior can be applied to a vector parameter, $v$, with the value of the prior $P$ being one of three methods: 
-	\begin{enumerate} 
-		\item $P=(\text{mean}(v)-k)^2$, e.g., using \commandlabsubarg{vector\_average}{method}{k}, or
-		\item $P=\text{mean}(log(v))-k$, e.g., using \commandlabsubarg{vector\_average}{method}{l}, or
-		\item $P=log(\text{mean}(v)/k)$, e.g., using \commandlabsubarg{vector\_average}{method}{m}. 
-	\end{enumerate}
-
-	The vector\_average additional prior restricts the vector to average arithmetically with \subcommand{method=k} or \subcommand{method=m}, or geometrically to $exp(k)$ when \subcommand{method=m}. Typically used with $k=1$ with \subcommand{method=k} or \subcommand{method=l}, or $k=0$ with \subcommand{method=m}, to restrict the recruitment\_multipliers to centre on $1$. Optionally, indices can be chosen or excluded outside a given set of bounds.
-
-	Methods available for the type \texttt{vector\_average} are \subcommand{l}, \subcommand{k}, \subcommand{m}. For a target vector parameter $\textbf{X}$ and target mean $k$, the contribution to the objective score is
+	\item \subcommand{method k}
 	
-	\begin{itemize}
-		\item \subcommand{method k}
-		
-		$- \log \left(\pi \left(p \right) \right) = \left(\bar{X} - k\right)^2$
-		
-		\item \subcommand{method l}
-		
-		$- \log \left(\pi \left(p \right) \right) = \left(\overline{ln\left(X\right)} - k\right)^2$
-		
-		\item \subcommand{method m}
-		
-		$- \log \left(\pi \left(p \right) \right) = \left(ln\left(\bar{X}\right) - k\right)^2$
-	\end{itemize}
+	$- \log \left(\pi \left(p \right) \right) = \left(\bar{X} - k\right)^2$
 	
-	where $\overline{ln\left(X\right)}$ is the mean of the logged values.
+	\item \subcommand{method l}
 	
-	\item\texttt{lognormal} with mean $\mu$ and c.v. $c$\label{sec:AdditionalPrior-LogNormal}\index{Additional prior!lognormal}
+	$- \log \left(\pi \left(p \right) \right) = \left(\overline{ln\left(X\right)} - k\right)^2$
 	
-	Apply a lognormal prior to a single parameter,
-
-	\begin{equation}
-	- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
-	\end{equation}
-
-	\item\texttt{uniform}\label{sec:AdditionalPrior-UniformLog}
-	\index{Additional prior!Uniform}
+	\item \subcommand{method m}
 	
-	Apply a uniform prior to a single parameter,
-	
-	\begin{equation}
-		- \log \left(\pi \left(p \right) \right) = 0
-	\end{equation}
-	
-	\item\texttt{uniform\_log}\label{sec:AdditionalPrior-Uniform}
-	\index{Additional prior!Uniform log}
-
-	Apply a uniform\_log prior to a single parameter,
-
-	\begin{equation}
-		- \log \left(\pi \left(p \right) \right) = \log \left( p \right)
-	\end{equation}
-
-	\item\texttt{element\_difference}\label{sec:AdditionalPrior-ElementDifference}\index{Additional prior!Element difference}
-	
-	Apply a penalty to encourage two vectors of equal length to be similar,
-
-	\begin{equation}
-	- \log \left(\pi \left(p_1,p_2 \right) \right) = \sum_{i = 1}^n \left( p_{1,i} - p_{2,i} \right)^2
-	\end{equation}
-
-	\item\texttt{Beta}\label{sec:AdditionalPrior-Beta}\index{Additional prior!Beta}
-
-	Apply a Beta prior to a single parameter, \index{Beta additional prior}\index{Additional.  Priors ! Beta} with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$, for parameter value = $p$
-
-	\begin{equation}
-	- \log \left(\pi \left( p \right) \right) = \left( 1 - m \right) \log \left( p - A \right) + \left( 1 - n \right)\log \left( B - p \right)
-	\end{equation}
-
-	where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $m=\tau \nu$ and $n=\tau(1-\nu)$. The beta prior is undefined when $\tau \leq 0$.
-	
-	\item\texttt{Sum}\label{sec:AdditionalPrior-Sum}\index{Additional prior!Sum}
-	
-	Apply a prior on the sum of a list of parameters, using either a normal or lognormal distribution.
-	
-	The normal distribution has mean $\mu$ and standard deviation with c.v $c$
-	
-	\begin{equation}
-		- \log \left(\pi \left(p \right) \right) = 0.5\left(\frac{p - \mu}{c\mu} \right)^2
-	\end{equation}
-	
-	And the lognormal distribution has mean $\mu$ and c.v. $c$
-	
-	\begin{equation}
-		- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
-	\end{equation}
-	
-	where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 \right)}$.
-	
+	$- \log \left(\pi \left(p \right) \right) = \left(ln\left(\bar{X}\right) - k\right)^2$
 \end{itemize}
+
+where $\overline{ln\left(X\right)}$ is the mean of the logged values.
+
+\subsubsection{Lognormal}\label{sec:AdditionalPrior-LogNormal}\index{Additional prior!lognormal}
+
+Apply a \subcommand{lognormal} additional prior with mean $\mu$ and c.v. $c$ to a single parameter,
+
+\begin{equation}
+- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
+\end{equation}
+
+\subsubsection{Uniform}\label{sec:AdditionalPrior-UniformLog}\index{Additional prior!Uniform}
+	
+Apply a \subcommand{uniform} additional prior to a single parameter,
+	
+\begin{equation}
+- \log \left(\pi \left(p \right) \right) = 0
+\end{equation}
+
+\subsubsection{Uniform-log}\label{sec:AdditionalPrior-Uniform}\index{Additional prior!Uniform log}
+
+Apply a \subcommand{uniform\_log} additional prior to a single parameter,
+
+\begin{equation}
+	- \log \left(\pi \left(p \right) \right) = \log \left( p \right)
+\end{equation}
+
+\subsubsection{Element difference}\label{sec:AdditionalPrior-ElementDifference}\index{Additional prior!Element difference}
+
+Apply an \subcommand{element\_difference} additional prior to encourage two vectors of equal length to be similar, where the value is the difference between the elements of each vector, such that,
+
+\begin{equation}
+- \log \left(\pi \left(p_1,p_2 \right) \right) = \sum_{i = 1}^n \left( p_{1,i} - p_{2,i} \right)^2
+\end{equation}
+
+\subsubsection{Beta}\label{sec:AdditionalPrior-Beta}\index{Additional prior!Beta}
+
+Apply a \subcommand{beta} additional prior to a single parameter\index{Beta additional prior}\index{Additional Priors ! Beta} with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$, for parameter value = $p$
+
+\begin{equation}
+- \log \left(\pi \left( p \right) \right) = \left( 1 - m \right) \log \left( p - A \right) + \left( 1 - n \right)\log \left( B - p \right)
+\end{equation}
+
+where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $m=\tau \nu$ and $n=\tau(1-\nu)$. 
+
+Note that the beta prior is undefined when $\tau \leq 0$.
+
+\subsubsection{Sum}\label{sec:AdditionalPrior-Sum}\index{Additional prior!Sum}
+	
+Apply a \subcommand{sum} additional prior on the sum of a list of parameters, using either a normal or lognormal distribution.
+	
+The normal distribution has mean $\mu$ and standard deviation with c.v $c$
+
+\begin{equation}
+	- \log \left(\pi \left(p \right) \right) = 0.5\left(\frac{p - \mu}{c\mu} \right)^2
+\end{equation}
+
+And the lognormal distribution has mean $\mu$ and c.v. $c$
+
+\begin{equation}
+	- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
+\end{equation}
+	
+where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 \right)}$.
+
+This additional prior can be used to encourage the sum of a list of parameters to have value $mu$.
+	
+\subsubsection{Applying additional priors}
 
 All parameters that can be estimated can also have an additional prior. For parameters that are not estimated within a specific model run, additional priors can be applied to.
 
