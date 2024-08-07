@@ -15,8 +15,11 @@ another for length-based models (Casal2_Length.pdf).
 Casal2 is an open source development and contributions to 
 the package are encouraged. 
 
-The source code for Casal2 is available at 
-https://github.com/NIWAFisheriesModelling/CASAL2
+The original source code for Casal2 is available at 
+https://github.com/Casal2/CASAL2. 
+
+This version is the development version from 
+https://github.com/alistairdunn1/CASAL2
 
 
 License
@@ -83,8 +86,7 @@ Contact
 =======
 
 For more information about Casal2, please see the Casal2
-user manual. You can contact the Casal2 development team 
-at casal2@niwa.co.nz
+user manual.
 
 
 Textpad & Notepad++ syntax highlighting
