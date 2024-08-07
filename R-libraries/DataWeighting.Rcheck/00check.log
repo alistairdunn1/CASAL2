@@ -1,7 +1,11 @@
 * using log directory 'C:/Projects/Software/CASAL2/R-libraries/DataWeighting.Rcheck'
-* using R version 4.1.0 (2021-05-18)
-* using platform: x86_64-w64-mingw32 (64-bit)
-* using session charset: ISO8859-1
+* using R version 4.4.1 (2024-06-14 ucrt)
+* using platform: x86_64-w64-mingw32
+* R was compiled by
+    gcc.exe (GCC) 13.2.0
+    GNU Fortran (GCC) 13.2.0
+* running under: Windows 10 x64 (build 19044)
+* using session charset: UTF-8
 * checking for file 'DataWeighting/DESCRIPTION' ... OK
 * this is package 'DataWeighting' version '1.0'
 * checking package namespace information ... OK
