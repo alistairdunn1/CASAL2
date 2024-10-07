@@ -16,7 +16,7 @@
   }
   for (i in 1:length(tab_objects)) {
     if (class(tab_objects[[i]]) != "casal2TAB") {
-      stop(paste0("The element ", i, "of tab_objects  must be class 'casal2TAB', but the parsed object is class '", class(tab_objects[[i]]), "'"))
+      stop(paste0("The element ", i, " of tab_objects  must be class 'casal2TAB', but the parsed object is class '", class(tab_objects[[i]]), "'"))
     }
   }
   for (i in 1:length(tab_objects)) {

@@ -16,9 +16,9 @@
 #define AGE_LENGTH_OBSERVATIONS_H_
 
 // Headers
+#include "AgeLengths/AgeLength.h"
 #include "AgeingErrors/AgeingError.h"
 #include "Observations/Observation.h"
-#include "AgeLengths/AgeLength.h"
 #include "Partition/Accessors/Cached/CombinedCategories.h"
 #include "Partition/Accessors/CombinedCategories.h"
 
@@ -31,9 +31,9 @@ namespace age {
 
 // Enumerated Types
 enum class SampleType {
-  kAge        = 0,
-  kLength     = 1,
-  kRandom     = 2,
+  kAge    = 0,
+  kLength = 1,
+  kRandom = 2,
 };
 
 using partition::accessors::CombinedCategoriesPtr;
@@ -49,7 +49,7 @@ public:
   virtual ~AgeLength();
   void         DoValidate() override final;
   virtual void DoBuild() override;
-  void         DoReset() override final{};
+  void         DoReset() override final {};
   void         PreExecute() override final;
   void         Execute() override final;
   void         CalculateScore() override final;
@@ -61,10 +61,11 @@ protected:
   vector<unsigned>            individual_ages_;
   vector<double>              individual_lengths_;
   vector<string>              selectivity_labels_;
+  unsigned                    n_quant_;
   vector<Selectivity*>        selectivities_;
-  string                      time_step_label_;   
+  string                      time_step_label_;
   bool                        plus_group_ = false;
-  unsigned                    age_spread_; 
+  unsigned                    age_spread_;
   string                      sample_type_;
   SampleType                  actual_sample_type_;
   vector<vector<Double>>      ageing_error_matrix_;
@@ -75,24 +76,22 @@ protected:
   AgeingError*                ageing_error_ = nullptr;
   Double                      time_step_proportion_;
   vector<Double>              quantiles_;
-  vector<Double>              quantile_breaks_;             
+  vector<Double>              quantile_breaks_;
   vector<double>              unique_lengths_;
   vector<vector<Double>>      numbers_at_age_;
   unsigned                    n_fish_;
-  vector<string>              split_category_labels_; // only used in validation
-  vector<string>              split_numerator_categories_; // only used in validation
+  vector<string>              split_category_labels_;       // only used in validation
+  vector<string>              split_numerator_categories_;  // only used in validation
 
-  bool                        apply_ageing_error_ = false;
-  vector<Double>              numbers_by_unique_size_;
-  vector<string>              numerator_categories_;
-  vector<Double>              numbers_at_age_numerator_;
-  vector<bool>                vector_of_cached_categories_in_numerator_;
-  niwa::AgeLength*            age_length_ptr_ = nullptr;
-  Selectivity*                numerator_selectivity_ = nullptr;
-  string                      selectivity_label_for_numerator_ = "";
+  bool             apply_ageing_error_ = false;
+  vector<Double>   numbers_by_unique_size_;
+  vector<string>   numerator_categories_;
+  vector<Double>   numbers_at_age_numerator_;
+  vector<bool>     vector_of_cached_categories_in_numerator_;
+  niwa::AgeLength* age_length_ptr_                  = nullptr;
+  Selectivity*     numerator_selectivity_           = nullptr;
+  string           selectivity_label_for_numerator_ = "";
   // vectors to do lookups on combined categories populated during DoBuild()
-
-
 };
 
 } /* namespace age */

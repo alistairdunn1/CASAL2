@@ -1064,7 +1064,7 @@ end_table
 
 \subsubsection{Observation of type Age Length}
 \commandlabsubarg{observation}{type}{age\_length}.
-\defRef{sec:Observation-AgeSize}
+\defRef{sec:Observation-AgeLength}
 \label{syntax:Observation-AgeLength}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
@@ -1102,4 +1102,9 @@ end_table
 \defSub{ageing\_error}{The label of ageing error to use}
 \defType{String}
 \defDefault{No ageing error}
+
+\defSub{intervals}{The number of quantiles to evaluate the lengths in the age-length relationship}
+\defType{Non-negative integer}
+\defDefault{5}
+
 

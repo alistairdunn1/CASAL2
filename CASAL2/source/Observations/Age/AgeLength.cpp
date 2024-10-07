@@ -19,12 +19,12 @@
 #include <boost/math/distributions/lognormal.hpp>
 #include <boost/math/distributions/normal.hpp>
 
-#include "../../Partition/Accessors/Cached/CombinedCategories.h"
 #include "AgeLengths/AgeLength.h"
 #include "AgeingErrors/AgeingError.h"
 #include "AgeingErrors/Manager.h"
 #include "Model/Model.h"
 #include "Partition/Accessors/All.h"
+#include "Partition/Accessors/Cached/CombinedCategories.h"
 #include "Selectivities/Manager.h"
 #include "TimeSteps/Manager.h"
 #include "Utilities/Map.h"
@@ -51,7 +51,7 @@ AgeLength::AgeLength(shared_ptr<Model> model) : Observation(model) {
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",Double(0.5))->set_range(0.0, 1.0);
   parameters_.Bind<unsigned>(PARAM_AGES, &individual_ages_, "Vector of individual ages", "", false);
   parameters_.Bind<double>(PARAM_LENGTHS, &individual_lengths_, "Vector of individual lengths. Has a one to one relationship with ages", "", false);
-  // clang-format on
+  parameters_.Bind<unsigned>(PARAM_INTERVALS, &n_quant_, "The number of quantiles to evaluate the lengths in the age-length relationship", "", 5);
 
   allowed_likelihood_types_.push_back(PARAM_PSEUDO);
   allowed_likelihood_types_.push_back(PARAM_BERNOULLI);
@@ -71,9 +71,9 @@ void AgeLength::DoValidate() {
   age_spread_ = model_->age_spread();
   if (individual_ages_.size() != individual_lengths_.size())
     LOG_ERROR_P(PARAM_AGES) << "needs to have the same number of elements as " << PARAM_LENGTHS << ". '" << individual_ages_.size() << "' ages supplied but '"
-                            << individual_lengths_.size() << "' lengths.";
+                            << individual_lengths_.size() << "' lengths were provided.";
   if (category_labels_.size() > 1) {
-    LOG_ERROR_P(PARAM_CATEGORIES) << " only a single category label or a combined category label are allowed i.e., male or male+female.";
+    LOG_ERROR_P(PARAM_CATEGORIES) << " only a single category label or a combined category labels are allowed i.e., 'male' or 'male+female'.";
   }
 
   // if users don't supply this paramater we set it equal to category_labels_
@@ -222,8 +222,8 @@ void AgeLength::DoBuild() {
 
   // set up 5 evenly spaced quantiles of normal disribution
   boost::math::normal dist{};
-  for (int i = 1; i <= 5; i++) {
-    quantiles_.push_back((Double(i) - 0.5) / Double(5));
+  for (unsigned i = 1; i <= n_quant_; i++) {
+    quantiles_.push_back((Double(i) - 0.5) / Double(n_quant_));
     quantile_breaks_.push_back(quantile(dist, AS_DOUBLE(quantiles_[i - 1])));
   }
 
