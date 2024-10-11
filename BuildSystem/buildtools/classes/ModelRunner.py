@@ -56,6 +56,7 @@ class ModelRunner:
             "LIN_tc_Dm",
             "SingleSexTagByLength_input",
             "SingleSexTagByLength_n",
+            "MultiSelectivity",
         }  # requires a config-betadiff.csl2 file
         estimation_gammadiff_dir_list = {
             "TwoSex",

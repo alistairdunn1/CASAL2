@@ -1,0 +1,498 @@
+
+[INFO] Setting the random number seed to 20
+[INFO] Estimable parameters were set from the input configuration files
+[INFO] Initiating point estimate run mode
+[INFO] Estimation_phase 1
+[INFO] Estimation with the betadiff minimiser
+about to evaluate function with x = 10 10 10 10 10 10 
+finished objective call: f = 5938.06
+about to evaluate gradient with x = 10 10 10 10 10 10 
+transformed = -0.436068 -0.410941 -0.819777 -0.436068 -0.410941 -0.819777 
+finished gradient call: status = 0 g = -5455.52 2186.05 -5086.42 -7463.06 2647.37 -8894.68 
+about to do fmin call with x = 10 10 10 10 10 10  f = 5938.06 g = -5455.52 2186.05 -5086.42 -7463.06 2647.37 -8894.68 
+Convergence check: current value is 1.49791 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 42.3461 1.53871 264.467 49.0352 0.679419 468.725 
+finished objective call: f = 26277.1
+about to do fmin call with x = 42.3461 1.53871 264.467 49.0352 0.679419 468.725  f = 26277.1 g = -5455.52 2186.05 -5086.42 -7463.06 2647.37 -8894.68 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 19.8383 6.65372 59.5282 23.8609 6.02094 119.126 
+finished objective call: f = 1075.74
+about to do fmin call with x = 19.8383 6.65372 59.5282 23.8609 6.02094 119.126  f = 1075.74 g = -5455.52 2186.05 -5086.42 -7463.06 2647.37 -8894.68 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 19.8383 6.65372 59.5282 23.8609 6.02094 119.126 
+transformed = -0.148459 -0.526187 -0.551627 -0.0426242 -0.550507 -0.35086 
+finished gradient call: status = 0 g = -475.47 2755.32 0.562036 4858.39 -7598.62 0.0122491 
+about to do fmin call with x = 19.8383 6.65372 59.5282 23.8609 6.02094 119.126  f = 1075.74 g = -475.47 2755.32 0.562036 4858.39 -7598.62 0.0122491 
+Convergence check: current value is 7.0636 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 35.5268 0.106006 164.088 17.0992 36.8431 335.889 
+finished objective call: f = 18338.6
+about to do fmin call with x = 35.5268 0.106006 164.088 17.0992 36.8431 335.889  f = 18338.6 g = -475.47 2755.32 0.562036 4858.39 -7598.62 0.0122491 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 22.5556 4.47751 74.624 22.6722 10.2905 153.626 
+finished objective call: f = 2992.62
+about to do fmin call with x = 22.5556 4.47751 74.624 22.6722 10.2905 153.626  f = 2992.62 g = -475.47 2755.32 0.562036 4858.39 -7598.62 0.0122491 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 20.3816 6.18456 62.4556 23.6207 6.80556 125.856 
+finished objective call: f = 926.622
+about to do fmin call with x = 20.3816 6.18456 62.4556 23.6207 6.80556 125.856  f = 926.622 g = -475.47 2755.32 0.562036 4858.39 -7598.62 0.0122491 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 20.3816 6.18456 62.4556 23.6207 6.80556 125.856 
+transformed = -0.133986 -0.544117 -0.540233 -0.0488798 -0.520501 -0.33093 
+finished gradient call: status = 0 g = 1651.87 -437.192 0.467321 1289.5 -565.648 0.00776033 
+about to do fmin call with x = 20.3816 6.18456 62.4556 23.6207 6.80556 125.856  f = 926.622 g = 1651.87 -437.192 0.467321 1289.5 -565.648 0.00776033 
+Convergence check: current value is 1.78268 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.0446 7.64473 79.9217 19.739 7.74071 165.616 
+finished objective call: f = 2365.98
+about to do fmin call with x = 13.0446 7.64473 79.9217 19.739 7.74071 165.616  f = 2365.98 g = 1651.87 -437.192 0.467321 1289.5 -565.648 0.00776033 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 19.3686 6.36915 64.6502 23.105 6.92573 130.896 
+finished objective call: f = 908.7
+about to do fmin call with x = 19.3686 6.36915 64.6502 23.105 6.92573 130.896  f = 908.7 g = 1651.87 -437.192 0.467321 1289.5 -565.648 0.00776033 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 19.3686 6.36915 64.6502 23.105 6.92573 130.896 
+transformed = -0.161032 -0.536995 -0.53184 -0.062333 -0.516039 -0.316237 
+finished gradient call: status = 0 g = -365.963 2578.52 0.622557 324.306 1323.79 0.00849631 
+about to do fmin call with x = 19.3686 6.36915 64.6502 23.105 6.92573 130.896  f = 908.7 g = -365.963 2578.52 0.622557 324.306 1323.79 0.00849631 
+Convergence check: current value is 2.83759 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 9.49429 2.09859 85.5306 15.2708 4.20414 178.233 
+finished objective call: f = 1135.7
+about to do fmin call with x = 9.49429 2.09859 85.5306 15.2708 4.20414 178.233  f = 1135.7 g = -365.963 2578.52 0.622557 324.306 1323.79 0.00849631 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.4671 4.54991 72.0556 20.1432 5.85463 147.841 
+finished objective call: f = 714.461
+about to do fmin call with x = 15.4671 4.54991 72.0556 20.1432 5.85463 147.841  f = 714.461 g = -365.963 2578.52 0.622557 324.306 1323.79 0.00849631 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.4671 4.54991 72.0556 20.1432 5.85463 147.841 
+transformed = -0.268598 -0.611857 -0.504375 -0.140327 -0.557081 -0.268089 
+finished gradient call: status = 0 g = -2256.68 3626.9 2.28865 -236.939 2341.66 0.0407395 
+about to do fmin call with x = 15.4671 4.54991 72.0556 20.1432 5.85463 147.841  f = 714.461 g = -2256.68 3626.9 2.28865 -236.939 2341.66 0.0407395 
+Convergence check: current value is 5.07641 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 10.8048 1.86218 90.8745 9.80178 2.21831 190.472 
+finished objective call: f = 1517.94
+about to do fmin call with x = 10.8048 1.86218 90.8745 9.80178 2.21831 190.472  f = 1517.94 g = -2256.68 3626.9 2.28865 -236.939 2341.66 0.0407395 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 14.4784 3.9177 75.7125 17.878 4.9928 156.226 
+finished objective call: f = 629.76
+about to do fmin call with x = 14.4784 3.9177 75.7125 17.878 4.9928 156.226  f = 629.76 g = -2256.68 3626.9 2.28865 -236.939 2341.66 0.0407395 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 14.4784 3.9177 75.7125 17.878 4.9928 156.226 
+transformed = -0.297053 -0.640963 -0.491249 -0.201397 -0.592557 -0.244876 
+finished gradient call: status = 0 g = -2552.28 3262.47 2.5004 -1669.21 3633.38 0.0875126 
+about to do fmin call with x = 14.4784 3.9177 75.7125 17.878 4.9928 156.226  f = 629.76 g = -2552.28 3262.47 2.5004 -1669.21 3633.38 0.0875126 
+Convergence check: current value is 5.76947 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.3989 2.61068 77.9306 15.1462 3.41623 161.607 
+finished objective call: f = 497.463
+about to do fmin call with x = 13.3989 2.61068 77.9306 15.1462 3.41623 161.607  f = 497.463 g = -2552.28 3262.47 2.5004 -1669.21 3633.38 0.0875126 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.3989 2.61068 77.9306 15.1462 3.41623 161.607 
+transformed = -0.328876 -0.709194 -0.483414 -0.277767 -0.665637 -0.230159 
+finished gradient call: status = 0 g = 385.922 -622.264 4.23083 -2614.56 2758.96 0.114149 
+about to do fmin call with x = 13.3989 2.61068 77.9306 15.1462 3.41623 161.607  f = 497.463 g = 385.922 -622.264 4.23083 -2614.56 2758.96 0.114149 
+Convergence check: current value is 5.54606 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 12.5084 2.14644 74.8054 17.0167 3.60867 155.035 
+finished objective call: f = 539.66
+about to do fmin call with x = 12.5084 2.14644 74.8054 17.0167 3.60867 155.035  f = 539.66 g = 385.922 -622.264 4.23083 -2614.56 2758.96 0.114149 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.0795 2.4405 76.8129 15.8041 3.48412 159.261 
+finished objective call: f = 478.551
+about to do fmin call with x = 13.0795 2.4405 76.8129 15.8041 3.48412 159.261  f = 478.551 g = 385.922 -622.264 4.23083 -2614.56 2758.96 0.114149 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.0795 2.4405 76.8129 15.8041 3.48412 159.261 
+transformed = -0.33846 -0.71919 -0.48735 -0.259031 -0.662202 -0.236559 
+finished gradient call: status = 0 g = 157.48 -632.381 4.40948 -468.264 988.287 0.210637 
+about to do fmin call with x = 13.0795 2.4405 76.8129 15.8041 3.48412 159.261  f = 478.551 g = 157.48 -632.381 4.40948 -468.264 988.287 0.210637 
+Convergence check: current value is 2.06517 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.4812 2.65879 75.8353 15.6625 3.34994 157.538 
+finished objective call: f = 470.159
+about to do fmin call with x = 13.4812 2.65879 75.8353 15.6625 3.34994 157.538  f = 470.159 g = 157.48 -632.381 4.40948 -468.264 988.287 0.210637 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.4812 2.65879 75.8353 15.6625 3.34994 157.538 
+transformed = -0.326417 -0.706427 -0.490812 -0.263043 -0.669023 -0.241273 
+finished gradient call: status = 0 g = 410.451 -591.357 4.50981 -155.485 562.432 0.235532 
+about to do fmin call with x = 13.4812 2.65879 75.8353 15.6625 3.34994 157.538  f = 470.159 g = 410.451 -591.357 4.50981 -155.485 562.432 0.235532 
+Convergence check: current value is 1.25778 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6387 2.92875 74.5288 14.9584 2.89334 156.129 
+finished objective call: f = 465.558
+about to do fmin call with x = 13.6387 2.92875 74.5288 14.9584 2.89334 156.129  f = 465.558 g = 410.451 -591.357 4.50981 -155.485 562.432 0.235532 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.6387 2.92875 74.5288 14.9584 2.89334 156.129 
+transformed = -0.321732 -0.691321 -0.495468 -0.283163 -0.693263 -0.24514 
+finished gradient call: status = 0 g = -659.665 588.473 4.099 -24.4014 -83.2376 0.268615 
+about to do fmin call with x = 13.6387 2.92875 74.5288 14.9584 2.89334 156.129  f = 465.558 g = -659.665 588.473 4.099 -24.4014 -83.2376 0.268615 
+Convergence check: current value is 1.41693 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.769 2.90089 74.4188 15.0979 2.97489 156.012 
+finished objective call: f = 463.583
+about to do fmin call with x = 13.769 2.90089 74.4188 15.0979 2.97489 156.012  f = 463.583 g = -659.665 588.473 4.099 -24.4014 -83.2376 0.268615 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.769 2.90089 74.4188 15.0979 2.97489 156.012 
+transformed = -0.317869 -0.692848 -0.495861 -0.279153 -0.688807 -0.245463 
+finished gradient call: status = 0 g = 8.57602 -6.47686 4.37485 18.5695 -21.8783 0.268567 
+about to do fmin call with x = 13.769 2.90089 74.4188 15.0979 2.97489 156.012  f = 463.583 g = 8.57602 -6.47686 4.37485 18.5695 -21.8783 0.268567 
+Convergence check: current value is 0.0471939 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.767 2.90085 74.2598 15.1016 2.97963 156.087 
+finished objective call: f = 463.578
+about to do fmin call with x = 13.767 2.90085 74.2598 15.1016 2.97963 156.087  f = 463.578 g = 8.57602 -6.47686 4.37485 18.5695 -21.8783 0.268567 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.767 2.90085 74.2598 15.1016 2.97963 156.087 
+transformed = -0.317928 -0.69285 -0.496431 -0.279048 -0.68855 -0.245257 
+finished gradient call: status = 0 g = 0.93043 0.0434757 4.39654 0.199947 -0.559795 0.267226 
+about to do fmin call with x = 13.767 2.90085 74.2598 15.1016 2.97963 156.087  f = 463.578 g = 0.93043 0.0434757 4.39654 0.199947 -0.559795 0.267226 
+Convergence check: current value is 0.00948393 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.7653 2.90073 73.8376 15.1051 2.98323 156.209 
+finished objective call: f = 463.572
+about to do fmin call with x = 13.7653 2.90073 73.8376 15.1051 2.98323 156.209  f = 463.572 g = 0.93043 0.0434757 4.39654 0.199947 -0.559795 0.267226 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.7653 2.90073 73.8376 15.1051 2.98323 156.209 
+transformed = -0.317978 -0.692857 -0.497945 -0.278948 -0.688355 -0.244922 
+finished gradient call: status = 0 g = -5.03224 5.06081 4.45957 -10.3532 12.7731 0.266056 
+about to do fmin call with x = 13.7653 2.90073 73.8376 15.1051 2.98323 156.209  f = 463.572 g = -5.03224 5.06081 4.45957 -10.3532 12.7731 0.266056 
+Convergence check: current value is 0.0275536 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.7604 2.90048 71.3177 15.115 2.99402 156.871 
+finished objective call: f = 463.544
+about to do fmin call with x = 13.7604 2.90048 71.3177 15.115 2.99402 156.871  f = 463.544 g = -5.03224 5.06081 4.45957 -10.3532 12.7731 0.266056 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.7604 2.90048 71.3177 15.115 2.99402 156.871 
+transformed = -0.318122 -0.692871 -0.507056 -0.278662 -0.687771 -0.243103 
+finished gradient call: status = 0 g = -22.9792 20.3378 4.86898 -44.2313 54.6659 0.26113 
+about to do fmin call with x = 13.7604 2.90048 71.3177 15.115 2.99402 156.871  f = 463.544 g = -22.9792 20.3378 4.86898 -44.2313 54.6659 0.26113 
+Convergence check: current value is 0.11793 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.7507 2.89981 63.4782 15.1348 3.01528 158.907 
+finished objective call: f = 463.457
+about to do fmin call with x = 13.7507 2.89981 63.4782 15.1348 3.01528 158.907  f = 463.457 g = -22.9792 20.3378 4.86898 -44.2313 54.6659 0.26113 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.7507 2.89981 63.4782 15.1348 3.01528 158.907 
+transformed = -0.31841 -0.692907 -0.536307 -0.278096 -0.686621 -0.237525 
+finished gradient call: status = 0 g = -58.5612 50.7416 6.54022 -109.985 136.465 0.248583 
+about to do fmin call with x = 13.7507 2.89981 63.4782 15.1348 3.01528 158.907  f = 463.457 g = -58.5612 50.7416 6.54022 -109.985 136.465 0.248583 
+Convergence check: current value is 0.294451 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6499 2.89225 3.26794 15.339 3.24032 184.31 
+finished objective call: f = 479.006
+about to do fmin call with x = 13.6499 2.89225 3.26794 15.339 3.24032 184.31  f = 479.006 g = -58.5612 50.7416 6.54022 -109.985 136.465 0.248583 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.7406 2.89906 54.3369 15.1551 3.03744 161.405 
+finished objective call: f = 463.319
+about to do fmin call with x = 13.7406 2.89906 54.3369 15.1551 3.03744 161.405  f = 463.319 g = -58.5612 50.7416 6.54022 -109.985 136.465 0.248583 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.7406 2.89906 54.3369 15.1551 3.03744 161.405 
+transformed = -0.318709 -0.692949 -0.57245 -0.277511 -0.685429 -0.230707 
+finished gradient call: status = 0 g = -96.3372 83.3367 9.67735 -178.516 221.825 0.234703 
+about to do fmin call with x = 13.7406 2.89906 54.3369 15.1551 3.03744 161.405  f = 463.319 g = -96.3372 83.3367 9.67735 -178.516 221.825 0.234703 
+Convergence check: current value is 0.478774 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6063 2.88889 1.03955 15.4275 3.34015 195.73 
+finished objective call: f = 1630.7
+about to do fmin call with x = 13.6063 2.88889 1.03955 15.4275 3.34015 195.73  f = 1630.7 g = -96.3372 83.3367 9.67735 -178.516 221.825 0.234703 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.7272 2.89804 43.0834 15.1823 3.0671 164.767 
+finished objective call: f = 463.002
+about to do fmin call with x = 13.7272 2.89804 43.0834 15.1823 3.0671 164.767  f = 463.002 g = -96.3372 83.3367 9.67735 -178.516 221.825 0.234703 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.7272 2.89804 43.0834 15.1823 3.0671 164.767 
+transformed = -0.319107 -0.693005 -0.620871 -0.276733 -0.683838 -0.221575 
+finished gradient call: status = 0 g = -149.272 129.733 17.2592 -269.533 335.652 0.217417 
+about to do fmin call with x = 13.7272 2.89804 43.0834 15.1823 3.0671 164.767  f = 463.002 g = -149.272 129.733 17.2592 -269.533 335.652 0.217417 
+Convergence check: current value is 0.724946 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.4432 2.87639 116.618 15.7625 3.72903 238.663 
+finished objective call: f = 41668.6
+about to do fmin call with x = 13.4432 2.87639 116.618 15.7625 3.72903 238.663  f = 41668.6 g = -149.272 129.733 17.2592 -269.533 335.652 0.217417 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6987 2.89587 23.3508 15.24 3.13054 171.916 
+finished objective call: f = 460.201
+about to do fmin call with x = 13.6987 2.89587 23.3508 15.24 3.13054 171.916  f = 460.201 g = -149.272 129.733 17.2592 -269.533 335.652 0.217417 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.6987 2.89587 23.3508 15.24 3.13054 171.916 
+transformed = -0.319952 -0.693124 -0.722946 -0.275081 -0.680461 -0.202312 
+finished gradient call: status = 0 g = -293.325 261.975 75.3866 -461.332 577.286 0.185203 
+about to do fmin call with x = 13.6987 2.89587 23.3508 15.24 3.13054 171.916  f = 460.201 g = -293.325 261.975 75.3866 -461.332 577.286 0.185203 
+Convergence check: current value is 1.25442 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 11.837 2.75446 427.05 19.2678 8.71779 498.145 
+finished objective call: f = 4.22601e+06
+about to do fmin call with x = 11.837 2.75446 427.05 19.2678 8.71779 498.145  f = 4.22601e+06 g = -293.325 261.975 75.3866 -461.332 577.286 0.185203 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.508 2.88158 47.9192 15.6307 3.57388 220.909 
+finished objective call: f = 16531.3
+about to do fmin call with x = 13.508 2.88158 47.9192 15.6307 3.57388 220.909  f = 16531.3 g = -293.325 261.975 75.3866 -461.332 577.286 0.185203 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6796 2.89444 13.4376 15.2789 3.17362 176.705 
+finished objective call: f = 451.639
+about to do fmin call with x = 13.6796 2.89444 13.4376 15.2789 3.17362 176.705  f = 451.639 g = -293.325 261.975 75.3866 -461.332 577.286 0.185203 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.6796 2.89444 13.4376 15.2789 3.17362 176.705 
+transformed = -0.320519 -0.693203 -0.790707 -0.273967 -0.678185 -0.189513 
+finished gradient call: status = 0 g = -510.327 457.517 244.376 -589.151 739.715 0.166566 
+about to do fmin call with x = 13.6796 2.89444 13.4376 15.2789 3.17362 176.705  f = 451.639 g = -510.327 457.517 244.376 -589.151 739.715 0.166566 
+Convergence check: current value is 1.63785 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 7.42289 2.40776 133.085 30.7217 31.2687 430.716 
+finished objective call: f = 6.22001e+07
+about to do fmin call with x = 7.42289 2.40776 133.085 30.7217 31.2687 430.716  f = 6.22001e+07 g = -510.327 457.517 244.376 -589.151 739.715 0.166566 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 12.9855 2.84384 476.101 16.7357 4.9525 356.768 
+finished objective call: f = 520824
+about to do fmin call with x = 12.9855 2.84384 476.101 16.7357 4.9525 356.768  f = 520824 g = -510.327 457.517 244.376 -589.151 739.715 0.166566 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6096 2.88936 0.535916 15.4228 3.33491 194.547 
+finished objective call: f = 2053.44
+about to do fmin call with x = 13.6096 2.88936 0.535916 15.4228 3.33491 194.547  f = 2053.44 g = -510.327 457.517 244.376 -589.151 739.715 0.166566 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6725 2.89393 10.4626 15.2933 3.18958 178.473 
+finished objective call: f = 444.58
+about to do fmin call with x = 13.6725 2.89393 10.4626 15.2933 3.18958 178.473  f = 444.58 g = -510.327 457.517 244.376 -589.151 739.715 0.166566 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.6725 2.89393 10.4626 15.2933 3.18958 178.473 
+transformed = -0.320726 -0.693231 -0.815606 -0.273556 -0.677346 -0.184809 
+finished gradient call: status = 0 g = -702.153 606.956 367.833 -636 799.526 0.160218 
+about to do fmin call with x = 13.6725 2.89393 10.4626 15.2933 3.18958 178.473  f = 444.58 g = -702.153 606.956 367.833 -636 799.526 0.160218 
+Convergence check: current value is 1.79839 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 4.84633 2.18579 498.915 38.5525 45.5096 0.53906 
+finished objective call: f = 1.48506e+08
+about to do fmin call with x = 4.84633 2.18579 498.915 38.5525 45.5096 0.53906  f = 1.48506e+08 g = -702.153 606.956 367.833 -636 799.526 0.160218 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 12.6169 2.81882 38.9683 17.5483 6.0751 436.924 
+finished objective call: f = 1.32589e+06
+about to do fmin call with x = 12.6169 2.81882 38.9683 17.5483 6.0751 436.924  f = 1.32589e+06 g = -702.153 606.956 367.833 -636 799.526 0.160218 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.5656 2.88638 12.0484 15.5147 3.43963 206.056 
+finished objective call: f = 4383.47
+about to do fmin call with x = 13.5656 2.88638 12.0484 15.5147 3.43963 206.056  f = 4383.47 g = -702.153 606.956 367.833 -636 799.526 0.160218 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6618 2.89318 6.60837 15.3154 3.21419 181.195 
+finished objective call: f = 429.126
+about to do fmin call with x = 13.6618 2.89318 6.60837 15.3154 3.21419 181.195  f = 429.126 g = -702.153 606.956 367.833 -636 799.526 0.160218 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.6618 2.89318 6.60837 15.3154 3.21419 181.195 
+transformed = -0.321044 -0.693272 -0.85385 -0.272925 -0.676057 -0.177585 
+finished gradient call: status = 0 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+about to do fmin call with x = 13.6618 2.89318 6.60837 15.3154 3.21419 181.195  f = 429.126 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+Convergence check: current value is 3.50164 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 5.04836 2.362 356.061 38.9203 46.0433 8.08303 
+finished objective call: f = 1.53736e+08
+about to do fmin call with x = 5.04836 2.362 356.061 38.9203 46.0433 8.08303  f = 1.53736e+08 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 12.6392 2.83773 20.5194 17.6103 6.16757 441.719 
+finished objective call: f = 1.40016e+06
+about to do fmin call with x = 12.6392 2.83773 20.5194 17.6103 6.16757 441.719  f = 1.40016e+06 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.5583 2.88761 17.9706 15.5406 3.46971 209.296 
+finished objective call: f = 6353.64
+about to do fmin call with x = 13.5583 2.88761 17.9706 15.5406 3.46971 209.296  f = 6353.64 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6515 2.89262 3.5911 15.3379 3.23932 183.97 
+finished objective call: f = 458.848
+about to do fmin call with x = 13.6515 2.89262 3.5911 15.3379 3.23932 183.97  f = 458.848 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 13.6602 2.89309 6.05413 15.3191 3.21828 181.647 
+finished objective call: f = 427.26
+about to do fmin call with x = 13.6602 2.89309 6.05413 15.3191 3.21828 181.647  f = 427.26 g = -1502.65 1072.54 381.589 -707.735 891.384 0.150958 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 13.6602 2.89309 6.05413 15.3191 3.21828 181.647 
+transformed = -0.321094 -0.693277 -0.860188 -0.27282 -0.675843 -0.176388 
+finished gradient call: status = 0 g = -1777.68 1199.2 255.467 -719.626 906.635 0.149478 
+about to do fmin call with x = 13.6602 2.89309 6.05413 15.3191 3.21828 181.647  f = 427.26 g = -1777.68 1199.2 255.467 -719.626 906.635 0.149478 
+Convergence check: current value is 4.16065 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 14.8847 3.40432 1.9346 15.3617 3.32949 183.207 
+finished objective call: f = 453.647
+about to do fmin call with x = 14.8847 3.40432 1.9346 15.3617 3.32949 183.207  f = 453.647 g = -1777.68 1199.2 255.467 -719.626 906.635 0.149478 
+done fmin call
+ireturn = 0
+about to evaluate function with x = 14.0345 3.04673 4.53632 15.3322 3.25243 182.129 
+finished objective call: f = 416.552
+about to do fmin call with x = 14.0345 3.04673 4.53632 15.3322 3.25243 182.129  f = 416.552 g = -1777.68 1199.2 255.467 -719.626 906.635 0.149478 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 14.0345 3.04673 4.53632 15.3322 3.25243 182.129 
+transformed = -0.310037 -0.684929 -0.879207 -0.272445 -0.674061 -0.175114 
+finished gradient call: status = 0 g = -2018.61 1313.3 -141.931 -891.343 1096.29 0.142684 
+about to do fmin call with x = 14.0345 3.04673 4.53632 15.3322 3.25243 182.129  f = 416.552 g = -2018.61 1313.3 -141.931 -891.343 1096.29 0.142684 
+Convergence check: current value is 4.84599 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.2479 3.49937 2.54784 15.3788 3.33966 181.496 
+finished objective call: f = 400.155
+about to do fmin call with x = 15.2479 3.49937 2.54784 15.3788 3.33966 181.496  f = 400.155 g = -2018.61 1313.3 -141.931 -891.343 1096.29 0.142684 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.2479 3.49937 2.54784 15.3788 3.33966 181.496 
+transformed = -0.274855 -0.661435 -0.909928 -0.271115 -0.669551 -0.176789 
+finished gradient call: status = 0 g = -1041.36 738.572 -398.399 -1259.37 1521.2 0.131392 
+about to do fmin call with x = 15.2479 3.49937 2.54784 15.3788 3.33966 181.496  f = 400.155 g = -1041.36 738.572 -398.399 -1259.37 1521.2 0.131392 
+Convergence check: current value is 3.80152 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.4157 3.5351 2.81527 15.3641 3.30577 180.48 
+finished objective call: f = 398.104
+about to do fmin call with x = 15.4157 3.5351 2.81527 15.3641 3.30577 180.48  f = 398.104 g = -1041.36 738.572 -398.399 -1259.37 1521.2 0.131392 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.4157 3.5351 2.81527 15.3641 3.30577 180.48 
+transformed = -0.270062 -0.659643 -0.90522 -0.271535 -0.671296 -0.179482 
+finished gradient call: status = 0 g = 372.381 85.1431 625.375 -1105.04 1346.21 0.138809 
+about to do fmin call with x = 15.4157 3.5351 2.81527 15.3641 3.30577 180.48  f = 398.104 g = 372.381 85.1431 625.375 -1105.04 1346.21 0.138809 
+Convergence check: current value is 3.38154 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.4053 3.49382 2.57302 15.3496 3.25194 180.335 
+finished objective call: f = 393.058
+about to do fmin call with x = 15.4053 3.49382 2.57302 15.3496 3.25194 180.335  f = 393.058 g = 372.381 85.1431 625.375 -1105.04 1346.21 0.138809 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.4053 3.49382 2.57302 15.3496 3.25194 180.335 
+transformed = -0.270358 -0.661714 -0.909474 -0.271947 -0.674087 -0.179865 
+finished gradient call: status = 0 g = 131.39 20.6862 268.144 -814.57 1029.7 0.148933 
+about to do fmin call with x = 15.4053 3.49382 2.57302 15.3496 3.25194 180.335  f = 393.058 g = 131.39 20.6862 268.144 -814.57 1029.7 0.148933 
+Convergence check: current value is 2.61971 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.5623 3.55568 2.14028 15.1746 3.03783 179.053 
+finished objective call: f = 388.485
+about to do fmin call with x = 15.5623 3.55568 2.14028 15.1746 3.03783 179.053  f = 388.485 g = 131.39 20.6862 268.144 -814.57 1029.7 0.148933 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.5623 3.55568 2.14028 15.1746 3.03783 179.053 
+transformed = -0.26589 -0.658615 -0.917614 -0.276955 -0.685408 -0.183268 
+finished gradient call: status = 0 g = -358.233 160.667 -293.456 -91.5628 148.572 0.178908 
+about to do fmin call with x = 15.5623 3.55568 2.14028 15.1746 3.03783 179.053  f = 388.485 g = -358.233 160.667 -293.456 -91.5628 148.572 0.178908 
+Convergence check: current value is 0.922128 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.5612 3.54381 2.23537 15.1202 2.99206 178.756 
+finished objective call: f = 388.03
+about to do fmin call with x = 15.5612 3.54381 2.23537 15.1202 2.99206 178.756  f = 388.03 g = -358.233 160.667 -293.456 -91.5628 148.572 0.178908 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.5612 3.54381 2.23537 15.1202 2.99206 178.756 
+transformed = -0.265921 -0.659207 -0.915759 -0.278514 -0.687876 -0.184056 
+finished gradient call: status = 0 g = -1.82069 -8.11657 -16.3401 -5.34744 19.4021 0.18358 
+about to do fmin call with x = 15.5612 3.54381 2.23537 15.1202 2.99206 178.756  f = 388.03 g = -1.82069 -8.11657 -16.3401 -5.34744 19.4021 0.18358 
+Convergence check: current value is 0.0500015 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.5546 3.54367 2.25243 15.1011 2.97967 178.716 
+finished objective call: f = 388.023
+about to do fmin call with x = 15.5546 3.54367 2.25243 15.1011 2.97967 178.716  f = 388.023 g = -1.82069 -8.11657 -16.3401 -5.34744 19.4021 0.18358 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.5546 3.54367 2.25243 15.1011 2.97967 178.716 
+transformed = -0.266108 -0.659215 -0.91543 -0.279062 -0.688548 -0.184162 
+finished gradient call: status = 0 g = -1.1521 3.93509 0.218913 -2.56187 1.73713 0.184118 
+about to do fmin call with x = 15.5546 3.54367 2.25243 15.1011 2.97967 178.716  f = 388.023 g = -1.1521 3.93509 0.218913 -2.56187 1.73713 0.184118 
+Convergence check: current value is 0.0101414 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.5509 3.5412 2.25603 15.1019 2.97981 178.713 
+finished objective call: f = 388.023
+about to do fmin call with x = 15.5509 3.5412 2.25603 15.1019 2.97981 178.713  f = 388.023 g = -1.1521 3.93509 0.218913 -2.56187 1.73713 0.184118 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.5509 3.5412 2.25603 15.1019 2.97981 178.713 
+transformed = -0.266213 -0.659338 -0.915361 -0.279039 -0.68854 -0.184171 
+finished gradient call: status = 0 g = 1.39051 -0.995846 0.313567 0.216129 -0.430557 0.184208 
+about to do fmin call with x = 15.5509 3.5412 2.25603 15.1019 2.97981 178.713  f = 388.023 g = 1.39051 -0.995846 0.313567 0.216129 -0.430557 0.184208 
+Convergence check: current value is 0.00358357 and threshold is 0.002
+done fmin call
+ireturn = 0
+about to evaluate function with x = 15.5502 3.54101 2.25689 15.1022 2.98001 178.706 
+finished objective call: f = 388.023
+about to do fmin call with x = 15.5502 3.54101 2.25689 15.1022 2.98001 178.706  f = 388.023 g = 1.39051 -0.995846 0.313567 0.216129 -0.430557 0.184208 
+done fmin call
+ireturn = 1
+about to evaluate gradient with x = 15.5502 3.54101 2.25689 15.1022 2.98001 178.706 
+transformed = -0.266232 -0.659348 -0.915344 -0.27903 -0.688529 -0.184189 
+finished gradient call: status = 0 g = 0.183853 -0.0830974 0.0907458 0.250618 -0.206607 0.184222 
+about to do fmin call with x = 15.5502 3.54101 2.25689 15.1022 2.98001 178.706  f = 388.023 g = 0.183853 -0.0830974 0.0907458 0.250618 -0.206607 0.184222 
+Convergence check: current value is 0.000645885 and threshold is 0.002
+fmm: have converged: t = 0.000645885 f = 388.023
+x = -0.266232 -0.659348 -0.915344 -0.27903 -0.688529 -0.184189 
+g = 0.183853 -0.0830974 0.0907458 0.250618 -0.206607 0.184222 
+done fmin call
+ireturn = -1
+finished main minimiser loop
+Successful convergence in optimise
+[INFO] Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Function had value 388.023 and 388.023 was expected.
+[INFO] Completed
+[INFO] Total elapsed time: 1 seconds

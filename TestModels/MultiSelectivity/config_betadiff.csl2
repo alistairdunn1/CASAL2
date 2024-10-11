@@ -1,0 +1,259 @@
+# population.csl2
+@model
+min_age     1
+max_age     50
+age_plus    True
+start_year  1995
+final_year  2010
+type age
+base_weight_units tonnes
+initialisation_phases phase1
+time_steps Summer Fishing Winter AgeIncrement
+
+threads 1
+
+@initialisation_phase phase1
+type derived
+
+@categories
+format stock
+names goldfish
+age_lengths AgeLength
+
+@time_step Summer
+processes Recruitment Mortality
+
+@time_step Fishing
+processes Mortality
+
+@time_step Winter
+processes  Mortality 
+
+@time_step AgeIncrement
+processes  Ageing
+
+# Population processes
+@process None
+type null_process
+
+@process Ageing
+type ageing
+categories *
+
+@process Recruitment
+type recruitment_beverton_holt
+categories goldfish
+proportions 1
+b0 70000
+recruitment_multipliers 1         
+steepness 0.75
+ssb SSB
+age 1
+
+
+
+@derived_quantity SSB
+type biomass
+time_step Fishing
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+categories *
+selectivities Maturity
+
+@process Mortality
+type mortality_instantaneous
+m 0.13
+relative_m_by_age One
+categories *
+time_step_proportions 0.4166667 0.3333333 0.25 
+table catches
+year	Longline2
+2000	1
+2001	1
+2002	1
+2003	1
+2004	1
+2005	1
+2006	1
+2007	1
+2008	1
+2009	1
+2010	1
+
+
+end_table
+
+table method
+method category   		selectivity 	u_max   time_step penalty
+Longline2  format=goldfish  SELLongline2        0.9999  Fishing    event_mortality_penalty
+end_table
+
+# Definition of selectivities
+@selectivity One
+type constant
+c 1
+
+@selectivity Maturity
+type all_values_bounded
+L              8
+H             10
+v            0 0.5 1
+
+
+
+@selectivity SELLongline2a
+type double_normal
+mu        10
+sigma_l   10
+sigma_r   10
+alpha     1.0
+
+@selectivity SELLongline2b
+type double_normal
+mu        10
+sigma_l   10
+sigma_r   10
+alpha     1.0
+
+@selectivity SELLongline2
+type multi_selectivity
+years 2000:2010
+selectivity_labels SELLongline2a*5 SELLongline2b*6
+default_selectivity SELLongline2b
+
+
+@age_length AgeLength
+type von_bertalanffy
+length_weight LengthWeight
+k 0.06
+t0 -1.4
+Linf 150
+cv_first 0.1
+cv_last  0.1
+time_step_proportions 0.4166667 0.75 1.0 0.0
+by_length FALSE
+distribution normal
+#compatibility_option casal
+
+@length_weight LengthWeight
+type basic
+units tonnes
+a 6e-09
+b 3
+
+@report EstimateValues
+type estimate_value
+
+
+#Some length comps to fit
+
+@observation Longline2Catch
+type process_removals_by_age
+method_of_removal Longline2
+mortality_process Mortality
+years 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 
+categories *+
+time_step Fishing
+min_age 1
+max_age 20
+plus_group False
+ageing_error AgeingError
+table obs
+2000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.031	0.016
+2001	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.031	0.016
+2002	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.031	0.016
+2003	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.031	0.016
+2004	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.031	0.016
+2005	0.000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.047
+2006	0.000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.047
+2007	0.000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.047
+2008	0.000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.047
+2009	0.000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.047
+2010	0.000	0.000	0.000	0.000	0.001	0.002	0.004	0.010	0.020	0.037	0.060	0.086	0.112	0.130	0.134	0.125	0.104	0.077	0.051	0.047
+end_table
+
+table error_values
+2000 400
+2001 400
+2002 400
+2003 400
+2004 400
+2005 400
+2006 400
+2007 400
+2008 400
+2009 400
+2010 400
+end_table
+
+
+error_value_multiplier 1
+likelihood multinomial
+delta 1e-11
+
+@ageing_error AgeingError
+type normal
+cv 0.1
+
+
+@minimiser betadiff
+type betadiff
+iterations 1000
+evaluations 4000
+tolerance 0.002
+covariance true
+active true
+
+@penalty event_mortality_penalty
+type process
+log_scale False
+multiplier 100
+
+
+
+@estimate
+parameter selectivity[SELLongline2a].mu
+lower_bound 1
+upper_bound 50
+type uniform
+
+@estimate
+parameter selectivity[SELLongline2a].sigma_l
+lower_bound 0.05
+upper_bound 50
+type uniform
+
+@estimate
+parameter selectivity[SELLongline2a].sigma_r
+lower_bound 0.05
+upper_bound 500
+type uniform
+
+
+@estimate
+parameter selectivity[SELLongline2b].mu
+lower_bound 1
+upper_bound 50
+type uniform
+
+@estimate
+parameter selectivity[SELLongline2b].sigma_l
+lower_bound 0.05
+upper_bound 50
+type uniform
+
+@estimate
+parameter selectivity[SELLongline2b].sigma_r
+lower_bound 0.05
+upper_bound 500
+type uniform
+
+
+ @assert ObjectiveFunction
+ type objective_function
+ value 388.023
+ tolerance 0.001 
+ 
+ @report ObjectiveFunction
+ type objective_function
+ 

@@ -13,10 +13,6 @@
  */
 #include "MultiSelectivity.h"
 
-#include <boost/math/distributions/lognormal.hpp>
-#include <cmath>
-
-#include "../../AgeLengths/AgeLength.h"
 #include "../../Model/Model.h"
 #include "../Manager.h"
 
@@ -32,7 +28,8 @@ MultiSelectivity::MultiSelectivity(shared_ptr<Model> model) : Selectivity(model)
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which we want to apply the corresponding selectivity in", "");
   parameters_.Bind<string>(PARAM_DEFAULT_SELECTIVITY, &default_selectivity_label_, "The selectivity used in missing years and the projections (if not otherwise specified)", "");
   parameters_.Bind<string>(PARAM_PROJECTION_SELECTIVITY, &projection_selectivity_label_,"The selectivity used in missing projection years (defaults to the same selectivity label as 'default_selectivity')", "", "");
-/* clang-format on */}
+  /* clang-format on */
+}
 
 /**
  * Validate years
@@ -62,28 +59,31 @@ void MultiSelectivity::DoBuild() {
 
   if (!default_selectivity_)
     LOG_ERROR_P(PARAM_DEFAULT_SELECTIVITY) << ": Default selectivity label " << default_selectivity_label_ << " was not found.";
-  projection_selectivity_ = model_->managers()->selectivity()->GetSelectivity(projection_selectivity_label_);
 
+  projection_selectivity_ = model_->managers()->selectivity()->GetSelectivity(projection_selectivity_label_);
   if (projection_selectivity_label_ != "" && !projection_selectivity_)
     LOG_ERROR_P(PARAM_DEFAULT_SELECTIVITY) << ": The projection selectivity label " << projection_selectivity_label_ << " was not found.";
 
   // Fill in vector of selectivities with the default_selectivity_ value
   for (unsigned y_ndx = 0; y_ndx < all_years.size(); ++y_ndx) {
     selectivities_[all_years[y_ndx]] = default_selectivity_;
+    selectivities_[all_years[y_ndx]]->set_label(default_selectivity_label_);
   }
 
   // Overwrite the vector of selectivities with the projection_selectivity_ value for the model projection_years, if supplied
   if (projection_selectivity_) {
     for (unsigned y_ndx = (run_years.size() + 1); y_ndx < projection_years.size(); ++y_ndx) {
       selectivities_[all_years[y_ndx]] = projection_selectivity_;
+      selectivities_[all_years[y_ndx]]->set_label(projection_selectivity_label_);
     }
   }
 
   // Then overwrite with the year value if user supplied for either/both run and projection years
-  for (unsigned y_ndx = 0; y_ndx < all_years.size(); ++y_ndx) {
+  for (unsigned y_ndx = 0; y_ndx < years_.size(); ++y_ndx) {
     Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(selectivity_labels_[y_ndx]);
     if (selectivity) {
-      selectivities_[all_years[y_ndx]] = selectivity;
+      selectivities_[years_[y_ndx]] = selectivity;
+      selectivities_[years_[y_ndx]]->set_label(selectivity->GetLabel());
     }
   }
 

@@ -1,0 +1,48 @@
+Casal2 (https://github.com/alistairdunn1/CASAL2:Development)
+Call: C:\Projects\Software\CASAL2\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
+Date: Fri Oct 11 18:47:57 2024
+Seed: 20
+Version: v24.10 (2024-10-07)
+Copyright (c) 2017-2024, NIWA (www.niwa.co.nz)
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=27368
+
+
+*estimate_value[EstimateValues]
+values {dataframe}
+selectivity[SELLongline2a].mu selectivity[SELLongline2a].sigma_l selectivity[SELLongline2a].sigma_r selectivity[SELLongline2b].mu selectivity[SELLongline2b].sigma_l selectivity[SELLongline2b].sigma_r 
+15.5502 3.54101 2.25689 15.1022 2.98001 178.706 
+*end
+
+*objective_function[ObjectiveFunction]
+values {vector}
+observation->Longline2Catch->2000 33.5163
+observation->Longline2Catch->2001 33.5163
+observation->Longline2Catch->2002 33.5163
+observation->Longline2Catch->2003 33.5163
+observation->Longline2Catch->2004 33.5163
+observation->Longline2Catch->2005 36.7413
+observation->Longline2Catch->2006 36.7406
+observation->Longline2Catch->2007 36.7401
+observation->Longline2Catch->2008 36.7398
+observation->Longline2Catch->2009 36.7397
+observation->Longline2Catch->2010 36.7397
+penalty->event_mortality_penalty 0
+prior->selectivity[SELLongline2a].mu 0
+prior->selectivity[SELLongline2a].sigma_l 0
+prior->selectivity[SELLongline2a].sigma_r 0
+prior->selectivity[SELLongline2b].mu 0
+prior->selectivity[SELLongline2b].sigma_l 0
+prior->selectivity[SELLongline2b].sigma_r 0
+total_score 388.023
+*end
+
+*info[messages_encountered]
+Values {string}
+Setting the random number seed to 20
+Estimable parameters were set from the input configuration files
+Initiating point estimate run mode
+Estimation_phase 1
+Estimation with the betadiff minimiser
+Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Function had value 388.023 and 388.023 was expected.
+*end
+
