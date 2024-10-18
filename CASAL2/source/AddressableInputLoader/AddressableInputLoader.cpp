@@ -111,11 +111,12 @@ void AddressableInputLoader::LoadValues(unsigned index) {
     vector<Estimate*> estimates = model_->managers()->estimate()->GetIsEstimated();
     for (auto estimate : estimates) {
       if (addressable_values_.find(estimate->parameter()) == addressable_values_.end())
-        LOG_FATAL() << "The estimate " << estimate->parameter() << " was not found in the input configuration file";
+        LOG_FATAL() << "The estimable parameter '" << estimate->parameter() << "' was not found in the free parameter file. "
+                    << "Please check that the free parameter file (e.g., the -i file) has been defined correctly.";
     }
     if (estimates.size() != addressable_values_.size())
-      LOG_FATAL() << "The free parameters file does not have the correct number of estimables defined. Expected " << estimates.size() << "estimables, but found  "
-                  << addressable_values_.size() << " in the free parameters file";
+      LOG_FATAL() << "The free parameter file does not have the correct number of estimables defined. Expected " << estimates.size() << "estimables, but "
+                  << addressable_values_.size() << " were found in the free parameter file";
   }
 
   unsigned estimate_count = 0;
