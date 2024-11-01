@@ -152,7 +152,7 @@ class ClassLoader:
                 # checks if it has children in Common, Age, or Length folders
                 file_list = os.listdir(casal2_src_folder + folder + '/')
                 for file in file_list:
-                    if file.startswith(folder[:-3]) and file.endswith('.h') and not file.endswith('-inl.h'):
+                    if file.startswith(folder[:-3]) and file.endswith('.h') and not file.endswith('-inl.h') and not file.endswith(".Mock.h"):
                         print('    Loading top-level parent class from file "' + file + '"')
                         parent_class_.name_ = file.replace('.h', '')
                         if not VariableLoader().Load('../CASAL2/source/' + folder + '/' + file, parent_class_):

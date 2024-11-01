@@ -5,7 +5,7 @@
  * @date Jan 11, 2016
  * @section LICENSE
  *
- * Copyright NIWA Science �2016 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifndef TESTCASES_MODELS_TWOSEX_H_
@@ -39,7 +39,6 @@ time_steps step_one step_two
 format stage.sex
 names immature.male mature.male immature.female mature.female
 age_lengths no_age_length*4
-
 
 @age_length no_age_length
 type none

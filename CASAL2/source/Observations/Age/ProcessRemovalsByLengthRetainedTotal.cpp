@@ -5,7 +5,7 @@
  * @date 06/05/2019
  * @section LICENSE
  *
- * Copyright NIWA Science 2019 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  */
 
 // Headers
@@ -157,7 +157,8 @@ void ProcessRemovalsByLengthRetainedTotal::DoValidate() {
 
   // if only one value supplied then assume its the same for all years
   if (process_error_values_.size() == 1) {
-    process_error_values_.resize(years_.size(), process_error_values_[0]);
+    Double temp = process_error_values_[0];
+    process_error_values_.resize(years_.size(), temp);
   }
 
   if (process_error_values_.size() != 0) {

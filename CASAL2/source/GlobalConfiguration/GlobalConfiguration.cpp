@@ -5,7 +5,7 @@
  * @date 18/09/2012
  * @section LICENSE
  *
- * Copyright NIWA Science �2012 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
@@ -42,8 +42,7 @@ void GlobalConfiguration::Clear() {
  */
 void GlobalConfiguration::ParseOptions() {
   LOG_TRACE();
-
-  LOG_INFO() << "Setting the random number seed to " << options_.random_number_seed_;
+  // LOG_INFO() << "Setting the random number seed to " << options_.random_number_seed_;
   // if (options_.output_ != "") {
   //   auto model = model();
   //   auto report = reports::Factory::Create(model, PARAM_REPORT, PARAM_OUTPUT_PARAMETERS);

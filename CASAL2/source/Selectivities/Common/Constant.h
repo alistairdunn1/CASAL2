@@ -5,7 +5,7 @@
  * @date 11/01/2013
  * @section LICENSE
  *
- * Copyright NIWA Science �2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -32,7 +32,7 @@ public:
   explicit Constant(shared_ptr<Model> model);
   virtual ~Constant() = default;
   void   DoValidate() override final;
-  Double GetAgeResult(unsigned age, AgeLength* age_length) override final;
+  Double GetAgeResult(unsigned age, AgeLength* age_length) override;
   Double GetLengthResult(unsigned length_bin) override final;
 
   Double get_value(Double value) override final;

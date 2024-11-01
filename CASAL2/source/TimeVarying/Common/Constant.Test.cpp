@@ -5,7 +5,7 @@
  * @date 28/01/2019
  * @section LICENSE
  *
- * Copyright NIWA Science �2018 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifdef TESTMODE
@@ -37,7 +37,7 @@ class MockSelectivity : public selectivities::Constant {
 public:
   MockSelectivity(shared_ptr<Model> model) : selectivities::Constant(model) {}
   virtual ~MockSelectivity() = default;
-  MOCK_CONST_METHOD2(GetAgeResult, double(unsigned age, AgeLength* age_length));
+  MOCK_METHOD2(GetAgeResult, double(unsigned age, AgeLength* age_length));
 };
 
 class MockObjects : public niwa::Objects {

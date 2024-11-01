@@ -4,7 +4,7 @@
  * @date 12/07/2013
  * @section LICENSE
  *
- * Copyright NIWA Science �2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 
@@ -114,6 +114,12 @@ void RecruitmentBevertonHolt::DoValidate() {
     LOG_ERROR_P(PARAM_PROPORTIONS) << "The sum total is " << running_total << " which should be 1.0";
 
   for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
+
+  if (recruitment_multipliers_.size() == 1) {
+    Double temp = recruitment_multipliers_[0];
+    recruitment_multipliers_.resize(years_.size(), temp);
+  }
+
 
   if (recruitment_multipliers_.size() != years_.size()) {
     LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "There are " << years_.size() << " model years and " << recruitment_multipliers_.size() << " " << PARAM_RECRUITMENT_MULTIPLIERS

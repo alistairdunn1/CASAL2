@@ -2,7 +2,7 @@
 // Name        : English.h
 // Author      : S.Rasmussen
 // Date        : 18/07/2008
-// Copyright   : Copyright NIWA Science �2008 - www.niwa.co.nz
+// Copyright   : Copyright Casal2 Project 2024 - https://github.com/Casal2/
 // Description :
 // $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
 //============================================================================
@@ -303,6 +303,7 @@
 #define PARAM_EVENT_MORTALITY                     "event_mortality"
 #define PARAM_EXCLUDE_PROCESSES                   "exclude_processes"
 #define PARAM_EXPECTED_VALUE                      "expected_value"
+#define PARAM_EXPLOITATION_RATES                  "exploitation_rates"
 #define PARAM_EXPONENTIAL                         "exponential"
 #define PARAM_EXOGENOUS_VARIABLE                  "exogenous_variable"
 #define PARAM_EXOGENOUS                           "exogenous"

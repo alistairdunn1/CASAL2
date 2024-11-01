@@ -5,7 +5,7 @@
  * @date 20/01/2015
  * @section LICENSE
  *
- * Copyright NIWA Science �2014 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 
@@ -24,8 +24,6 @@ namespace niwa {
 void AddressableInputLoader::Validate() {
   if (model_->global_configuration().get_free_parameter_input_file() != "") {
     LOG_INFO() << "Estimable parameters were set from the free parameter file: " << model_->global_configuration().get_free_parameter_input_file();
-  } else {
-    LOG_INFO() << "Estimable parameters were set from the input configuration files";
   }
 }
 

@@ -4,7 +4,7 @@
  * @date 28/10/2013
  * @section LICENSE
  *
- * Copyright NIWA Science �2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifndef PARAMETERS_BINDABLE_INL_H_
@@ -45,7 +45,7 @@ template <typename T>
 void Bindable<T>::Bind() {
   if (values_.size() > 1)
     LOG_ERROR() << location() << ": " << label_ << " supports having a single value defined only. There are " << values_.size() << " values defined.\n"
-                << "The values defined are: " << boost::algorithm::join(values_, " | ");
+                << "The values defined are: {" << boost::algorithm::join(values_, ", ") << "}";
 
   if (values_.size() > 0) {
     if (!niwa::utilities::To<T>(values_[0], *target_)) {

@@ -5,7 +5,7 @@
  * @date 10/11/2015
  * @section LICENSE
  *
- * Copyright NIWA Science �2015 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -247,6 +247,33 @@ TEST(Object, Test_Addressable_Usage_Is_Set) {
   EXPECT_NO_THROW(object.SetAddressableIsUsed("orange", addressable::kTransformation));
   EXPECT_FALSE(object.IsAddressableUsedFor("orange", addressable::kProfile));
   EXPECT_TRUE(object.IsAddressableUsedFor("orange", addressable::kTransformation));
+}
+
+/**
+ * Test Bitwise Xor operations on Enum Type
+ *
+ *
+ */
+class TestObject8 : public Object {
+public:
+  void Reset() override final{};
+
+  TestObject8() {
+    RegisterAsAddressable("apple", &addressable, (addressable::Usage)(addressable::kAll ^ addressable::kEstimate));    
+  }
+
+  double addressable = 0.0;
+};
+
+TEST(Object, Test_Addressable_Has_Usage) {
+  TestObject8 object;
+
+  EXPECT_EQ(addressable::kSingle, object.GetAddressableType("apple"));
+  EXPECT_EQ(&object.addressable, object.GetAddressable("apple"));
+
+  EXPECT_TRUE(object.HasAddressableUsage("apple", addressable::kLookup));
+  EXPECT_FALSE(object.HasAddressableUsage("apple", addressable::kEstimate));
+
 }
 
 } /* namespace base */

@@ -4,7 +4,7 @@
  * @date 2/09/2014
  * @section LICENSE
  *
- * Copyright NIWA Science �2014 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 
@@ -22,6 +22,7 @@
 #include "../../Processes/Manager.h"
 #include "../../TimeSteps/Factory.h"
 #include "../../TimeSteps/Manager.h"
+#include "../../Utilities/Math.h"
 
 // namespaces
 namespace niwa {
@@ -229,7 +230,7 @@ bool Iterative::CheckConvergence(unsigned index) {
     }
   }
   LOG_FINE() << label_ << " had check values " << sum << " and " << previous_sum;
-  if (sum == 0.0)
+  if (utilities::math::IsZero(sum))
     variance = INFINITY;
   else
     variance = fabs(previous_sum - sum) / sum;

@@ -5,7 +5,7 @@
  * @date 16/11/2012
  * @section LICENSE
  *
- * Copyright NIWA Science �2012 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
@@ -53,7 +53,7 @@ void CommandLineParser::Parse(int argc, char* argv[], RunParameters& options) {
     ("help,h", "Display help")
     ("license,l", "Display the reference for the Casal2 license")
     ("version,v", "Display the Casal2 version")
-    ("config,c", value<string>(), "Configuration [file]")
+    ("config,c", value<vector<string>>()->multitoken(), "Configuration [file 1] [file 2] [file N]")
     ("run,r", "Do a model run (without estimation)")
     ("estimate,e", "Estimate the MPD")
     ("Estimate,E", value<string>(), "Estimate the MPD and create an MPD [file] containing the MPD and covariance for use in an MCMC")
@@ -138,7 +138,7 @@ void CommandLineParser::Parse(int argc, char* argv[], RunParameters& options) {
 
   LOG_TRACE();
   if (parameters.count("config"))
-    options.config_file_ = parameters["config"].as<string>();
+    options.config_file_ = parameters["config"].as<vector<string>>();
   if (parameters.count("input")) {
     if (parameters.count("input-force"))
       LOG_FATAL() << "Do not specify both -i (input file) and -I (input-force file) at the same time";
