@@ -5,7 +5,7 @@
  * @date 2023
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2023 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 
@@ -37,8 +37,8 @@ Double Poisson::AdjustErrorValue(const Double process_error, const Double error_
  * @param comparisons A collection of comparisons passed by the observation
  */
 void Poisson::SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons) {
-  utilities::RandomNumberGenerator& rng = utilities::RandomNumberGenerator::Instance();
-  auto iterator = comparisons.begin();
+  utilities::RandomNumberGenerator& rng      = utilities::RandomNumberGenerator::Instance();
+  auto                              iterator = comparisons.begin();
   for (; iterator != comparisons.end(); ++iterator) {
     LOG_FINE() << "Simulating values for year: " << iterator->first;
     for (observations::Comparison& comparison : iterator->second) {
@@ -59,9 +59,9 @@ void Poisson::GetScores(map<unsigned, vector<observations::Comparison> >& compar
     for (observations::Comparison& comparison : year_iterator->second) {
       // check expected isn't zero
       comparison.expected_ = math::ZeroFun(comparison.expected_, comparison.delta_);
-      //comparison.adjusted_error_ = comparison.expected_;// lambda is the variance
+      // comparison.adjusted_error_ = comparison.expected_;// lambda is the variance
       comparison.score_ = -1.0 * (-1.0 * comparison.expected_ + comparison.observed_ * log(comparison.expected_) - math::LnGamma(comparison.observed_ + 1.0));
-      //std::cerr << " observed = " << comparison.observed_ << " expected " <<  comparison.expected_ << " score " << comparison.score_ << "\n";
+      // std::cerr << " observed = " << comparison.observed_ << " expected " <<  comparison.expected_ << " score " << comparison.score_ << "\n";
       comparison.score_ *= multiplier_;
     }
   }

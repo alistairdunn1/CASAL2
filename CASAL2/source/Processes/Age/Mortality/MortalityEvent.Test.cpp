@@ -5,17 +5,18 @@
  * @date 5/04/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
 #ifdef TESTMODE
 
 // Headers
+#include "MortalityEvent.h"
+
 #include <iostream>
 
 #include "Model/Factory.h"
-#include "MortalityEvent.h"
 #include "Partition/Partition.h"
 #include "TestResources/TestFixtures/BasicModel.h"
 #include "TimeSteps/Manager.h"
@@ -96,20 +97,20 @@ TEST_F(BasicModel, Processes_Mortality_Event_No_Penalty) {
   model_->FullIteration();
 
   vector<double> immature_males   = {60000,
-                                   60000,
-                                   60000,
-                                   60000,
-                                   58820.224719101127,
-                                   58040.751812527917,
-                                   57518.450333899993,
-                                   57156.243467817498,
-                                   56910.233811571517,
-                                   56720.216336407662,
-                                   56606.775903734859,
-                                   56606.775903734859,
-                                   56606.775903734859,
-                                   56606.775903734859,
-                                   56606.775903734859};
+                                     60000,
+                                     60000,
+                                     60000,
+                                     58820.224719101127,
+                                     58040.751812527917,
+                                     57518.450333899993,
+                                     57156.243467817498,
+                                     56910.233811571517,
+                                     56720.216336407662,
+                                     56606.775903734859,
+                                     56606.775903734859,
+                                     56606.775903734859,
+                                     56606.775903734859,
+                                     56606.775903734859};
   vector<double> immature_females = {40000,
                                      40000,
                                      40000,

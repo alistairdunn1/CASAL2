@@ -5,16 +5,17 @@
  * @date 4/04/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
 #ifdef TESTMODE
 
 // Headers
+#include "Ageing.h"
+
 #include <iostream>
 
-#include "Ageing.h"
 #include "Model/Factory.h"
 #include "Model/Model.h"
 #include "Partition/Partition.h"

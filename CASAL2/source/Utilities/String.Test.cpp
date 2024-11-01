@@ -4,7 +4,7 @@
  * @date 12/09/2014
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2014 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -13,10 +13,10 @@
 #ifdef TESTMODE
 
 // headers
+#include "String.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include "String.h"
 
 // namespaces
 namespace niwa {

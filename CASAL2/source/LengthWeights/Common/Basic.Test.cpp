@@ -5,12 +5,14 @@
  * MODIFIED 25/10/2018
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifdef TESTMODE
 
 // Headers
+#include "Basic.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -18,7 +20,6 @@
 
 #include "../../AgeLengths/AgeLength.h"
 #include "../../TestResources/MockClasses/Model.h"
-#include "Basic.h"
 
 // Namespaces
 namespace niwa {

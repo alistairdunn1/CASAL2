@@ -5,7 +5,7 @@
  * @date 29/01/2019
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2015 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -52,10 +52,10 @@ public:
     addressable_sm_["c"] = 2.0;
   }
   virtual ~UnitTester() = default;
-  void DoValidate() override final{};
-  void DoBuild() override final{};
-  void DoReset() override final{};
-  void DoExecute() override final{};
+  void DoValidate() override final {};
+  void DoBuild() override final {};
+  void DoReset() override final {};
+  void DoExecute() override final {};
 
 public:
   // These addressables are used for unit testing

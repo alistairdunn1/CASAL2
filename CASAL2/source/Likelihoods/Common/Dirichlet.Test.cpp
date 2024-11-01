@@ -1,10 +1,12 @@
 //============================================================================
 // Name        : Dirichlet.Test.cpp
-// Copyright   : Copyright Casal2 Project 2024 - https://github.com/Casal2/�2009 - www.niwa.co.nz
+// Copyright   : Copyright Casal2 Project 2024 - https://github.com/Casal2/
 //============================================================================
 #ifdef TESTMODE
 
 // Headers
+#include "Dirichlet.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -12,7 +14,6 @@
 
 #include "../../Observations/Comparison.h"
 #include "../../Utilities/RandomNumberGenerator.h"
-#include "Dirichlet.h"
 
 // Namespaces
 namespace niwa {

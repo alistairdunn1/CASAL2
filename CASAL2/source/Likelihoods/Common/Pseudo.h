@@ -5,7 +5,7 @@
  * @date 25/03/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -29,9 +29,9 @@ namespace likelihoods {
 class Pseudo : public niwa::Likelihood {
 public:
   // Methods
-  Pseudo(shared_ptr<Model> model) : Likelihood(model){};
+  Pseudo(shared_ptr<Model> model) : Likelihood(model) {};
   virtual ~Pseudo() = default;
-  void   DoValidate() override final{};
+  void   DoValidate() override final {};
   Double AdjustErrorValue(const Double process_error, const Double error_value) override final;
   void   SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons) override final;
 };

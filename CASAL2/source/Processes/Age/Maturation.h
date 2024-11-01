@@ -4,7 +4,7 @@
  * @date 11/09/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -34,7 +34,7 @@ public:
   virtual ~Maturation() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoExecute() override final;
   void FillReportCache(ostringstream& cache) override final;
   void FillTabularReportCache(ostringstream& cache, bool first_run) override final;

@@ -5,7 +5,7 @@
  * @date 17/04/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -33,9 +33,9 @@ public:
   // Methods
   DeltaDiff(shared_ptr<Model> model);
   virtual ~DeltaDiff() = default;
-  void DoValidate() final{};
-  void DoBuild() final{};
-  void DoReset() final{};
+  void DoValidate() final {};
+  void DoBuild() final {};
+  void DoReset() final {};
   void Execute() final { LOG_CODE_ERROR() << "Execute is bad"; }
   void ExecuteThreaded(shared_ptr<ThreadPool> thread_pool) final;
 

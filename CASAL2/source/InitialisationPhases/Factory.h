@@ -5,7 +5,7 @@
  * @date 13/12/2012
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2017 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifndef INITIALISATIONPHASE_FACTORY_H_

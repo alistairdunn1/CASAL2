@@ -5,7 +5,7 @@
  * @date 21/12/2012
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2012 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -33,7 +33,7 @@ class Manager : public niwa::base::Manager<niwa::selectivities::Manager, niwa::S
 
 public:
   // methods
-  virtual ~Manager() noexcept(true){};
+  virtual ~Manager() noexcept(true) {};
   Selectivity* GetSelectivity(const string& label);
 
 protected:

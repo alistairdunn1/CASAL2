@@ -4,12 +4,14 @@
  * @date 21/02/2014
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2014 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifdef TESTMODE
 
 // headers
+#include "LogNormal.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -18,7 +20,6 @@
 #include "../../Likelihoods/Factory.h"
 #include "../../Observations/Comparison.h"
 #include "../../Utilities/RandomNumberGenerator.h"
-#include "LogNormal.h"
 
 // namespaces
 namespace niwa {

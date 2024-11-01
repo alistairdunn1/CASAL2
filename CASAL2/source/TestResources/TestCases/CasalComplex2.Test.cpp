@@ -4,12 +4,13 @@
  * @date 14/03/2014
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2014 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  */
 #ifdef TESTMODE
 
 #include "CasalComplex2.h"
+
 #include "Model/Model.h"
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "TestResources/TestFixtures/InternalEmptyModel.h"

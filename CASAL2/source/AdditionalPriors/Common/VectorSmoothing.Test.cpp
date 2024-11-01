@@ -4,11 +4,13 @@
  * @date 21/6/2017
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2017 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  */
 #ifdef TESTMODE
 
 // Headers
+#include "VectorSmoothing.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -16,7 +18,6 @@
 
 #include "../../Model/Model.h"
 #include "../../TestResources/MockClasses/Model.h"
-#include "VectorSmoothing.h"
 
 // Namespaces
 namespace niwa {

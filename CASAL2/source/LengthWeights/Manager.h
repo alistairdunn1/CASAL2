@@ -4,7 +4,7 @@
  * @date 24/07/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -30,7 +30,7 @@ class Manager : public niwa::base::Manager<niwa::lengthweights::Manager, niwa::L
 
 public:
   // methods
-  virtual ~Manager() noexcept(true){};
+  virtual ~Manager() noexcept(true) {};
   LengthWeight* GetLengthWeight(const string& label) const;
 
 protected:

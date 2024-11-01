@@ -4,7 +4,7 @@
  * @date 07/04/2017
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2017 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -29,7 +29,7 @@ public:
   explicit LogNormalEmpirical(shared_ptr<Model> model);
   virtual ~LogNormalEmpirical() = default;
   void DoValidate() override final;
-  void DoBuild() override final{};
+  void DoBuild() override final {};
   void DoReset() override final;
   void DoUpdate() override final;
 

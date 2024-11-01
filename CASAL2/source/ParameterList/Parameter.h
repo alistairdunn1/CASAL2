@@ -5,7 +5,7 @@
  * @date 18/12/2012
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2012 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -42,7 +42,7 @@ public:
   // Methods
   Parameter() = delete;
   Parameter(const string& label, const string& description);
-  virtual ~Parameter(){};
+  virtual ~Parameter() {};
   virtual void Bind() = 0;
   void         AddValue(const string& value);
   void         Clear() { values_.clear(); }

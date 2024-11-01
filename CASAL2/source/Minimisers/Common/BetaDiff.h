@@ -4,7 +4,7 @@
  * @date 20/05/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -34,9 +34,9 @@ public:
   // Methods
   explicit BetaDiff(shared_ptr<Model> model);
   virtual ~BetaDiff() = default;
-  void DoValidate() override final{};
-  void DoBuild() override final{};
-  void DoReset() override final{};
+  void DoValidate() override final {};
+  void DoBuild() override final {};
+  void DoReset() override final {};
   void Execute() override final;
 
 private:

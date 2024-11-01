@@ -5,7 +5,7 @@
  * @date 2/04/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -34,8 +34,8 @@ using std::string;
 class BasicModel : public testfixtures::Base {
 public:
   // Setup and TearDown Methods
-  BasicModel(){};
-  virtual ~BasicModel(){};
+  BasicModel() {};
+  virtual ~BasicModel() {};
   void SetUp() override final;
 };
 

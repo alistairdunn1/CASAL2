@@ -5,7 +5,7 @@
  * @date 2/02/2016
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2014 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -31,7 +31,7 @@ public:
   virtual ~RandomWalk() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoUpdate() override final;
 
 private:

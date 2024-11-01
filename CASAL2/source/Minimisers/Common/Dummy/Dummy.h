@@ -5,7 +5,7 @@
  * @date Feb 9, 2016
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2016 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
  * @section DESCRIPTION
  *
@@ -31,9 +31,9 @@ class Dummy : public Minimiser {
 public:
   Dummy(shared_ptr<Model> model);
   virtual ~Dummy() = default;
-  void DoValidate() override final{};
-  void DoBuild() override final{};
-  void DoReset() override final{};
+  void DoValidate() override final {};
+  void DoBuild() override final {};
+  void DoReset() override final {};
   void Execute() override final;
 };
 } /* namespace minimisers */

@@ -2,7 +2,7 @@
 // Name        : Dirichlet.h
 // Author      : C.Marsh
 // Date        : 21/07/2015
-// Copyright   : Copyright Casal2 Project 2024 - https://github.com/Casal2/�2009 - www.niwa.co.nz
+// Copyright   : Copyright Casal2 Project 2024 - https://github.com/Casal2/
 // Description :
 //============================================================================
 
@@ -24,9 +24,9 @@ namespace likelihoods {
 class Dirichlet : public niwa::Likelihood {
 public:
   // Methods
-  Dirichlet(shared_ptr<Model> model) : Likelihood(model){};
+  Dirichlet(shared_ptr<Model> model) : Likelihood(model) {};
   virtual ~Dirichlet() = default;
-  void   DoValidate() override final{};
+  void   DoValidate() override final {};
   Double AdjustErrorValue(const Double process_error, const Double error_value) override final;
   void   SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons) override final;
   Double GetInitialScore(map<unsigned, vector<observations::Comparison> >& comparisons, unsigned year) override final;
