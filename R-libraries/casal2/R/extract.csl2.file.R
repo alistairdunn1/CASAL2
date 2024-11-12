@@ -38,7 +38,7 @@
       }
     }
     i <- 1
-    while (i != length(file)) {
+    while (i <= length(file)) {
       if (tolower(substring(file[i], 1, 8)) == "!include") {
         temp <- string.to.vector.of.words(file[i])[2]
         temp <- gsub("\"", "", temp)
