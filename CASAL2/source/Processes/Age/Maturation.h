@@ -34,7 +34,7 @@ public:
   virtual ~Maturation() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoExecute() override final;
   void FillReportCache(ostringstream& cache) override final;
   void FillTabularReportCache(ostringstream& cache, bool first_run) override final;
@@ -50,6 +50,10 @@ protected:
   accessor::Categories  to_partition_;
   vector<Selectivity*>  selectivities_;
   map<unsigned, Double> rates_by_years_;
+  string                missing_years_method_;
+  bool                  missing_years_zero_;
+  string                projection_years_method_;
+  Double                projection_rate_ = 0.0;
 };
 
 } /* namespace age */

@@ -29,6 +29,10 @@ Maturation::Maturation(shared_ptr<Model> model) : Process(model), from_partition
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities to use for maturation", "");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to be associated with the maturity rates", "");
   parameters_.Bind<Double>(PARAM_RATES, &rates_, "The rates to mature for each year", "");
+  parameters_.Bind<string>(PARAM_MISSING_YEARS_METHOD, &missing_years_method_, "How to handle rate value for missing years", "", PARAM_ERROR)
+      ->set_allowed_values({PARAM_ERROR, PARAM_ZERO, PARAM_FINAL_YEAR});
+  parameters_.Bind<string>(PARAM_PROJECTION_YEARS_METHOD, &missing_years_method_, "How to handle rate value for missing years", "", PARAM_FINAL_YEAR)
+      ->set_allowed_values({PARAM_ZERO, PARAM_FINAL_YEAR});
 
   RegisterAsAddressable(PARAM_RATES, &rates_by_years_);
 
@@ -67,10 +71,18 @@ void Maturation::DoValidate() {
     }
   }
 
+  if (missing_years_method_ == PARAM_ERROR && years_.size() != model_->years().size()) {
+    LOG_ERROR_P(PARAM_YEARS) << "Not all years were specified for the model when the missing_years_method was defined as error.";
+  }
+
   // Validate rates and years are the same length
   if (rates_.size() != years_.size())
     LOG_ERROR_P(PARAM_RATES) << ": The number of rates (" << rates_.size() << ") does not match the number of years (" << years_.size() << ").";
   for (unsigned i = 0; i < years_.size(); ++i) rates_by_years_[years_[i]] = rates_[i];
+
+  LOG_FINEST() << "Missing years method: " << missing_years_method_;
+  LOG_FINEST() << "Projection years method" << projection_years_method_;
+  missing_years_zero_ = missing_years_method_ == PARAM_ZERO;
 }
 
 /**
@@ -98,6 +110,19 @@ void Maturation::DoBuild() {
       LOG_WARNING() << "At " << location() << " the model year " << this_year << " was not found in " << PARAM_YEARS
                     << ". This is potentially an error. Please check the input configuration files";
   }
+
+  // We have some missing years, fill them in based on the method
+  if (model_->years().size() != years_.size() && !missing_years_zero_) {
+    Double final_year_rate = rates_by_years_.rbegin()->second;
+
+    for (auto this_year : model_->years()) {
+      if (find(years_.begin(), years_.end(), this_year) == years_.end()) {
+        rates_by_years_[this_year] = final_year_rate;
+      }
+    }
+  }
+
+  projection_rate_ = projection_years_method_ == PARAM_FINAL_YEAR ? rates_by_years_.rbegin()->second : 0.0;
 }
 
 /**
@@ -109,16 +134,20 @@ void Maturation::DoExecute() {
   Double amount    = 0.0;
 
   unsigned current_year = model_->current_year();
-  Double   rate         = rates_by_years_[current_year];
+  Double   rate         = rates_by_years_[current_year];  // Be aware this would add value if it doesn't exist.
+
   // if year is missing for projection then we grab the last one
   if (rates_by_years_.find(current_year) == rates_by_years_.end())
-    rate = rates_by_years_.rbegin()->second;
+    rate = projection_rate_;
 
   for (unsigned i = 0; from_iter != from_partition_.end() && to_iter != to_partition_.end(); ++from_iter, ++to_iter, ++i) {
     unsigned min_age = (*from_iter)->min_age_;
 
     for (unsigned offset = 0; offset < (*from_iter)->data_.size(); ++offset) {
       amount = rate * selectivities_[i]->GetAgeResult(min_age + offset, (*from_iter)->age_length_) * (*from_iter)->data_[offset];
+      if (amount == 0) {
+        continue;
+      }
       (*from_iter)->data_[offset] -= amount;
       (*to_iter)->data_[offset] += amount;
     }
