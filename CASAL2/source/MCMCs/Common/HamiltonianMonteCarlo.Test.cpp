@@ -138,10 +138,6 @@ TEST_F(HamiltonianMonteCarloThreadedModel, TwentyFive_Iteration_With_TwoSex) {
   ASSERT_EQ(25u, chain.size());
 
 #ifdef _WIN64
-  for (unsigned i = 0; i < 25; ++i) {
-    std::cout << "EXPECT_DOUBLE_EQ(chain[" << i << "].score_, " << chain[i].score_ << ");" << endl;
-  }
-
   EXPECT_DOUBLE_EQ(chain[0].score_, 1979.3020499611750438);
   EXPECT_DOUBLE_EQ(chain[1].score_, 1979.3020470915430451);
   EXPECT_DOUBLE_EQ(chain[2].score_, 1979.3020466862337798);
@@ -396,9 +392,6 @@ TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_CasalComplexOne_L
   ASSERT_EQ(5u, chain.size());
 
 #ifdef _WIN64
-  for (unsigned i = 0; i < 5; ++i) {
-    std::cout << "EXPECT_DOUBLE_EQ(chain[" << i << "].score_, " << chain[i].score_ << ");" << endl;
-  }
   EXPECT_DOUBLE_EQ(chain[0].score_, 487.52063897213412247);
   EXPECT_DOUBLE_EQ(chain[1].score_, 487.52082861950833603);
   EXPECT_DOUBLE_EQ(chain[2].score_, 487.52089792652054712);

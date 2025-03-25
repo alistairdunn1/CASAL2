@@ -134,11 +134,13 @@ void Maturation::DoExecute() {
   Double amount    = 0.0;
 
   unsigned current_year = model_->current_year();
-  Double   rate         = rates_by_years_[current_year];  // Be aware this would add value if it doesn't exist.
+  Double   rate         = 0.0;
 
   // if year is missing for projection then we grab the last one
   if (rates_by_years_.find(current_year) == rates_by_years_.end())
     rate = projection_rate_;
+  else
+    rate = rates_by_years_[current_year];  // Be aware this would add value if it doesn't exist.
 
   for (unsigned i = 0; from_iter != from_partition_.end() && to_iter != to_partition_.end(); ++from_iter, ++to_iter, ++i) {
     unsigned min_age = (*from_iter)->min_age_;
