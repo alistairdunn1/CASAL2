@@ -10,6 +10,7 @@
 #ifdef TESTMODE
 
 #include "CasalComplex1.h"
+
 #include "Model/Model.h"
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Observations/Manager.h"
@@ -81,7 +82,7 @@ TEST_F(InternalEmptyModel, Model_CasalComplex1_Simulation) {
   EXPECT_DOUBLE_EQ(0.0, obj_function.score());
 
   Observation* observation = model_->managers()->observation()->GetObservation("chatTANage");
-  if (!observation && observation->label() != "chatTANage")
+  if (observation == nullptr)  // && observation->label() != "chatTANage")
     LOG_ERROR() << "Observation chatTANage could not be loaded for testing";
 
   map<unsigned, vector<obs::Comparison> >& comparisons = observation->comparisons();
