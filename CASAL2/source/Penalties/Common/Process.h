@@ -30,16 +30,16 @@ public:
   // methods
   Process(shared_ptr<Model> model);
   virtual ~Process() = default;
-  void   Trigger(Double value_1, Double value_2);
+  void Trigger(Double value_1, Double value_2);
+
 protected:
   // methods
-  void DoValidate() override final{};
-  void DoBuild() override final{};
+  void DoValidate() override final {};
+  void DoBuild() override final {};
 
-private:
   // members
-  Double multiplier_;
-  bool   log_scale_;
+  Double multiplier_ = 1.0;
+  bool   log_scale_  = false;
 };
 } /* namespace penalties */
 } /* namespace niwa */
