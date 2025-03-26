@@ -185,7 +185,7 @@ void Managers::Validate() {
     minimiser_->Validate(model_);
   observation_->Validate();
   penalty_->Validate();
-  profile_->Validate();
+  profile_->Validate(model_);
   project_->Validate();
   LOG_FINE() << "Validating Reports";
   report_->Validate(model_);
@@ -235,7 +235,7 @@ void Managers::Build() {
   estimate_->Build(model_);
   addressable_transformation_->Build();
   LOG_FINE() << "Building estimates and transformations...Done";
-  
+
   if (mcmc_ && (run_mode == RunMode::kMCMC || run_mode == RunMode::kTesting))
     mcmc_->Build();
   if (run_mode == RunMode::kEstimation || run_mode == RunMode::kMCMC || run_mode == RunMode::kTesting || run_mode == RunMode::kProfiling)

@@ -28,9 +28,10 @@ class Manager : public niwa::base::Manager<niwa::profiles::Manager, niwa::Profil
 
 public:
   // methods
-  virtual ~Manager() noexcept(true){};
-  void Verify(shared_ptr<Model> model);
-  Profile* GetProfile(); // should only be allowed one
+  virtual ~Manager() noexcept(true) {};
+  void     Validate() override final;
+  void     Validate(shared_ptr<Model> model);
+  Profile* GetProfile();  // should only be allowed one
 
 protected:
   // methods

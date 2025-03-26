@@ -11,8 +11,6 @@
 // headers
 #include "Manager.h"
 
-#include "Verification/Verification.h"
-
 // namespaces
 namespace niwa {
 namespace profiles {
@@ -37,15 +35,28 @@ Profile* Manager::GetProfile() {
   return nullptr;
 }
 
-/**
- * @brief Verify our profiles
- *
- * @param model
- */
-void Manager::Verify(shared_ptr<Model> model) {
-  LOG_FINE() << "Verify profile";
-  verification::DoVerification(model);
-  for (auto profile : objects_) profile->Verify(model);
+void Manager::Validate() {
+  LOG_CODE_ERROR() << "This method should not be used for this manager";
 }
+
+/**
+ *
+ */
+void Manager::Validate(shared_ptr<Model> model) {
+  if (model->run_mode() == RunMode::kProfiling && objects_.size() == 0) {
+    LOG_FATAL() << "No @profile blocks have been defined, even though this is an Profiling run";
+  }
+
+  if (model->run_mode() != RunMode::kProfiling) {
+    return;  // No need to validate
+  }
+
+  if (objects_.size() > 1) {
+    LOG_FATAL() << "Only one @profile block can be specified in a model configuration, you have specified " << objects_.size();
+  }
+
+  for (auto profile : objects_) profile->Validate();
+}
+
 } /* namespace profiles */
 } /* namespace niwa */
