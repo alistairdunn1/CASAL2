@@ -1,3 +1,4 @@
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 /**
  * @file RandomNumberGenerator.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
@@ -163,7 +164,6 @@ double RandomNumberGenerator::gamma(double shape) {
  * Generate a Poisson random number
  *
  * @param lambda
- * @param sigma (default 1.0)
  * @return random number
  */
 double RandomNumberGenerator::poisson(double lambda) {
@@ -171,7 +171,7 @@ double RandomNumberGenerator::poisson(double lambda) {
   boost::variate_generator<boost::mt19937&, boost::poisson_distribution<> > generator(generator_, poisson);
 
   double value = generator();
-  LOG_FINEST() << "rng.poisson(" << lambda <<  ") = " << value;
+  LOG_FINEST() << "rng.poisson(" << lambda << ") = " << value;
   sequence_.push_back(0);
   rng_poisson_values_.push_back(value);
   return value;
