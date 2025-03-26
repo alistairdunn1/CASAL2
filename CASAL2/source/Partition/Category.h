@@ -17,6 +17,7 @@
 #define PARTITION_CATEGORY_H_
 
 // headers
+#include <iomanip>
 #include <map>
 #include <string>
 #include <vector>
@@ -43,7 +44,7 @@ using std::vector;
 class Category {
 public:
   // methods
-  Category(shared_ptr<Model> model) : model_(model){};
+  Category(shared_ptr<Model> model) : model_(model) {};
   virtual ~Category() = default;
 
   void Cache();
@@ -61,8 +62,16 @@ public:
   vector<Double>   length_data_;
   vector<Double>   cached_length_data_;
 
-  AgeLength* age_length_ = nullptr;
+  AgeLength*       age_length_       = nullptr;
   GrowthIncrement* growth_increment_ = nullptr;
+
+  inline void dump() {
+    cout << std::fixed << std::setprecision(15) << name_ << ": ";
+    for (const auto& value : data_) {
+      cout << value << " ";
+    }
+    cout << endl;
+  }
 
 private:
   // members
