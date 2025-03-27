@@ -123,7 +123,6 @@ void Project::SetSingleValue(Double value, bool save_value, unsigned year) {
   *addressable_ = value;
   if (save_value) {
     projected_values_[year] = value;
-    std::cerr << "year: " << year << " " << value << "\n";
   }
 }
 
@@ -137,7 +136,6 @@ void Project::SetVectorValue(Double value, bool save_value, unsigned year) {
   addressable_vector_->push_back(value);
   if (save_value) {
     projected_values_[year] = value;
-    std::cerr << "year: " << year << " " << value << "\n";
   }
   LOG_FINEST() << "size before adding a value of " << value << " = " << addressable_vector_->size();
 }
