@@ -201,7 +201,7 @@ upper_bound 1e-1
 type uniform
 
 @estimate recruitment.r0
-parameter process[Recruitment].R0
+parameter process[Recruitment].r0
 lower_bound 1e5
 upper_bound 1e10
 type uniform_log
@@ -223,20 +223,11 @@ type process
 log_scale False
 multiplier 10
 
-@project recruitment.r0
-type constant
-parameter process[Recruitment].R0
-values 100000
-years 2010 2012
-
 @derived_quantity abundance
 type abundance
 categories *
 selectivities Maturation Maturation Maturation Maturation
 time_step step_one
-
-@report DQ
-type derived_quantity
 )";
 
 }  // namespace models

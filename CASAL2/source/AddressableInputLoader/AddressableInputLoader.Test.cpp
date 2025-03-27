@@ -58,9 +58,9 @@ TEST_F(AddressableInputLoaderTest, TwoSex_R0_Override) {
   AddressableInputLoader* loader = model_->managers()->addressable_input_loader();
 
   // Add different values for R0
-  loader->AddValue("process[Recruitment].R0", 500000.0);
-  loader->AddValue("process[Recruitment].R0", 1000000.0);
-  loader->AddValue("process[Recruitment].R0", 2000000.0);
+  loader->AddValue("process[Recruitment].r0", 500000.0);
+  loader->AddValue("process[Recruitment].r0", 1000000.0);
+  loader->AddValue("process[Recruitment].r0", 2000000.0);
 
   loader->AddValue("catchability[CPUEq].q", 0.000153139);
   loader->AddValue("catchability[CPUEq].q", 0.000153139);
@@ -123,9 +123,9 @@ TEST_F(AddressableInputLoaderTest, TwoSex_a50_Override) {
   AddressableInputLoader* loader = model_->managers()->addressable_input_loader();
 
   // Add different values for a50
-  loader->AddValue("process[Recruitment].R0", 997386);
-  loader->AddValue("process[Recruitment].R0", 997386);
-  loader->AddValue("process[Recruitment].R0", 997386);
+  loader->AddValue("process[Recruitment].r0", 997386);
+  loader->AddValue("process[Recruitment].r0", 997386);
+  loader->AddValue("process[Recruitment].r0", 997386);
 
   loader->AddValue("catchability[CPUEq].q", 0.000153139);
   loader->AddValue("catchability[CPUEq].q", 0.000153139);
@@ -188,9 +188,9 @@ TEST_F(AddressableInputLoaderTest, TwoSex_R0_And_M_Override) {
   AddressableInputLoader* loader = model_->managers()->addressable_input_loader();
 
   // Add different values for a50
-  loader->AddValue("process[Recruitment].R0", 500000.0);
-  loader->AddValue("process[Recruitment].R0", 1000000.0);
-  loader->AddValue("process[Recruitment].R0", 2000000.0);
+  loader->AddValue("process[Recruitment].r0", 500000.0);
+  loader->AddValue("process[Recruitment].r0", 1000000.0);
+  loader->AddValue("process[Recruitment].r0", 2000000.0);
 
   loader->AddValue("catchability[CPUEq].q", 0.000153139);
   loader->AddValue("catchability[CPUEq].q", 0.000153139);
@@ -250,7 +250,7 @@ TEST_F(AddressableInputLoaderTest, GetAddressableLabels) {
   AddressableInputLoader* loader = model_->managers()->addressable_input_loader();
 
   // Add some addressable values
-  loader->AddValue("process[Recruitment].R0", 500000.0);
+  loader->AddValue("process[Recruitment].r0", 500000.0);
   loader->AddValue("process[halfM].M{1}", 0.05);
 
   // Get the addressable labels
@@ -264,7 +264,7 @@ TEST_F(AddressableInputLoaderTest, GetAddressableLabels) {
   bool found_m  = false;
 
   for (auto label : labels) {
-    if (label == "process[Recruitment].R0")
+    if (label == "process[Recruitment].r0")
       found_r0 = true;
     else if (label == "process[halfM].M{1}")
       found_m = true;
@@ -287,14 +287,14 @@ TEST_F(AddressableInputLoaderTest, GetValueCount) {
   EXPECT_EQ(loader->GetValueCount(), 0);
 
   // Add one set of values
-  loader->AddValue("process[Recruitment].R0", 500000.0);
+  loader->AddValue("process[Recruitment].r0", 500000.0);
   loader->AddValue("process[halfM].M{1}", 0.05);
 
   // Should now have one set
   EXPECT_EQ(loader->GetValueCount(), 1);
 
   // Add another set
-  loader->AddValue("process[Recruitment].R0", 1000000.0);
+  loader->AddValue("process[Recruitment].r0", 1000000.0);
   loader->AddValue("process[halfM].M{1}", 0.065);
 
   // Should now have two sets
@@ -311,25 +311,25 @@ TEST_F(AddressableInputLoaderTest, GetValues) {
   AddressableInputLoader* loader = model_->managers()->addressable_input_loader();
 
   // Add some values
-  loader->AddValue("process[Recruitment].R0", 500000.0);
+  loader->AddValue("process[Recruitment].r0", 500000.0);
   loader->AddValue("process[halfM].M{1}", 0.05);
 
   // Add another set
-  loader->AddValue("process[Recruitment].R0", 1000000.0);
+  loader->AddValue("process[Recruitment].r0", 1000000.0);
   loader->AddValue("process[halfM].M{1}", 0.065);
 
   // Get the first set of values
   map<string, Double> values1 = loader->GetValues(0);
 
   // Check the values
-  EXPECT_EQ(values1["process[Recruitment].R0"], 500000.0);
+  EXPECT_EQ(values1["process[Recruitment].r0"], 500000.0);
   EXPECT_EQ(values1["process[halfM].M{1}"], 0.05);
 
   // Get the second set of values
   map<string, Double> values2 = loader->GetValues(1);
 
   // Check the values
-  EXPECT_EQ(values2["process[Recruitment].R0"], 1000000.0);
+  EXPECT_EQ(values2["process[Recruitment].r0"], 1000000.0);
   EXPECT_EQ(values2["process[halfM].M{1}"], 0.065);
 }
 
