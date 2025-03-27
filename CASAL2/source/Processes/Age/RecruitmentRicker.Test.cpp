@@ -22,7 +22,6 @@
 #include "Partition/Partition.h"
 #include "Selectivities/Manager.h"
 #include "Selectivities/Selectivity.h"
-#include "TestResources/TestFixtures/ComplexModel.h"
 #include "TestResources/TestFixtures/InternalEmptyModel.h"
 #include "TimeSteps/Manager.h"
 
