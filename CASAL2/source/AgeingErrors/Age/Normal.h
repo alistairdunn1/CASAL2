@@ -39,6 +39,7 @@ private:
   // members
   Double   cv_ = 0.0;
   unsigned k_;
+  bool     normalise_rows_;
 };
 
 } /* namespace ageingerrors */

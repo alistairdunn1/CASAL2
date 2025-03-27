@@ -28,10 +28,8 @@ namespace ageingerrors {
  */
 
 Double NormalCDF(Double x, Double mu, Double sigma) {
-  if (sigma <= 0.0 && x < mu)
-    return 0;
-  else if (sigma <= 0.0 && x >= mu)
-    return 1;
+  if (sigma <= 0.0)
+    return (x < mu) ? 0.0 : 1.0;
 
   boost::math::normal s(AS_DOUBLE(mu), AS_DOUBLE(sigma));
   return cdf(s, AS_DOUBLE(x));
@@ -52,6 +50,7 @@ Normal::Normal(shared_ptr<Model> model) : AgeingError(model) {
   parameters_
       .Bind<unsigned>(PARAM_K, &k_, "k defines the minimum age of individuals which can be misclassified, i.e., individuals of age less than k have no ageing error", "", 0u)
       ->set_lower_bound(0u);
+  parameters_.Bind<bool>(PARAM_NORMALISE_ROWS, &normalise_rows_, "Normalise the rows of the misclassification matrix so they sum to 1.0", "", false);
 
   RegisterAsAddressable(PARAM_CV, &cv_);
 }
@@ -82,8 +81,8 @@ void Normal::DoBuild() {
  * changes from any addressable modifications
  */
 void Normal::DoReset() {
-  unsigned age         = 0;
-  Double min_age_class = 0.0;
+  unsigned age           = 0;
+  Double   min_age_class = 0.0;
 
   for (unsigned i = 0; i < age_spread_; ++i) {
     age = min_age_ + i;
@@ -99,13 +98,26 @@ void Normal::DoReset() {
         mis_matrix_[i][j] = NormalCDF(min_age_class + 1.0, age, age * cv_) - NormalCDF(min_age_class, age, age * cv_);
     }
   }
-
   if (k_ > min_age_) {
     for (unsigned i = 0; i < k_ - min_age_; ++i) {
-      for (unsigned j = 0; j < k_ - min_age_; ++j) {
-        mis_matrix_[i][j] = 0.0;
+      for (unsigned j = 0; j < age_spread_; ++j) {
+        mis_matrix_[i][j] = (i == j) ? 1.0 : 0.0;  // Identity submatrix
       }
-      mis_matrix_[i][i] = 1.0;
+    }
+  }
+
+  // Ensure each row in mis_matrix_ sums to 1.0 (normalization step)
+  if (normalise_rows_) {
+    for (unsigned i = 0; i < age_spread_; ++i) {
+      Double row_sum = 0.0;
+      for (unsigned j = 0; j < age_spread_; ++j) {
+        row_sum += mis_matrix_[i][j];
+      }
+      if (row_sum > 0.0) {
+        for (unsigned j = 0; j < age_spread_; ++j) {
+          mis_matrix_[i][j] /= row_sum;
+        }
+      }
     }
   }
 }
