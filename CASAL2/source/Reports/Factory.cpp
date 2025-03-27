@@ -55,10 +55,11 @@
 // Age
 #include "../Reports/Age/AgeLength.h"
 #include "../Reports/Age/AgeingErrorMatrix.h"
+// Test
+#include "../Reports/Test/ObjectiveFunction.h"
 
 // Namespaces
-namespace niwa {
-namespace reports {
+namespace niwa::reports {
 
 /**
  * Create the instance of our object as defined by the two parameters
@@ -140,6 +141,8 @@ Report* Factory::Create(shared_ptr<Model> model, const string& object_type, cons
       result = new PartitionBiomass();
     else if (sub_type == PARAM_PARTITION)
       result = new Partition();
+    else if (sub_type == PARAM_TEST_OBJECTIVE_FUNCTION)
+      result = new niwa::reports::test::ObjectiveFunction();
     else if (model->partition_type() == PartitionType::kAge) {
       if (object_type == PARAM_REPORT) {
         if (sub_type == PARAM_AGEING_ERROR)
@@ -159,5 +162,4 @@ Report* Factory::Create(shared_ptr<Model> model, const string& object_type, cons
   return result;
 }
 
-} /* namespace reports */
-} /* namespace niwa */
+}  // namespace niwa::reports
