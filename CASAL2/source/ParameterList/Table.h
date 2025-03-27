@@ -80,6 +80,7 @@ public:
   const vector<string>&   columns() { return columns_; }
   unsigned                column_index(const string& label, bool throw_error = true) const;
   vector<vector<string>>& data() { return data_; }
+  void                    set_data(vector<vector<string>> new_data) { data_ = new_data; }
   string                  location() const;
   void                    set_is_optional(bool is_optional) { is_optional_ = is_optional; }
   bool                    is_optional() const { return is_optional_; }
