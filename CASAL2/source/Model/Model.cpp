@@ -492,7 +492,7 @@ void Model::RunBasic() {
      * Running the model now
      */
 
-    // Iterate over all partition members and UpDate Mean Weight for the inital weight calculations
+    // Iterate over all partition members and UpDate Mean Weight for the initial weight calculations
     agelengths::Manager&           age_length_manager = *managers_->age_length();
     initialisationphases::Manager& init_phase_manager = *managers_->initialisation_phase();
     init_phase_manager.Execute(pointer());

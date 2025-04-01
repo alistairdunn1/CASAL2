@@ -60,8 +60,8 @@ b0 1500
 categories untagged
 proportions 1
 steepness 0.75
-inital_mean_length 10
-inital_length_cv 0.40
+initial_mean_length 10
+initial_length_cv 0.40
 ssb SSB
 
 

@@ -26,7 +26,6 @@
 #include "TimeSteps/Manager.h"
 
 namespace niwa::processes::age {
-using niwa::testfixtures::ComplexModel;
 using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
 using std::endl;

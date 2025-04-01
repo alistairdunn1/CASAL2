@@ -159,7 +159,7 @@ void Data::DoBuild() {
   // Initialise all time-steps and years with inputs.
   unsigned age;
   for (auto year : model_->years()) {
-    LOG_FINEST() << "inital population for  = " << year;
+    LOG_FINEST() << "initial population for  = " << year;
     for (unsigned i = 0; i < number_time_steps_; ++i) {
       LOG_FINEST() << "step = " << i;
       LOG_FINEST() << "data_by_year_[" << year << "].size() " << data_by_year_[year].size();

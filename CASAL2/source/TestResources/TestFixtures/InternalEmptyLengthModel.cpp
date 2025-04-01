@@ -13,13 +13,14 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
-#include "../../GrowthIncrements/Manager.h"
+
 #include "../../AgeLengths/Manager.h"
 #include "../../Catchabilities/Manager.h"
 #include "../../Categories/Categories.h"
 #include "../../DerivedQuantities/Manager.h"
 #include "../../Estimates/Manager.h"
 #include "../../GlobalConfiguration/GlobalConfiguration.h"
+#include "../../GrowthIncrements/Manager.h"
 #include "../../InitialisationPhases/Manager.h"
 #include "../../LengthWeights/Manager.h"
 #include "../../Logging/Logging.h"
