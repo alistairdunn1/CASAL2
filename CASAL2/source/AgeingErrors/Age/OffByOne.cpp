@@ -67,10 +67,10 @@ void OffByOne::DoReset() {
   }
 
   if (k_ > min_age_) {
-    unsigned l = 0;
-    for (unsigned j = 0; j < (k_ - min_age_); ++j, ++l) {
-      mis_matrix_[j][l] = 0.0;
-      mis_matrix_[j][j] = 1.0;
+    for (unsigned i = 0; i < k_ - min_age_; ++i) {
+      for (unsigned j = 0; j < age_spread_; ++j) {
+        mis_matrix_[i][j] = (i == j) ? 1.0 : 0.0;  // Identity submatrix
+      }
     }
   }
 }
