@@ -284,6 +284,7 @@ base::Object* Objects::FindObjectOrNull(const string& parameter_absolute_name) {
 
   } else if (type == PARAM_LIKELIHOOD) {
     result = model_->managers()->likelihood()->GetLikelihood(label);
+
   } else if (type == PARAM_GROWTH_INCREMENT) {
     result = model_->managers()->growth_increment()->GetGrowthIncrement(label);
 
