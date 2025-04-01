@@ -23,100 +23,172 @@ namespace models {
  */
 const std::string length_based_unsexed_basic =
     R"(
-    @model
-    type length
-    start_year 1986 
-    final_year 2012
-    projection_final_year 2021
-    length_bins  1:68
-    length_plus false
-    length_plus_group 69
-    base_weight_units tonnes
-    initialisation_phases Equilibrium_state
-    time_steps Annual
+@model
+type length
+start_year 1986 
+final_year 2012
+projection_final_year 2021
+length_bins  1:15
+length_plus false
+length_plus_group 15
+base_weight_units tonnes
+initialisation_phases Equilibrium_state
+time_steps Annual
 
-    @categories 
-    format sex
-    names uni
-    growth_increment growth_model
+@categories 
+format sex
+names uni
+growth_increment growth_model
+
+@initialisation_phase Equilibrium_state
+type iterative
+years 200
+convergence_years 200
+
+@time_step Annual 
+processes Recruit_BH growth  mortality
+
+@process Nop
+type null_process
+
+@process Recruit_BH
+type recruitment_beverton_holt
+ssb_offset 1
+standardise_years 1986:2010
+initial_mean_length 5
+initial_length_cv 0.40
+recruitment_multipliers 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00  1.00 1.00 1.00  1.00 1.00 1.00
+b0 1500
+categories uni
+proportions 1
+steepness 0.75
+ssb SSB
+
+@process mortality
+type mortality_constant_rate
+m 0.2
+relative_m_by_length One
+categories uni
+time_step_proportions 1.0
+
+@process growth
+type growth
+categories uni
 
 
-    @initialisation_phase Equilibrium_state
-    type iterative
-    years 200
-    convergence_years 200
 
-    @time_step Annual 
-    processes Recruit_BH growth  mortality
+@length_weight allometric
+type basic
+a 0.000000000373
+b 3.145
+units tonnes
 
-    @process Nop
-    type null_process
+@derived_quantity SSB
+type biomass
+categories uni
+selectivities maturity
+time_step Annual
+time_step_proportion 0.5
 
-    @process Recruit_BH
-    type recruitment_beverton_holt
-    ssb_offset 1
-    standardise_years 1986:2010
-    recruitment_multipliers 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00  1.00 1.00 1.00  1.00 1.00 1.00
-    b0 1500
-    categories uni
-    proportions 1
-    steepness 0.75
-    inital_mean_length 10
-    inital_length_cv 0.40
-    ssb SSB
+@selectivity double_normal
+type double_normal
+mu 12
+sigma_l 2
+sigma_r 8
 
-    @process mortality
-    type mortality_constant_rate
-    m 0.2
-    relative_m_by_length One
-    time_step_proportions 1
-    categories uni
-    time_step_proportions 1.0
+@selectivity maturity
+type logistic
+a50 30 
+ato95 5
 
-    @process growth
-    type growth
-    categories uni
+@selectivity One
+type constant
+c 1
+)";
 
-    @growth_increment growth_model ##
-    type basic
-    time_step_proportions 1
-    l_alpha 20
-    l_beta  40
-    g_alpha 10
-    g_beta 1
-    min_sigma 2
-    distribution normal
-    length_weight allometric
-    cv 0.0
-    compatibility_option casal
+const std::string length_based_unsexed_basic_with_length_plus =
+    R"(
+@model
+type length
+start_year 1986 
+final_year 2012
+projection_final_year 2021
+length_bins  1:15
+length_plus true
+length_plus_group 15
+base_weight_units tonnes
+initialisation_phases Equilibrium_state
+time_steps Annual
 
-    @length_weight allometric
-    type basic
-    a 0.000000000373
-    b 3.145
-    units tonnes
+@categories 
+format sex
+names uni
+growth_increment growth_model
 
-    @derived_quantity SSB
-    type biomass
-    categories uni
-    selectivities maturity
-    time_step Annual
-    time_step_proportion 0.5
+@initialisation_phase Equilibrium_state
+type iterative
+years 200
+convergence_years 200
 
-    @selectivity double_normal
-    type double_normal
-    mu 21
-    sigma_l 5
-    sigma_r 10
+@time_step Annual 
+processes Recruit_BH growth  mortality
 
-    @selectivity maturity
-    type logistic
-    a50 30 
-    ato95 5
+@process Nop
+type null_process
 
-    @selectivity One
-    type constant
-    c 1
+@process Recruit_BH
+type recruitment_beverton_holt
+ssb_offset 1
+standardise_years 1986:2010
+initial_mean_length 5
+initial_length_cv 0.40
+recruitment_multipliers 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00  1.00 1.00 1.00  1.00 1.00 1.00
+b0 1500
+categories uni
+proportions 1
+steepness 0.75
+ssb SSB
+
+@process mortality
+type mortality_constant_rate
+m 0.2
+relative_m_by_length One
+categories uni
+time_step_proportions 1.0
+
+@process growth
+type growth
+categories uni
+
+
+
+@length_weight allometric
+type basic
+a 0.000000000373
+b 3.145
+units tonnes
+
+@derived_quantity SSB
+type biomass
+categories uni
+selectivities maturity
+time_step Annual
+time_step_proportion 0.5
+
+@selectivity double_normal
+type double_normal
+mu 12
+sigma_l 2
+sigma_r 8
+
+@selectivity maturity
+type logistic
+a50 30 
+ato95 5
+
+@selectivity One
+type constant
+c 1
 )";
 
 }  // namespace models

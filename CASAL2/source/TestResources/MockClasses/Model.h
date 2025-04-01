@@ -24,6 +24,7 @@
 #include "../../Model/Model.h"
 #include "../../Model/Models/Age.h"
 #include "../../Model/Objects.h"
+#include "../../Partition/Partition.h"
 #include "../../Utilities/PartitionType.h"
 
 // Namespaces
@@ -72,6 +73,7 @@ public:
   MOCK_CONST_METHOD0(years_all, vector<unsigned>());
   MOCK_CONST_METHOD0(partition_type, PartitionType());
   MOCK_CONST_METHOD0(length_bins, vector<double>&());
+  MOCK_CONST_METHOD0(length_bin_mid_points, const vector<double>&());
   MOCK_CONST_METHOD0(length_plus, bool());
   MOCK_METHOD0(managers, shared_ptr<Managers>());
   MOCK_METHOD0(categories, niwa::Categories*());
@@ -93,8 +95,10 @@ public:
   void set_initialiation_phases(vector<string> init_phases) { initialisation_phases_ = init_phases; }
   void set_partition_type(PartitionType partition_type) { partition_type_ = partition_type; }
   void set_length_bins(vector<double> model_length_bins) { model_length_bins_ = model_length_bins; }
-  void set_number_of_length_bins() { number_of_model_length_bins_ = length_plus_ == true ? model_length_bins_.size() : model_length_bins_.size() - 1;; }
-
+  void set_number_of_length_bins() {
+    number_of_model_length_bins_ = length_plus_ == true ? model_length_bins_.size() : model_length_bins_.size() - 1;
+    ;
+  }
 
   /**
    * Mock methods to call parent
@@ -123,7 +127,6 @@ public:
     EXPECT_CALL(*this, length_bins()).WillRepeatedly(ReturnRef(model_length_bins_));
     EXPECT_CALL(*this, length_plus()).WillRepeatedly(Return(length_plus_));
     EXPECT_CALL(*this, get_number_of_length_bins()).WillRepeatedly(Return(number_of_model_length_bins_));
-
   }
 
   /**
