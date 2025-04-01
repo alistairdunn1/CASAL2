@@ -89,7 +89,7 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
     LOG_FINE() << "Finished modification of object_type (" << object << ") and sub_type (" << sub << ")";
   }
 
-  if (model->partition_type() == PartitionType::kAge || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kAge))
+  if (model->partition_type() == PartitionType::kAge || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kAge)) {
     if (object == PARAM_PROCESS || object == PARAM_PROCESSES) {
       if (sub == PARAM_AGEING)
         result = new age::Ageing(model);
@@ -150,6 +150,8 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_TRANSITION_CATEGORY_BY_AGE)
         result = new age::TransitionCategoryByAge(model);
     }
+  }
+
   if (model->partition_type() == PartitionType::kLength || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kLength)) {
     if (object == PARAM_PROCESS || object == PARAM_PROCESSES) {
       if (sub == PARAM_GROWTH)
