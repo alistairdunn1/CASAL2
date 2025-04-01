@@ -35,10 +35,10 @@ public:
   void DoBuild(shared_ptr<Model> model) final {};
   void DoExecute(shared_ptr<Model> model) final;
 
-  vector<double>& scores() { return scores_; }
+  vector<Double>& scores() { return scores_; }
 
 private:
-  vector<double> scores_;
+  vector<Double> scores_;
 };
 
 }  // namespace niwa::reports::test
