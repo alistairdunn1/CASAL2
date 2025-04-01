@@ -142,6 +142,8 @@ void GrowthIncrement::populate_growth_transition_matrix() {
   Double mu         = 0.0;
   Double sigma      = 0.0;
 
+  cout << "number_of_model_length_bins_ (" << number_of_model_length_bins_ << ") vs model_min_length_bins_.size() (" << model_min_length_bins_.size() << ")" << endl;
+
   if (is_growth_type_none_) {
     // If growth is none then the growth increment model is the identity matrix for all time-steps. That is
     // population will stay in the length bin they were in before growth
@@ -152,7 +154,7 @@ void GrowthIncrement::populate_growth_transition_matrix() {
     // else do the normal thing where we calculate the mean increment and cv and define the growth increment matrix
     if (compatibility_type_ == CompatibilityType::kCasal) {
       for (unsigned i = 0; i < number_of_model_length_bins_; ++i) {
-        if ((i == (number_of_model_length_bins_ - 1)) & plus_group_) {
+        if ((i == (number_of_model_length_bins_ - 1)) && plus_group_) {
           LOG_FINE() << "in plus group set = 1.0";
           growth_transition_matrix_[i][i] = 1.0;  // stay in plus group
         } else {
@@ -179,7 +181,7 @@ void GrowthIncrement::populate_growth_transition_matrix() {
       }
     } else {
       for (unsigned i = 0; i < number_of_model_length_bins_; ++i) {
-        if ((i == (number_of_model_length_bins_ - 1)) & plus_group_) {
+        if ((i == (number_of_model_length_bins_ - 1)) && plus_group_) {
           LOG_FINE() << "in plus group set = 1.0";
           growth_transition_matrix_[i][i] = 1.0;  // stay in plus group
         } else {
