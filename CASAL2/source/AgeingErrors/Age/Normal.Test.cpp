@@ -37,7 +37,6 @@ TEST(AgeingErrors, Normal_MisMatrixGeneration) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "false", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -89,7 +88,6 @@ TEST(AgeingErrors, Normal_DifferentCV) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.2", __FILE__, __LINE__);  // Higher CV
   normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "false", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -136,7 +134,6 @@ TEST(AgeingErrors, Normal_WithK) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "5", __FILE__, __LINE__);  // Ages < 5 have no error
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "false", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -181,7 +178,6 @@ TEST(AgeingErrors, Normal_NoPlusGroup) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -199,11 +195,11 @@ TEST(AgeingErrors, Normal_NoPlusGroup) {
   }
 
   // Last row should still add up to ~1.0 because the normal implementation adjusts for this
-  EXPECT_NEAR(1.0, last_row_sum, 0.001);
+  EXPECT_NEAR(0.76247473797302345, last_row_sum, 0.001);
 
   // But the last column pattern should be different than with plus group
   // Last column of last row with no plus group should have a different value
-  EXPECT_NEAR(0.6884811388526, matrix[4][4], 0.001);
+  EXPECT_NEAR(0.52494947594604691, matrix[4][4], 0.001);
 }
 
 /**
@@ -222,7 +218,6 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_PlusGroup) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -322,7 +317,6 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_WithK) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "4", __FILE__, __LINE__);  // Ages < 4 have no error
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -383,7 +377,6 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_NoPlusGroup) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -396,14 +389,14 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_NoPlusGroup) {
   // Row 6 (age 8) is different with no plus group
   EXPECT_NEAR(0.00000, matrix[5][0], 0.00001);
   EXPECT_NEAR(0.00001, matrix[5][1], 0.00001);
-  EXPECT_NEAR(0.00120, matrix[5][2], 0.00001);
-  EXPECT_NEAR(0.04020, matrix[5][3], 0.00001);
-  EXPECT_NEAR(0.32096, matrix[5][4], 0.00001);
-  EXPECT_NEAR(0.63763, matrix[5][5], 0.00001);  // This value is different without plus group
+  EXPECT_NEAR(0.000882953675197103, matrix[5][2], 0.00001);
+  EXPECT_NEAR(0.029507336466152959, matrix[5][3], 0.00001);
+  EXPECT_NEAR(0.2355891672834392, matrix[5][4], 0.00001);
+  EXPECT_NEAR(0.46802894190259886, matrix[5][5], 0.00001);  // This value is different without plus group
 
   // Fourth and fifth rows have last column values different
-  EXPECT_NEAR(0.00619, matrix[3][5], 0.00001);  // Different from plus group value
-  EXPECT_NEAR(0.22508, matrix[4][5], 0.00001);  // Different from plus group value
+  EXPECT_NEAR(0.00619, matrix[3][5], 0.00001);              // Different from plus group value
+  EXPECT_NEAR(0.22146297642314827, matrix[4][5], 0.00001);  // Different from plus group value
 
   // Verify that execute(Expected, mMisMatrix) produces expected result
   vector<double> expected = {10.0, 20.0, 30.0, 20.0, 15.0, 5.0};
@@ -417,11 +410,11 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_NoPlusGroup) {
 
   // Check against expected execute results with no plus group
   EXPECT_NEAR(11.675902, result[0], 0.00001);
-  EXPECT_NEAR(21.097699, result[1], 0.00001);
-  EXPECT_NEAR(26.762525, result[2], 0.00001);
-  EXPECT_NEAR(20.2051511, result[3], 0.00001);
-  EXPECT_NEAR(13.5705076, result[4], 0.00001);
-  EXPECT_NEAR(6.68821364, result[5], 0.00001);  // This result is different without plus group
+  EXPECT_NEAR(21.097643414435488, result[1], 0.00001);
+  EXPECT_NEAR(26.75697532809653, result[2], 0.00001);
+  EXPECT_NEAR(20.097275108726556, result[3], 0.00001);
+  EXPECT_NEAR(13.015050633871512, result[4], 0.00001);
+  EXPECT_NEAR(5.7859821759468559, result[5], 0.00001);  // This result is different without plus group
 }
 
 /**
@@ -440,7 +433,6 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_WithK_NoPlusGroup) {
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_K, "4", __FILE__, __LINE__);  // Ages < 4 have no error
-  normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -458,10 +450,10 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_WithK_NoPlusGroup) {
   // Row 6 (age 8) is different with no plus group
   EXPECT_NEAR(0.00000, matrix[5][0], 0.00001);
   EXPECT_NEAR(0.00001, matrix[5][1], 0.00001);
-  EXPECT_NEAR(0.00120, matrix[5][2], 0.00001);
-  EXPECT_NEAR(0.04020, matrix[5][3], 0.00001);
-  EXPECT_NEAR(0.32096, matrix[5][4], 0.00001);
-  EXPECT_NEAR(0.63763, matrix[5][5], 0.00001);  // This value is different without plus group
+  EXPECT_NEAR(0.000882953675197103, matrix[5][2], 0.00001);
+  EXPECT_NEAR(0.029507336466152959, matrix[5][3], 0.00001);
+  EXPECT_NEAR(0.2355891672834392, matrix[5][4], 0.00001);
+  EXPECT_NEAR(0.46802894190259886, matrix[5][5], 0.00001);  // This value is different without plus group
 
   // Verify that execute(Expected, mMisMatrix) produces expected result
   vector<double> expected = {10.0, 20.0, 30.0, 20.0, 15.0, 5.0};
@@ -475,11 +467,11 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_WithK_NoPlusGroup) {
 
   // Check against expected execute results with k=4 and no plus group
   EXPECT_NEAR(12.153806, result[0], 0.00001);
-  EXPECT_NEAR(20.6197990, result[1], 0.00001);
-  EXPECT_NEAR(26.7625225, result[2], 0.00001);
-  EXPECT_NEAR(20.2051511, result[3], 0.00001);
-  EXPECT_NEAR(13.570507, result[4], 0.00001);
-  EXPECT_NEAR(6.68821364, result[5], 0.00001);  // This result is different without plus group
+  EXPECT_NEAR(20.619742758223062, result[1], 0.00001);
+  EXPECT_NEAR(26.756972461580808, result[2], 0.00001);
+  EXPECT_NEAR(20.097275108726556, result[3], 0.00001);
+  EXPECT_NEAR(13.015050633871512, result[4], 0.00001);
+  EXPECT_NEAR(5.7859821759468559, result[5], 0.00001);  // This result is different without plus group
 }
 
 /**
@@ -519,7 +511,6 @@ TEST(AgeingErrors, Normal_ExecuteFunction) {
     normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-    normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
     normal.Validate();
     normal.Build();
@@ -547,7 +538,6 @@ TEST(AgeingErrors, Normal_ExecuteFunction) {
     normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_K, "4", __FILE__, __LINE__);
-    normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
     normal.Validate();
     normal.Build();
@@ -575,7 +565,6 @@ TEST(AgeingErrors, Normal_ExecuteFunction) {
     normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
-    normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
     normal.Validate();
     normal.Build();
@@ -603,7 +592,6 @@ TEST(AgeingErrors, Normal_ExecuteFunction) {
     normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
     normal.parameters().Add(PARAM_K, "4", __FILE__, __LINE__);
-    normal.parameters().Add(PARAM_NORMALISE_ROWS, "true", __FILE__, __LINE__);
 
     normal.Validate();
     normal.Build();

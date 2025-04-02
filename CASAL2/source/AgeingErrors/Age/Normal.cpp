@@ -50,7 +50,6 @@ Normal::Normal(shared_ptr<Model> model) : AgeingError(model) {
   parameters_
       .Bind<unsigned>(PARAM_K, &k_, "k defines the minimum age of individuals which can be misclassified, i.e., individuals of age less than k have no ageing error", "", 0u)
       ->set_lower_bound(0u);
-  parameters_.Bind<bool>(PARAM_NORMALISE_ROWS, &normalise_rows_, "Normalise the rows of the misclassification matrix so they sum to 1.0", "", false);
 
   RegisterAsAddressable(PARAM_CV, &cv_);
 }
@@ -102,21 +101,6 @@ void Normal::DoReset() {
     for (unsigned i = 0; i < k_ - min_age_; ++i) {
       for (unsigned j = 0; j < age_spread_; ++j) {
         mis_matrix_[i][j] = (i == j) ? 1.0 : 0.0;  // Identity submatrix
-      }
-    }
-  }
-
-  // Ensure each row in mis_matrix_ sums to 1.0 (normalization step)
-  if (normalise_rows_) {
-    for (unsigned i = 0; i < age_spread_; ++i) {
-      Double row_sum = 0.0;
-      for (unsigned j = 0; j < age_spread_; ++j) {
-        row_sum += mis_matrix_[i][j];
-      }
-      if (row_sum > 0.0) {
-        for (unsigned j = 0; j < age_spread_; ++j) {
-          mis_matrix_[i][j] /= row_sum;
-        }
       }
     }
   }
