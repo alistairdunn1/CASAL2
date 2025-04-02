@@ -138,11 +138,14 @@ void GrowthIncrement::Reset() {
 
 void GrowthIncrement::populate_growth_transition_matrix() {
   LOG_TRACE();
+
+  if (!plus_group_) {
+    LOG_CODE_ERROR() << "GrowthIncrements in models with length_plus set to false is currently non-functional. Please use a length_plus group";
+  }
+
   Double sum_so_far = 0.0;
   Double mu         = 0.0;
   Double sigma      = 0.0;
-
-  cout << "number_of_model_length_bins_ (" << number_of_model_length_bins_ << ") vs model_min_length_bins_.size() (" << model_min_length_bins_.size() << ")" << endl;
 
   if (is_growth_type_none_) {
     // If growth is none then the growth increment model is the identity matrix for all time-steps. That is
