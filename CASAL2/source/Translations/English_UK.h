@@ -517,7 +517,6 @@
 #define PARAM_NONE                                "none"
 #define PARAM_NOP                                 "null_process"
 #define PARAM_NORMAL                              "normal"
-#define PARAM_NORMALISE_ROWS                      "normalise_rows"
 #define PARAM_NORMALISED_RESIDUALS                "normalised_residuals"
 #define PARAM_NORMAL_BY_STDEV                     "normal_by_stdev"
 #define PARAM_NORMAL_LOG                          "normal_log"
