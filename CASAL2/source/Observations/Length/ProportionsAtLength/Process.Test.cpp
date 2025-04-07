@@ -1,22 +1,21 @@
 /**
- * @file ProportionsAtLength.Test.cpp
- * @author  C.Marsh
- * @date 2022
+ * @file Process.Test.cpp
+ * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
+ * @date 2025/04/07
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright Casal2 Project 2025 - https://github.com/Casal2/
  *
  */
 #ifdef TESTMODE
 
 // Headers
-#include "TimeStep.h"
-
 #include <iostream>
 
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Observations/Manager.h"
 #include "TestResources/TestFixtures/InternalEmptyLengthModel.h"
+#include "TimeStep.h"
 
 // Namespaces
 namespace niwa {
@@ -180,12 +179,13 @@ ato95 3.5
 const std::string bespoke_length_range =
     R"(
 @observation TrawlSurveyProportionAtLength
-type proportions_at_length
+type process_proportions_at_length
 years 1993 1994 1995 1998 2000 2001 2002 2008 2012 
 likelihood multinomial
 time_step Annual
+process mortality
+process_proportion 0.5
 categories untagged+tag_1996
-time_step_proportion 0.5
 selectivities TrawlSurveySel_1
 length_bins 35:68 
 plus_group true
@@ -218,12 +218,13 @@ end_table
 const std::string default_length_range =
     R"(
 @observation TrawlSurveyProportionAtLength
-type proportions_at_length
+type process_proportions_at_length
 years 1995 1998 2000 2001 2002 2008 2012 
 likelihood multinomial
 time_step Annual
+process mortality
+process_proportion 0.5
 categories untagged+tag_1996
-time_step_proportion 0.5
 selectivities TrawlSurveySel_1
 sum_to_one true
 delta 1e-5
@@ -250,12 +251,13 @@ end_table
 const std::string default_length_range_sum_to_one_false =
     R"(
 @observation TrawlSurveyProportionAtLength
-type proportions_at_length
+type process_proportions_at_length
 years  1995 1998 2000 2001 2002 2008 2012 
 likelihood multinomial
 time_step Annual
+process mortality
+process_proportion 0.5
 categories untagged+tag_1996
-time_step_proportion 0.5
 selectivities TrawlSurveySel_1
 plus_group true
 sum_to_one F
@@ -282,12 +284,13 @@ end_table
 const std::string bespoke_length_range_sum_to_one_false =
     R"(
 @observation TrawlSurveyProportionAtLength
-type proportions_at_length
+type process_proportions_at_length
 years 1993 1994 1995 1998 2000 2001 2002 2008 2012 
 likelihood multinomial
 time_step Annual
+process mortality
+process_proportion 0.5
 categories untagged+tag_1996
-time_step_proportion 0.5
 selectivities TrawlSurveySel_1
 length_bins 35:68 
 plus_group true
@@ -319,7 +322,7 @@ end_table
 /**
  * Test single sex model - user supplied custom length range
  */
-TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_bespoke_lengths) {
+TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_Process_singlesex_bespoke_lengths) {
   AddConfigurationLine(simple_single_sex_model, __FILE__, 32);
   AddConfigurationLine(bespoke_length_range, __FILE__, 32);
   LoadConfiguration();
@@ -363,7 +366,7 @@ TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_bespo
 /**
  * Test single sex model - user doesn't supply length bins so model uses model range
  */
-TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_default) {
+TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_Process_singlesex_default) {
   AddConfigurationLine(simple_single_sex_model, __FILE__, 32);
   AddConfigurationLine(default_length_range, __FILE__, 32);
   LoadConfiguration();
@@ -415,7 +418,7 @@ TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_defau
 /**
  * Test 3
  */
-TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_defaultlength_sum_to_one_false) {
+TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_Process_singlesex_defaultlength_sum_to_one_false) {
   AddConfigurationLine(simple_single_sex_model, __FILE__, 32);
   AddConfigurationLine(default_length_range_sum_to_one_false, __FILE__, 32);
   LoadConfiguration();
@@ -429,7 +432,7 @@ TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_defau
 /**
  * Test 4
  */
-TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_singlesex_bespokelength_sum_to_one_false) {
+TEST_F(InternalEmptyLengthModel, Observation_ProportionsAtLength_Process_singlesex_bespokelength_sum_to_one_false) {
   AddConfigurationLine(simple_single_sex_model, __FILE__, 32);
   AddConfigurationLine(bespoke_length_range_sum_to_one_false, __FILE__, 32);
   LoadConfiguration();
