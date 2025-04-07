@@ -33,6 +33,8 @@ public:
   void DoReset() override final;
   void DoUpdate() override final;
 
+  map<unsigned, Double>& values_by_year() { return values_by_year_; };
+
 private:
   // members
   vector<Double>        values_;
