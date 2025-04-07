@@ -41,7 +41,6 @@
 #include "../Profiles/Manager.h"
 #include "../Projects/Manager.h"
 #include "../Reports/Manager.h"
-#include "../Simulates/Manager.h"
 #include "../TimeSteps/Manager.h"
 #include "../TimeVarying/Manager.h"
 #include "../Utilities/RandomNumberGenerator.h"
@@ -767,7 +766,6 @@ void Model::RunSimulation() {
       LOG_MEDIUM() << "Iteration year: " << current_year_;
       age_length_manager.UpdateDataType();  // this only does something if we have data type age-length
       time_varying_manager.Update(current_year_);
-      managers_->simulate()->Update(current_year_);
       time_step_manager.Execute(current_year_);
     }
     // model finish running given this set of -i

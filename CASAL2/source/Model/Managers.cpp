@@ -41,7 +41,6 @@
 #include "../Projects/Manager.h"
 #include "../Reports/Manager.h"
 #include "../Selectivities/Manager.h"
-#include "../Simulates/Manager.h"
 #include "../TimeSteps/Manager.h"
 #include "../TimeVarying/Manager.h"
 
@@ -80,7 +79,6 @@ Managers::Managers(shared_ptr<Model> model) {
   profile_                    = new profiles::Manager();
   project_                    = new projects::Manager();
   selectivity_                = new selectivities::Manager();
-  simulate_                   = new simulates::Manager();
   time_step_                  = new timesteps::Manager();
   time_varying_               = new timevarying::Manager();
 }
@@ -122,7 +120,6 @@ Managers::~Managers() {
   delete profile_;
   delete project_;
   delete selectivity_;
-  delete simulate_;
   delete time_step_;
   delete time_varying_;
 }
@@ -191,7 +188,6 @@ void Managers::Validate() {
   report_->Validate(model_);
   LOG_FINE() << "Validating Reports..Done";
   selectivity_->Validate();
-  simulate_->Validate();
   time_varying_->Validate();
 
   addressable_transformation_->Validate();  // needs to be at the after all other classes, but before Estimates
@@ -228,7 +224,6 @@ void Managers::Build() {
   profile_->Build();
   project_->Build(model_);
   selectivity_->Build();
-  simulate_->Build();
   time_varying_->Build();
 
   LOG_FINE() << "Building estimates and transformations...";
@@ -276,7 +271,6 @@ void Managers::Verify(shared_ptr<Model> model) {
   profile_->Verify(model);
   project_->Verify(model);
   report_->Verify(model);
-  simulate_->Verify(model);
   time_step_->Verify(model);
   time_varying_->Verify(model);
 }
@@ -308,7 +302,6 @@ void Managers::Reset() {
   profile_->Reset();
   project_->Reset();
   //  report_->Reset();
-  simulate_->Reset();
   time_step_->Reset();
   time_varying_->Reset();
 }

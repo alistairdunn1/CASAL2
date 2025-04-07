@@ -54,7 +54,6 @@ namespace profiles { class Manager; }
 namespace projects { class Manager; }
 namespace reports { class Manager; }
 namespace selectivities { class Manager; }
-namespace simulates { class Manager; }
 namespace timesteps { class Manager; }
 namespace timevarying { class Manager; }
 // clang-format on
@@ -97,7 +96,6 @@ public:
   virtual projects::Manager*                   project() { CHECK_AND_RETURN(project_); }
   virtual shared_ptr<reports::Manager>         report();
   virtual selectivities::Manager*              selectivity() { CHECK_AND_RETURN(selectivity_); }
-  virtual simulates::Manager*                  simulate() { CHECK_AND_RETURN(simulate_); }
   virtual timesteps::Manager*                  time_step() { CHECK_AND_RETURN(time_step_); }
   virtual timevarying::Manager*                time_varying() { CHECK_AND_RETURN(time_varying_); }
 
@@ -138,7 +136,6 @@ protected:
   projects::Manager*                   project_     = nullptr;
   shared_ptr<reports::Manager>         report_;
   selectivities::Manager*              selectivity_  = nullptr;
-  simulates::Manager*                  simulate_     = nullptr;
   timesteps::Manager*                  time_step_    = nullptr;
   timevarying::Manager*                time_varying_ = nullptr;
   static std::mutex                    lock_;
