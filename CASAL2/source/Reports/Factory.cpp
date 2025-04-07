@@ -56,6 +56,7 @@
 #include "../Reports/Age/AgeLength.h"
 #include "../Reports/Age/AgeingErrorMatrix.h"
 // Test
+#include "../Reports/Test/AddressableValue.h"
 #include "../Reports/Test/ObjectiveFunction.h"
 
 // Namespaces
@@ -79,6 +80,7 @@ Report* Factory::Create(shared_ptr<Model> model, const string& object_type, cons
     // Note the R extract.mpd() function v22.06 also errors out for this report
     // if (sub_type == PARAM_CATEGORY_INFO)
     //  result = new CategoryInfo();
+
     else if (sub_type == PARAM_CATEGORY_LIST)
       result = new CategoryList();
     else if (sub_type == PARAM_CATCHABILITY)
@@ -141,6 +143,8 @@ Report* Factory::Create(shared_ptr<Model> model, const string& object_type, cons
       result = new PartitionBiomass();
     else if (sub_type == PARAM_PARTITION)
       result = new Partition();
+    else if (sub_type == PARAM_ADDRESSABLE_VALUE)
+      result = new niwa::reports::test::AddressableValue();
     else if (sub_type == PARAM_TEST_OBJECTIVE_FUNCTION)
       result = new niwa::reports::test::ObjectiveFunction();
     else if (model->partition_type() == PartitionType::kAge) {
