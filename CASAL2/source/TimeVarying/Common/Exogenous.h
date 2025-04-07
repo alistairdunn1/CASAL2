@@ -33,6 +33,9 @@ public:
   void DoReset() override final;
   void DoUpdate() override final;
 
+  map<unsigned, Double>& values_by_year() { return values_by_year_; }
+  Double                 mean_value() const { return mean_value_; }
+
 private:
   // members
   vector<Double>        exogenous_;
