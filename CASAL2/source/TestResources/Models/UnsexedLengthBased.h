@@ -75,8 +75,6 @@ time_step_proportions 1.0
 type growth
 categories uni
 
-
-
 @length_weight allometric
 type basic
 a 0.000000000373
@@ -159,8 +157,6 @@ time_step_proportions 1.0
 @process growth
 type growth
 categories uni
-
-
 
 @length_weight allometric
 type basic
