@@ -47,9 +47,10 @@ void Manager::Validate(shared_ptr<Model> model) {
     LOG_FATAL() << "No @profile blocks have been defined, even though this is an Profiling run";
   }
 
-  if (model->run_mode() != RunMode::kProfiling) {
-    return;  // No need to validate
-  }
+  // TODO: This breaks build
+  // if (model->run_mode() != RunMode::kProfiling) {
+  //   return;  // No need to validate
+  // }
 
   if (objects_.size() > 1) {
     LOG_FATAL() << "Only one @profile block can be specified in a model configuration, you have specified " << objects_.size();
