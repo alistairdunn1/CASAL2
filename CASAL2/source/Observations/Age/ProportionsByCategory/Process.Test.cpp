@@ -54,7 +54,7 @@ table error_values
 end_table
 )";
 
-TEST_F(InternalEmptyModel, Process_Proportions_By_Category) {
+TEST_F(InternalEmptyModel, Observation_Process_Proportions_By_Category) {
   AddConfigurationLine(testresources::models::two_sex, "TestResources/Models/TwoSex.h", 27);
   AddConfigurationLine(proportions_by_category_twosex_basic, __FILE__, 33);
   LoadConfiguration();
