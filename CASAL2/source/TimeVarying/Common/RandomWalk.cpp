@@ -18,8 +18,7 @@
 #include "../../Utilities/RandomNumberGenerator.h"
 
 // namespaces
-namespace niwa {
-namespace timevarying {
+namespace niwa::timevarying {
 
 /**
  * Default constructor
@@ -27,8 +26,8 @@ namespace timevarying {
 RandomWalk::RandomWalk(shared_ptr<Model> model) : TimeVarying(model) {
   parameters_.Bind<Double>(PARAM_MEAN, &mu_, "The mean (mu) of the random walk distribution", "", 0);
   parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma)  of the random walk distribution", "", 1)->set_lower_bound(0, false);
-  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &upper_bound_, "The lower bound for the random walk", "");
-  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &lower_bound_, "The upper bound for the random walk", "");
+  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower bound for the random walk", "");
+  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper bound for the random walk", "");
   parameters_.Bind<Double>(PARAM_RHO, &rho_, "The autocorrelation parameter (rho)  of the random walk distribution", "", 1);
   parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The distribution type", "", PARAM_NORMAL)->set_allowed_values({PARAM_NORMAL});
 
@@ -41,6 +40,8 @@ RandomWalk::RandomWalk(shared_ptr<Model> model) : TimeVarying(model) {
  * Validate
  */
 void RandomWalk::DoValidate() {
+  LOG_CODE_ERROR() << "TimeVarying.Random_Walk has been disabled due to a software bug. Please contact the developers if you require this functionality";
+
   if (distribution_ != PARAM_NORMAL)
     LOG_ERROR() << "Random walk can draw from a normal distribution only";
 }
@@ -66,6 +67,7 @@ void RandomWalk::DoUpdate() {
   utilities::RandomNumberGenerator& rng     = utilities::RandomNumberGenerator::Instance();
   Double                            value   = *addressable_;
   double                            deviate = rng.normal(AS_DOUBLE(mu_), AS_DOUBLE(sigma_));
+  cout << "year: " << model_->current_year() << "; value: " << value << "; deviate: " << deviate << endl;
   value += value * rho_ + deviate;
 
   if (value < lower_bound_) {
@@ -78,11 +80,11 @@ void RandomWalk::DoUpdate() {
   }
 
   LOG_FINEST() << "value after deviate of " << deviate << " = " << value << " for year " << model_->current_year();
+  cout << "setting value to " << value;
 
   LOG_FINE() << "Setting Value to: " << value;
   parameter_by_year_[model_->current_year()] = value;
   (this->*update_function_)(value);
 }
 
-} /* namespace timevarying */
-} /* namespace niwa */
+}  // namespace niwa::timevarying

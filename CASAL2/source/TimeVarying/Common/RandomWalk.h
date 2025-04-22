@@ -18,9 +18,7 @@
 #include "../../TimeVarying/TimeVarying.h"
 
 // namespaces
-namespace niwa {
-class Estimate;
-namespace timevarying {
+namespace niwa::timevarying {
 
 /**
  * Class definition
@@ -31,7 +29,7 @@ public:
   virtual ~RandomWalk() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoUpdate() override final;
 
 private:
@@ -47,7 +45,6 @@ private:
   Double                upper_bound_;
 };
 
-} /* namespace timevarying */
-} /* namespace niwa */
+}  // namespace niwa::timevarying
 
 #endif /* TIMEVARYING_RANDOMWALK_H_ */
