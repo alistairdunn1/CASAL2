@@ -18,9 +18,7 @@
 #include "../../TimeVarying/TimeVarying.h"
 
 // namespaces
-namespace niwa {
-class Estimate;
-namespace timevarying {
+namespace niwa::timevarying {
 
 /**
  * Class definition
@@ -46,7 +44,6 @@ private:
   Double  upper_bound_;
 };
 
-} /* namespace timevarying */
-} /* namespace niwa */
+}  // namespace niwa::timevarying
 
 #endif /* TIMEVARYING_RANDOM_DRAW_H_ */

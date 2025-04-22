@@ -18,8 +18,7 @@
 #include "../../Utilities/RandomNumberGenerator.h"
 
 // namespaces
-namespace niwa {
-namespace timevarying {
+namespace niwa::timevarying {
 
 /**
  * Default constructor
@@ -128,5 +127,4 @@ void RandomDraw::DoUpdate() {
   (this->*update_function_)(parameter_by_year_[model_->current_year()]);
 }
 
-} /* namespace timevarying */
-} /* namespace niwa */
+}  // namespace niwa::timevarying
