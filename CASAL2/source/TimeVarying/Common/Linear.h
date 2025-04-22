@@ -36,10 +36,9 @@ public:
 
 private:
   // members
-  Double                slope_;
-  Double                intercept_;
-  Double*               value_;
-  map<unsigned, Double> values_by_year_;
+  Double  slope_;
+  Double  intercept_;
+  Double* value_;
 };
 
 } /* namespace timevarying */

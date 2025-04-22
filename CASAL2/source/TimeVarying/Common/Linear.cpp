@@ -41,6 +41,8 @@ void Linear::DoValidate() {}
  * Build
  */
 void Linear::DoBuild() {
+  LOG_CODE_ERROR() << "TimeVarying.Linear is currently disabled due to a software bug. Please contact the developers if you need this functionality.";
+
   if (model_->objects().GetAddressableType(parameter_) != addressable::kSingle)
     LOG_ERROR_P(PARAM_TYPE) << "@time_varying blocks of type " << PARAM_LINEAR << " can be used only with parameters that are scalars or single values";
   DoReset();
