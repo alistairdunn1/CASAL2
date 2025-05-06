@@ -13,4 +13,4 @@ The most recent production version of Casal2 is available [here](https://github.
 
 ## Community
 
-Casal2 has a dedicated Slack server available [here](https://join.slack.com/t/casal2workspace/shared_invite/zt-2ko29a60h-jJpdINxi4OSb~tVNe0nRrQ). You're free to join the Slack community and ask questions or provide feedback.
+Casal2 has a dedicated Slack server available [here](https://join.slack.com/t/casal2workspace/shared_invite/zt-34x3s925h-INlNdKhsfataAZB8J34ceA). You're free to join the Slack community and ask questions or provide feedback.
