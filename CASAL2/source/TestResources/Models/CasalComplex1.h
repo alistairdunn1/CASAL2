@@ -32,6 +32,8 @@ const std::string test_cases_models_casal_complex_1 =
 @model
 min_age 2
 max_age 25
+length_bins 3:15
+length_plus t
 age_plus t
 base_weight_units kgs
 start_year 1975
