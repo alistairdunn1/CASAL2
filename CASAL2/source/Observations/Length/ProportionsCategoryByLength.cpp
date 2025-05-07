@@ -486,7 +486,7 @@ void ProportionsCategoryByLength::Execute() {
         final_value       = (1 - proportion_of_time_) * start_value + proportion_of_time_ * end_value;
         total_final_value = (1 - proportion_of_time_) * total_start_value + proportion_of_time_ * total_end_value;
       }
-      length_results_[category_length_offset + length_offset] += final_value / total_final_value;
+      length_results_[category_length_offset + length_offset] += final_value / utilities::math::ZeroFun(total_final_value);
       length_bins_for_comparison_[category_length_offset + length_offset] = length_bins_[length_offset];
       categories_for_comparison_[category_length_offset + length_offset]  = category_labels_[category_offset];
 
