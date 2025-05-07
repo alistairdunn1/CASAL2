@@ -135,7 +135,7 @@ void MortalityDiseaseRate::DoExecute() {
           amount                   = data * (1 - exp(-selectivities_[i]->GetLengthResult(j) * dm * year_effect_by_year_[year]));
           results_[year_ndx][i][j] = amount;
           LOG_FINEST() << "j = " << j << " data " << data << " dm " << dm << " Year effect " << year_effect_by_year_[year];
-          data *= exp(-selectivities_[i]->GetLengthResult(j) * dm * year_effect_by_year_[year]);
+          data -= amount;
           ++j;
         }
         ++i;
