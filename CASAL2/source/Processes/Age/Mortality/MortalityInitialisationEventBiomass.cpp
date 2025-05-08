@@ -101,8 +101,10 @@ void MortalityInitialisationEventBiomass::DoExecute() {
       unsigned j = 0;
       // categories->UpdateMeanWeightData();
       for (Double& data : categories->data_) {
-        Double temp = data * selectivities_[i]->GetAgeResult(categories->min_age_ + j, categories->age_length_);
-        vulnerable += temp * categories->age_length_->mean_weight(time_step_index, categories->min_age_ + j);
+        Double temp                                              = data * selectivities_[i]->GetAgeResult(categories->min_age_ + j, categories->age_length_);
+        Double local_vulnerable                                  = temp * categories->age_length_->mean_weight(time_step_index, categories->min_age_ + j);
+        vulnerable_[categories->name_][categories->min_age_ + j] = local_vulnerable;
+        vulnerable += local_vulnerable;
         ++j;
       }
       ++i;
@@ -134,16 +136,19 @@ void MortalityInitialisationEventBiomass::DoExecute() {
         StoreForReport("Exploitation: ", AS_DOUBLE(exploitation));
         StoreForReport("Catch: ", AS_DOUBLE(catch_));
     */
+    i               = 0;
     Double removals = 0;
     for (auto categories : partition_) {
       unsigned offset = 0;
       for (Double& data : categories->data_) {
         // report
-        removals = vulnerable_[categories->name_][categories->min_age_ + offset] * exploitation;
+        // removals = vulnerable_[categories->name_][categories->min_age_ + offset] * exploitation;
+        removals = data * selectivities_[i]->GetAgeResult(categories->min_age_ + offset, categories->age_length_) * exploitation;
         // StoreForReport(categories->name_ + "_Removals: ", AS_DOUBLE(removals));
         data -= removals;
         offset++;
       }
+      ++i;
     }
     ++init_iteration_;
   }
