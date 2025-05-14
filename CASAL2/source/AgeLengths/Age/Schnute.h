@@ -27,7 +27,7 @@ public:
   // methods
   explicit Schnute(shared_ptr<Model> model);
   virtual ~Schnute() = default;
-  void DoValidate() override final{};
+  void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
   // accessors
@@ -38,12 +38,12 @@ protected:
   // methods
 
   // members
-  Double                               y1_;
-  Double                               y2_;
-  Double                               tau1_;
-  Double                               tau2_;
-  Double                               a_;
-  Double                               b_;
+  Double y1_;
+  Double y2_;
+  Double tau1_;
+  Double tau2_;
+  Double a_;
+  Double b_;
 };
 
 } /* namespace agelengths */

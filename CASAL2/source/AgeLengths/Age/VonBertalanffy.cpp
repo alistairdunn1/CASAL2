@@ -37,13 +37,21 @@ namespace agelengths {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 VonBertalanffy::VonBertalanffy(shared_ptr<Model> model) : AgeLength(model) {
-  parameters_.Bind<Double>(PARAM_LINF, &linf_, "The $L_{infinity}$ parameter", "")->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_K, &k_, "The $k$ parameter", "")->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_T0, &t0_, "The $t_0$ parameter", "");
+  parameters_.Bind<Double>(PARAM_LINF, &linf_, "The $L_{infinity}$ parameter");
+  parameters_.Bind<Double>(PARAM_K, &k_, "The $k$ parameter");
+  parameters_.Bind<Double>(PARAM_T0, &t0_, "The $t_0$ parameter");
 
   RegisterAsAddressable(PARAM_LINF, &linf_);
   RegisterAsAddressable(PARAM_K, &k_);
   RegisterAsAddressable(PARAM_T0, &t0_);
+}
+
+/**
+ *
+ */
+void VonBertalanffy::DoValidate() {
+  parameters_.Validate(PARAM_LINF)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_K)->GreaterThan(0.0);
 }
 
 /**

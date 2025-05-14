@@ -34,11 +34,9 @@ Data::Data(shared_ptr<Model> model) : AgeLength(model) {
   data_table_ = new parameters::Table(PARAM_DATA);
 
   parameters_.BindTable(PARAM_DATA, data_table_, "", "");
-  parameters_.Bind<string>(PARAM_EXTERNAL_GAPS, &external_gaps_, "The method to use for external data gaps", "", PARAM_MEAN)
-      ->set_allowed_values({PARAM_MEAN, PARAM_NEAREST_NEIGHBOUR});
-  parameters_.Bind<string>(PARAM_INTERNAL_GAPS, &internal_gaps_, "The method to use for internal data gaps", "", PARAM_MEAN)
-      ->set_allowed_values({PARAM_MEAN, PARAM_NEAREST_NEIGHBOUR, PARAM_INTERPOLATE});
-  parameters_.Bind<string>(PARAM_TIME_STEP_MEASUREMENTS_WERE_MADE, &step_data_supplied_, "The time step label for which size-at-age data are provided", "");
+  parameters_.Bind<string>(PARAM_EXTERNAL_GAPS, &external_gaps_, "The method to use for external data gaps")->set_default_value(PARAM_MEAN);
+  parameters_.Bind<string>(PARAM_INTERNAL_GAPS, &internal_gaps_, "The method to use for internal data gaps")->set_default_value(PARAM_MEAN);
+  parameters_.Bind<string>(PARAM_TIME_STEP_MEASUREMENTS_WERE_MADE, &step_data_supplied_, "The time step label for which size-at-age data are provided");
 }
 
 /**
@@ -47,6 +45,15 @@ Data::Data(shared_ptr<Model> model) : AgeLength(model) {
 Data::~Data() {
   delete data_table_;
 }
+
+/**
+ *
+ */
+void Data::DoValidate() {
+  parameters_.Validate(PARAM_EXTERNAL_GAPS)->IsInList({PARAM_MEAN, PARAM_NEAREST_NEIGHBOUR});
+  parameters_.Validate(PARAM_INTERNAL_GAPS)->IsInList({PARAM_MEAN, PARAM_NEAREST_NEIGHBOUR, PARAM_INTERPOLATE});
+}
+
 /**
  * Build any objects that will need to be utilised by this object.
  * Obtain smart_pointers to any objects that will be used by this object.

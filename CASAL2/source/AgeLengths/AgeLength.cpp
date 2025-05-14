@@ -39,16 +39,23 @@ namespace niwa {
  */
 AgeLength::AgeLength(shared_ptr<Model> model) : model_(model) {
   // clang-format off
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the age length relationship", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of age length relationship", "");
-  parameters_.Bind<Double>( PARAM_TIME_STEP_PROPORTIONS, &time_step_proportions_,"The fraction of the year applied in each time step that is added to the age for the purposes of evaluating the length, i.e., a value of 0.5 for a time step will evaluate the length of individuals at age+0.5 in that time step","", true)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_label_, "The assumed distribution for the growth curve", "", PARAM_NORMAL)->set_allowed_values({PARAM_NORMAL, PARAM_LOGNORMAL, PARAM_NONE});
-  parameters_.Bind<Double>(PARAM_CV_FIRST, &cv_first_, "The CV for the first age class", "", Double(0.0))->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_CV_LAST, &cv_last_, "The CV for last age class", "", Double(0.0))->set_lower_bound(0.0);
-  parameters_.Bind<string>(PARAM_COMPATIBILITY, &compatibility_,"Backwards compatibility option: either casal2 (the default) or casal to use the (less accurate) cumulative normal function from CASAL", "", PARAM_CASAL2)->set_allowed_values({PARAM_CASAL, PARAM_CASAL2});
-  parameters_.Bind<bool>(PARAM_BY_LENGTH, &by_length_, "Specifies if the linear interpolation of CVs is a linear function of mean length at age. Default is true", "", true);
-  parameters_.Bind<string>(PARAM_LENGTH_WEIGHT, &length_weight_label_, "The label from an associated length-weight block", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the age length relationship");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of age length relationship");
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_proportions_,"The fraction of the year applied in each time step that is added to the age for the purposes of evaluating the length, i.e., a value of 0.5 for a time step will evaluate the length of individuals at age+0.5 in that time step")
+  ->set_default_value(0.0);
+  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_label_, "The assumed distribution for the growth curve")
+    ->set_default_value(PARAM_NORMAL);
+  parameters_.Bind<Double>(PARAM_CV_FIRST, &cv_first_, "The CV for the first age class")
+    ->set_default_value(0.0);
+  parameters_.Bind<Double>(PARAM_CV_LAST, &cv_last_, "The CV for last age class")
+    ->set_default_value(0.0);
+  parameters_.Bind<string>(PARAM_COMPATIBILITY, &compatibility_,"Backwards compatibility option: either casal2 (the default) or casal to use the (less accurate) cumulative normal function from CASAL")
+  ->set_default_value(PARAM_CASAL2);
+  parameters_.Bind<bool>(PARAM_BY_LENGTH, &by_length_, "Specifies if the linear interpolation of CVs is a linear function of mean length at age. Default is true")
+    ->set_default_value(true);
+  parameters_.Bind<string>(PARAM_LENGTH_WEIGHT, &length_weight_label_, "The label from an associated length-weight block");
   // clang-format on
+
   RegisterAsAddressable(PARAM_CV_FIRST, &cv_first_);
   RegisterAsAddressable(PARAM_CV_LAST, &cv_last_);
 }
@@ -62,6 +69,13 @@ AgeLength::AgeLength(shared_ptr<Model> model) : model_(model) {
 void AgeLength::Validate() {
   LOG_FINEST() << "by_length_ = " << by_length_;
   parameters_.Populate(model_);
+
+  // Validate our parameters
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_DISTRIBUTION)->IsInList({PARAM_NORMAL, PARAM_LOGNORMAL, PARAM_NONE});
+  parameters_.Validate(PARAM_CV_FIRST)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_CV_LAST)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_COMPATIBILITY)->IsInList({PARAM_CASAL, PARAM_CASAL2});
 
   // get offsets
   year_offset_ = model_->start_year();
@@ -219,8 +233,8 @@ void AgeLength::PopulateCV() {
           cvs_[year_ndx][step_iter][age_ndx] = (cv_first_ + (cv_last_ - cv_first_) * (age - min_age_) / (max_age_ - min_age_));
         }
       }  // if (!parameters_.Get(PARAM_CV_LAST)->has_been_defined()) {
-    }    // for (unsigned step_iter = 0; step_iter < time_steps.size(); ++step_iter)
-  }      // for (unsigned year : years) {
+    }  // for (unsigned step_iter = 0; step_iter < time_steps.size(); ++step_iter)
+  }  // for (unsigned year : years) {
 }
 
 /**
@@ -457,7 +471,7 @@ void AgeLength::PopulateAgeLengthMatrix() {
           }
         }
       }  // for (unsigned age_index = 0; age_index < iter.second->age_spread(); ++age_index)
-    }    // for (unsigned time_step = 0; time_step < time_step_count; ++time_step)
+    }  // for (unsigned time_step = 0; time_step < time_step_count; ++time_step)
 
     // This code seems redundant?
     // if not time-varying then it should all be the same anyway....
@@ -597,8 +611,8 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
           }
         }
       }  // for (unsigned age_index = 0; age_index < iter.second->age_spread(); ++age_index)
-    }    // for (unsigned time_step = 0; time_step < time_step_count; ++time_step)
-  }      // if we need to update
+    }  // for (unsigned time_step = 0; time_step < time_step_count; ++time_step)
+  }  // if we need to update
 }
 /**
  * @details This will take numbers at age and pass them through the age-length transition matrix whilst applying a selectivity

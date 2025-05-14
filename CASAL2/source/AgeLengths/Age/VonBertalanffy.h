@@ -28,20 +28,20 @@ public:
   // methods
   explicit VonBertalanffy(shared_ptr<Model> model);
   virtual ~VonBertalanffy() = default;
-  void DoValidate() override final{};
+  void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
 
-  // accessors  
+  // accessors
   Double calculate_mean_length(unsigned year, unsigned time_step, unsigned age) override final;
 
 protected:
   // methods
 
   // members
-  Double                               linf_;
-  Double                               k_;
-  Double                               t0_;
+  Double linf_;
+  Double k_;
+  Double t0_;
 };
 
 } /* namespace agelengths */

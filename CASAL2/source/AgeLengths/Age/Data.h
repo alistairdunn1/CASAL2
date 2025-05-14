@@ -20,7 +20,6 @@
 // namespaces
 namespace niwa {
 
-
 namespace agelengths {
 
 // classes
@@ -29,9 +28,9 @@ public:
   // methods
   explicit Data(shared_ptr<Model> model);
   virtual ~Data();
-  void DoValidate() override final{};
+  void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
 
   Double calculate_mean_length(unsigned year, unsigned time_step, unsigned age) override final;
 
@@ -54,7 +53,7 @@ private:
   map<unsigned, map<unsigned, map<unsigned, Double>>> mean_length_by_year_;
   string                                              step_data_supplied_;
   unsigned                                            step_index_data_supplied_;
-  unsigned                                            ageing_index_ = 0;
+  unsigned                                            ageing_index_   = 0;
   unsigned                                            mortality_index = 0;
   vector<Double>                                      means_;
   vector<unsigned>                                    steps_to_figure_;
