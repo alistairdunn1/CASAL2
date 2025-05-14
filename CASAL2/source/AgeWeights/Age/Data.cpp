@@ -32,12 +32,13 @@ namespace ageweights {
 Data::Data(shared_ptr<Model> model) : AgeWeight(model) {
   data_table_ = new parameters::Table(PARAM_DATA);
 
+  // clang-format off
   parameters_.BindTable(PARAM_DATA, data_table_, "", "");
-  parameters_
-      .Bind<string>(PARAM_EQUILIBRIUM_METHOD, &equilibrium_method_, "If used in an SSB calculation, what is the method to calculate equilibrium SSB", "", PARAM_TERMINAL_YEAR)
-      ->set_allowed_values({PARAM_MEAN, PARAM_FIRST_YEAR, PARAM_TERMINAL_YEAR});
-  parameters_.Bind<string>(PARAM_UNITS, &units_, "The units of measure (grams, kilograms (kgs), or tonnes)", "", PARAM_KGS)
-      ->set_allowed_values({PARAM_KGS, PARAM_KILOGRAMS, PARAM_GRAMS, PARAM_TONNES});
+  parameters_.Bind<string>(PARAM_EQUILIBRIUM_METHOD, &equilibrium_method_, "If used in an SSB calculation, what is the method to calculate equilibrium SSB")
+    ->set_default_value(PARAM_TERMINAL_YEAR);
+  parameters_.Bind<string>(PARAM_UNITS, &units_, "The units of measure (grams, kilograms (kgs), or tonnes)")
+    ->set_default_value(PARAM_KGS);
+  // clang-format on
 }
 
 /**
@@ -45,6 +46,14 @@ Data::Data(shared_ptr<Model> model) : AgeWeight(model) {
  */
 Data::~Data() {
   delete data_table_;
+}
+
+/**
+ *
+ */
+void Data::DoValidate() {
+  parameters_.Validate(PARAM_EQUILIBRIUM_METHOD)->IsInList({PARAM_MEAN, PARAM_FIRST_YEAR, PARAM_TERMINAL_YEAR});
+  parameters_.Validate(PARAM_UNITS)->IsInList({PARAM_KGS, PARAM_KILOGRAMS, PARAM_GRAMS, PARAM_TONNES});
 }
 
 /**

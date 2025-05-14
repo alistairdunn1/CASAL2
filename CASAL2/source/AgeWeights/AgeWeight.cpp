@@ -35,8 +35,8 @@ namespace niwa {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 AgeWeight::AgeWeight(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "Label of the age weight relationship", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of age weight", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "Label of the age weight relationship");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of age weight");
 }
 
 /**

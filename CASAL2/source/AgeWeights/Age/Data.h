@@ -27,10 +27,10 @@ public:
   // methods
   explicit Data(shared_ptr<Model> model);
   virtual ~Data();
-  void DoValidate() override final{};
+  void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
-  void DoRebuildCache() override final{};  // This should never happen. i.e time vary data type.
+  void DoReset() override final {};
+  void DoRebuildCache() override final {};  // This should never happen. i.e time vary data type.
 
   Double mean_weight_at_age_by_year(unsigned year, unsigned age) override final;
 
