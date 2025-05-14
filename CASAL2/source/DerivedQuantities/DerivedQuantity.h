@@ -36,7 +36,7 @@ public:
   virtual ~DerivedQuantity() = default;
   void   Validate();
   void   Build();
-  void   Verify(shared_ptr<Model> model){};
+  void   Verify(shared_ptr<Model> model) {};
   void   Reset();
   Double GetValue(unsigned year);
   Double GetInitialisationValue(unsigned phase = 0, unsigned index = 0);
@@ -65,7 +65,7 @@ protected:
   accessor::Categories   partition_;
   string                 proportion_method_;
   Double                 time_step_proportion_;
-  bool                   mean_proportion_method_;
+  bool                   mean_proportion_method_ = true;
 };
 } /* namespace niwa */
 #endif /* DERIVEDQUANTITY_H_ */
