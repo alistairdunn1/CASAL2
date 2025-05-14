@@ -24,8 +24,8 @@ namespace additionalpriors {
  * Default constructor
  */
 ElementDifference::ElementDifference(shared_ptr<Model> model) : AdditionalPrior(model) {
-  parameters_.Bind<string>(PARAM_SECOND_PARAMETER, &second_parameter_, "The name of the second parameter for comparing", "");
-  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiply the penalty by this factor", "", 1);
+  parameters_.Bind<string>(PARAM_SECOND_PARAMETER, &second_parameter_, "The name of the second parameter for comparing");
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiply the penalty by this factor")->set_default_value(1.0);
 }
 
 /**

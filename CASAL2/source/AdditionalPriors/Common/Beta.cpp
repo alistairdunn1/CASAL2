@@ -31,10 +31,10 @@ namespace additionalpriors {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Beta::Beta(shared_ptr<Model> model) : AdditionalPrior(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "Beta distribution mean (mu) parameter", "");
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "Beta distribution variance (sigma) parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A, &a_, "Beta distribution lower bound, of the range (A) parameter", "");
-  parameters_.Bind<Double>(PARAM_B, &b_, "Beta distribution upper bound of the range (B) parameter", "");
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "Beta distribution mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "Beta distribution variance (sigma) parameter");
+  parameters_.Bind<Double>(PARAM_A, &a_, "Beta distribution lower bound, of the range (A) parameter");
+  parameters_.Bind<Double>(PARAM_B, &b_, "Beta distribution upper bound of the range (B) parameter");
 }
 
 /**
@@ -44,8 +44,9 @@ Beta::Beta(shared_ptr<Model> model) : AdditionalPrior(model) {
  * Note: all parameters are populated from configuration files
  */
 void Beta::DoValidate() {
-  if (a_ >= b_)
-    LOG_ERROR_P(PARAM_B) << "value B (" << AS_DOUBLE(b_) << ") cannot be less than or equal to A (" << AS_DOUBLE(a_) << ")";
+  parameters_.Validate(PARAM_SIGMA)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_A)->LessThanParameter(PARAM_B);
+
   Double max_sigma = ((((mu_ - a_) * (b_ - mu_)) / (sigma_ * sigma_)) - 1);
   if (max_sigma <= 0.0)
     LOG_ERROR_P(PARAM_SIGMA) << "value (" << AS_DOUBLE(sigma_) << ") is invalid. (" << mu_ << " - " << a_ << ") * (" << b_ << " - " << mu_ << ") / (" << sigma_ << " * " << sigma_
