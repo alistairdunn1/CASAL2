@@ -50,6 +50,11 @@ void BindableVector<T>::Bind() {
     target_->push_back(value);
   }
 
+  // If we're using default values, load it now.
+  if (has_default_value_ && values_.empty()) {
+    target_->push_back(default_value_);
+  }
+
   /**
    * Check that the values provided are in our allowed_values_ object if it has
    * been defined

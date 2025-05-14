@@ -40,13 +40,18 @@ public:
   void Bind() override final;
 
   // acessors
-  void           set_default_value(T value) { default_value_ = value; }
+  void set_default_value(T value) {
+    default_value_ = value;
+    is_optional_   = true;
+  }
+  T              default_value() const { return default_value_; }
   string         stored_type() const override final { return utilities::demangle(typeid(*target_).name()); }
   vector<string> current_values() override final;
   void           set_allowed_values(std::initializer_list<T> list);
   void           set_range(T lower_bound, T upper_bound, bool lower_inclusive = true, bool upper_inclusive = true);
   void           set_lower_bound(T lower_bound, bool inclusive = true);
   void           set_upper_bound(T upper_bound, bool inclusive = true);
+  T*             target() { return target_; }
 
 private:
   // class

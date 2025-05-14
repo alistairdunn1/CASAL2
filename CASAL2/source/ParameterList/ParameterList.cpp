@@ -105,6 +105,7 @@ bool ParameterList::Add(const string& label, const string& value, const string& 
  */
 void ParameterList::Populate(shared_ptr<Model> model) {
   LOG_TRACE();
+  model_ = model;
   if (already_populated_) {
     LOG_CODE_ERROR() << "  if (already_populated_): " << parent_block_type_;
   }
@@ -377,6 +378,22 @@ void ParameterList::BindTable(const string& label, parameters::Table* table, con
   table->set_requires_columns(requires_columns);
   table->set_is_optional(optional);
   tables_[label] = table;
+}
+
+shared_ptr<Validator> ParameterList::Validate(const string& label) {
+  auto it = parameters_.find(label);
+  if (it == parameters_.end()) {
+    LOG_CODE_ERROR() << "The parameter " << label << " has not been bound";
+  }
+  return std::make_shared<Validator>(model_, this, it->second);
+}
+
+shared_ptr<ValidatorVector> ParameterList::ValidateVector(const string& label) {
+  auto it = parameters_.find(label);
+  if (it == parameters_.end()) {
+    LOG_CODE_ERROR() << "The parameter " << label << " has not been bound";
+  }
+  return std::make_shared<ValidatorVector>(model_, this, it->second);
 }
 
 } /* namespace niwa */

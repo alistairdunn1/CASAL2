@@ -60,13 +60,17 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <variant>
 #include <vector>
 
-#include "../ParameterList/Parameter.h"
-#include "../ParameterList/Parameters/Bindable.h"
-#include "../ParameterList/Parameters/BindableVector.h"
 #include "../ParameterList/Table.h"
 #include "../Utilities/NoCopy.h"
+#include "../Utilities/Types.h"
+#include "Parameter.h"
+#include "Parameters/Bindable.h"
+#include "Parameters/BindableVector.h"
+#include "Parameters/Validator.h"
+#include "Parameters/ValidatorVector.h"
 
 // Namespaces
 namespace niwa {
@@ -75,6 +79,9 @@ using niwa::parameterlist::Parameter;
 using niwa::parameters::Bindable;
 using niwa::parameters::BindableVector;
 using niwa::parameters::Table;
+using niwa::parameters::Validator;
+using niwa::parameters::ValidatorVector;
+using niwa::utilities::Double;
 using std::map;
 using std::shared_ptr;
 using std::string;
@@ -90,20 +97,27 @@ public:
   // Methods
   ParameterList() = default;
   virtual ~ParameterList();
-  bool               Add(const string& label, const string& value, const string& file_name, const unsigned& line_number);
-  bool               Add(const string& label, const vector<string>& values, const string& file_name, const unsigned& line_number);
-  Parameter*         Get(const string& label);
-  parameters::Table* GetTable(const string& label);
-  void               CopyFrom(const ParameterList& source, string parameter_label);
-  void               CopyFrom(const ParameterList& source, string parameter_label, const unsigned& value_index);
-  void               Clear();
+  bool                        Add(const string& label, const string& value, const string& file_name, const unsigned& line_number);
+  bool                        Add(const string& label, const vector<string>& values, const string& file_name, const unsigned& line_number);
+  Parameter*                  Get(const string& label);
+  parameters::Table*          GetTable(const string& label);
+  shared_ptr<Validator>       Validate(const string& label);
+  shared_ptr<ValidatorVector> ValidateVector(const string& label);
+  void                        CopyFrom(const ParameterList& source, string parameter_label);
+  void                        CopyFrom(const ParameterList& source, string parameter_label, const unsigned& value_index);
+  void                        Clear();
 
+  template <typename T>
+  Bindable<T>* Bind(const string& label, T* target, const string& description);
   template <typename T>
   Bindable<T>* Bind(const string& label, T* target, const string& description, const string& values);
   template <typename T>
   Bindable<T>* Bind(const string& label, T* target, const string& description, const string& values, T default_value);
+
   template <typename T>
   BindableVector<T>* Bind(const string& label, vector<T>* target, const string& description, const string& values, bool optional = false);
+  template <typename T>
+  BindableVector<T>* Bind(const string& label, vector<T>* target, const string& description);
 
   void BindTable(const string& label, parameters::Table* table, const string& description, const string& values, bool requires_columns = true, bool optional = false);
   void Populate(shared_ptr<Model> model);
@@ -123,6 +137,7 @@ public:
 
 private:
   // members
+  shared_ptr<Model>       model_;
   bool                    already_populated_   = false;
   string                  parent_block_type_   = "<unknown>";
   string                  defined_file_name_   = "<unknown>";

@@ -44,6 +44,14 @@ public:
   void           set_range(T lower_bound, T upper_bound, bool lower_inclusive = true, bool upper_inclusive = true);
   void           set_lower_bound(T lower_bound, bool inclusive = true);
   void           set_upper_bound(T upper_bound, bool inclusive = true);
+  void           set_default_value(T value) {
+    default_value_     = value;
+    has_default_value_ = true;
+    is_optional_       = true;
+  }
+  T          default_value() const { return default_value_; }
+  bool       has_default_value() const { return has_default_value_; }
+  vector<T>* target() { return target_; }
 
 private:
   // class
@@ -60,6 +68,8 @@ private:
   vector<T>* target_ = nullptr;
   vector<T>  allowed_values_;
   Range      range_;
+  bool       has_default_value_ = false;
+  T          default_value_;
 };
 
 } /* namespace parameters */

@@ -39,6 +39,16 @@ namespace niwa {
  * @return the parameter
  */
 template <typename T>
+Bindable<T>* ParameterList::Bind(const string& label, T* target, const string& description) {
+  if (parameters_.find(label) != parameters_.end()) {
+    LOG_CODE_ERROR() << "The parameter " << label << " has already been bound with the description " << description;
+  }
+  Bindable<T>* parameter = new Bindable<T>(label, target, description);
+  parameters_[label]     = parameter;
+  return parameter;
+}
+
+template <typename T>
 Bindable<T>* ParameterList::Bind(const string& label, T* target, const string& description, const string& values) {
   if (parameters_.find(label) != parameters_.end()) {
     LOG_CODE_ERROR() << "The parameter " << label << " has already been bound with the description " << description;
@@ -88,6 +98,16 @@ BindableVector<T>* ParameterList::Bind(const string& label, vector<T>* target, c
   BindableVector<T>* parameter = new BindableVector<T>(label, target, description);
   parameter->set_is_optional(optional);
   parameters_[label] = parameter;
+  return parameter;
+}
+
+template <typename T>
+BindableVector<T>* ParameterList::Bind(const string& label, vector<T>* target, const string& description) {
+  if (parameters_.find(label) != parameters_.end()) {
+    LOG_CODE_ERROR() << "The parameter " << label << " has already been bound with the description " << description;
+  }
+  BindableVector<T>* parameter = new BindableVector<T>(label, target, description);
+  parameters_[label]           = parameter;
   return parameter;
 }
 

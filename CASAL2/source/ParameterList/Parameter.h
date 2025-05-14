@@ -42,13 +42,14 @@ public:
   // Methods
   Parameter() = delete;
   Parameter(const string& label, const string& description);
-  virtual ~Parameter(){};
+  virtual ~Parameter() {};
   virtual void Bind() = 0;
   void         AddValue(const string& value);
   void         Clear() { values_.clear(); }
 
   // Accessors
   virtual vector<string> current_values() = 0;
+  string                 label() const { return label_; }
   void                   set_label(const string& label) { label_ = label; }
   void                   set_values(const vector<string>& values) { values_.assign(values.begin(), values.end()); }
   void                   set_value(const string& value) {
