@@ -46,10 +46,9 @@ Double NormalCDF(Double x, Double mu, Double sigma) {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Normal::Normal(shared_ptr<Model> model) : AgeingError(model) {
-  parameters_.Bind<Double>(PARAM_CV, &cv_, "CV of the misclassification matrix", "")->set_lower_bound(0.0, false);
-  parameters_
-      .Bind<unsigned>(PARAM_K, &k_, "k defines the minimum age of individuals which can be misclassified, i.e., individuals of age less than k have no ageing error", "", 0u)
-      ->set_lower_bound(0u);
+  parameters_.Bind<Double>(PARAM_CV, &cv_, "CV of the misclassification matrix");
+  parameters_.Bind<unsigned>(PARAM_K, &k_, "k defines the minimum age of individuals which can be misclassified, i.e., individuals of age less than k have no ageing error")
+      ->set_default_value(0u);
 
   RegisterAsAddressable(PARAM_CV, &cv_);
 }
@@ -61,11 +60,8 @@ Normal::Normal(shared_ptr<Model> model) : AgeingError(model) {
  * Note: all parameters are populated from configuration files
  */
 void Normal::DoValidate() {
-  if (cv_ <= 0.0)
-    LOG_ERROR_P(PARAM_CV) << "CV value (" << AS_DOUBLE(cv_) << ") cannot be less than or equal to 0.0";
-
-  if (k_ > max_age_)
-    LOG_ERROR_P(PARAM_K) << "K value (" << k_ << ") cannot be greater than the maximum age in the model (" << max_age_ << ")";
+  parameters_.Validate(PARAM_CV)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_K)->IsAge();
 }
 
 /**

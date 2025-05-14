@@ -31,9 +31,9 @@ public:
 
 protected:
   // methods
-  void DoValidate() override final{};
+  void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
 
 private:
   // members

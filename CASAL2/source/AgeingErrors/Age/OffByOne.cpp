@@ -19,9 +19,9 @@ namespace ageingerrors {
 // clang-format off
 // Constructor
 OffByOne::OffByOne(shared_ptr<Model> model) : AgeingError(model) {
-  parameters_.Bind<Double>(PARAM_P1, &p1_, "The proportion misclassified as one year younger, e.g., the proportion of age k individuals that were misclassified as age (k-1)", "")->set_range(0.0, 1.0, true, true);
-  parameters_.Bind<Double>(PARAM_P2, &p2_, "The proportion misclassified as one year older, e.g., the proportion of age k individuals that were misclassified as age (k+1))", "")->set_range(0.0, 1.0, true, true);
-  parameters_.Bind<unsigned>(PARAM_K, &k_, "The minimum age of animals which can be misclassified, i.e., animals of age less than k are assumed to be correctly classified", "", 0u)->set_lower_bound(0u, true);
+  parameters_.Bind<Double>(PARAM_P1, &p1_, "The proportion misclassified as one year younger, e.g., the proportion of age k individuals that were misclassified as age (k-1)");
+  parameters_.Bind<Double>(PARAM_P2, &p2_, "The proportion misclassified as one year older, e.g., the proportion of age k individuals that were misclassified as age (k+1))");
+  parameters_.Bind<unsigned>(PARAM_K, &k_, "The minimum age of animals which can be misclassified, i.e., animals of age less than k are assumed to be correctly classified")->set_default_value(0u);
   RegisterAsAddressable(PARAM_P1, &p1_);
   RegisterAsAddressable(PARAM_P2, &p2_);
 }
@@ -34,8 +34,9 @@ OffByOne::OffByOne(shared_ptr<Model> model) : AgeingError(model) {
  * Note: all parameters are populated from configuration files
  */
 void OffByOne::DoValidate() {
-  if (k_ > max_age_)
-    LOG_ERROR_P(PARAM_K) << "value (" << k_ << ") cannot be greater than the maximum age in the model (" << max_age_ << ")";
+  parameters_.Validate(PARAM_P1)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_P2)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_K)->IsAge();
 }
 
 /**
