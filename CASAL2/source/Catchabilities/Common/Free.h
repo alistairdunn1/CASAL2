@@ -27,8 +27,8 @@ public:
   Free() = delete;
   explicit Free(shared_ptr<Model> model);
   virtual ~Free() = default;
-  void DoValidate() final{};
-  void DoBuild() final{};
+  void DoValidate() final;
+  void DoBuild() final {};
 
 private:
   // members

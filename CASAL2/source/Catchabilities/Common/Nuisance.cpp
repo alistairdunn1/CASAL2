@@ -34,8 +34,8 @@ namespace utils = niwa::utilities;
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Nuisance::Nuisance(shared_ptr<Model> model) : Catchability(model) {
-  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The upper bound for nuisance catchability", "");
-  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The lower bound for nuisance catchability", "");
+  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The upper bound for nuisance catchability");
+  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The lower bound for nuisance catchability");
 
   RegisterAsAddressable(PARAM_Q, &q_, addressable::kLookup);
 }
@@ -52,7 +52,7 @@ void Nuisance::DoBuild() {
   LOG_FINEST() << "Find an @additional_prior command for parameter " << parameter;
 
   bool has_prior = false;
-  has_prior = model_->managers()->additional_prior()->HasAdditionalPriorExcludingRatioType(parameter);
+  has_prior      = model_->managers()->additional_prior()->HasAdditionalPriorExcludingRatioType(parameter);
 
   LOG_FINE() << " has prior = " << has_prior;
   if (has_prior) {
@@ -64,7 +64,7 @@ void Nuisance::DoBuild() {
     prior_type_ = additional_prior->type();
     LOG_FINEST() << "Type of prior on Nuisance q = " << prior_type_;
 
-    if(prior_type_ != PARAM_LOGNORMAL && prior_type_ != PARAM_NONE && prior_type_ != PARAM_UNIFORM_LOG)
+    if (prior_type_ != PARAM_LOGNORMAL && prior_type_ != PARAM_NONE && prior_type_ != PARAM_UNIFORM_LOG)
       LOG_ERROR_P(PARAM_LABEL) << "the additional prior type needs to be either 'none', 'lognormal' or 'uniform_log'";
 
     // Perhaps set value to the mean of the bounds for now if the estimate system cannot handle an uninitialised estimate
@@ -242,15 +242,13 @@ void Nuisance::CalculateQ(map<unsigned, vector<observations::Comparison> >& comp
  * Verify this objects
  */
 void Nuisance::DoVerify(shared_ptr<Model> model) {
-  if(observation_labels_.size() == 0)
+  if (observation_labels_.size() == 0)
     LOG_WARNING() << "The @catchability block " << label_ << " is not assigned to an @observation.";
-  if(observation_labels_.size() > 1) {
+  if (observation_labels_.size() > 1) {
     string all_observation_labels;
-    for(unsigned i = 0; i < observation_labels_.size(); ++i)
-      all_observation_labels = all_observation_labels + string(", ") + observation_labels_[i];
+    for (unsigned i = 0; i < observation_labels_.size(); ++i) all_observation_labels = all_observation_labels + string(", ") + observation_labels_[i];
     LOG_VERIFY() << "The @catchability block " << label_ << " is assigned to more than one @observation. These were " << all_observation_labels;
   }
-
 }
 
 } /* namespace catchabilities */

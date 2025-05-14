@@ -31,8 +31,8 @@ public:
   // members
   Nuisance() = delete;
   explicit Nuisance(shared_ptr<Model> model);
-  virtual ~Nuisance(){};
-  void DoValidate() final{};
+  virtual ~Nuisance() {};
+  void DoValidate() final {};
   void DoBuild() final;
   void DoVerify(shared_ptr<Model> model) final;
 

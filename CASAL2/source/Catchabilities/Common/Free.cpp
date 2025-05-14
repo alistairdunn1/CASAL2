@@ -12,8 +12,7 @@
 #include "Free.h"
 
 // namespaces
-namespace niwa {
-namespace catchabilities {
+namespace niwa::catchabilities {
 
 /**
  * Default constructor
@@ -26,10 +25,16 @@ namespace catchabilities {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Free::Free(shared_ptr<Model> model) : Catchability(model) {
-  parameters_.Bind<Double>(PARAM_Q, &q_, "The value of the catchability", "")->set_lower_bound(0.0);
+  parameters_.Bind<Double>(PARAM_Q, &q_, "The value of the catchability");
 
   RegisterAsAddressable(PARAM_Q, &q_);
 }
 
-} /* namespace catchabilities */
-} /* namespace niwa */
+/**
+ * Validate our parameters
+ */
+void Free::DoValidate() {
+  parameters_.Validate(PARAM_Q)->GreaterThanOrEqualTo(0.0);
+}
+
+}  // namespace niwa::catchabilities
