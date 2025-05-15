@@ -33,23 +33,38 @@ namespace math = niwa::utilities::math;
  */
 MCMC::MCMC(shared_ptr<Model> model) : model_(model) {
   // clang-format off
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the MCMC", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The MCMC method", "", PARAM_RANDOMWALK)->set_allowed_values({PARAM_HAMILTONIAN, PARAM_RANDOMWALK});
-  parameters_.Bind<unsigned>(PARAM_LENGTH, &length_, "The number of iterations for the MCMC (including the burn in period)", "")->set_lower_bound(1);
-  parameters_.Bind<unsigned>(PARAM_BURN_IN, &burn_in_, "The number of iterations for the burn_in period of the MCMC", "", 0u)->set_lower_bound(0);
-  parameters_.Bind<bool>(PARAM_ACTIVE, &active_, "Indicates if this is the active MCMC algorithm", "", true);
-  parameters_.Bind<double>(PARAM_STEP_SIZE, &step_size_, "Initial step-size (as a multiplier of the approximate covariance matrix)", "", 0)->set_lower_bound(0);
-  parameters_.Bind<double>(PARAM_START, &start_, "The covariance multiplier for the starting point of the MCMC", "", 0.0)->set_lower_bound(0.0);
-  parameters_.Bind<bool>(PARAM_PARAMETER_AT_BOUND, &fix_parameters_at_bounds_, "Adjust the start for parameters at bounds as a random uniform jump between the bounds", "", false);
-  parameters_.Bind<unsigned>(PARAM_KEEP, &keep_, "The spacing between recorded values in the MCMC", "", 1u)->set_lower_bound(1u);
-  parameters_.Bind<double>(PARAM_MAX_CORRELATION, &max_correlation_, "The maximum absolute correlation in the covariance matrix of the proposal distribution", "", 0.8)->set_range(0.0, 1.0, false, true);
-  parameters_.Bind<string>(PARAM_COVARIANCE_ADJUSTMENT_METHOD, &correlation_method_, "The method for adjusting small variances in the covariance proposal matrix", "", PARAM_CORRELATION)->set_allowed_values({PARAM_COVARIANCE, PARAM_CORRELATION, PARAM_NONE});
-  parameters_.Bind<double>(PARAM_CORRELATION_ADJUSTMENT_DIFF, &correlation_diff_, "The minimum non-zero variance times the range of the bounds in the covariance matrix of the proposal distribution", "", 0.0001)->set_lower_bound(0.0, false);
-  parameters_.Bind<string>(PARAM_PROPOSAL_DISTRIBUTION, &proposal_distribution_, "The shape of the proposal distribution (either the t or the normal distribution)", "", PARAM_T)->set_allowed_values({PARAM_NORMAL, PARAM_T});
-  parameters_.Bind<unsigned>(PARAM_DF, &df_, "The degrees of freedom of the multivariate t proposal distribution", "", 4)->set_lower_bound(1, false);
-  parameters_.Bind<unsigned>(PARAM_ADAPT_STEPSIZE_AT, &adapt_step_size_, "The iteration numbers in which to check and resize the MCMC stepsize", "", true)->set_lower_bound(0);
-  parameters_.Bind<string>(PARAM_ADAPT_STEPSIZE_METHOD, &adapt_stepsize_method_, "The method to use to adapt the step size", "", PARAM_RATIO)->set_allowed_values({PARAM_RATIO, PARAM_DOUBLE_HALF});
-  parameters_.Bind<unsigned>(PARAM_ADAPT_COVARIANCE_AT, &adapt_covariance_matrix_, "The iteration number in which to adapt the covariance matrix", "", 0u)->set_lower_bound(0);
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the MCMC");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The MCMC method")
+    ->set_default_value(PARAM_RANDOMWALK);
+  parameters_.Bind<unsigned>(PARAM_LENGTH, &length_, "The number of iterations for the MCMC (including the burn in period)");
+  parameters_.Bind<unsigned>(PARAM_BURN_IN, &burn_in_, "The number of iterations for the burn_in period of the MCMC")
+    ->set_default_value(0u);
+  parameters_.Bind<bool>(PARAM_ACTIVE, &active_, "Indicates if this is the active MCMC algorithm")
+    ->set_default_value(true);
+  parameters_.Bind<double>(PARAM_STEP_SIZE, &step_size_, "Initial step-size (as a multiplier of the approximate covariance matrix)")
+    ->set_default_value(0.0);
+  parameters_.Bind<double>(PARAM_START, &start_, "The covariance multiplier for the starting point of the MCMC")
+    ->set_default_value(0.0);
+  parameters_.Bind<bool>(PARAM_PARAMETER_AT_BOUND, &fix_parameters_at_bounds_, "Adjust the start for parameters at bounds as a random uniform jump between the bounds")
+    ->set_default_value(false);
+  parameters_.Bind<unsigned>(PARAM_KEEP, &keep_, "The spacing between recorded values in the MCMC")
+    ->set_default_value(1u);
+  parameters_.Bind<double>(PARAM_MAX_CORRELATION, &max_correlation_, "The maximum absolute correlation in the covariance matrix of the proposal distribution")
+    ->set_default_value(0.8);
+  parameters_.Bind<string>(PARAM_COVARIANCE_ADJUSTMENT_METHOD, &correlation_method_, "The method for adjusting small variances in the covariance proposal matrix")
+    ->set_default_value(PARAM_CORRELATION);
+  parameters_.Bind<double>(PARAM_CORRELATION_ADJUSTMENT_DIFF, &correlation_diff_, "The minimum non-zero variance times the range of the bounds in the covariance matrix of the proposal distribution")
+    ->set_default_value(0.0001);
+  parameters_.Bind<string>(PARAM_PROPOSAL_DISTRIBUTION, &proposal_distribution_, "The shape of the proposal distribution (either the t or the normal distribution)")
+    ->set_default_value(PARAM_T);
+  parameters_.Bind<unsigned>(PARAM_DF, &df_, "The degrees of freedom of the multivariate t proposal distribution")
+    ->set_default_value(4u);
+  parameters_.Bind<unsigned>(PARAM_ADAPT_STEPSIZE_AT, &adapt_step_size_, "The iteration numbers in which to check and resize the MCMC stepsize")
+    ->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_ADAPT_STEPSIZE_METHOD, &adapt_stepsize_method_, "The method to use to adapt the step size")
+    ->set_default_value(PARAM_RATIO);
+  parameters_.Bind<unsigned>(PARAM_ADAPT_COVARIANCE_AT, &adapt_covariance_matrix_, "The iteration number in which to adapt the covariance matrix")
+    ->set_default_value(0u);
   // clang-format on
 }
 #ifdef USE_AUTODIFF
@@ -83,17 +98,19 @@ bool MCMC::WithinBounds() {
  */
 void MCMC::Validate() {
   parameters_.Populate(model_);
-
-  if (burn_in_ > length_)
-    LOG_ERROR_P(PARAM_BURN_IN) << "(" << burn_in_ << ") cannot be greater than the length of the MCMC (" << length_ << ")";
-
-  for (unsigned adapt : adapt_step_size_) {
-    if (adapt > burn_in_)
-      LOG_ERROR_P(PARAM_ADAPT_STEPSIZE_AT) << "(" << adapt << ") cannot be greater than the length of the burn in(" << burn_in_ << ")";
-  }
-  if (adapt_covariance_matrix_ > burn_in_)
-    LOG_ERROR_P(PARAM_ADAPT_COVARIANCE_AT) << "(" << adapt_covariance_matrix_ << ") cannot be greater than the length of the burn in(" << burn_in_ << ")";
-
+  parameters_.Validate(PARAM_LENGTH)->GreaterThan(0u);
+  parameters_.Validate(PARAM_BURN_IN)->GreaterThanOrEqualTo(0u)->LessThanOrEqualToParameter(PARAM_LENGTH);
+  parameters_.Validate(PARAM_STEP_SIZE)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_START)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_KEEP)->GreaterThanOrEqualTo(1u);
+  parameters_.Validate(PARAM_MAX_CORRELATION)->GreaterThan(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_COVARIANCE_ADJUSTMENT_METHOD)->IsInList({PARAM_COVARIANCE, PARAM_CORRELATION, PARAM_NONE});
+  parameters_.Validate(PARAM_CORRELATION_ADJUSTMENT_DIFF)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_PROPOSAL_DISTRIBUTION)->IsInList({PARAM_T, PARAM_NORMAL});
+  parameters_.Validate(PARAM_DF)->GreaterThan(1u);
+  parameters_.ValidateVector(PARAM_ADAPT_STEPSIZE_AT)->GreaterThan(0u)->LessThanOrEqualToParameter(PARAM_BURN_IN);
+  parameters_.Validate(PARAM_ADAPT_STEPSIZE_METHOD)->IsInList({PARAM_RATIO, PARAM_DOUBLE_HALF});
+  parameters_.Validate(PARAM_ADAPT_COVARIANCE_AT)->GreaterThanOrEqualTo(0u)->LessThanOrEqualToParameter(PARAM_BURN_IN);
   DoValidate();
 }
 
