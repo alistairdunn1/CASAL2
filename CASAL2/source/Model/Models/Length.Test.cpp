@@ -93,8 +93,8 @@ max_age 1
  * if users supply min_age Casal2 will stop
  */
 TEST_F(InternalEmptyModel, length_model_with_min_age) {
-  AddConfigurationLine(length_model_with_max_age, __FILE__, 51);
-  AddConfigurationLine(core_model, __FILE__, 51);
+  AddConfigurationLine(length_model_with_max_age, __FILE__, 79);
+  AddConfigurationLine(core_model, __FILE__, 29);
   LoadConfiguration();
   EXPECT_THROW(model_->Start(RunMode::kBasic), std::string);
 }
