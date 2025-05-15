@@ -25,12 +25,12 @@ namespace util = niwa::utilities;
  * Default constructor
  */
 Profile::Profile(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the profile", "", "");
-  parameters_.Bind<unsigned>(PARAM_STEPS, &steps_, "The number of steps between the lower and upper bound", "")->set_lower_bound(2, true);
-  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower value of the range", "");
-  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper value of the range", "");
-  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The system parameter to profile", "");
-  parameters_.Bind<string>(PARAM_SAME, &same_labels_, "List of other parameters that are constrained to have the same value as this parameter", "", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the profile")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_STEPS, &steps_, "The number of steps between the lower and upper bound");
+  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower value of the range");
+  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper value of the range");
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The system parameter to profile");
+  parameters_.Bind<string>(PARAM_SAME, &same_labels_, "List of other parameters that are constrained to have the same value as this parameter")->set_is_optional(true);
 }
 
 /**
@@ -38,6 +38,8 @@ Profile::Profile(shared_ptr<Model> model) : model_(model) {
  */
 void Profile::Validate() {
   parameters_.Populate(model_);
+  parameters_.Validate(PARAM_STEPS)->GreaterThanOrEqualTo(2u);
+  parameters_.Validate(PARAM_LOWER_BOUND)->LessThanParameter(PARAM_UPPER_BOUND);
 }
 
 /**
@@ -48,7 +50,6 @@ void Profile::Build() {
   if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kProfile, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "This parameter cannot be used in an @profile block. Error: " << error;
   }
-
 
   target_         = model_->objects().GetAddressable(parameter_);
   original_value_ = *target_;
@@ -62,8 +63,8 @@ void Profile::Build() {
         LOG_FATAL_P(PARAM_SAME) << "This parameter cannot be used in an @profile block. Error: " << error;
       }
 
-      auto same_target         = model_->objects().GetAddressable(same);
-      if(!same_target) {
+      auto same_target = model_->objects().GetAddressable(same);
+      if (!same_target) {
         LOG_FATAL_P(PARAM_SAME) << "Could nof find " << same << " does it exist, or in the right format?";
       }
       sames_.push_back(same_target);
@@ -74,13 +75,14 @@ void Profile::Build() {
 /**
  * Verify
  */
-void Profile::Verify(shared_ptr<Model> model){
+void Profile::Verify(shared_ptr<Model> model) {
   LOG_MEDIUM() << "Verify ";
   LOG_FINE() << "check if used for transformation";
-  if (model->objects().IsParameterUsedFor(parameter_ , addressable::kTransformation)) {
-    LOG_FATAL_P(PARAM_PARAMETER) << "Found an @parameter_transformation block for " << parameter_ << ". You cannot have a @parameter_transformation and a @profile for the same parameter.";
+  if (model->objects().IsParameterUsedFor(parameter_, addressable::kTransformation)) {
+    LOG_FATAL_P(PARAM_PARAMETER) << "Found an @parameter_transformation block for " << parameter_
+                                 << ". You cannot have a @parameter_transformation and a @profile for the same parameter.";
   }
-  if (model->objects().IsParameterUsedFor(parameter_ , addressable::kTimeVarying)) {
+  if (model->objects().IsParameterUsedFor(parameter_, addressable::kTimeVarying)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "Found an @time_varying block for " << parameter_ << ". You cannot have a @time_varying and a @profile for the same parameter.";
   }
 }
