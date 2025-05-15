@@ -23,18 +23,59 @@ namespace niwa::parameters {
 using niwa::parameters::Bindable;
 
 /**
+ *
+ */
+BindableVector<Double>* ValidatorVector::GetParameterAsVectorDouble() {
+  auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorDouble " << parameter_->label() << " is not a vector<double> type";
+  }
+  return param;
+}
+
+/**
+ * This method will return the current parameter as a Bindaable storing an unsigned
+ */
+BindableVector<unsigned>* ValidatorVector::GetParameterAsVectorUnsigned() {
+  auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorUnsigned " << parameter_->label() << " is not a vector<unsigned> type";
+  }
+  return param;
+}
+
+/**
  * This method will check that the value of the parameter is greater than the value passed
  */
 shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(Double value) {
-  LOG_CODE_ERROR() << "ValidatorVector::GreaterThan is not implemented";
-  auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThan " << parameter_->label() << " is not a double type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
-  Double source = *param->target();
-  if (source <= value) {
-    LOG_ERROR() << this->parameter_->location() << "parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be greater than "
-                << AS_DOUBLE(value);
+
+  auto* param = GetParameterAsVectorDouble();
+  for (auto& val : *param->target()) {
+    if (val <= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be greater than "
+                  << AS_DOUBLE(value);
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the value of the parameter is greater than the value passed
+ */
+shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(unsigned value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto* param = GetParameterAsVectorUnsigned();
+  for (auto& val : *param->target()) {
+    if (val <= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be greater than " << value;
+    }
   }
 
   return shared_from_this();
@@ -45,6 +86,10 @@ shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(Double value) {
  * in as the parameter
  */
 shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(Double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
   auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
   if (param == nullptr) {
     LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualTo " << parameter_->label() << " is not a vector<double> type";
@@ -60,6 +105,31 @@ shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(Double value) 
   return shared_from_this();
 }
 
+/**
+ * This method will check that the value of the parameter is greater than or equal to the value passed
+ */
+shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(unsigned value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualTo " << parameter_->label() << " is not an unsigned type";
+  }
+
+  for (auto& val : *param->target()) {
+    if (val < value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be greater than or equal to " << value;
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
 shared_ptr<ValidatorVector> ValidatorVector::LessThan(Double value) {
   LOG_CODE_ERROR() << "ValidatorVector::LessThan is not implemented";
   auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
@@ -111,6 +181,50 @@ shared_ptr<ValidatorVector> ValidatorVector::IsInList(initializer_list<string> l
   }
 
   LOG_ERROR() << this->parameter_->location() << "value (" << source << ") is invalid. Must be in the list";
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualToParameter(const string& label) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    // handle for when the parameters are both double
+    auto* param2 = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << label << " is not a double type";
+    }
+
+    Double target = *param2->target();
+    for (auto& source : *param->target()) {
+      if (source > target) {
+        LOG_ERROR() << this->parameter_->location() << " parameter " << param->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to " << label
+                    << " (" << AS_DOUBLE(target) << ")";
+      }
+    }
+
+  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    // handle for when the parameters are both unsigned
+    auto* param2 = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << label << " is not an unsigned type";
+    }
+    unsigned target = *param2->target();
+    for (auto& source : *param->target()) {
+      if (source > target) {
+        LOG_ERROR() << this->parameter_->location() << " parameter " << param->label() << " value (" << source << ") is invalid. Must be less than or equal to " << label << " ("
+                    << target << ")";
+      }
+    }
+
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << parameter_->label() << " is not a double/unsigned type";
+  }
+
   return shared_from_this();
 }
 

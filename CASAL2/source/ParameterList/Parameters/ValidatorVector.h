@@ -15,6 +15,7 @@
 #include <string>
 
 #include "../../Utilities/Types.h"
+#include "BindableVector.h"
 
 // namespaces
 namespace niwa {
@@ -40,17 +41,18 @@ public:
   ~ValidatorVector() {};
 
   shared_ptr<ValidatorVector> GreaterThan(Double value);
+  shared_ptr<ValidatorVector> GreaterThan(unsigned value);
   shared_ptr<ValidatorVector> GreaterThanOrEqualTo(Double value);
+  shared_ptr<ValidatorVector> GreaterThanOrEqualTo(unsigned value);
   shared_ptr<ValidatorVector> LessThan(Double value);
   shared_ptr<ValidatorVector> LessThanOrEqualTo(Double value);
-  shared_ptr<ValidatorVector> LessThanParameter(const string& label);
-  shared_ptr<ValidatorVector> LessThanOrEqualToParameter(const string& label);
-  shared_ptr<ValidatorVector> GreaterThanOrEqualToModelMinAge();
-  shared_ptr<ValidatorVector> LessThanOrEqualToModelMaxAge();
-  shared_ptr<ValidatorVector> IsAge();
   shared_ptr<ValidatorVector> IsInList(initializer_list<string> list);
+  shared_ptr<ValidatorVector> LessThanOrEqualToParameter(const string& label);
 
 protected:
+  BindableVector<Double>*   GetParameterAsVectorDouble();
+  BindableVector<unsigned>* GetParameterAsVectorUnsigned();
+
   shared_ptr<Model>               model_;
   niwa::ParameterList*            parameters_;
   niwa::parameterlist::Parameter* parameter_;

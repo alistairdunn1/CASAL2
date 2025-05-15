@@ -15,6 +15,7 @@
 #include <string>
 
 #include "../../Utilities/Types.h"
+#include "Bindable.h"
 
 // namespaces
 namespace niwa {
@@ -40,7 +41,9 @@ public:
   ~Validator() {};
 
   shared_ptr<Validator> GreaterThan(Double value);
+  shared_ptr<Validator> GreaterThan(unsigned value);
   shared_ptr<Validator> GreaterThanOrEqualTo(Double value);
+  shared_ptr<Validator> GreaterThanOrEqualTo(unsigned value);
   shared_ptr<Validator> LessThan(Double value);
   shared_ptr<Validator> LessThanOrEqualTo(Double value);
   shared_ptr<Validator> LessThanParameter(const string& label);
@@ -51,6 +54,9 @@ public:
   shared_ptr<Validator> IsInList(initializer_list<string> list);
 
 protected:
+  Bindable<Double>*   GetParameterAsDouble();
+  Bindable<unsigned>* GetParameterAsUnsigned();
+
   shared_ptr<Model>               model_;
   niwa::ParameterList*            parameters_;
   niwa::parameterlist::Parameter* parameter_;
