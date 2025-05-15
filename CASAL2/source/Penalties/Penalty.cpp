@@ -22,8 +22,8 @@ namespace niwa {
  * Default Constructor
  */
 Penalty::Penalty(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the penalty", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of penalty", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the penalty");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of penalty")->set_default_value(PARAM_PROCESS);
 }
 
 /**

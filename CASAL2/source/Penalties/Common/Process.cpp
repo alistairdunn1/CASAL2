@@ -25,10 +25,17 @@ namespace penalties {
  * Default constructor
  */
 Process::Process(shared_ptr<Model> model) : Penalty(model) {
-  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "The penalty multiplier", "", 1.0);
-  parameters_.Bind<bool>(PARAM_LOG_SCALE, &log_scale_, "Indicates if the sums of squares is calculated on the log scale", "", false);
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "The penalty multiplier")->set_default_value(1.0);
+  parameters_.Bind<bool>(PARAM_LOG_SCALE, &log_scale_, "Indicates if the sums of squares is calculated on the log scale")->set_default_value(false);
 
   has_score_ = false;
+}
+
+/**
+ * Validate the parameters
+ */
+void Process::DoValidate() {
+  parameters_.Validate(PARAM_MULTIPLIER)->GreaterThan(0.0);
 }
 
 /**
@@ -44,10 +51,9 @@ void Process::Trigger(Double value_1, Double value_2) {
     value_1 = log(utilities::math::ZeroFun(value_1));
     value_2 = log(utilities::math::ZeroFun(value_2));
   }
-  //Double value = (value_1 - value_2) * (value_1 - value_2) * multiplier_;
+  // Double value = (value_1 - value_2) * (value_1 - value_2) * multiplier_;
   score_ += (value_1 - value_2) * (value_1 - value_2) * multiplier_;
 }
-
 
 } /* namespace penalties */
 } /* namespace niwa */
