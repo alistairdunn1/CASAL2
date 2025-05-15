@@ -19,10 +19,9 @@ namespace lengthweights {
  * Default constructor
  */
 Basic::Basic(shared_ptr<Model> model) : LengthWeight(model) {
-  parameters_.Bind<Double>(PARAM_A, &a_, "The $a$ parameter ($W = a L^b$)", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_B, &b_, "The $b$ parameter ($W = a L^b$)", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<string>(PARAM_UNITS, &units_, "The units for weights (grams, kilograms (kgs), or tonnes)", "")->set_allowed_values({PARAM_TONNES, PARAM_KGS, PARAM_KILOGRAMS, PARAM_GRAMS});
-  //parameters_.Bind<Double>(PARAM_LENGTH_BIN_PROPORTION, &length_bin_proportion_, "The proportion between length bins when calculating mean weight calculations", "", 0.5)->set_partition_type(PartitionType::kLength);
+  parameters_.Bind<Double>(PARAM_A, &a_, "The $a$ parameter ($W = a L^b$)");
+  parameters_.Bind<Double>(PARAM_B, &b_, "The $b$ parameter ($W = a L^b$)");
+  parameters_.Bind<string>(PARAM_UNITS, &units_, "The units for weights (grams, kilograms (kgs), or tonnes)");
 
   RegisterAsAddressable(PARAM_B, &b_);
   RegisterAsAddressable(PARAM_A, &a_);
@@ -34,10 +33,9 @@ Basic::Basic(shared_ptr<Model> model) : LengthWeight(model) {
  * Check that neither 'a' or 'b' are less than or equal to 0.0
  */
 void Basic::DoValidate() {
-  if (a_ <= 0.0)
-    LOG_ERROR_P(PARAM_A) << " (" << AS_DOUBLE(a_) << ") cannot be less than or equal to 0.0";
-  if (b_ <= 0.0)
-    LOG_ERROR_P(PARAM_B) << " (" << AS_DOUBLE(b_) << ") cannot be less than or equal to 0.0";
+  parameters_.Validate(PARAM_A)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_B)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_UNITS)->IsInList({PARAM_TONNES, PARAM_KGS, PARAM_KILOGRAMS, PARAM_GRAMS});
 }
 
 /**

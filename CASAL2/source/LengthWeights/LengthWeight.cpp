@@ -23,8 +23,8 @@ namespace niwa {
  * Default constructor
  */
 LengthWeight::LengthWeight(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the length-weight relationship", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of the length-weight relationship", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the length-weight relationship");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of the length-weight relationship");
 }
 
 /**
