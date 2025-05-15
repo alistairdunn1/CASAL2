@@ -21,13 +21,19 @@ namespace estimates {
  * Default constructor
  */
 NormalLog::NormalLog(shared_ptr<Model> model) : Estimate(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "The normal-log prior mean (mu) parameter", "");
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The normal-log prior variance (standard deviation) parameter", "")->set_lower_bound(0.0, false);
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "The normal-log prior mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The normal-log prior variance (standard deviation) parameter");
 
   RegisterAsAddressable(PARAM_MU, &mu_);
   RegisterAsAddressable(PARAM_SIGMA, &sigma_);
 }
 
+/**
+ * Validate the parameters from the configuration file
+ */
+void NormalLog::DoValidate() {
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+}
 /**
  * Calculate and return the score
  * @return The score
@@ -42,11 +48,11 @@ Double NormalLog::GetScore() {
  *
  * @return vector of mu and sigma
  */
-vector<Double>   NormalLog::GetPriorValues() {
+vector<Double> NormalLog::GetPriorValues() {
   vector<Double> result = {mu_, sigma_};
   return result;
 }
-vector<string>   NormalLog::GetPriorLabels() {
+vector<string> NormalLog::GetPriorLabels() {
   vector<string> result = {PARAM_MU, PARAM_SIGMA};
   return result;
 }

@@ -32,11 +32,11 @@ public:
   NormalLog() = delete;
   explicit NormalLog(shared_ptr<Model> model);
   virtual ~NormalLog() = default;
-  void   DoValidate() override final{};
-  Double GetScore() override final;
-  vector<Double>   GetPriorValues() override final;
-  vector<string>   GetPriorLabels() override final;
-  
+  void           DoValidate() override final;
+  Double         GetScore() override final;
+  vector<Double> GetPriorValues() override final;
+  vector<string> GetPriorLabels() override final;
+
 private:
   // Members
   Double mu_;

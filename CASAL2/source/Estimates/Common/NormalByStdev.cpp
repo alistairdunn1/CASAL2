@@ -21,15 +21,23 @@ namespace estimates {
  * Default constructor
  */
 NormalByStdev::NormalByStdev(shared_ptr<Model> model) : Estimate(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "The normal prior mean (mu) parameter", "");
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The normal variance (sigma) parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<bool>(
-      PARAM_LOGNORMAL_TRANSFORMATION, &assume_lognormal_,
-      "Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information",
-      "", false);
+  // clang-format off
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "The normal prior mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The normal variance (sigma) parameter");
+  parameters_.Bind<bool>(PARAM_LOGNORMAL_TRANSFORMATION, &assume_lognormal_,
+          "Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information")
+    ->set_default_value(false);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_MU, &mu_);
   RegisterAsAddressable(PARAM_SIGMA, &sigma_);
+}
+
+/**
+ * Validate the parameters from the configuration file
+ */
+void NormalByStdev::DoValidate() {
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
 }
 
 /**

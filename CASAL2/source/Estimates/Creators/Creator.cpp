@@ -33,15 +33,15 @@ namespace utils = niwa::utilities;
  *
  */
 Creator::Creator(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "TThe label of the estimate", "", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The prior type for the estimate", "");
-  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the variable to estimate in the model", "");
-  parameters_.Bind<double>(PARAM_LOWER_BOUND, &lower_bounds_, "The lower bound for the parameter", "");
-  parameters_.Bind<double>(PARAM_UPPER_BOUND, &upper_bounds_, "The upper bound for the parameter", "");
-  //  parameters_.Bind<string>(PARAM_PRIOR, &prior_label_, "TBA", "", "");
-  parameters_.Bind<string>(PARAM_SAME, &same_labels_, "The list of parameters that are constrained to have the same value as this parameter", "", "");
-  parameters_.Bind<string>(PARAM_ESTIMATION_PHASE, &estimation_phase_, "The estimation phase", "", "");
-  parameters_.Bind<bool>(PARAM_MCMC_FIXED, &mcmc_fixed_, "Indicates if this parameter is estimated at the point estimate but fixed during MCMC estimation run", "", false);
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "TThe label of the estimate")->set_default_value("");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The prior type for the estimate");
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the variable to estimate in the model");
+  parameters_.Bind<double>(PARAM_LOWER_BOUND, &lower_bounds_, "The lower bound for the parameter");
+  parameters_.Bind<double>(PARAM_UPPER_BOUND, &upper_bounds_, "The upper bound for the parameter");
+  parameters_.Bind<string>(PARAM_SAME, &same_labels_, "The list of parameters that are constrained to have the same value as this parameter")->set_default_value("");
+  parameters_.Bind<string>(PARAM_ESTIMATION_PHASE, &estimation_phase_, "The estimation phase")->set_default_value("");
+  parameters_.Bind<bool>(PARAM_MCMC_FIXED, &mcmc_fixed_, "Indicates if this parameter is estimated at the point estimate but fixed during MCMC estimation run")
+      ->set_default_value(false);
 }
 
 /**

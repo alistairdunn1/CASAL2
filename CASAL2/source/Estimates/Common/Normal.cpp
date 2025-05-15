@@ -21,11 +21,18 @@ namespace estimates {
  * Default constructor
  */
 Normal::Normal(shared_ptr<Model> model) : Estimate(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "The normal prior mean (mu) parameter", "");
-  parameters_.Bind<Double>(PARAM_CV, &cv_, "The normal variance (standard deviation) parameter", "")->set_lower_bound(0.0, false);
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "The normal prior mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_CV, &cv_, "The normal variance (standard deviation) parameter");
 
   RegisterAsAddressable(PARAM_MU, &mu_);
   RegisterAsAddressable(PARAM_CV, &cv_);
+}
+
+/**
+ * Validate the parameters from the configuration file
+ */
+void Normal::DoValidate() {
+  parameters_.Validate(PARAM_CV)->GreaterThan(0.0);
 }
 
 /**

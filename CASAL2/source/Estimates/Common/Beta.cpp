@@ -21,10 +21,10 @@ namespace estimates {
  * Default constructor
  */
 Beta::Beta(shared_ptr<Model> model) : Estimate(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "Beta prior  mean (mu) parameter", "");
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "Beta prior variance (sigma) parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A, &a_, "Beta prior lower bound of the range (A) parameter", "");
-  parameters_.Bind<Double>(PARAM_B, &b_, "Beta prior upper bound of the range (B) parameter", "");
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "Beta prior  mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "Beta prior variance (sigma) parameter");
+  parameters_.Bind<Double>(PARAM_A, &a_, "Beta prior lower bound of the range (A) parameter");
+  parameters_.Bind<Double>(PARAM_B, &b_, "Beta prior upper bound of the range (B) parameter");
 
   RegisterAsAddressable(PARAM_MU, &mu_);
   RegisterAsAddressable(PARAM_SIGMA, &sigma_);
@@ -34,8 +34,9 @@ Beta::Beta(shared_ptr<Model> model) : Estimate(model) {
  * Validate the parameters from the configuration file
  */
 void Beta::DoValidate() {
-  if (a_ >= b_)
-    LOG_ERROR_P(PARAM_B) << "b (" << AS_DOUBLE(b_) << ") cannot be less than or equal to a (" << AS_DOUBLE(a_) << ")";
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_A)->LessThanParameter(PARAM_B);
+
   if (((((mu_ - a_) * (b_ - mu_)) / (sigma_ * sigma_)) - 1) <= 0.0)
     LOG_ERROR_P(PARAM_SIGMA) << " (" << AS_DOUBLE(sigma_) << ") is too large";
 }
@@ -59,11 +60,11 @@ Double Beta::GetScore() {
  *
  * @return vector of mu and sigma
  */
-vector<Double>   Beta::GetPriorValues() {
+vector<Double> Beta::GetPriorValues() {
   vector<Double> result = {mu_, sigma_, a_, b_};
   return result;
 }
-vector<string>   Beta::GetPriorLabels() {
+vector<string> Beta::GetPriorLabels() {
   vector<string> result = {PARAM_MU, PARAM_SIGMA, PARAM_A, PARAM_B};
   return result;
 }

@@ -25,14 +25,15 @@ namespace niwa {
  * Default constructor
  */
 Estimate::Estimate(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the estimate", "", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of prior for the estimate", "");
-  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter to estimate", "");
-  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower bound for the parameter", "");
-  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper bound for the parameter", "");
-  parameters_.Bind<string>(PARAM_SAME, &same_labels_, "List of other parameters that are constrained to have the same value as this parameter", "", "");
-  parameters_.Bind<unsigned>(PARAM_ESTIMATION_PHASE, &estimation_phase_, "The first estimation phase to allow this to be estimated", "", 1);
-  parameters_.Bind<bool>(PARAM_MCMC_FIXED, &mcmc_fixed_, "Indicates if this parameter is estimated at the point estimate but fixed during MCMC estimation run", "", false);
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the estimate")->set_default_value("");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of prior for the estimate");
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter to estimate");
+  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower bound for the parameter");
+  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper bound for the parameter");
+  parameters_.Bind<string>(PARAM_SAME, &same_labels_, "List of other parameters that are constrained to have the same value as this parameter")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_ESTIMATION_PHASE, &estimation_phase_, "The first estimation phase to allow this to be estimated")->set_default_value(1u);
+  parameters_.Bind<bool>(PARAM_MCMC_FIXED, &mcmc_fixed_, "Indicates if this parameter is estimated at the point estimate but fixed during MCMC estimation run")
+      ->set_default_value(false);
 }
 
 /**
@@ -49,7 +50,7 @@ void Estimate::Validate() {
  * Build the estimate
  */
 void Estimate::Build() {
-  if(!value_been_initialised_)
+  if (!value_been_initialised_)
     set_initial_value(value());
   Reset();
 }
@@ -64,7 +65,6 @@ void Estimate::Reset() {
    */
   if (utilities::math::IsEqual(lower_bound_, upper_bound_))
     set_value(value());
-  
 }
 
 /**

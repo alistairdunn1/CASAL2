@@ -20,8 +20,8 @@ namespace creators {
  * Default constructor
  */
 Lognormal::Lognormal(shared_ptr<Model> model) : Creator(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "The lognormal prior mean (mu) parameter", "");
-  parameters_.Bind<Double>(PARAM_CV, &cv_, "The lognormal variance (cv) parameter", "");
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "The lognormal prior mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_CV, &cv_, "The lognormal variance (cv) parameter");
 }
 
 /**

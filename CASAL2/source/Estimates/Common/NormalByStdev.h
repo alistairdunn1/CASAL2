@@ -32,11 +32,11 @@ public:
   NormalByStdev() = delete;
   explicit NormalByStdev(shared_ptr<Model> model);
   virtual ~NormalByStdev() = default;
-  void   DoValidate() override final{};
-  Double GetScore() override final;
-  vector<Double>   GetPriorValues() override final;
-  vector<string>   GetPriorLabels() override final;
-  
+  void           DoValidate() override final;
+  Double         GetScore() override final;
+  vector<Double> GetPriorValues() override final;
+  vector<string> GetPriorLabels() override final;
+
 private:
   // Members
   Double mu_;

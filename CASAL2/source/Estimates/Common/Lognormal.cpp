@@ -14,11 +14,19 @@ namespace estimates {
  * Default constructor
  */
 Lognormal::Lognormal(shared_ptr<Model> model) : Estimate(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "The lognormal prior mean (mu) parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_CV, &cv_, "The lognormal variance (cv) parameter", "")->set_lower_bound(0.0, false);
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "The lognormal prior mean (mu) parameter");
+  parameters_.Bind<Double>(PARAM_CV, &cv_, "The lognormal variance (cv) parameter");
 
   RegisterAsAddressable(PARAM_MU, &mu_);
   RegisterAsAddressable(PARAM_CV, &cv_);
+}
+
+/**
+ * Validate the parameters from the configuration file
+ */
+void Lognormal::DoValidate() {
+  parameters_.Validate(PARAM_MU)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_CV)->GreaterThan(0.0);
 }
 
 /**
@@ -35,11 +43,11 @@ Double Lognormal::GetScore() {
  *
  * @return vector of mu and sigma
  */
-vector<Double>   Lognormal::GetPriorValues() {
+vector<Double> Lognormal::GetPriorValues() {
   vector<Double> result = {mu_, cv_};
   return result;
 }
-vector<string>   Lognormal::GetPriorLabels() {
+vector<string> Lognormal::GetPriorLabels() {
   vector<string> result = {PARAM_MU, PARAM_CV};
   return result;
 }
