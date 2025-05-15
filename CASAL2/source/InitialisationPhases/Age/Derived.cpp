@@ -35,9 +35,11 @@ namespace age {
  * Default constructor
  */
 Derived::Derived(shared_ptr<Model> model) : InitialisationPhase(model), cached_partition_(model), partition_(model) {
-  parameters_.Bind<string>(PARAM_INSERT_PROCESSES, &insert_processes_,
-                           "Specifies the additional processes that are not in the annual cycle to be inserted into this initialisation phase", "", true);
-  parameters_.Bind<string>(PARAM_EXCLUDE_PROCESSES, &exclude_processes_, "Specifies the Processes in the annual cycle to be excluded from this initialisation phase", "", true);
+  parameters_
+      .Bind<string>(PARAM_INSERT_PROCESSES, &insert_processes_, "Specifies the additional processes that are not in the annual cycle to be inserted into this initialisation phase")
+      ->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_EXCLUDE_PROCESSES, &exclude_processes_, "Specifies the Processes in the annual cycle to be excluded from this initialisation phase")
+      ->set_is_optional(true);
 }
 
 /*

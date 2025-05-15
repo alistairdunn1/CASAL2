@@ -37,7 +37,7 @@ namespace age {
 Cinitial::Cinitial(shared_ptr<Model> model) : InitialisationPhase(model) {
   n_table_ = new parameters::Table(PARAM_N);
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories for the Cinitial initialisation", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories for the Cinitial initialisation");
   parameters_.BindTable(PARAM_N, n_table_, "The table of values for the Cinitial initialisation", "", false, false);
 
   RegisterAsAddressable(&n_);
@@ -55,6 +55,7 @@ Cinitial::~Cinitial() {
  */
 void Cinitial::DoValidate() {
   LOG_TRACE();
+
   min_age_ = model_->min_age();
   max_age_ = model_->max_age();
 

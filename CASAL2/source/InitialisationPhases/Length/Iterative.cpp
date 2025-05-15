@@ -36,21 +36,23 @@ namespace accessor = partition::accessors;
  * Default constructor
  */
 Iterative::Iterative(shared_ptr<Model> model) : InitialisationPhase(model), cached_partition_(model), partition_(model) {
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The number of iterations (years) over which to execute this initialisation phase", "");
-  parameters_.Bind<string>(PARAM_INSERT_PROCESSES, &insert_processes_, "The processes in the annual cycle to be included in this initialisation phase", "", true);
-  parameters_.Bind<string>(PARAM_EXCLUDE_PROCESSES, &exclude_processes_, "The processes in the annual cycle to be excluded from this initialisation phase", "", true);
-  parameters_.Bind<unsigned>(PARAM_CONVERGENCE_YEARS, &convergence_years_, "The iterations (years) when the test for convergence (lambda) is evaluated", "", true)
-      ->set_lower_bound(2, true);
-  parameters_.Bind<Double>(PARAM_LAMBDA, &lambda_,
-                           "The maximum value of the absolute sum of differences (lambda) between the partition at year and year-1 that indicates successful convergence", "",
-                           Double(1e-10));
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Indicates if the convergence check applies only to the plus_group", "", false);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The number of iterations (years) over which to execute this initialisation phase");
+  parameters_.Bind<string>(PARAM_INSERT_PROCESSES, &insert_processes_, "The processes in the annual cycle to be included in this initialisation phase")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_EXCLUDE_PROCESSES, &exclude_processes_, "The processes in the annual cycle to be excluded from this initialisation phase")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_CONVERGENCE_YEARS, &convergence_years_, "The iterations (years) when the test for convergence (lambda) is evaluated")->set_is_optional(true);
+  parameters_
+      .Bind<Double>(PARAM_LAMBDA, &lambda_,
+                    "The maximum value of the absolute sum of differences (lambda) between the partition at year and year-1 that indicates successful convergence")
+      ->set_default_value(1e-10);
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Indicates if the convergence check applies only to the plus_group")->set_default_value(false);
 }
 
 /**
  * Validate
  */
 void Iterative::DoValidate() {
+  parameters_.ValidateVector(PARAM_CONVERGENCE_YEARS)->GreaterThanOrEqualTo(2u);
+
   for (string insert : insert_processes_) {
     vector<string> pieces;
     boost::split(pieces, insert, boost::is_any_of("()="), boost::token_compress_on);

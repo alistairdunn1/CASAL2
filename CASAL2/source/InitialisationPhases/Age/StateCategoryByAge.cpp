@@ -29,9 +29,9 @@ namespace age {
 StateCategoryByAge::StateCategoryByAge(shared_ptr<Model> model) : InitialisationPhase(model), partition_(model), cached_partition_(model) {
   n_table_ = new parameters::Table(PARAM_N);
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories for the category state initialisation", "");
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age of values supplied in the definition of the category state", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age of values supplied in the definition of the category state", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories for the category state initialisation");
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age of values supplied in the definition of the category state");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age of values supplied in the definition of the category state");
   parameters_.BindTable(PARAM_N, n_table_, "Table of data from minimum age to maximum age for each category", "", false, false);
 
   RegisterAsAddressable(&n_);
@@ -48,9 +48,7 @@ StateCategoryByAge::~StateCategoryByAge() {
  * Validate the parameters passed in from the configuration file
  */
 void StateCategoryByAge::DoValidate() {
-  if (max_age_ < min_age_)
-    LOG_ERROR_P(PARAM_MIN_AGE) << "The minimum age (" << min_age_ << ") cannot be greater than the maximum age (" << max_age_ << ")";
-
+  parameters_.Validate(PARAM_MIN_AGE)->LessThanParameter(PARAM_MAX_AGE);
   column_count_ = (max_age_ - min_age_) + 2;
 
   /**
