@@ -26,10 +26,10 @@ using std::set;
 namespace math = niwa::utilities::math;
 
 DirichletMultinomial::DirichletMultinomial(shared_ptr<Model> model) : Likelihood(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "Label of the Dirichlet-multinomial distribution", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "Type of likelihood", "");
-  parameters_.Bind<Double>(PARAM_THETA, &theta_, "Theta parameter (account for overdispersion)", "")->set_lower_bound(0.0);
-  // parameters_.Bind<string>(PARAM_OVERDISPERSION_TYPE, &theta_model_, "Is theta linear or saturated", "", PARAM_LINEAR)->set_allowed_values({PARAM_LINEAR,PARAM_SATURATED});
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "Label of the Dirichlet-multinomial distribution");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "Type of likelihood");
+  parameters_.Bind<Double>(PARAM_THETA, &theta_, "Theta parameter (account for overdispersion)");
+
   RegisterAsAddressable(PARAM_THETA, &theta_);
 }
 
@@ -37,6 +37,7 @@ DirichletMultinomial::DirichletMultinomial(shared_ptr<Model> model) : Likelihood
  * Validate user hasn't supplied a label that is a type from another likelihood.
  */
 void DirichletMultinomial::DoValidate() {
+  parameters_.Validate(PARAM_THETA)->GreaterThanOrEqualTo(0.0);
   // check labels are not the same as possible type
   if (find(likelihood_types_with_no_labels_.begin(), likelihood_types_with_no_labels_.end(), label_) != likelihood_types_with_no_labels_.end())
     LOG_ERROR_P(PARAM_LABEL) << "The label '" << label_
