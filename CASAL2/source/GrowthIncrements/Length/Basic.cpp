@@ -26,10 +26,10 @@ namespace growthincrements {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Basic::Basic(shared_ptr<Model> model) : GrowthIncrement(model) {
-  parameters_.Bind<Double>(PARAM_G_ALPHA, &g_a_, "Growth alpha parameter", "");
-  parameters_.Bind<Double>(PARAM_G_BETA, &g_b_, "Growth beta parameter", "");
-  parameters_.Bind<Double>(PARAM_L_ALPHA, &l_a_, "Reference length for growth alpha", "");
-  parameters_.Bind<Double>(PARAM_L_BETA, &l_b_, "Reference length for growth beta", "");
+  parameters_.Bind<Double>(PARAM_G_ALPHA, &g_a_, "Growth alpha parameter");
+  parameters_.Bind<Double>(PARAM_G_BETA, &g_b_, "Growth beta parameter");
+  parameters_.Bind<Double>(PARAM_L_ALPHA, &l_a_, "Reference length for growth alpha");
+  parameters_.Bind<Double>(PARAM_L_BETA, &l_b_, "Reference length for growth beta");
 
   RegisterAsAddressable(PARAM_G_ALPHA, &g_a_);
   RegisterAsAddressable(PARAM_G_BETA, &g_b_);

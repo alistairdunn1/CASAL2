@@ -25,17 +25,17 @@ namespace niwa {
  * Default constructor
  */
 GrowthIncrement::GrowthIncrement(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the growth increment model", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of the growth increment model", "");
-  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_label_, "The assumed distribution for the growth model", "", PARAM_NORMAL)->set_allowed_values({PARAM_NORMAL});
-  parameters_.Bind<string>(PARAM_LENGTH_WEIGHT, &length_weight_label_, "The label from an associated length-weight block", "");
-  parameters_.Bind<Double>(PARAM_CV, &cv_, "Coefficient of variation for the growth increment model", "")->set_lower_bound(0.0, true);
-  parameters_.Bind<Double>(PARAM_MIN_SIGMA, &min_sigma_, "Lower bound on sigma for the growth mode", "")->set_lower_bound(0.0, false);
-  parameters_
-      .Bind<string>(PARAM_COMPATIBILITY, &compatibility_,
-                    "Backwards compatibility option: either casal2 (the default) or casal to use the (less accurate) cumulative normal function from CASAL", "", PARAM_CASAL2)
-      ->set_allowed_values({PARAM_CASAL, PARAM_CASAL2});
-
+  // clang-format off
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the growth increment model");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of the growth increment model");
+  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_label_, "The assumed distribution for the growth model")
+    ->set_default_value(PARAM_NORMAL);
+  parameters_.Bind<string>(PARAM_LENGTH_WEIGHT, &length_weight_label_, "The label from an associated length-weight block");
+  parameters_.Bind<Double>(PARAM_CV, &cv_, "Coefficient of variation for the growth increment model");
+  parameters_.Bind<Double>(PARAM_MIN_SIGMA, &min_sigma_, "Lower bound on sigma for the growth mode");
+  parameters_.Bind<string>(PARAM_COMPATIBILITY, &compatibility_, "Backwards compatibility option: either casal2 (the default) or casal to use the (less accurate) cumulative normal function from CASAL")
+    ->set_default_value(PARAM_CASAL2);
+  // clang-format on
   RegisterAsAddressable(PARAM_CV, &cv_);
   RegisterAsAddressable(PARAM_MIN_SIGMA, &min_sigma_);
 }
@@ -45,10 +45,13 @@ GrowthIncrement::GrowthIncrement(shared_ptr<Model> model) : model_(model) {
  */
 void GrowthIncrement::Validate() {
   LOG_TRACE();
-
   parameters_.Populate(model_);
-  LOG_MEDIUM() << "Validate growth transition matrix";
+  parameters_.Validate(PARAM_DISTRIBUTION)->IsInList({PARAM_NORMAL});
+  parameters_.Validate(PARAM_CV)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_MIN_SIGMA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_COMPATIBILITY)->IsInList({PARAM_CASAL, PARAM_CASAL2});
 
+  LOG_MEDIUM() << "Validate growth transition matrix";
   if (distribution_label_ == PARAM_NORMAL)
     distribution_ = Distribution::kNormal;
   else if (distribution_label_ == PARAM_LOGNORMAL)
