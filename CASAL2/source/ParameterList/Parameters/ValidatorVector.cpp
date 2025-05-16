@@ -13,6 +13,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <iostream>
+
 #include "../../Logging/Logging.h"
 #include "../../Model/Model.h"
 #include "../Parameter.h"
@@ -21,6 +23,8 @@
 
 namespace niwa::parameters {
 using niwa::parameters::Bindable;
+using std::cout;
+using std::endl;
 
 /**
  *
@@ -223,6 +227,148 @@ shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualToParameter(const st
 
   } else {
     LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << parameter_->label() << " is not a double/unsigned type";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<ValidatorVector> ValidatorVector::IsModelYear() {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto* param = GetParameterAsVectorUnsigned();
+  for (auto& val : *param->target()) {
+    if (val < model_->start_year() || val > model_->final_year()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be between " << model_->start_year()
+                  << " and " << model_->final_year();
+    }
+  }
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string& label) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto check_size = [&](auto* param1, auto* param2) {
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " is not a compatible vector type";
+      return;
+    }
+    if (param1->target()->size() != param2->target()->size()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than " << label;
+    }
+  };
+
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
+      check_size(param, param2);
+    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
+      check_size(param, param2);
+    } else {
+      LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+    }
+  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
+      check_size(param, param2);
+    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
+      check_size(param, param2);
+    } else {
+      LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+    }
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(const string& label) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto expand = [&](auto* param, auto* param2, const char* type_name1, const char* type_name2) {
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label << " is not a vector<" << type_name2 << "> type";
+      return;
+    }
+    auto& src = *param->target();
+    auto& dst = *param2->target();
+    if (src.size() != 1 && src.size() != dst.size()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " requires either 1 element or same number of elements as " << label;
+      return;
+    }
+    if (src.size() == 1) {
+      std::cout << "src.size() = " << src.size() << " dst.size() = " << dst.size() << endl;
+      auto temp = src[0];
+      src.assign(dst.size(), temp);
+    }
+  };
+
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
+      expand(param, param2, "double", "double");
+    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
+      expand(param, param2, "double", "unsigned");
+    } else {
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+    }
+  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
+      expand(param, param2, "unsigned", "double");
+    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
+      expand(param, param2, "unsigned", "unsigned");
+    } else {
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+    }
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will take the current parameter and check if it has been defined by the user in the configuration file.
+ *
+ * If the parameter has not been defined, then we're going to assign it based on the parameter passed in as the label.
+ *
+ * @param label The label of the parameter to copy from if current parameter has not been defined
+ */
+shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(const string& label) {
+  // If it's already been defined we don't need to do anything
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<double> type";
+    }
+    param->target()->assign(param2->target()->begin(), param2->target()->end());
+
+  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<unsigned> type";
+    }
+    param->target()->assign(param2->target()->begin(), param2->target()->end());
+
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << parameter_->label() << " is not a vector<double/unsigned> type";
   }
 
   return shared_from_this();
