@@ -24,11 +24,16 @@ namespace niwa::timevarying {
  * Default constructor
  */
 RandomDraw::RandomDraw(shared_ptr<Model> model) : TimeVarying(model) {
-  parameters_.Bind<Double>(PARAM_MEAN, &mu_, "The mean (mu) of the random draw distribution", "", 0);
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma)  of the random draw distribution", "", 1)->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &upper_bound_, "The lower bound for the random draw", "");
-  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &lower_bound_, "The upper bound for the random draw", "");
-  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The distribution type", "", PARAM_NORMAL)->set_allowed_values({PARAM_NORMAL, PARAM_LOGNORMAL});
+  // clang-format off
+  parameters_.Bind<Double>(PARAM_MEAN, &mu_, "The mean (mu) of the random draw distribution")
+    ->set_default_value(0.0);
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma)  of the random draw distribution")
+    ->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &upper_bound_, "The lower bound for the random draw");
+  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &lower_bound_, "The upper bound for the random draw");
+  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The distribution type")
+    ->set_default_value(PARAM_NORMAL);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_MEAN, &mu_);
   RegisterAsAddressable(PARAM_SIGMA, &sigma_);
@@ -37,7 +42,11 @@ RandomDraw::RandomDraw(shared_ptr<Model> model) : TimeVarying(model) {
 /**
  * Validate
  */
-void RandomDraw::DoValidate() {}
+void RandomDraw::DoValidate() {
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_LOWER_BOUND)->LessThanParameter(PARAM_UPPER_BOUND);
+  parameters_.Validate(PARAM_DISTRIBUTION)->IsInList({PARAM_NORMAL, PARAM_LOGNORMAL});
+}
 
 /**
  * Build

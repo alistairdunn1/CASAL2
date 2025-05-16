@@ -7,6 +7,8 @@
 
 #include "Constant.h"
 
+#include "../../Utilities/Map.h"
+
 namespace niwa {
 namespace timevarying {
 
@@ -14,7 +16,7 @@ namespace timevarying {
  * Default constructor
  */
 Constant::Constant(shared_ptr<Model> model) : TimeVarying(model) {
-  parameters_.Bind<Double>(PARAM_VALUES, &values_, "The value to assign to addressable", "");
+  parameters_.Bind<Double>(PARAM_VALUES, &values_, "The value to assign to addressable");
 
   RegisterAsAddressable(PARAM_VALUES, &parameter_by_year_);
 }
@@ -23,29 +25,10 @@ Constant::Constant(shared_ptr<Model> model) : TimeVarying(model) {
  * Validate
  */
 void Constant::DoValidate() {
-  if (values_.size() != 1 && values_.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_VALUES) << "length (" << values_.size() << ") must match the number of years provided (" << years_.size() << ")";
-    return;
-  }
+  parameters_.ValidateVector(PARAM_VALUES)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
 
-  if (values_.size() == 1) {
-    auto val_v = values_[0];
-    values_.assign(years_.size(), val_v);
-  }
-  for (unsigned i = 0; i < years_.size(); ++i) {
-    parameter_by_year_[years_[i]] = values_[i];
-  }
+  parameter_by_year_ = utilities::Map::create(years_, values_);
 }
-
-/**
- * Build
- */
-void Constant::DoBuild() {}
-
-/**
- * Reset
- */
-void Constant::DoReset() {}
 
 /**
  * Update

@@ -22,11 +22,10 @@ namespace niwa {
  * Default constructor
  */
 TimeVarying::TimeVarying(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the time-varying object", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of the time-varying object", "", "")
-      ->set_allowed_values({PARAM_ANNUAL_SHIFT, PARAM_CONSTANT, PARAM_EXOGENOUS, PARAM_LINEAR, PARAM_RANDOMWALK, PARAM_RANDOMDRAW});
-  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter to vary in each year", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to vary the paramter", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the time-varying object");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of the time-varying object");
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter to vary in each year")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to vary the paramter");
 
   // Define if we recommended that this be allowed to be estimable
   if (type_ == PARAM_RANDOMDRAW || type_ == PARAM_RANDOMWALK) {
@@ -42,14 +41,10 @@ TimeVarying::TimeVarying(shared_ptr<Model> model) : model_(model) {
  */
 void TimeVarying::Validate() {
   parameters_.Populate(model_);
-  DoValidate();
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
 
-  // set a default parameter that is the label. This makes it
-  // easier to define this object in the configuration file
-  if (parameter_ == "") {
-    parameters().Add(PARAM_PARAMETER, label_, parameters_.Get(PARAM_LABEL)->file_name(), parameters_.Get(PARAM_LABEL)->line_number());
-    parameter_ = label_;
-  }
+  parameter_ = parameters_.Get(PARAM_PARAMETER)->has_been_defined() ? parameter_ : label_;
+  DoValidate();
 }
 
 /**

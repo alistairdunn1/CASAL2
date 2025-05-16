@@ -23,8 +23,8 @@ namespace timevarying {
  * Default constructor
  */
 Exogenous::Exogenous(shared_ptr<Model> model) : TimeVarying(model) {
-  parameters_.Bind<Double>(PARAM_A, &a_, "The shift parameter", "");
-  parameters_.Bind<Double>(PARAM_EXOGENOUS_VARIABLE, &exogenous_, "The values of exogenous variable for each year", "");
+  parameters_.Bind<Double>(PARAM_A, &a_, "The shift parameter");
+  parameters_.Bind<Double>(PARAM_EXOGENOUS_VARIABLE, &exogenous_, "The values of exogenous variable for each year");
 
   RegisterAsAddressable(PARAM_A, &a_);
   RegisterAsAddressable(PARAM_EXOGENOUS_VARIABLE, &exogenous_);
@@ -34,8 +34,7 @@ Exogenous::Exogenous(shared_ptr<Model> model) : TimeVarying(model) {
  * Validate parameters from config file
  */
 void Exogenous::DoValidate() {
-  if (years_.size() != exogenous_.size())
-    LOG_ERROR_P(PARAM_YEARS) << "provided (" << years_.size() << ") does not match the number of values provided (" << exogenous_.size() << ")";
+  parameters_.ValidateVector(PARAM_EXOGENOUS_VARIABLE)->SameNumberOfElementsAs(PARAM_YEARS);
 }
 
 /**

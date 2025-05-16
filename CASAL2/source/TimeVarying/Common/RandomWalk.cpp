@@ -24,12 +24,18 @@ namespace niwa::timevarying {
  * Default constructor
  */
 RandomWalk::RandomWalk(shared_ptr<Model> model) : TimeVarying(model) {
-  parameters_.Bind<Double>(PARAM_MEAN, &mu_, "The mean (mu) of the random walk distribution", "", 0);
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma)  of the random walk distribution", "", 1)->set_lower_bound(0, false);
-  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower bound for the random walk", "");
-  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper bound for the random walk", "");
-  parameters_.Bind<Double>(PARAM_RHO, &rho_, "The autocorrelation parameter (rho)  of the random walk distribution", "", 1);
-  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The distribution type", "", PARAM_NORMAL)->set_allowed_values({PARAM_NORMAL});
+  // clang-format off
+  parameters_.Bind<Double>(PARAM_MEAN, &mu_, "The mean (mu) of the random walk distribution")
+    ->set_default_value(0.0);
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma)  of the random walk distribution")
+    ->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The lower bound for the random walk");
+  parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The upper bound for the random walk");
+  parameters_.Bind<Double>(PARAM_RHO, &rho_, "The autocorrelation parameter (rho)  of the random walk distribution")
+    ->set_default_value(1.0);
+  parameters_.Bind<string>(PARAM_DISTRIBUTION, &distribution_, "The distribution type")
+    ->set_default_value(PARAM_NORMAL);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_MEAN, &mu_);
   RegisterAsAddressable(PARAM_SIGMA, &sigma_);
@@ -42,8 +48,9 @@ RandomWalk::RandomWalk(shared_ptr<Model> model) : TimeVarying(model) {
 void RandomWalk::DoValidate() {
   LOG_CODE_ERROR() << "TimeVarying.Random_Walk has been disabled due to a software bug. Please contact the developers if you require this functionality";
 
-  if (distribution_ != PARAM_NORMAL)
-    LOG_ERROR() << "Random walk can draw from a normal distribution only";
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_LOWER_BOUND)->LessThanParameter(PARAM_UPPER_BOUND);
+  parameters_.Validate(PARAM_DISTRIBUTION)->IsInList({PARAM_NORMAL});
 }
 
 /**

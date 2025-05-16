@@ -29,10 +29,10 @@ public:
   // methods
   explicit Constant(shared_ptr<Model> model);
   virtual ~Constant() = default;
-  void DoValidate() override final;
-  void DoBuild() override final;
-  void DoReset() override final;
-  void DoUpdate() override final;
+  void DoValidate() final;
+  void DoBuild() final {};
+  void DoReset() final {};
+  void DoUpdate() final;
 
 protected:
   // members

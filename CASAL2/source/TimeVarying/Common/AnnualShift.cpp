@@ -22,11 +22,11 @@ namespace timevarying {
  * Default constructor
  */
 AnnualShift::AnnualShift(shared_ptr<Model> model) : TimeVarying(model) {
-  parameters_.Bind<Double>(PARAM_A, &a_, "Parameter A", "");
-  parameters_.Bind<Double>(PARAM_B, &b_, "Parameter B", "");
-  parameters_.Bind<Double>(PARAM_C, &c_, "Parameter C", "");
-  parameters_.Bind<unsigned>(PARAM_SCALING_YEARS, &scaling_years_, "The scaling years", "", true);
-  parameters_.Bind<Double>(PARAM_VALUES, &values_, "The values for each year", "");
+  parameters_.Bind<Double>(PARAM_A, &a_, "Parameter A");
+  parameters_.Bind<Double>(PARAM_B, &b_, "Parameter B");
+  parameters_.Bind<Double>(PARAM_C, &c_, "Parameter C");
+  parameters_.Bind<unsigned>(PARAM_SCALING_YEARS, &scaling_years_, "The scaling years")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_VALUES, &values_, "The values for each year");
 
   RegisterAsAddressable(PARAM_A, &a_);
   RegisterAsAddressable(PARAM_B, &b_);
@@ -38,16 +38,8 @@ AnnualShift::AnnualShift(shared_ptr<Model> model) : TimeVarying(model) {
  * Validate
  */
 void AnnualShift::DoValidate() {
-  if (years_.size() != values_.size())
-    LOG_ERROR_P(PARAM_YEARS) << "provided (" << years_.size() << ") does not match the number of values provided (" << values_.size() << ")";
-
-  if (scaling_years_.size() == 0)
-    scaling_years_ = years_;
-
-  for (unsigned year : scaling_years_) {
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_SCALING_YEARS) << "value (" << year << ") has not been defined as one of the years";
-  }
+  parameters_.ValidateVector(PARAM_VALUES)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  parameters_.ValidateVector(PARAM_SCALING_YEARS)->DuplicateParameterIfNotAssigned(PARAM_YEARS)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
 }
 
 /**
