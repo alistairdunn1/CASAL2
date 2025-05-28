@@ -26,9 +26,9 @@ using niwa::parameters::Bindable;
 /**
  * This method will return the current parameter as a Bindaable storing a double
  */
-Bindable<Double>* Validator::GetParameterAsDouble() {
+Bindable<Double>* Validator::GetParameterAsDouble(bool null_on_error) {
   auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr) {
+  if (param == nullptr && !null_on_error) {
     LOG_CODE_ERROR() << "Parameter::Validator::GetParameterAsDouble " << parameter_->label() << " is not a double type";
   }
   return param;
@@ -37,9 +37,9 @@ Bindable<Double>* Validator::GetParameterAsDouble() {
 /**
  * This method will return the current parameter as a Bindaable storing an unsigned
  */
-Bindable<unsigned>* Validator::GetParameterAsUnsigned() {
+Bindable<unsigned>* Validator::GetParameterAsUnsigned(bool null_on_error) {
   auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
+  if (param == nullptr && !null_on_error) {
     LOG_CODE_ERROR() << "Parameter::Validator::GetParameterAsUnsigned " << parameter_->label() << " is not an unsigned type";
   }
   return param;
@@ -107,6 +107,34 @@ shared_ptr<Validator> Validator::GreaterThanOrEqualTo(unsigned value) {
 
   return shared_from_this();
 }
+
+/**
+ * This method will check that the value of the parameter is greater than or equal to the value of
+ * the parameter passed in as the label
+ */
+shared_ptr<Validator> Validator::GreaterThanOrEqualToParameter(const string& label) {
+  auto* source_unsigned = GetParameterAsUnsigned(true);
+  auto* source_double   = GetParameterAsDouble(true);
+  if (source_unsigned == nullptr && source_double == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << parameter_->label() << " is not a double or unsigned type";
+  }
+
+  auto* target_unsigned = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
+  auto* target_double   = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
+  if (target_unsigned == nullptr && target_double == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " is not a double or unsigned type";
+  }
+
+  Double source = source_double ? *source_double->target() : static_cast<Double>(*source_unsigned->target());
+  Double target = target_double ? *target_double->target() : static_cast<Double>(*target_unsigned->target());
+  if (source < target) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be greater than or equal to "
+                << label << " (" << AS_DOUBLE(target) << ")";
+  }
+
+  return shared_from_this();
+}
+
 /**
  * This method will check that the value of the parameter is greater than or equal to the value passed
  */
@@ -135,6 +163,22 @@ shared_ptr<Validator> Validator::LessThanOrEqualTo(Double value) {
   Double source = *param->target();
   if (source > value) {
     LOG_ERROR() << this->parameter_->location() << "value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to " << AS_DOUBLE(value);
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<Validator> Validator::LessThanOrEqualTo(unsigned value) {
+  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualTo " << parameter_->label() << " is not an unsigned type";
+  }
+  unsigned source = *param->target();
+  if (source > value) {
+    LOG_ERROR() << this->parameter_->location() << "value (" << source << ") is invalid. Must be less than or equal to " << value;
   }
 
   return shared_from_this();
@@ -185,35 +229,23 @@ shared_ptr<Validator> Validator::LessThanParameter(const string& label) {
  *
  */
 shared_ptr<Validator> Validator::LessThanOrEqualToParameter(const string& label) {
-  if (auto* param = dynamic_cast<Bindable<Double>*>(parameter_)) {
-    // Handle for when the parameters are both double
-    auto* param2 = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter " << label << " is not a double type. Cannot compare to " << param->label() << " which is a double type";
-    }
+  auto* source_unsigned = GetParameterAsUnsigned(true);
+  auto* source_double   = GetParameterAsDouble(true);
+  if (source_unsigned == nullptr && source_double == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << parameter_->label() << " is not a double or unsigned type";
+  }
 
-    Double source = *param->target();
-    Double target = *param2->target();
+  auto* target_unsigned = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
+  auto* target_double   = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
+  if (target_unsigned == nullptr && target_double == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << label << " is not a double or unsigned type";
+  }
 
-    if (source > target) {
-      LOG_ERROR() << this->parameter_->location() << " parameter" << param->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to " << label
-                  << " (" << AS_DOUBLE(target) << ")";
-    }
-
-  } else if (auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_)) {
-    // handle for when the parameters are both unsigned
-    auto* param2 = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter " << label << " is not an unsigned type. Cannot compare to " << param->label() << " which is an unsigned type";
-    }
-
-    unsigned source = *param->target();
-    unsigned target = *param2->target();
-
-    if (source > target) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << param->label() << " value (" << source << ") is invalid. Must be less than or equal to " << label << " ("
-                  << target << ")";
-    }
+  Double source = source_double ? *source_double->target() : static_cast<Double>(*source_unsigned->target());
+  Double target = target_double ? *target_double->target() : static_cast<Double>(*target_unsigned->target());
+  if (source > target) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to "
+                << label << " (" << AS_DOUBLE(target) << ")";
   }
 
   return shared_from_this();
@@ -240,15 +272,53 @@ shared_ptr<Validator> Validator::GreaterThanOrEqualToModelMinAge() {
 /**
  *
  */
-shared_ptr<Validator> Validator::LessThanOrEqualToModelMaxAge() {
+shared_ptr<Validator> Validator::GreaterThanModelMinAge() {
   auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
   if (param == nullptr) {
     LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a double type";
   }
 
   unsigned source = *param->target();
-  if (source > model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to model max age ("
+  if (source <= model_->min_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than model min age ("
+                << model_->min_age() << ")";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<Validator> Validator::LessThanOrEqualToModelMaxAge() {
+  auto* param_double   = GetParameterAsDouble(true);
+  auto* param_unsigned = GetParameterAsUnsigned(true);
+  if (param_double == nullptr && param_unsigned == nullptr) {
+    LOG_CODE_ERROR() << "Validator::LessThanOrEqualToModelMaxAge() - Parameter " << parameter_->label() << " is not a double or unsigned type";
+  }
+
+  unsigned value = param_unsigned ? *param_unsigned->target() : static_cast<unsigned>(*param_double->target());
+  if (value > model_->max_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << value << ") is invalid. Must be less than or equal to model max age ("
+                << model_->max_age() << ")";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the value of the parameter is less than the model max age
+ */
+shared_ptr<Validator> Validator::LessThanModelMaxAge() {
+  auto* param_double   = GetParameterAsDouble(true);
+  auto* param_unsigned = GetParameterAsUnsigned(true);
+  if (param_double == nullptr && param_unsigned == nullptr) {
+    LOG_CODE_ERROR() << "Validator::LessThanModelMaxAge() - Parameter " << parameter_->label() << " is not a double or unsigned type";
+  }
+
+  unsigned value = param_unsigned ? *param_unsigned->target() : static_cast<unsigned>(*param_double->target());
+  if (value >= model_->max_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << value << ") is invalid. Must be less than or equal to model max age ("
                 << model_->max_age() << ")";
   }
 

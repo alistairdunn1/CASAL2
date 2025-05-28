@@ -29,9 +29,9 @@ using std::endl;
 /**
  *
  */
-BindableVector<Double>* ValidatorVector::GetParameterAsVectorDouble() {
+BindableVector<Double>* ValidatorVector::GetParameterAsVectorDouble(bool null_on_error) {
   auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
-  if (param == nullptr) {
+  if (param == nullptr && !null_on_error) {
     LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorDouble " << parameter_->label() << " is not a vector<double> type";
   }
   return param;
@@ -40,9 +40,9 @@ BindableVector<Double>* ValidatorVector::GetParameterAsVectorDouble() {
 /**
  * This method will return the current parameter as a Bindaable storing an unsigned
  */
-BindableVector<unsigned>* ValidatorVector::GetParameterAsVectorUnsigned() {
+BindableVector<unsigned>* ValidatorVector::GetParameterAsVectorUnsigned(bool null_on_error) {
   auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_);
-  if (param == nullptr) {
+  if (param == nullptr && !null_on_error) {
     LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorUnsigned " << parameter_->label() << " is not a vector<unsigned> type";
   }
   return param;
@@ -253,6 +253,29 @@ shared_ptr<ValidatorVector> ValidatorVector::IsModelYear() {
 /**
  *
  */
+shared_ptr<ValidatorVector> ValidatorVector::NumberOfElements(unsigned count) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto* param_double   = GetParameterAsVectorDouble(true);
+  auto* param_unsigned = GetParameterAsVectorUnsigned(true);
+  if (param_double == nullptr && param_unsigned == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::NumberOfElements " << parameter_->label() << " is not a vector<double/unsigned> type";
+    return shared_from_this();
+  }
+
+  unsigned actual_count = param_double ? param_double->target()->size() : param_unsigned->target()->size();
+  if (actual_count != count) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << actual_count << " elements, but requires exactly " << count;
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
 shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string& label) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
@@ -369,6 +392,42 @@ shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(con
 
   } else {
     LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << parameter_->label() << " is not a vector<double/unsigned> type";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the number of elements in the parameter is the same as the model age spread.
+ * If the parameter is optional and has not been defined, it will return the current instance without validation.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsModelAgeSpread() {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto* param = GetParameterAsVectorDouble();
+  if (param->target()->size() != model_->age_spread()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than the model age spread (" << model_->age_spread()
+                << ")";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the number of elements in the parameter is the same as the number of model length bin mid points.
+ * If the parameter is optional and has not been defined, it will return the current instance without validation.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsModelLengthBinMidPoints() {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto* param = GetParameterAsVectorDouble();
+  if (param->target()->size() != model_->length_bin_mid_points().size()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than the model length bin mid points ("
+                << model_->length_bin_mid_points().size() << ")";
   }
 
   return shared_from_this();

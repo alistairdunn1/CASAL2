@@ -44,18 +44,22 @@ public:
   shared_ptr<Validator> GreaterThan(unsigned value);
   shared_ptr<Validator> GreaterThanOrEqualTo(Double value);
   shared_ptr<Validator> GreaterThanOrEqualTo(unsigned value);
+  shared_ptr<Validator> GreaterThanOrEqualToParameter(const string& label);
   shared_ptr<Validator> LessThan(Double value);
   shared_ptr<Validator> LessThanOrEqualTo(Double value);
+  shared_ptr<Validator> LessThanOrEqualTo(unsigned value);
   shared_ptr<Validator> LessThanParameter(const string& label);
   shared_ptr<Validator> LessThanOrEqualToParameter(const string& label);
   shared_ptr<Validator> GreaterThanOrEqualToModelMinAge();
+  shared_ptr<Validator> GreaterThanModelMinAge();
   shared_ptr<Validator> LessThanOrEqualToModelMaxAge();
+  shared_ptr<Validator> LessThanModelMaxAge();
   shared_ptr<Validator> IsAge();
   shared_ptr<Validator> IsInList(initializer_list<string> list);
 
 protected:
-  Bindable<Double>*   GetParameterAsDouble();
-  Bindable<unsigned>* GetParameterAsUnsigned();
+  Bindable<Double>*   GetParameterAsDouble(bool null_on_error = false);
+  Bindable<unsigned>* GetParameterAsUnsigned(bool null_on_error = false);
 
   shared_ptr<Model>               model_;
   niwa::ParameterList*            parameters_;

@@ -49,13 +49,16 @@ public:
   shared_ptr<ValidatorVector> IsInList(initializer_list<string> list);
   shared_ptr<ValidatorVector> LessThanOrEqualToParameter(const string& label);
   shared_ptr<ValidatorVector> IsModelYear();
+  shared_ptr<ValidatorVector> NumberOfElements(unsigned count);
   shared_ptr<ValidatorVector> SameNumberOfElementsAs(const string& label);
   shared_ptr<ValidatorVector> ExpandToSameNumberOfElementsAs(const string& label);
   shared_ptr<ValidatorVector> DuplicateParameterIfNotAssigned(const string& label);
+  shared_ptr<ValidatorVector> SameNumberOfElementsModelAgeSpread();
+  shared_ptr<ValidatorVector> SameNumberOfElementsModelLengthBinMidPoints();
 
 protected:
-  BindableVector<Double>*   GetParameterAsVectorDouble();
-  BindableVector<unsigned>* GetParameterAsVectorUnsigned();
+  BindableVector<Double>*   GetParameterAsVectorDouble(bool null_on_error = false);
+  BindableVector<unsigned>* GetParameterAsVectorUnsigned(bool null_on_error = false);
 
   shared_ptr<Model>               model_;
   niwa::ParameterList*            parameters_;
