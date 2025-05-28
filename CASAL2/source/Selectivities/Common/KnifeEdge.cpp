@@ -23,13 +23,12 @@ namespace selectivities {
  * Default Constructor
  */
 KnifeEdge::KnifeEdge(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_E, &edge_, "The edge value", "");
-  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity", "", 1.0);
+  parameters_.Bind<Double>(PARAM_E, &edge_, "The edge value");
+  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity")->set_default_value(1.0);
 
   RegisterAsAddressable(PARAM_ALPHA, &alpha_);
   RegisterAsAddressable(PARAM_E, &edge_);
   allowed_length_based_in_age_based_model_ = true;
-
 }
 
 /**

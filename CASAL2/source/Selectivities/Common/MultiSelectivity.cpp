@@ -28,10 +28,12 @@ namespace selectivities {
  */
 MultiSelectivity::MultiSelectivity(shared_ptr<Model> model) : Selectivity(model) {
   /* clang-format off */
-  parameters_.Bind<string>(PARAM_SELECTIVITY_LABELS, &selectivity_labels_, "The labels of the selectivities, one for each year", "", true);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which we want to apply the corresponding selectivity in", "");
-  parameters_.Bind<string>(PARAM_DEFAULT_SELECTIVITY, &default_selectivity_label_, "The selectivity used in missing years and the projections (if not otherwise specified)", "");
-  parameters_.Bind<string>(PARAM_PROJECTION_SELECTIVITY, &projection_selectivity_label_,"The selectivity used in missing projection years (defaults to the same selectivity label as 'default_selectivity')", "", "");
+  parameters_.Bind<string>(PARAM_SELECTIVITY_LABELS, &selectivity_labels_, "The labels of the selectivities, one for each year")
+    ->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which we want to apply the corresponding selectivity in");
+  parameters_.Bind<string>(PARAM_DEFAULT_SELECTIVITY, &default_selectivity_label_, "The selectivity used in missing years and the projections (if not otherwise specified)");
+  parameters_.Bind<string>(PARAM_PROJECTION_SELECTIVITY, &projection_selectivity_label_,"The selectivity used in missing projection years (defaults to the same selectivity label as 'default_selectivity')")
+    ->set_default_value("");
 /* clang-format on */}
 
 /**
@@ -40,10 +42,7 @@ MultiSelectivity::MultiSelectivity(shared_ptr<Model> model) : Selectivity(model)
  *
  */
 void MultiSelectivity::DoValidate() {
-  if (years_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITY_LABELS)
-        << "number of selectivity labels supplied differs from the number of years supplied. This needs to be a one to one relationship. You provided "
-        << selectivity_labels_.size() << " selectivity labels, but supplied  = " << years_.size() << " number of years.";
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->SameNumberOfElementsAs(PARAM_SELECTIVITY_LABELS);
 }
 
 /**

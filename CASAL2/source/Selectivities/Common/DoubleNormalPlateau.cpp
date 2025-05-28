@@ -23,12 +23,12 @@ namespace selectivities {
  * Default constructor
  */
 DoubleNormalPlateau::DoubleNormalPlateau(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_SIGMA_L, &sigma_l_, "The sigma L parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_SIGMA_R, &sigma_r_, "The sigma R parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A1, &a1_, "The a1 parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A2, &a2_, "The a2 parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);  // The equivalent of a_max
-  parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<Double>(PARAM_SIGMA_L, &sigma_l_, "The sigma L parameter");
+  parameters_.Bind<Double>(PARAM_SIGMA_R, &sigma_r_, "The sigma R parameter");
+  parameters_.Bind<Double>(PARAM_A1, &a1_, "The a1 parameter");
+  parameters_.Bind<Double>(PARAM_A2, &a2_, "The a2 parameter");
+  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity")->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies")->set_default_value(0.0);
 
   RegisterAsAddressable(PARAM_A1, &a1_);
   RegisterAsAddressable(PARAM_A2, &a2_);
@@ -49,8 +49,16 @@ DoubleNormalPlateau::DoubleNormalPlateau(shared_ptr<Model> model) : Selectivity(
  * rules for the model.
  */
 void DoubleNormalPlateau::DoValidate() {
-  if (model_->partition_type() == PartitionType::kAge && beta_ > model_->max_age())
-    LOG_ERROR_P(PARAM_BETA) << ": beta (" << AS_DOUBLE(beta_) << ") cannot be greater than the model maximum age";
+  parameters_.Validate(PARAM_SIGMA_L)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_SIGMA_R)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_A1)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_A2)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_ALPHA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_BETA)->GreaterThanOrEqualTo(0.0);
+
+  if (model_->partition_type() == PartitionType::kAge) {
+    parameters_.Validate(PARAM_BETA)->LessThanOrEqualToModelMaxAge();
+  }
 }
 
 /**

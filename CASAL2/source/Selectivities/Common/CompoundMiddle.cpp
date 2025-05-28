@@ -23,12 +23,17 @@ namespace selectivities {
  * Default constructor
  */
 CompoundMiddle::CompoundMiddle(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_A50, &a50_, "The mean (mu)", "");
-  parameters_.Bind<Double>(PARAM_ATO95, &a_to95_, "The sigma L parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A_MIN, &amin_, "The sigma R parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_LEFT_MEAN, &leftmu_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_TO_RIGHT_MEAN, &to_rightmu_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_SIGMA, &sd_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
+  // clang-format off
+  parameters_.Bind<Double>(PARAM_A50, &a50_, "The mean (mu)");
+  parameters_.Bind<Double>(PARAM_ATO95, &a_to95_, "The sigma L parameter");
+  parameters_.Bind<Double>(PARAM_A_MIN, &amin_, "The sigma R parameter");
+  parameters_.Bind<Double>(PARAM_LEFT_MEAN, &leftmu_, "The maximum value of the selectivity")
+    ->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_TO_RIGHT_MEAN, &to_rightmu_, "The maximum value of the selectivity")
+    ->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_SIGMA, &sd_, "The maximum value of the selectivity")
+    ->set_default_value(1.0);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_A50, &a50_);
   RegisterAsAddressable(PARAM_ATO95, &a_to95_);
@@ -48,7 +53,14 @@ CompoundMiddle::CompoundMiddle(shared_ptr<Model> model) : Selectivity(model) {
  * variables to ensure they are within the business
  * rules for the model.
  */
-void CompoundMiddle::DoValidate() {}
+void CompoundMiddle::DoValidate() {
+  parameters_.Validate(PARAM_A50)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_ATO95)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_A_MIN)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_LEFT_MEAN)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_TO_RIGHT_MEAN)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+}
 /**
  * The core function
  */

@@ -19,16 +19,16 @@ namespace selectivities {
  * Default constructor
  */
 Constant::Constant(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_C, &c_, "The constant value", "");
-  parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<Double>(PARAM_C, &c_, "The constant value");
+  parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies")->set_default_value(0.0);
 
   RegisterAsAddressable(PARAM_C, &c_);
   allowed_length_based_in_age_based_model_ = false;
 }
 
 void Constant::DoValidate() {
-  if (beta_ > model_->max_age())
-    LOG_ERROR_P(PARAM_BETA) << ": beta (" << AS_DOUBLE(beta_) << ") cannot be greater than the model maximum age";
+  parameters_.Validate(PARAM_C)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_BETA)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualToModelMaxAge();
 }
 
 /**

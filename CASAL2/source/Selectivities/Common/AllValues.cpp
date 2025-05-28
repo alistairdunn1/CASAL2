@@ -27,11 +27,10 @@ namespace selectivities {
  * Default Constructor
  */
 AllValues::AllValues(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_V, &v_, "The v parameter", "")->set_partition_type(PartitionType::kAge | PartitionType::kLength);
+  parameters_.Bind<Double>(PARAM_V, &v_, "The v parameter");
 
   RegisterAsAddressable(PARAM_V, &v_);
   allowed_length_based_in_age_based_model_ = false;
-
 }
 
 /**
@@ -46,17 +45,11 @@ AllValues::AllValues(shared_ptr<Model> model) : Selectivity(model) {
 void AllValues::DoValidate() {
   switch (model_->partition_type()) {
     case PartitionType::kAge:
-      if (v_.size() != model_->age_spread()) {
-        LOG_ERROR_P(PARAM_V) << ": Number of 'v' values supplied is not the same as the number of ages classes that were defined for the model.\n"
-                             << "Expected: " << model_->age_spread() << ", parsed: " << v_.size();
-      }
+      parameters_.ValidateVector(PARAM_V)->SameNumberOfElementsModelAgeSpread();
       break;
 
     case PartitionType::kLength:
-      if (v_.size() != model_->length_bin_mid_points().size()) {
-        LOG_ERROR_P(PARAM_V) << ": Number of 'v' values supplied is not the same as the number of length bins that were defined for the model.\n"
-                             << "Expected: " << model_->length_bin_mid_points().size() << ", parsed: " << v_.size();
-      }
+      parameters_.ValidateVector(PARAM_V)->SameNumberOfElementsModelLengthBinMidPoints();
       break;
 
     default:
@@ -65,7 +58,6 @@ void AllValues::DoValidate() {
   }
 }
 
-
 /**
  * The core function
  */
@@ -73,7 +65,7 @@ Double AllValues::get_value(Double value) {
   if (model_->partition_type() == PartitionType::kLength) {
     return v_[model_->get_length_bin_ndx(value)];
   }
-  LOG_CODE_ERROR() << "AllValues::get_value(Double value) value = "  << value;
+  LOG_CODE_ERROR() << "AllValues::get_value(Double value) value = " << value;
   return 1.0;
 }
 
@@ -84,9 +76,8 @@ Double AllValues::get_value(unsigned value) {
   if (model_->partition_type() == PartitionType::kAge) {
     return v_[value - model_->min_age()];
   } else {
-
   }
-  LOG_CODE_ERROR() << "AllValues::get_value(unsigned value) value = "  << value;
+  LOG_CODE_ERROR() << "AllValues::get_value(unsigned value) value = " << value;
   return 1.0;
 }
 

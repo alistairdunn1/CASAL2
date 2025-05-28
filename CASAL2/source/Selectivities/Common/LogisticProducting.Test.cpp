@@ -40,7 +40,7 @@ TEST(Selectivities, LogisticProducing_Age) {
   niwa::selectivities::LogisticProducing logistic_producing(model);
 
   logistic_producing.parameters().Add(PARAM_LABEL, "unit_test_logistic_producing", __FILE__, __LINE__);
-  logistic_producing.parameters().Add(PARAM_TYPE, "not needed in test", __FILE__, __LINE__);
+  logistic_producing.parameters().Add(PARAM_TYPE, PARAM_LOGISTIC_PRODUCING, __FILE__, __LINE__);
   logistic_producing.parameters().Add(PARAM_L, "2", __FILE__, __LINE__);
   logistic_producing.parameters().Add(PARAM_H, "17", __FILE__, __LINE__);
   logistic_producing.parameters().Add(PARAM_A50, "5", __FILE__, __LINE__);
@@ -75,7 +75,7 @@ TEST(Selectivities, LogisticProducing_Length) {
   vector<double> expected_values = {0, 0.0285941883861936946, 0.0367784120531689865, 0.0437232369834234524, 0.0488412893889367539, 0.0522344024617764913, 1};
 
   logistic_producing.parameters().Add(PARAM_LABEL, "unit_test_logistic_producing", __FILE__, __LINE__);
-  logistic_producing.parameters().Add(PARAM_TYPE, "not needed in test", __FILE__, __LINE__);
+  logistic_producing.parameters().Add(PARAM_TYPE, PARAM_LOGISTIC_PRODUCING, __FILE__, __LINE__);
   logistic_producing.parameters().Add(PARAM_L, "12", __FILE__, __LINE__);
   logistic_producing.parameters().Add(PARAM_H, "62", __FILE__, __LINE__);
   logistic_producing.parameters().Add(PARAM_A50, "20", __FILE__, __LINE__);

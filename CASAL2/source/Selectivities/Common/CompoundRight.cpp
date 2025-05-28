@@ -29,12 +29,12 @@ namespace selectivities {
  * Default constructor
  */
 CompoundRight::CompoundRight(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_A50, &a50_, "The mean (mu)", "");
-  parameters_.Bind<Double>(PARAM_ATO95, &a_to95_, "The sigma L parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A_MIN, &amin_, "The sigma R parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_LEFT_MEAN, &leftmu_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_TO_RIGHT_MEAN, &to_rightmu_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_SIGMA, &sd_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
+  parameters_.Bind<Double>(PARAM_A50, &a50_, "The mean (mu)");
+  parameters_.Bind<Double>(PARAM_ATO95, &a_to95_, "The sigma L parameter");
+  parameters_.Bind<Double>(PARAM_A_MIN, &amin_, "The sigma R parameter");
+  parameters_.Bind<Double>(PARAM_LEFT_MEAN, &leftmu_, "The maximum value of the selectivity")->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_TO_RIGHT_MEAN, &to_rightmu_, "The maximum value of the selectivity")->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_SIGMA, &sd_, "The maximum value of the selectivity")->set_default_value(1.0);
 
   RegisterAsAddressable(PARAM_A50, &a50_);
   RegisterAsAddressable(PARAM_ATO95, &a_to95_);
@@ -54,7 +54,19 @@ CompoundRight::CompoundRight(shared_ptr<Model> model) : Selectivity(model) {
  * variables to ensure they are within the business
  * rules for the model.
  */
-void CompoundRight::DoValidate() {}
+void CompoundRight::DoValidate() {
+  parameters_.Validate(PARAM_A50)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_ATO95)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_A_MIN)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_LEFT_MEAN)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_TO_RIGHT_MEAN)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+
+  // Validate that the leftmu_ and to_rightmu_ are not too far apart
+  if (leftmu_ + to_rightmu_ < 1.0) {
+    LOG_ERROR() << "The sum of leftmu (" << leftmu_ << ") and to_rightmu (" << to_rightmu_ << ") must be greater than or equal to 1.0";
+  }
+}
 /**
  * The core function
  */

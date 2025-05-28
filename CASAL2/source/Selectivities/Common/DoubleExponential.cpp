@@ -23,9 +23,9 @@ namespace selectivities {
  * Explicit Constructor
  */
 DoubleExponential::DoubleExponential(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_X0, &x0_, "The X0 parameter", "");
-  parameters_.Bind<Double>(PARAM_X1, &x1_, "The X1 parameter", "");
-  parameters_.Bind<Double>(PARAM_X2, &x2_, "The X2 parameter", "");
+  parameters_.Bind<Double>(PARAM_X0, &x0_, "The X0 parameter");
+  parameters_.Bind<Double>(PARAM_X1, &x1_, "The X1 parameter");
+  parameters_.Bind<Double>(PARAM_X2, &x2_, "The X2 parameter");
   parameters_.Bind<Double>(PARAM_Y0, &y0_, "The Y0 parameter", "")->set_lower_bound(0.0, false);
   parameters_.Bind<Double>(PARAM_Y1, &y1_, "The Y1 parameter", "")->set_lower_bound(0.0, false);
   parameters_.Bind<Double>(PARAM_Y2, &y2_, "The Y2 parameter", "")->set_lower_bound(0.0, false);
@@ -53,24 +53,14 @@ DoubleExponential::DoubleExponential(shared_ptr<Model> model) : Selectivity(mode
  * rules for the model.
  */
 void DoubleExponential::DoValidate() {
-  // Param: x0, x1, x2 - Check that x1 is between x0 and x2
-  if (x0_ < x1_ || x0_ > x2_)
-    LOG_ERROR_P(PARAM_X0) << "x0 ( " << AS_DOUBLE(x0_) << ") must be between x1 (" << AS_DOUBLE(x1_) << ") and x2 (" << AS_DOUBLE(x2_) << ")";
-
-  // Param: y0, y1, y2
-  if (y0_ < 0.0)
-    LOG_ERROR_P(PARAM_Y0) << ": y0 (" << AS_DOUBLE(y0_) << ") cannot be less than 0.0";
-  if (y1_ < 0.0)
-    LOG_ERROR_P(PARAM_Y1) << ": y1 (" << AS_DOUBLE(y1_) << ") cannot be less than 0.0";
-  if (y2_ < 0.0)
-    LOG_ERROR_P(PARAM_Y2) << ": y2 (" << AS_DOUBLE(y2_) << ") cannot be less than 0.0";
-
-  // Param: alpha
-  if (alpha_ <= 0.0)
-    LOG_ERROR_P(PARAM_ALPHA) << ": alpha (" << AS_DOUBLE(alpha_) << ") cannot be less than or equal to 0.0";
-
-  if (beta_ > model_->max_age())
-    LOG_ERROR_P(PARAM_BETA) << ": beta (" << AS_DOUBLE(beta_) << ") cannot be greater than the model maximum age";
+  parameters_.Validate(PARAM_X0)->GreaterThanOrEqualTo(0.0)->GreaterThanOrEqualToParameter(PARAM_X1)->LessThanOrEqualToParameter(PARAM_X2);
+  parameters_.Validate(PARAM_X1)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualToParameter(PARAM_X2);
+  parameters_.Validate(PARAM_X2)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_Y0)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_Y1)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_Y2)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_ALPHA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_BETA)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualToModelMaxAge();
 }
 /**
  * The core function

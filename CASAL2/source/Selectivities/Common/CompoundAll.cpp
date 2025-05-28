@@ -23,9 +23,9 @@ namespace selectivities {
  * Default constructor
  */
 CompoundAll::CompoundAll(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_A50, &a50_, "The mean (mu)", "");
-  parameters_.Bind<Double>(PARAM_ATO95, &a_to95_, "The sigma L parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_A_MIN, &amin_, "The sigma R parameter", "")->set_lower_bound(0.0, false);
+  parameters_.Bind<Double>(PARAM_A50, &a50_, "The mean (mu)");
+  parameters_.Bind<Double>(PARAM_ATO95, &a_to95_, "The sigma L parameter");
+  parameters_.Bind<Double>(PARAM_A_MIN, &amin_, "The sigma R parameter");
 
   RegisterAsAddressable(PARAM_A50, &a50_);
   RegisterAsAddressable(PARAM_ATO95, &a_to95_);
@@ -43,7 +43,11 @@ CompoundAll::CompoundAll(shared_ptr<Model> model) : Selectivity(model) {
  * variables to ensure they are within the business
  * rules for the model.
  */
-void CompoundAll::DoValidate() {}
+void CompoundAll::DoValidate() {
+  parameters_.Validate(PARAM_A50)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_ATO95)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_A_MIN)->GreaterThanOrEqualTo(0.0);
+}
 /**
  * The core function
  */

@@ -23,11 +23,11 @@ namespace selectivities {
  * Default constructor
  */
 LogisticProducing::LogisticProducing(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<unsigned>(PARAM_L, &low_, "The low value (L)", "");
-  parameters_.Bind<unsigned>(PARAM_H, &high_, "The high value (H)", "");
-  parameters_.Bind<Double>(PARAM_A50, &a50_, "the a50 parameter", "");
-  parameters_.Bind<Double>(PARAM_ATO95, &ato95_, "The ato95 parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
+  parameters_.Bind<unsigned>(PARAM_L, &low_, "The low value (L)");
+  parameters_.Bind<unsigned>(PARAM_H, &high_, "The high value (H)");
+  parameters_.Bind<Double>(PARAM_A50, &a50_, "the a50 parameter");
+  parameters_.Bind<Double>(PARAM_ATO95, &ato95_, "The ato95 parameter");
+  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity")->set_default_value(1.0);
 
   RegisterAsAddressable(PARAM_A50, &a50_);
   RegisterAsAddressable(PARAM_ATO95, &ato95_);
@@ -45,14 +45,12 @@ LogisticProducing::LogisticProducing(shared_ptr<Model> model) : Selectivity(mode
  * rules for the model.
  */
 void LogisticProducing::DoValidate() {
-  if (low_ > a50_ || high_ < a50_ || low_ >= high_) {
-    LOG_ERROR_P(PARAM_A50) << "low (l) cannot be greater than a50 | high (h) cannot be less than a50 | low cannot be greater than high";
-  }
-
-  if (alpha_ <= 0.0)
-    LOG_ERROR_P(PARAM_ALPHA) << ": alpha (" << AS_DOUBLE(alpha_) << ") cannot be less than or equal to 0.0";
-  if (ato95_ <= 0.0)
-    LOG_ERROR_P(PARAM_ATO95) << ": ato95 (" << AS_DOUBLE(ato95_) << ") cannot be less than or equal to 0.0";
+  parameters_.Validate(PARAM_L)->GreaterThanOrEqualTo(0u)->LessThanParameter(PARAM_H)->LessThanOrEqualToParameter(PARAM_A50);
+  parameters_.Validate(PARAM_H)->GreaterThanOrEqualToParameter(PARAM_A50);
+  ;
+  parameters_.Validate(PARAM_A50)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_ATO95)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_ALPHA)->GreaterThan(0.0);
 }
 
 /**
@@ -61,7 +59,7 @@ void LogisticProducing::DoValidate() {
 Double LogisticProducing::get_value(Double value) {
   if (value < low_) {
     return 0.0;
-  } else if(value >= high_) {
+  } else if (value >= high_) {
     return alpha_;
   } else if (value == low_) {
     return alpha_ / (1.0 + pow(19.0, (a50_ - value) / ato95_));
@@ -70,7 +68,7 @@ Double LogisticProducing::get_value(Double value) {
     if (lambda2 > 0.99999) {
       return alpha_;
     } else {
-      Double lambda1            = 1.0 / (1.0 + pow(19.0, (a50_ - value) / ato95_));
+      Double lambda1 = 1.0 / (1.0 + pow(19.0, (a50_ - value) / ato95_));
       return (lambda1 - lambda2) / (1.0 - lambda2) * alpha_;
     }
   }
@@ -82,7 +80,7 @@ Double LogisticProducing::get_value(Double value) {
 Double LogisticProducing::get_value(unsigned value) {
   if (value < low_) {
     return 0.0;
-  } else if(value >= high_) {
+  } else if (value >= high_) {
     return alpha_;
   } else if (value == low_) {
     return alpha_ / (1.0 + pow(19.0, (a50_ - value) / ato95_));
@@ -91,7 +89,7 @@ Double LogisticProducing::get_value(unsigned value) {
     if (lambda2 > 0.99999) {
       return alpha_;
     } else {
-      Double lambda1            = 1.0 / (1.0 + pow(19.0, (a50_ - value) / ato95_));
+      Double lambda1 = 1.0 / (1.0 + pow(19.0, (a50_ - value) / ato95_));
       return (lambda1 - lambda2) / (1.0 - lambda2) * alpha_;
     }
   }

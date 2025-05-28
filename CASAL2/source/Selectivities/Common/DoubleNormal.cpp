@@ -25,11 +25,11 @@ namespace selectivities {
  * Default constructor
  */
 DoubleNormal::DoubleNormal(shared_ptr<Model> model) : Selectivity(model) {
-  parameters_.Bind<Double>(PARAM_MU, &mu_, "The mean (mu)", "");
-  parameters_.Bind<Double>(PARAM_SIGMA_L, &sigma_l_, "The sigma L parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_SIGMA_R, &sigma_r_, "The sigma R parameter", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity", "", 1.0)->set_lower_bound(0.0, false);
-  parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies", "", 0.0)->set_lower_bound(0.0, true);
+  parameters_.Bind<Double>(PARAM_MU, &mu_, "The mean (mu)");
+  parameters_.Bind<Double>(PARAM_SIGMA_L, &sigma_l_, "The sigma L parameter");
+  parameters_.Bind<Double>(PARAM_SIGMA_R, &sigma_r_, "The sigma R parameter");
+  parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The maximum value of the selectivity")->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies")->set_default_value(0.0);
 
   RegisterAsAddressable(PARAM_MU, &mu_);
   RegisterAsAddressable(PARAM_SIGMA_L, &sigma_l_);
@@ -48,8 +48,11 @@ DoubleNormal::DoubleNormal(shared_ptr<Model> model) : Selectivity(model) {
  * rules for the model.
  */
 void DoubleNormal::DoValidate() {
-  if (beta_ > model_->max_age())
-    LOG_ERROR_P(PARAM_BETA) << ": beta (" << AS_DOUBLE(beta_) << ") cannot be greater than the model maximum age";
+  parameters_.Validate(PARAM_MU)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_SIGMA_L)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_SIGMA_R)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_ALPHA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_BETA)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualToModelMaxAge();
 }
 /**
  * The core function
