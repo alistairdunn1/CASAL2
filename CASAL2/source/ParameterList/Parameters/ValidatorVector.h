@@ -57,8 +57,9 @@ public:
   shared_ptr<ValidatorVector> SameNumberOfElementsModelLengthBinMidPoints();
 
 protected:
-  BindableVector<Double>*   GetParameterAsVectorDouble(bool null_on_error = false);
-  BindableVector<unsigned>* GetParameterAsVectorUnsigned(bool null_on_error = false);
+  BindableVector<Double>*      GetParameterAsVectorDouble(bool null_on_error = false);
+  BindableVector<unsigned>*    GetParameterAsVectorUnsigned(bool null_on_error = false);
+  BindableVector<std::string>* GetParameterAsVectorString(bool null_on_error = false);
 
   shared_ptr<Model>               model_;
   niwa::ParameterList*            parameters_;

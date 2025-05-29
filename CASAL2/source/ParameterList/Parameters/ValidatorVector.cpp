@@ -49,6 +49,17 @@ BindableVector<unsigned>* ValidatorVector::GetParameterAsVectorUnsigned(bool nul
 }
 
 /**
+ * This method will return the current parameter as a Bindable storing a vector of strings
+ */
+BindableVector<std::string>* ValidatorVector::GetParameterAsVectorString(bool null_on_error) {
+  auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_);
+  if (param == nullptr && !null_on_error) {
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorString " << parameter_->label() << " is not a vector<string> type";
+  }
+  return param;
+}
+
+/**
  * This method will check that the value of the parameter is greater than the value passed
  */
 shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(Double value) {
@@ -281,34 +292,33 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
     return shared_from_this();
   }
 
-  auto check_size = [&](auto* param1, auto* param2) {
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " is not a compatible vector type";
-      return;
-    }
-    if (param1->target()->size() != param2->target()->size()) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than " << label;
-    }
-  };
+  auto* source_double   = GetParameterAsVectorDouble(true);
+  auto* source_unsigned = GetParameterAsVectorUnsigned(true);
+  auto* source_string   = GetParameterAsVectorString(true);
+  if (source_double == nullptr && source_unsigned == nullptr && source_string == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned/string> type";
+    return shared_from_this();
+  }
 
-  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
-    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
-      check_size(param, param2);
-    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
-      check_size(param, param2);
-    } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
-    }
-  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
-      check_size(param, param2);
-    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
-      check_size(param, param2);
-    } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
-    }
-  } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+  auto* target = parameters_->Get(label);
+  if (target == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " does not exist in the parameter list";
+    return shared_from_this();
+  }
+
+  auto* target_double   = dynamic_cast<BindableVector<Double>*>(target);
+  auto* target_unsigned = dynamic_cast<BindableVector<unsigned>*>(target);
+  auto* target_string   = dynamic_cast<BindableVector<std::string>*>(target);
+  if (target_double == nullptr && target_unsigned == nullptr && target_string == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " is not a vector<double/unsigned/string> type";
+    return shared_from_this();
+  }
+
+  auto source_size = source_double ? source_double->target()->size() : (source_unsigned ? source_unsigned->target()->size() : source_string->target()->size());
+  auto target_size = target_double ? target_double->target()->size() : (target_unsigned ? target_unsigned->target()->size() : target_string->target()->size());
+  if (source_size != target_size) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << source_size << " elements, but " << label << " has " << target_size
+                << " elements";
   }
 
   return shared_from_this();
