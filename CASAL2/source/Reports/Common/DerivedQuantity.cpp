@@ -19,15 +19,14 @@ DerivedQuantity::DerivedQuantity() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection | RunMode::kSimulation | RunMode::kEstimation | RunMode::kProfiling);
   model_state_ = (State::Type)(State::kIterationComplete);
 
-  parameters_.Bind<string>(PARAM_DERIVED_QUANTITY, &derived_quantity_label_, "The derived quantity label", "", "");
+  parameters_.Bind<string>(PARAM_DERIVED_QUANTITY, &derived_quantity_label_, "The derived quantity label")->set_is_optional(true);
 }
 
 /**
  * Validate object
  */
 void DerivedQuantity::DoValidate(shared_ptr<Model> model) {
-  if (derived_quantity_label_ == "")
-    derived_quantity_label_ = label_;
+  parameters_.Validate(PARAM_DERIVED_QUANTITY)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
 }
 /**
  * Build the relationships between this object and other objects

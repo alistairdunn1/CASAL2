@@ -21,17 +21,15 @@ GrowthIncrement::GrowthIncrement() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection);
   model_state_ = State::kExecute;
   skip_tags_   = true;
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "The time step label", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for the report", "", true);
-  parameters_.Bind<string>(PARAM_GROWTH_INCREMENT, &growth_label_, "The growth increment label", "");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "The time step label");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for the report")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_GROWTH_INCREMENT, &growth_label_, "The growth increment label");
 }
 /**
  * DoValidate get pointer
  */
 void GrowthIncrement::DoValidate(shared_ptr<Model> model) {
-  if (!parameters_.Get(PARAM_YEARS)->has_been_defined()) {
-    years_ = model->years();
-  }
+  parameters_.ValidateVector(PARAM_YEARS)->DefaultToAllModelYears()->IsModelYear();
 }
 /**
  * DoBuild get pointer

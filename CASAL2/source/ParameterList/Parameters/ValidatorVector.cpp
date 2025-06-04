@@ -264,6 +264,30 @@ shared_ptr<ValidatorVector> ValidatorVector::IsModelYear() {
 /**
  *
  */
+shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  auto* param = GetParameterAsVectorUnsigned();
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelYears " << parameter_->label() << " is not a vector<unsigned> type";
+    return shared_from_this();
+  }
+
+  // std::cout << "Model Years Size: " << model_->years().size() << endl;
+  // return shared_from_this();
+
+  if (param->target() != nullptr || param->target()->size() == 0) {
+    *param->target() = model_->years();
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
 shared_ptr<ValidatorVector> ValidatorVector::NumberOfElements(unsigned count) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();

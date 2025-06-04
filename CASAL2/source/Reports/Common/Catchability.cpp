@@ -19,12 +19,13 @@ Catchability::Catchability() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection | RunMode::kSimulation | RunMode::kEstimation | RunMode::kProfiling);
   model_state_ = (State::Type)(State::kIterationComplete);
 
-  parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The catchability label", "", "");
+  parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The catchability label")->set_default_value("");
 }
 /**
  * Validate object
  */
 void Catchability::DoValidate(shared_ptr<Model> model) {}
+
 /**
  * Build the relationships between this object and other objects
  */

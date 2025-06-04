@@ -31,14 +31,12 @@ Partition::Partition() {
   model_state_ = State::kExecute;
   skip_tags_   = true;
 
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "Time Step label", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Years", "", true);
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "Time Step label");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Years")->set_is_optional(true);
 }
 
 void Partition::DoValidate(shared_ptr<Model> model) {
-  if (!parameters_.Get(PARAM_YEARS)->has_been_defined()) {
-    years_ = model->years();
-  }
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
 }
 /**
  * Execute the report

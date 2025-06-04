@@ -33,15 +33,14 @@ Process::Process() {
   model_state_ = State::kIterationComplete;
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kSimulation | RunMode::kEstimation | RunMode::kProjection | RunMode::kProfiling);
 
-  parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The process label that is reported", "", "");
+  parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The process label that is reported")->set_is_optional(true);
 }
 
 /**
  * Validate object
  */
 void Process::DoValidate(shared_ptr<Model> model) {
-  if (process_label_ == "")
-    process_label_ = label_;
+  parameters_.Validate(PARAM_PROCESS)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
 }
 
 /**

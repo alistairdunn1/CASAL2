@@ -27,7 +27,7 @@ namespace reports {
 AddressableTransformation::AddressableTransformation() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kEstimation | RunMode::kProfiling | RunMode::kProjection);
   model_state_ = State::kIterationComplete;
-  parameters_.Bind<string>(PARAM_PARAMETER_TRANSFORMATION, &addressable_label_, "The parameter_transformation label that is reported", "");
+  parameters_.Bind<string>(PARAM_PARAMETER_TRANSFORMATION, &addressable_label_, "The parameter_transformation label that is reported");
 }
 
 /**

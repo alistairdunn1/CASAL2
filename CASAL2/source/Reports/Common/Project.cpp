@@ -31,16 +31,13 @@ Project::Project() {
   model_state_ = State::kIterationComplete;
   run_mode_    = (RunMode::Type)(RunMode::kProjection);
 
-  parameters_.Bind<string>(PARAM_PROJECT, &project_label_, "The project label that is reported", "", "");
+  parameters_.Bind<string>(PARAM_PROJECT, &project_label_, "The project label that is reported")->set_is_optional(true);
 }
 /**
  * Validate object
  */
 void Project::DoValidate(shared_ptr<Model> model) {
-  if (!model->global_configuration().print_tabular()) {
-    if (project_label_ == "")
-      project_label_ = label_;
-  }
+  parameters_.Validate(PARAM_PROJECT)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
 }
 
 /**

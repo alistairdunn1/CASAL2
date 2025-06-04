@@ -31,16 +31,15 @@ Observation::Observation() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection | RunMode::kSimulation | RunMode::kEstimation | RunMode::kProfiling);
   model_state_ = (State::Type)(State::kIterationComplete);
 
-  parameters_.Bind<string>(PARAM_OBSERVATION, &observation_label_, "The observation label", "", "");
-  parameters_.Bind<bool>(PARAM_NORMALISED_RESIDUALS, &normalised_resids_, "Print Normalised Residuals?", "", true);
-  parameters_.Bind<bool>(PARAM_PEARSONS_RESIDUALS, &pearson_resids_, "Print Pearsons Residuals?", "", true);
+  parameters_.Bind<string>(PARAM_OBSERVATION, &observation_label_, "The observation label")->set_is_optional(true);
+  parameters_.Bind<bool>(PARAM_NORMALISED_RESIDUALS, &normalised_resids_, "Print Normalised Residuals?")->set_default_value(true);
+  parameters_.Bind<bool>(PARAM_PEARSONS_RESIDUALS, &pearson_resids_, "Print Pearsons Residuals?")->set_default_value(true);
 }
 /**
  * Validate object
  */
 void Observation::DoValidate(shared_ptr<Model> model) {
-  if (observation_label_ == "")
-    observation_label_ = label_;
+  parameters_.Validate(PARAM_OBSERVATION)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
 }
 
 /**

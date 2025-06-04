@@ -369,4 +369,41 @@ shared_ptr<Validator> Validator::IsInList(initializer_list<string> list) {
   return shared_from_this();
 }
 
+/**
+ *
+ */
+shared_ptr<Validator> Validator::DuplicateParameterIfNotAssigned(const string& label) {
+  // If it's already been defined we don't need to do anything
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  if (auto* param = dynamic_cast<Bindable<Double>*>(parameter_)) {
+    auto* param2 = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a double type";
+    }
+    *param->target() = *param2->target();
+
+  } else if (auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_)) {
+    auto* param2 = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not an unsigned type";
+    }
+    *param->target() = *param2->target();
+
+  } else if (auto* param = dynamic_cast<Bindable<string>*>(parameter_)) {
+    auto* param2 = dynamic_cast<Bindable<string>*>(parameters_->Get(label));
+    if (param2 == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a string type";
+    }
+    *param->target() = *param2->target();
+
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << parameter_->label() << " is not a double/unsigned type";
+  }
+
+  return shared_from_this();
+}
+
 }  // namespace niwa::parameters

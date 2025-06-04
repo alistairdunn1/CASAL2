@@ -26,13 +26,15 @@ SimulatedObservation::SimulatedObservation() {
   model_state_ = State::kIterationComplete;
   skip_tags_   = true;
 
-  parameters_.Bind<string>(PARAM_OBSERVATION, &observation_label_, "The observation label", "", "");
+  parameters_.Bind<string>(PARAM_OBSERVATION, &observation_label_, "The observation label")->set_is_optional(true);
 }
 
 /**
  * Validate object
  */
-void SimulatedObservation::DoValidate(shared_ptr<Model> model) {}
+void SimulatedObservation::DoValidate(shared_ptr<Model> model) {
+  parameters_.Validate(PARAM_OBSERVATION)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
+}
 
 /**
  * Build method

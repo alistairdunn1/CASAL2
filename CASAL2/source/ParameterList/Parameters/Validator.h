@@ -56,6 +56,7 @@ public:
   shared_ptr<Validator> LessThanModelMaxAge();
   shared_ptr<Validator> IsAge();
   shared_ptr<Validator> IsInList(initializer_list<string> list);
+  shared_ptr<Validator> DuplicateParameterIfNotAssigned(const string& label);
 
 protected:
   Bindable<Double>*   GetParameterAsDouble(bool null_on_error = false);

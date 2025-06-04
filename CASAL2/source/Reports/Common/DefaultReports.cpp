@@ -14,14 +14,14 @@ namespace reports {
  *
  */
 DefaultReports::DefaultReports() {
-  parameters_.Bind<bool>(PARAM_CATCHABILITIES, &report_catchabilities_, "Report catchabilities", "", false);
-  parameters_.Bind<bool>(PARAM_DERIVED_QUANTITIES, &report_derived_quantities_, "Report derived quantities", "", false);
-  parameters_.Bind<bool>(PARAM_OBSERVATIONS, &report_observations_, "Report observations", "", false);
-  parameters_.Bind<bool>(PARAM_PROCESSES, &report_processes_, "Report processes", "", false);
-  parameters_.Bind<bool>(PARAM_PROJECTS, &report_projects_, "Report projects", "", false);
-  parameters_.Bind<bool>(PARAM_SELECTIVITIES, &report_selectivities_, "Report selectivities", "", false);
-  parameters_.Bind<bool>(PARAM_PARAMETER_TRANSFORMATIONS, &addressable_transformations_, "Report parameters transformations", "", false);
-  parameters_.Bind<bool>(PARAM_TIME_VARYING, &time_varying_, "Report Time-Varying objects", "", false);
+  parameters_.Bind<bool>(PARAM_CATCHABILITIES, &report_catchabilities_, "Report catchabilities")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_DERIVED_QUANTITIES, &report_derived_quantities_, "Report derived quantities")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_OBSERVATIONS, &report_observations_, "Report observations")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_PROCESSES, &report_processes_, "Report processes")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_PROJECTS, &report_projects_, "Report projects")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_SELECTIVITIES, &report_selectivities_, "Report selectivities")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_PARAMETER_TRANSFORMATIONS, &addressable_transformations_, "Report parameters transformations")->set_default_value(false);
+  parameters_.Bind<bool>(PARAM_TIME_VARYING, &time_varying_, "Report Time-Varying objects")->set_default_value(false);
 
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection | RunMode::kSimulation | RunMode::kEstimation | RunMode::kProfiling | RunMode::kMCMC);
   model_state_ = (State::Type)(State::kIterationComplete);

@@ -23,10 +23,10 @@ SelectivityByYear::SelectivityByYear() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection);
   model_state_ = State::kExecute;
   skip_tags_   = true;
-  parameters_.Bind<string>(PARAM_SELECTIVITY, &selectivity_label_, "Selectivity label", "", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Years", "", true);
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "Time Step when to print the selectivity", "");
-  parameters_.Bind<double>(PARAM_LENGTH_VALUES, &length_values_, "Length values to evaluate the length-based selectivity in an age based model.", "", true);
+  parameters_.Bind<string>(PARAM_SELECTIVITY, &selectivity_label_, "Selectivity label")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Years")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "Time Step when to print the selectivity");
+  parameters_.Bind<double>(PARAM_LENGTH_VALUES, &length_values_, "Length values to evaluate the length-based selectivity in an age based model.")->set_is_optional(true);
 }
 
 /**
@@ -34,11 +34,8 @@ SelectivityByYear::SelectivityByYear() {
  */
 void SelectivityByYear::DoValidate(shared_ptr<Model> model) {
   LOG_FINE() << " prepping report for " << label_ << " selectivity " << selectivity_label_;
-  if (!parameters_.Get(PARAM_YEARS)->has_been_defined()) {
-    years_ = model->years();
-  }
-  if (selectivity_label_ == "")
-    selectivity_label_ = label_;
+  parameters_.Validate(PARAM_SELECTIVITY)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
 }
 /**
  * Build object

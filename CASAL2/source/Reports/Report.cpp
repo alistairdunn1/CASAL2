@@ -54,14 +54,15 @@ inline bool DoesFileExist(const string& file_name) {
  * Default constructor
  */
 Report::Report() {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The report label", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The report type", "");
-  parameters_.Bind<string>(PARAM_FILE_NAME, &file_name_, "The file name. If not supplied, then output is directed to standard out", "", "");
-  parameters_
-      .Bind<string>(PARAM_WRITE_MODE, &write_mode_, "Specify if any previous file with the same name should be overwritten, appended to, or is generated using a sequential suffix",
-                    "", PARAM_OVERWRITE)
-      ->set_allowed_values({PARAM_OVERWRITE, PARAM_APPEND, PARAM_INCREMENTAL_SUFFIX});
-  parameters_.Bind<string>(PARAM_FORMAT, &format_, "Report output format", "", PARAM_R)->set_allowed_values({PARAM_R, PARAM_NONE});
+  // clang-format off
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The report label");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The report type");
+  parameters_.Bind<string>(PARAM_FILE_NAME, &file_name_, "The file name. If not supplied, then output is directed to standard out")
+    ->set_default_value("");
+  parameters_.Bind<string>(PARAM_WRITE_MODE, &write_mode_, "Specify if any previous file with the same name should be overwritten, appended to, or is generated using a sequential suffix")
+    ->set_default_value(PARAM_OVERWRITE);
+  parameters_.Bind<string>(PARAM_FORMAT, &format_, "Report output format")->set_default_value(PARAM_R);
+  // clang-format on
 }
 
 /**
@@ -75,6 +76,10 @@ void Report::Validate(shared_ptr<Model> model) {
 
   Report::lock_.lock();
   parameters_.Populate(model);
+
+  parameters_.Validate(PARAM_WRITE_MODE)->IsInList({PARAM_OVERWRITE, PARAM_APPEND, PARAM_INCREMENTAL_SUFFIX});
+  parameters_.Validate(PARAM_FORMAT)->IsInList({PARAM_R, PARAM_NONE});
+
   DoValidate(model);
   Report::lock_.unlock();
 }
@@ -135,8 +140,6 @@ void Report::Verify(shared_ptr<Model> model) {
   Report::lock_.lock();
   if (time_step_ != "" && !model->managers()->time_step()->GetTimeStep(time_step_))
     LOG_ERROR_P(PARAM_TIME_STEP) << " labelled '" << time_step_ << "' could not be found. Please check it has been defined correctly";
-
-
 
   DoVerify(model);
   Report::lock_.unlock();
@@ -304,7 +307,7 @@ void Report::FlushCache() {
     if (!file.is_open())
       LOG_ERROR() << "Unable to open file: " << file_name;
 
-    //LOG_MEDIUM() << "skip tags = " << skip_tags_;
+    // LOG_MEDIUM() << "skip tags = " << skip_tags_;
     if (!skip_tags_) {
       cache_ << REPORT_END << "\n";
     }

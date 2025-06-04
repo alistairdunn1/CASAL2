@@ -22,13 +22,15 @@ TimeVarying::TimeVarying() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kProjection | RunMode::kSimulation | RunMode::kEstimation | RunMode::kProfiling);
   model_state_ = (State::Type)(State::kIterationComplete);
 
-  parameters_.Bind<string>(PARAM_TIME_VARYING, &time_varying_label_, "The time varying label that is reported", "", "");
+  parameters_.Bind<string>(PARAM_TIME_VARYING, &time_varying_label_, "The time varying label that is reported")->set_is_optional(true);
 }
 
 /**
  * Validate object
  */
-void TimeVarying::DoValidate(shared_ptr<Model> model) {}
+void TimeVarying::DoValidate(shared_ptr<Model> model) {
+  parameters_.Validate(PARAM_TIME_VARYING)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
+}
 
 /**
  *  Build object

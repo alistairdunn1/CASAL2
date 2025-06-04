@@ -29,9 +29,9 @@ Addressable::Addressable() {
   run_mode_    = (RunMode::Type)(RunMode::kBasic | RunMode::kEstimation | RunMode::kProjection | RunMode::kProfiling);
   model_state_ = State::kExecute;
 
-  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The addressable parameter name", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Define the years that the report is generated for", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "Defines the time-step that the report applies to", "", "");
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The addressable parameter name");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Define the years that the report is generated for");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_, "Defines the time-step that the report applies to")->set_default_value("");
 }
 
 /**
@@ -91,13 +91,9 @@ void Addressable::DoPrepareTabular(shared_ptr<Model> model) {
   LOG_INFO() << "Tabular mode for reports of type " << PARAM_PARAMETER_TRANSFORMATIONS << " has not been implemented";
 }
 
-void Addressable::DoExecuteTabular(shared_ptr<Model> model) {
+void Addressable::DoExecuteTabular(shared_ptr<Model> model) {}
 
-}
-
-void Addressable::DoFinaliseTabular(shared_ptr<Model> model) {
-
-}
+void Addressable::DoFinaliseTabular(shared_ptr<Model> model) {}
 
 } /* namespace reports */
 } /* namespace niwa */
