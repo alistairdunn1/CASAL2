@@ -85,6 +85,7 @@ public:
   virtual vector<unsigned>      years_all() const;
   virtual vector<unsigned>      years_projection() const;
   unsigned                      year_spread() const;
+  void                          set_current_year(unsigned current_year) { current_year_ = current_year; }
   virtual unsigned              current_year() const { return current_year_; }
   virtual string                base_weight_units() const { return base_weight_units_; }
   virtual unsigned              min_age() const { return min_age_; }
