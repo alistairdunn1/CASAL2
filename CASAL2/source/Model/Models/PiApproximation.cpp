@@ -34,7 +34,7 @@ PiApproximation::PiApproximation() {
   partition_type_ = PartitionType::kPiApprox;
   size_           = 100.0;
 
-  parameters_.Bind<bool>(PARAM_USE_RANDOM, &use_random_, "Use random numbers for points, not the defined MCMC algorithm", "", false);
+  parameters_.Bind<bool>(PARAM_USE_RANDOM, &use_random_, "Use random numbers for points, not the defined MCMC algorithm")->set_default_value(false);
 }
 
 /**
@@ -114,7 +114,7 @@ void PiApproximation::FullIteration() {
   double pi_approx = 4 * (insided / (insided + outsided));
   objective_score_ = math::PI + abs(math::PI - pi_approx);
 
-  //managers()->penalty()->FlagPenalty("PI_Approximation", objective_score_);
+  // managers()->penalty()->FlagPenalty("PI_Approximation", objective_score_);
   cout << "Objective Score: " << objective_score_ << " (" << (inside_ + outside_) << ") - "
        << "inside_ / outside_: " << inside_ << " : " << outside_ << "; new_x/new_y: " << new_x << "/" << new_y << endl;
 }

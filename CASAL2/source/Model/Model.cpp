@@ -61,15 +61,14 @@ using std::endl;
 Model::Model() {
   LOG_TRACE();
 
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "Type of model (only type=age is currently implemented)", "", PARAM_AGE)
-      ->set_allowed_values({PARAM_AGE, PARAM_PI_APPROX, PARAM_LENGTH});
-  // was: ->set_allowed_values({PARAM_AGE, PARAM_LENGTH, PARAM_HYBRID, PARAM_MULTIVARIATE, PARAM_PI_APPROX});
-  parameters_
-      .Bind<string>(PARAM_BASE_UNITS, &base_weight_units_,
-                    "Define the units for the base weight measurement unit (grams, kilograms (kgs), or tonnes). This will be the default unit of any weight input values ", "",
-                    PARAM_TONNES)
-      ->set_allowed_values({PARAM_GRAMS, PARAM_TONNES, PARAM_KILOGRAMS, PARAM_KGS});
-  parameters_.Bind<unsigned>(PARAM_THREADS, &threads_, "The number of threads to use for this model", "", 1u)->set_lower_bound(1);
+  // clang-format off
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "Type of model (only type=age is currently implemented)")
+    ->set_default_value(PARAM_AGE);
+  parameters_.Bind<string>(PARAM_BASE_UNITS, &base_weight_units_, "Define the units for the base weight measurement unit (grams, kilograms (kgs), or tonnes). This will be the default unit of any weight input values ")
+    ->set_default_value(PARAM_TONNES);
+  parameters_.Bind<unsigned>(PARAM_THREADS, &threads_, "The number of threads to use for this model")
+    ->set_default_value(1u);
+  // clang-format on
 }
 
 /**
@@ -388,6 +387,10 @@ void Model::Validate() {
 
   if (!parameters_.has_been_populated())
     parameters_.Populate(pointer());
+
+  parameters_.Validate(PARAM_TYPE)->IsInList({PARAM_AGE, PARAM_PI_APPROX, PARAM_LENGTH});
+  parameters_.Validate(PARAM_BASE_UNITS)->IsInList({PARAM_GRAMS, PARAM_TONNES, PARAM_KILOGRAMS, PARAM_KGS});
+  parameters_.Validate(PARAM_THREADS)->GreaterThan(0u);
 
   DoValidate();
 

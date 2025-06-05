@@ -35,7 +35,7 @@ namespace math = niwa::utilities::math;
 Multivariate::Multivariate() {
   partition_type_ = PartitionType::kMultivariate;
 
-  parameters_.Bind<bool>(PARAM_USE_RANDOM, &use_random_, "Use random numbers for points, not the defined MCMC algorithm", "", false);
+  parameters_.Bind<bool>(PARAM_USE_RANDOM, &use_random_, "Use random numbers for points, not the defined MCMC algorithm")->set_default_value(false);
 
   // Mean should be 0.0, 0.0
   // Cov  should be [[ 1.0, 0.0]][ 0. 1.0] // Identity Matrix
