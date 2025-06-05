@@ -11,6 +11,8 @@
 // headers
 #include "Constant.h"
 
+#include "../../Utilities/Map.h"
+
 // namespaces
 namespace niwa {
 namespace projects {
@@ -19,27 +21,15 @@ namespace projects {
  * Default constructor
  */
 Constant::Constant(shared_ptr<Model> model) : Project(model) {
-  parameters_.Bind<Double>(PARAM_VALUES, &values_, "The values to assign to the addressable", "");
+  parameters_.Bind<Double>(PARAM_VALUES, &values_, "The values to assign to the addressable");
 }
 
 /**
  * Validate
  */
 void Constant::DoValidate() {
-  if (values_.size() != 1 && values_.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_VALUES) << "length (" << values_.size() << ") must match the number of years provided (" << years_.size() << "), or use a single value for all years";
-    return;
-  }
-
-  if (values_.size() == 1) {
-    Double value = values_[0];
-    values_.assign(years_.size(), value);
-    LOG_FINEST() << "number of values converted from 1 to " << values_.size();
-  }
-  for (unsigned i = 0; i < years_.size(); ++i) {
-    LOG_FINEST() << "value in year " << years_[i] << " = " << values_[i];
-    year_values_[years_[i]] = values_[i];
-  }
+  parameters_.ValidateVector(PARAM_VALUES)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  year_values_ = utilities::Map::create(years_, values_);
 }
 
 /**

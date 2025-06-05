@@ -23,16 +23,16 @@ namespace projects {
  */
 
 LogNormal::LogNormal(shared_ptr<Model> model) : Project(model) {
-  parameters_.Bind<Double>(PARAM_MEAN, &mean_, "The mean of the lognormal process", "", 0.0);
-  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma) of the lognormal process", "")->set_lower_bound(0.0);
-  // parameters_.Bind<Double>(PARAM_RHO, &rho_, "an autocorrelation parameter on the log scale", "", 0.0);
-  // parameters_.Bind<Double>(PARAM_ALPHA, &alpha_, "The alpha constant in the gaussian AR(1) process", 0.0,true);
+  parameters_.Bind<Double>(PARAM_MEAN, &mean_, "The mean of the lognormal process")->set_default_value(0.0);
+  parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma) of the lognormal process");
 }
 
 /**
  * Validate
  */
-void LogNormal::DoValidate() {}
+void LogNormal::DoValidate() {
+  parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+}
 
 /**
  * Build

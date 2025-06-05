@@ -22,27 +22,16 @@ namespace projects {
  * Default constructor
  */
 EmpiricalSampling::EmpiricalSampling(shared_ptr<Model> model) : Project(model) {
-  parameters_.Bind<unsigned>(PARAM_START_YEAR, &start_year_, "The start year of sampling", "", false);
-  parameters_.Bind<unsigned>(PARAM_FINAL_YEAR, &final_year_, "The final year of sampling", "", false);
+  parameters_.Bind<unsigned>(PARAM_START_YEAR, &start_year_, "The start year of sampling")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_FINAL_YEAR, &final_year_, "The final year of sampling")->set_is_optional(true);
 }
 
 /**
  * Validate
  */
 void EmpiricalSampling::DoValidate() {
-  // if no values specified then set default as the model lifespan
-  if (!parameters_.Get(PARAM_START_YEAR)->has_been_defined())
-    start_year_ = model_->start_year();
-  if (!parameters_.Get(PARAM_FINAL_YEAR)->has_been_defined())
-    final_year_ = model_->final_year();
-
-  if (start_year_ < model_->start_year())
-    LOG_ERROR_P(PARAM_START_YEAR) << start_year_ << " must be greater than or equal to the model start year " << model_->start_year();
-  if (final_year_ > model_->final_year())
-    LOG_ERROR_P(PARAM_FINAL_YEAR) << final_year_ << " must be less than or equal to the model final year " << model_->final_year();
-
-  if (final_year_ <= start_year_)
-    LOG_ERROR_P(PARAM_FINAL_YEAR) << final_year_ << " must be larger than start year " << start_year_;
+  parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model_->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
+  parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model_->projection_final_year());
 }
 
 /**
