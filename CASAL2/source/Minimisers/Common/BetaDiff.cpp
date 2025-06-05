@@ -48,9 +48,18 @@ private:
  * Default constructor
  */
 BetaDiff::BetaDiff(shared_ptr<Model> model) : Minimiser(model) {
-  parameters_.Bind<int>(PARAM_MAX_ITERATIONS, &max_iterations_, "The maximum number of iterations", "", 1000)->set_lower_bound(1);
-  parameters_.Bind<int>(PARAM_MAX_EVALUATIONS, &max_evaluations_, "The maximum number of evaluations", "", 4000)->set_lower_bound(1);
-  parameters_.Bind<double>(PARAM_TOLERANCE, &gradient_tolerance_, "The tolerance of the gradient for convergence", "", DEFAULT_CONVERGENCE)->set_lower_bound(0.0, false);
+  parameters_.Bind<unsigned>(PARAM_MAX_ITERATIONS, &max_iterations_, "The maximum number of iterations")->set_default_value(1000);
+  parameters_.Bind<unsigned>(PARAM_MAX_EVALUATIONS, &max_evaluations_, "The maximum number of evaluations")->set_default_value(4000);
+  parameters_.Bind<double>(PARAM_TOLERANCE, &gradient_tolerance_, "The tolerance of the gradient for convergence")->set_default_value(1e-5);
+}
+
+/**
+ *
+ */
+void BetaDiff::DoValidate() {
+  parameters_.Validate(PARAM_MAX_ITERATIONS)->GreaterThan(1u);
+  parameters_.Validate(PARAM_MAX_EVALUATIONS)->GreaterThan(1u);
+  parameters_.Validate(PARAM_TOLERANCE)->GreaterThanOrEqualTo(0.0);
 }
 
 /**
@@ -89,9 +98,11 @@ void BetaDiff::Execute() {
 
   dmatrix betadiff_hessian(estimates.size(), estimates.size());
   //  dmatrix adolc_hessian(estimates.size(), estimates.size());
-  int    convergence = 0;
-  double score       = optimise<MyModel, MyObjective>(my_model, my_objective, start_values, lower_bounds, upper_bounds, convergence, 0, max_iterations_, max_evaluations_,
-                                                gradient_tolerance_, 0, &betadiff_hessian, 0, 1);
+  int    convergence     = 0;
+  int    max_iterations  = (int)max_iterations_;
+  int    max_evaluations = (int)max_evaluations_;
+  double score           = optimise<MyModel, MyObjective>(my_model, my_objective, start_values, lower_bounds, upper_bounds, convergence, 0, max_iterations, max_evaluations,
+                                                          gradient_tolerance_, 0, &betadiff_hessian, 0, 1);
 
   LOG_FINE() << "complete optimise, get hessian, " << hessian_size_;
   for (int row = 0; row < (int)estimates.size(); ++row) {

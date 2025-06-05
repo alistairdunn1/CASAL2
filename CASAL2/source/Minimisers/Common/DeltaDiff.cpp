@@ -23,10 +23,20 @@ namespace minimisers {
  * Default constructor
  */
 DeltaDiff::DeltaDiff(shared_ptr<Model> model) : Minimiser(model) {
-  parameters_.Bind<int>(PARAM_MAX_ITERATIONS, &max_iterations_, "Maximum number of iterations", "", 1000)->set_lower_bound(1, true);
-  parameters_.Bind<int>(PARAM_MAX_EVALUATIONS, &max_evaluations_, "Maximum number of evaluations", "", 4000)->set_lower_bound(1, true);
-  parameters_.Bind<Double>(PARAM_TOLERANCE, &gradient_tolerance_, "Tolerance of the gradient for convergence", "", DEFAULT_CONVERGENCE)->set_lower_bound(0, false);
-  parameters_.Bind<Double>(PARAM_STEP_SIZE, &step_size_, "Minimum Step-size before minimisation fails", "", 1e-7)->set_lower_bound(0, false);
+  parameters_.Bind<unsigned>(PARAM_MAX_ITERATIONS, &max_iterations_, "The maximum number of iterations")->set_default_value(1000);
+  parameters_.Bind<unsigned>(PARAM_MAX_EVALUATIONS, &max_evaluations_, "The maximum number of evaluations")->set_default_value(4000);
+  parameters_.Bind<double>(PARAM_TOLERANCE, &gradient_tolerance_, "The tolerance of the gradient for convergence")->set_default_value(1e-5);
+  parameters_.Bind<double>(PARAM_STEP_SIZE, &step_size_, "The minimum step size before minimisation fails")->set_default_value(1e-7);
+}
+
+/**
+ *
+ */
+void DeltaDiff::DoValidate() {
+  parameters_.Validate(PARAM_MAX_ITERATIONS)->GreaterThan(1u);
+  parameters_.Validate(PARAM_MAX_EVALUATIONS)->GreaterThan(1u);
+  parameters_.Validate(PARAM_TOLERANCE)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_STEP_SIZE)->GreaterThanOrEqualTo(0.0);
 }
 
 /**
@@ -71,9 +81,11 @@ void DeltaDiff::ExecuteThreaded(shared_ptr<ThreadPool> thread_pool) {
   }
 
   LOG_FINE() << "Launching minimiser";
-  int               status = 0;
+  int               status          = 0;
+  int               max_iterations  = (int)max_iterations_;
+  int               max_evaluations = (int)max_evaluations_;
   deltadiff::Engine clDeltaDiff;
-  clDeltaDiff.optimise_finite_differences(call_back, start_values, lower_bounds, upper_bounds, status, max_iterations_, max_evaluations_, gradient_tolerance_, hessian_, 1,
+  clDeltaDiff.optimise_finite_differences(call_back, start_values, lower_bounds, upper_bounds, status, max_iterations, max_evaluations, gradient_tolerance_, hessian_, 1,
                                           step_size_);
   /*
   LOG_MEDIUM() << "start values now ";

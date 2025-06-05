@@ -34,16 +34,16 @@ public:
   // Methods
   explicit BetaDiff(shared_ptr<Model> model);
   virtual ~BetaDiff() = default;
-  void DoValidate() override final{};
-  void DoBuild() override final{};
-  void DoReset() override final{};
+  void DoValidate() override final;
+  void DoBuild() override final {};
+  void DoReset() override final {};
   void Execute() override final;
 
 private:
   // Members
-  int    max_iterations_;
-  int    max_evaluations_;
-  double gradient_tolerance_;
+  unsigned max_iterations_;
+  unsigned max_evaluations_;
+  double   gradient_tolerance_;
 };
 
 }  // namespace minimisers

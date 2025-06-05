@@ -33,17 +33,17 @@ public:
   // Methods
   GammaDiff(shared_ptr<Model> model);
   virtual ~GammaDiff() = default;
-  void DoValidate() override final{};
-  void DoBuild() override final{};
-  void DoReset() override final{};
+  void DoValidate() override final;
+  void DoBuild() override final {};
+  void DoReset() override final {};
   void Execute() override final;
 
 private:
   // Members
-  int    max_iterations_;
-  int    max_evaluations_;
-  double gradient_tolerance_;
-  double step_size_;
+  unsigned max_iterations_;
+  unsigned max_evaluations_;
+  double   gradient_tolerance_;
+  double   step_size_;
 };
 
 } /* namespace minimisers */
