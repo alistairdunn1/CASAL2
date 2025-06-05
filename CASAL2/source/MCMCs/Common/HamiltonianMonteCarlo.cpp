@@ -53,11 +53,20 @@ double norm2(const std::vector<double>& target) {
  * @param model
  */
 HamiltonianMonteCarlo::HamiltonianMonteCarlo(shared_ptr<Model> model) : MCMC(model) {
-  parameters_.Bind<unsigned>(PARAM_LEAPFROG_STEPS, &leapfrog_steps_, "Number of leapfrog steps", "", 1u)->set_lower_bound(0, false);
-  parameters_.Bind<double>(PARAM_LEAPFROG_DELTA, &leapfrog_delta_, "Amount to leapfrog per step", "", 1e-7)->set_lower_bound(0, false);
-  parameters_.Bind<double>(PARAM_GRADIENT_STEP_SIZE, &gradient_step_size_, "Step size to use when calculating gradient", "", 1e-7)->set_lower_bound(1e-13, true);
+  parameters_.Bind<unsigned>(PARAM_LEAPFROG_STEPS, &leapfrog_steps_, "Number of leapfrog steps")->set_default_value(1u);
+  parameters_.Bind<double>(PARAM_LEAPFROG_DELTA, &leapfrog_delta_, "Amount to leapfrog per step")->set_default_value(1e-7);
+  parameters_.Bind<double>(PARAM_GRADIENT_STEP_SIZE, &gradient_step_size_, "Step size to use when calculating gradient")->set_default_value(1e-7);
 
   type_ = PARAM_HAMILTONIAN;
+}
+
+/**
+ *
+ */
+void HamiltonianMonteCarlo::DoValidate() {
+  parameters_.Validate(PARAM_LEAPFROG_STEPS)->GreaterThan(0u);
+  parameters_.Validate(PARAM_LEAPFROG_DELTA)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_GRADIENT_STEP_SIZE)->GreaterThan(1e-13);
 }
 
 /**

@@ -33,8 +33,8 @@ public:
 
 protected:
   // methods
-  void DoValidate() final{};
-  void DoBuild() final{};
+  void DoValidate() final;
+  void DoBuild() final {};
   void GeneratedNewScaledCandidates();
 
   // members
