@@ -38,20 +38,25 @@ public:
   void Bind() override final;
 
   // accessors
-  string         stored_type() const override final { return utilities::demangle(typeid(*target_).name()); }
-  vector<string> current_values() override final;
-  void           set_allowed_values(std::initializer_list<T> list);
-  void           set_range(T lower_bound, T upper_bound, bool lower_inclusive = true, bool upper_inclusive = true);
-  void           set_lower_bound(T lower_bound, bool inclusive = true);
-  void           set_upper_bound(T upper_bound, bool inclusive = true);
-  void           set_default_value(T value) {
+  string             stored_type() const override final { return utilities::demangle(typeid(*target_).name()); }
+  vector<string>     current_values() override final;
+  vector<T>*         target() { return target_; }
+  BindableVector<T>* flag_is_category();
+
+  // Maybe deprecated methods
+  T    default_value() const { return default_value_; }
+  bool has_default_value() const { return has_default_value_; }
+  void set_default_value(T value) {
     default_value_     = value;
     has_default_value_ = true;
     is_optional_       = true;
   }
-  T          default_value() const { return default_value_; }
-  bool       has_default_value() const { return has_default_value_; }
-  vector<T>* target() { return target_; }
+
+  // Deprecated methods
+  void set_allowed_values(std::initializer_list<T> list);
+  void set_range(T lower_bound, T upper_bound, bool lower_inclusive = true, bool upper_inclusive = true);
+  void set_lower_bound(T lower_bound, bool inclusive = true);
+  void set_upper_bound(T upper_bound, bool inclusive = true);
 
 private:
   // class
@@ -70,6 +75,7 @@ private:
   Range      range_;
   bool       has_default_value_ = false;
   T          default_value_;
+  bool       is_categories_ = false;
 };
 
 } /* namespace parameters */

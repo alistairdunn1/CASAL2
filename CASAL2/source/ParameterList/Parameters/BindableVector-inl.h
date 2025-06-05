@@ -179,6 +179,12 @@ vector<string> BindableVector<T>::current_values() {
   return result;
 }
 
+template <typename T>
+BindableVector<T>* BindableVector<T>::flag_is_category() {
+  is_categories_ = true;
+  return this;
+}
+
 } /* namespace parameters */
 } /* namespace niwa */
 

@@ -406,4 +406,59 @@ shared_ptr<Validator> Validator::DuplicateParameterIfNotAssigned(const string& l
   return shared_from_this();
 }
 
+/**
+ *
+ */
+shared_ptr<Validator> Validator::IsModelYear() {
+  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not an unsigned type";
+  }
+
+  unsigned source = *param->target();
+  auto     years  = model_->years_all();
+  if (std::find(years.begin(), years.end(), source) == years.end()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model start year ("
+                << *years.begin() << ") and end year (" << *years.rbegin() << ")";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *
+ */
+shared_ptr<Validator> Validator::DefaultValue(unsigned value) {
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not an unsigned type";
+  }
+
+  *param->target() = value;
+
+  return shared_from_this();
+}
+
+/**
+ * This method will return a shared pointer to a Validator that will check if the parameter is required
+ * based on the boolean value passed in.
+ */
+shared_ptr<Validator> Validator::RequiredIf(bool required) {
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  if (required) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " is required but has not been defined.";
+  } else {
+    LOG_WARNING() << this->parameter_->location() << " parameter " << parameter_->label() << " is optional and has not been defined.";
+  }
+
+  return shared_from_this();
+}
+
 }  // namespace niwa::parameters

@@ -40,10 +40,12 @@ public:
   void Bind() override final;
 
   // acessors
-  void set_default_value(T value) {
+  Bindable<T>* set_default_value(T value) {
     default_value_ = value;
     is_optional_   = true;
+    return this;
   }
+
   T              default_value() const { return default_value_; }
   string         stored_type() const override final { return utilities::demangle(typeid(*target_).name()); }
   vector<string> current_values() override final;

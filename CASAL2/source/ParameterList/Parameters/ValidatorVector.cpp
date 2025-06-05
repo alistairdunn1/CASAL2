@@ -251,11 +251,12 @@ shared_ptr<ValidatorVector> ValidatorVector::IsModelYear() {
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorUnsigned();
+  auto* param      = GetParameterAsVectorUnsigned();
+  auto  final_year = fmax(model_->final_year(), model_->projection_final_year());
   for (auto& val : *param->target()) {
-    if (val < model_->start_year() || val > model_->final_year()) {
+    if (val < model_->start_year() || val > final_year) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be between " << model_->start_year()
-                  << " and " << model_->final_year();
+                  << " and " << final_year;
     }
   }
   return shared_from_this();
@@ -368,7 +369,6 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
       return;
     }
     if (src.size() == 1) {
-      std::cout << "src.size() = " << src.size() << " dst.size() = " << dst.size() << endl;
       auto temp = src[0];
       src.assign(dst.size(), temp);
     }
@@ -379,19 +379,34 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
       expand(param, param2, "double", "double");
     } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
       expand(param, param2, "double", "unsigned");
+    } else if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
+      expand(param, param2, "double", "string");
     } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
     }
   } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
     if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
       expand(param, param2, "unsigned", "double");
     } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
       expand(param, param2, "unsigned", "unsigned");
+    } else if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
+      expand(param, param2, "double", "string");
     } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
     }
+  } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
+    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
+      expand(param, param2, "string", "double");
+    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
+      expand(param, param2, "string", "unsigned");
+    } else if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
+      expand(param, param2, "string", "string");
+    } else {
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned/string> type";
+    }
+
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
   }
 
   return shared_from_this();

@@ -57,6 +57,9 @@ public:
   shared_ptr<Validator> IsAge();
   shared_ptr<Validator> IsInList(initializer_list<string> list);
   shared_ptr<Validator> DuplicateParameterIfNotAssigned(const string& label);
+  shared_ptr<Validator> IsModelYear();
+  shared_ptr<Validator> DefaultValue(unsigned value);
+  shared_ptr<Validator> RequiredIf(bool required);
 
 protected:
   Bindable<Double>*   GetParameterAsDouble(bool null_on_error = false);
