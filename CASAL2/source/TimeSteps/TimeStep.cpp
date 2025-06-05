@@ -28,8 +28,8 @@ namespace niwa {
 TimeStep::TimeStep(shared_ptr<Model> model) : model_(model) {
   LOG_TRACE();
 
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the time step", "");
-  parameters_.Bind<string>(PARAM_PROCESSES, &process_names_, "The labels of the processes that occur in this time step, in the order that they occur", "");
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the time step");
+  parameters_.Bind<string>(PARAM_PROCESSES, &process_names_, "The labels of the processes that occur in this time step, in the order that they occur");
 }
 
 /**
@@ -57,9 +57,9 @@ void TimeStep::Build() {
   // Check if this time-step was in the annual cycle.
   // if not flag an info to user
   vector<string> model_time_steps = model_->time_steps();
-  if(find(model_time_steps.begin(), model_time_steps.end(), label_) == model_time_steps.end()) {
+  if (find(model_time_steps.begin(), model_time_steps.end(), label_) == model_time_steps.end()) {
     LOG_INFO() << "time_step " << label_ << " was defined but not included in the annual cycle.";
-  } 
+  }
 
   /**
    * Find the range of our mortality block. This block encompasses the
@@ -81,12 +81,10 @@ void TimeStep::Build() {
 
   mortality_block_.second = mortality_block_.first == processes_.size() ? mortality_block_.first : mortality_block_.second;
 }
- /**
+/**
  * Execute the time step during the initialisation phases
  */
-void     TimeStep::Verify(shared_ptr<Model> model) {
-
-}
+void TimeStep::Verify(shared_ptr<Model> model) {}
 /**
  * Execute the time step during the initialisation phases
  */
