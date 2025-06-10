@@ -180,8 +180,9 @@ vector<string> BindableVector<T>::current_values() {
 }
 
 template <typename T>
-BindableVector<T>* BindableVector<T>::flag_is_category() {
-  is_categories_ = true;
+BindableVector<T>* BindableVector<T>::flag_is_category(bool allow_combined_categories) {
+  is_categories_             = true;
+  allow_combined_categories_ = allow_combined_categories;
   return this;
 }
 

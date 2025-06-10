@@ -91,6 +91,7 @@ public:
     optional_columns_    = columns;
     allow_other_columns_ = true;
   }
+  bool has_been_defined() const { return data_.size() != 0; }
 
 private:
   string                 label_       = "";

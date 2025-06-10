@@ -106,6 +106,7 @@ public:
   void                        CopyFrom(const ParameterList& source, string parameter_label);
   void                        CopyFrom(const ParameterList& source, string parameter_label, const unsigned& value_index);
   void                        Clear();
+  void                        Unbind(const string& label);
 
   template <typename T>
   Bindable<T>* Bind(const string& label, T* target, const string& description);

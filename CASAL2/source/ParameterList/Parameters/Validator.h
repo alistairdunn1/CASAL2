@@ -60,6 +60,8 @@ public:
   shared_ptr<Validator> IsModelYear();
   shared_ptr<Validator> DefaultValue(unsigned value);
   shared_ptr<Validator> RequiredIf(bool required);
+  shared_ptr<Validator> ForbiddenIfDefined(const string& label);
+  shared_ptr<Validator> EitherOrDefined(const string& label);
 
 protected:
   Bindable<Double>*   GetParameterAsDouble(bool null_on_error = false);

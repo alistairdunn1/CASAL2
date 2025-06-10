@@ -46,9 +46,13 @@ public:
   shared_ptr<ValidatorVector> GreaterThanOrEqualTo(unsigned value);
   shared_ptr<ValidatorVector> LessThan(Double value);
   shared_ptr<ValidatorVector> LessThanOrEqualTo(Double value);
+  shared_ptr<ValidatorVector> LessThanOrEqualTo(unsigned value);
+  shared_ptr<ValidatorVector> SumToOne();
   shared_ptr<ValidatorVector> IsInList(initializer_list<string> list);
   shared_ptr<ValidatorVector> LessThanOrEqualToParameter(const string& label);
+  shared_ptr<ValidatorVector> IsModelAge();
   shared_ptr<ValidatorVector> IsModelYear();
+  shared_ptr<ValidatorVector> IsLengthBin();
   shared_ptr<ValidatorVector> DefaultToAllModelYears();
   shared_ptr<ValidatorVector> NumberOfElements(unsigned count);
   shared_ptr<ValidatorVector> SameNumberOfElementsAs(const string& label);
@@ -56,6 +60,9 @@ public:
   shared_ptr<ValidatorVector> DuplicateParameterIfNotAssigned(const string& label);
   shared_ptr<ValidatorVector> SameNumberOfElementsModelAgeSpread();
   shared_ptr<ValidatorVector> SameNumberOfElementsModelLengthBinMidPoints();
+  shared_ptr<ValidatorVector> IsInIncreasingOrder();
+  shared_ptr<ValidatorVector> IsUniqueFrom(const string& label);
+  shared_ptr<ValidatorVector> EitherOrTableDefined(const string& table_label);
 
 protected:
   BindableVector<Double>*      GetParameterAsVectorDouble(bool null_on_error = false);

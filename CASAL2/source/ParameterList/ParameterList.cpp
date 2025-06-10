@@ -61,13 +61,14 @@ ParameterList::~ParameterList() {
  * @return true on success, false on failure
  */
 bool ParameterList::Add(const string& label, const vector<string>& values, const string& file_name, const unsigned& line_number) {
-  if (parameters_.find(label) == parameters_.end())
+  auto iter = Get(label);
+  if (iter == nullptr) {
     return false;
+  }
 
-  auto iter = parameters_.find(label);
-  iter->second->set_values(values);
-  iter->second->set_file_name(file_name);
-  iter->second->set_line_number(line_number);
+  iter->set_values(values);
+  iter->set_file_name(file_name);
+  iter->set_line_number(line_number);
 
   return true;
 }
@@ -118,7 +119,7 @@ void ParameterList::Populate(shared_ptr<Model> model) {
    */
   string missing_parameters = "";
   for (auto iter = parameters_.begin(); iter != parameters_.end(); ++iter) {
-    if ((iter->second->values().size() == 0 && !iter->second->is_optional())
+    if ((iter->second->values().size() == 0 && !iter->second->is_optional() && !iter->second->is_deprecated())
         && (iter->second->partition_type() == PartitionType::kModel || iter->second->partition_type() == model->partition_type()))
       missing_parameters += iter->first + " ";
   }
@@ -151,9 +152,27 @@ void ParameterList::Populate(shared_ptr<Model> model) {
    */
   for (auto iter : parameters_) {
     string label = iter.first;
-    if (label == PARAM_CATEGORIES || label == PARAM_FROM || label == PARAM_TO || label == PARAM_PREY_CATEGORIES || label == PARAM_PREDATOR_CATEGORIES
-        || label == PARAM_TOTAL_CATEGORIES || label == PARAM_TAGGED_CATEGORIES || label == PARAM_TARGET_CATEGORIES || label == PARAM_INDIVIDUAL_CATEGORIES
-        || label == PARAM_NUMERATOR_CATEGORIES) {
+
+    bool                    is_category     = false;
+    bool                    allow_combined  = true;  // TODO: Change to false once parameter upgrae is done
+    BindableVector<string>* bindable_vector = dynamic_cast<BindableVector<string>*>(iter.second);
+    if (bindable_vector != nullptr) {
+      is_category    = bindable_vector->is_categories();
+      allow_combined = bindable_vector->allow_combined_categories();
+    }
+
+    vector<string> possible_categories = {PARAM_CATEGORIES,
+                                          PARAM_FROM,
+                                          PARAM_TO,
+                                          PARAM_PREY_CATEGORIES,
+                                          PARAM_PREDATOR_CATEGORIES,
+                                          PARAM_TOTAL_CATEGORIES,
+                                          PARAM_TAGGED_CATEGORIES,
+                                          PARAM_TARGET_CATEGORIES,
+                                          PARAM_INDIVIDUAL_CATEGORIES,
+                                          PARAM_NUMERATOR_CATEGORIES};
+
+    if (is_category || std::find(possible_categories.begin(), possible_categories.end(), label) != possible_categories.end()) {
       LOG_FINE() << "Expanding category name values for " << label << " at " << iter.second->location();
       LOG_FINE() << "Expanding " << boost::join(iter.second->values(), " ");
       vector<string> expanded_values = model->categories()->ExpandLabels(iter.second->values(), iter.second->location());
@@ -165,12 +184,32 @@ void ParameterList::Populate(shared_ptr<Model> model) {
        * e.g. male+female would be checked as male, then female to function.
        */
       for (const string& category_groups : iter.second->values()) {
+        if (!allow_combined && model_->categories()->IsCombinedLabels(category_groups)) {
+          LOG_FATAL() << iter.second->location() << ": the parameter '" << label << "' does not allow combined categories, but the value '" << category_groups
+                      << "' contains a '+' character. Please remove the '+' character from the value.";
+        }
+
         vector<string> plus_split_categories;
         boost::split(plus_split_categories, category_groups, boost::is_any_of("+"));
         for (string& single_category : plus_split_categories) {
-          if (!model->categories()->IsValid(single_category))
-            LOG_FATAL() << iter.second->location() << ": category " << single_category << " is not a valid category";
+          if (!model->categories()->IsValid(single_category)) {
+            LOG_FATAL() << iter.second->location() << ": the parameter '" << label << "' contains an invalid category '" << single_category
+                        << "'. Please check the categories defined in your model.";
+          }
         }
+      }
+    }
+  }
+
+  // Check for deprecated parameters
+  for (auto iter = parameters_.begin(); iter != parameters_.end(); ++iter) {
+    if (iter->second->values().size() > 0 && iter->second->is_deprecated()) {
+      if (iter->second->deprecated_replacement() != "") {
+        LOG_ERROR() << iter->second->location() << " the parameter '" << iter->first << "' is deprecated and should be replaced with '" << iter->second->deprecated_replacement()
+                    << "'. Please update your model.";
+      } else {
+        // No replacement, just log an error
+        LOG_ERROR() << iter->second->location() << " the parameter '" << iter->first << "' is deprecated and should not be used in Casal2. Please remove it from your model.";
       }
     }
   }
@@ -240,8 +279,15 @@ void ParameterList::Populate(shared_ptr<Model> model) {
  */
 Parameter* ParameterList::Get(const string& label) {
   auto iter = parameters_.find(label);
-  if (iter == parameters_.end())
+  if (iter == parameters_.end()) {
+    // Check for aliases
+    for (const auto& param : parameters_) {
+      if (std::find(param.second->alias_labels().begin(), param.second->alias_labels().end(), label) != param.second->alias_labels().end()) {
+        return param.second;
+      }
+    }
     return nullptr;
+  }
 
   return iter->second;
 }
@@ -381,19 +427,32 @@ void ParameterList::BindTable(const string& label, parameters::Table* table, con
 }
 
 shared_ptr<Validator> ParameterList::Validate(const string& label) {
-  auto it = parameters_.find(label);
-  if (it == parameters_.end()) {
-    LOG_CODE_ERROR() << "The parameter " << label << " has not been bound";
+  auto it = Get(label);
+  if (it == nullptr) {
+    LOG_CODE_ERROR() << "The parameter " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
   }
-  return std::make_shared<Validator>(model_, this, it->second);
+  return std::make_shared<Validator>(model_, this, it);
 }
 
 shared_ptr<ValidatorVector> ParameterList::ValidateVector(const string& label) {
-  auto it = parameters_.find(label);
-  if (it == parameters_.end()) {
-    LOG_CODE_ERROR() << "The parameter " << label << " has not been bound";
+  auto it = Get(label);
+  if (it == nullptr) {
+    LOG_CODE_ERROR() << "The parameter " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
   }
-  return std::make_shared<ValidatorVector>(model_, this, it->second);
+  return std::make_shared<ValidatorVector>(model_, this, it);
 }
+
+/**
+ *
+ */
+void ParameterList::Unbind(const string& label) {
+  auto iter = parameters_.find(label);
+  if (iter != parameters_.end()) {
+    delete iter->second;
+    parameters_.erase(iter);
+  } else {
+    LOG_CODE_ERROR() << "Parameter " << label << " not found in ParameterList.";
+  }
+}  // namespace niwa
 
 } /* namespace niwa */

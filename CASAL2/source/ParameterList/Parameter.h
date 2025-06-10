@@ -69,6 +69,15 @@ public:
   string                description() const { return description_; };
   void                  set_partition_type(PartitionType partition_type);
   PartitionType         partition_type() const { return partition_type_; }
+  void                  flag_deprecated(const string& replacement = "") {
+    is_deprecated_          = true;
+    deprecated_replacement_ = replacement;
+  }
+  bool   is_deprecated() const { return is_deprecated_; }
+  string deprecated_replacement() const { return deprecated_replacement_; }
+
+  void                  set_alias_labels(const vector<string> alias_labels) { alias_labels_ = alias_labels; }
+  const vector<string>& alias_labels() const { return alias_labels_; }
 
 protected:
   // Methods
@@ -76,13 +85,16 @@ protected:
   void RequireValueType() const;
 
   // Members
-  string         label_       = "";
-  string         description_ = "";
+  string         label_        = "";
+  vector<string> alias_labels_ = {};
+  string         description_  = "";
   vector<string> values_;
-  string         file_name_      = "";
-  unsigned       line_number_    = 0;
-  bool           is_optional_    = false;
-  PartitionType  partition_type_ = PartitionType::kModel;
+  string         file_name_              = "";
+  unsigned       line_number_            = 0;
+  bool           is_optional_            = false;
+  PartitionType  partition_type_         = PartitionType::kModel;
+  bool           is_deprecated_          = false;
+  string         deprecated_replacement_ = "";
 };
 
 } /* namespace parameterlist */

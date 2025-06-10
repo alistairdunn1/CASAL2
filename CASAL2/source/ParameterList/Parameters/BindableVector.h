@@ -41,7 +41,9 @@ public:
   string             stored_type() const override final { return utilities::demangle(typeid(*target_).name()); }
   vector<string>     current_values() override final;
   vector<T>*         target() { return target_; }
-  BindableVector<T>* flag_is_category();
+  BindableVector<T>* flag_is_category(bool allow_combined_categories = false);
+  bool               is_categories() const { return is_categories_; }
+  bool               allow_combined_categories() const { return allow_combined_categories_; }
 
   // Maybe deprecated methods
   T    default_value() const { return default_value_; }
@@ -75,7 +77,8 @@ private:
   Range      range_;
   bool       has_default_value_ = false;
   T          default_value_;
-  bool       is_categories_ = false;
+  bool       is_categories_             = false;
+  bool       allow_combined_categories_ = true;  // TODO: Change to false once parameter upgrade is done
 };
 
 } /* namespace parameters */

@@ -156,13 +156,18 @@ shared_ptr<Validator> Validator::LessThan(Double value) {
  *
  */
 shared_ptr<Validator> Validator::LessThanOrEqualTo(Double value) {
+  if (!parameter_->has_been_defined() && !parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
   auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
   if (param == nullptr) {
     LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualTo " << parameter_->label() << " is not a double type";
   }
   Double source = *param->target();
   if (source > value) {
-    LOG_ERROR() << this->parameter_->location() << "value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to " << AS_DOUBLE(value);
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to "
+                << AS_DOUBLE(value);
   }
 
   return shared_from_this();
@@ -178,7 +183,7 @@ shared_ptr<Validator> Validator::LessThanOrEqualTo(unsigned value) {
   }
   unsigned source = *param->target();
   if (source > value) {
-    LOG_ERROR() << this->parameter_->location() << "value (" << source << ") is invalid. Must be less than or equal to " << value;
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to " << value;
   }
 
   return shared_from_this();
@@ -456,6 +461,36 @@ shared_ptr<Validator> Validator::RequiredIf(bool required) {
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " is required but has not been defined.";
   } else {
     LOG_WARNING() << this->parameter_->location() << " parameter " << parameter_->label() << " is optional and has not been defined.";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will return a shared pointer to a Validator that will check if the parameter is forbidden
+ * if the label passed in is defined.
+ */
+shared_ptr<Validator> Validator::ForbiddenIfDefined(const string& label) {
+  if (parameter_->has_been_defined() && parameters_->Get(label)->has_been_defined()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " is forbidden if " << label << " is defined.";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will return a shared pointer to a Validator that will check if the parameter is either
+ * defined or not defined.
+ */
+shared_ptr<Validator> Validator::EitherOrDefined(const string& label) {
+  auto* param = parameters_->Get(label);
+  if (!param->has_been_defined() && !parameter_->has_been_defined()) {
+    if (parameter_->is_optional()) {
+      // If the parameter is optional and not defined, we can return without error
+      return shared_from_this();
+    }
+
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " or " << label << " must be defined in the model";
   }
 
   return shared_from_this();
