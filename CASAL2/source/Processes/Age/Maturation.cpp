@@ -14,6 +14,7 @@
 #include "Categories/Categories.h"
 #include "Selectivities/Manager.h"
 #include "Selectivities/Selectivity.h"
+#include "Utilities/Map.h"
 
 // namespaces
 namespace niwa {
@@ -24,15 +25,19 @@ namespace age {
  * Default constructor
  */
 Maturation::Maturation(shared_ptr<Model> model) : Process(model), from_partition_(model), to_partition_(model) {
-  parameters_.Bind<string>(PARAM_FROM, &from_category_names_, "The list of categories to mature from", "");
-  parameters_.Bind<string>(PARAM_TO, &to_category_names_, "The list of categories to mature to", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities to use for maturation", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to be associated with the maturity rates", "");
-  parameters_.Bind<Double>(PARAM_RATES, &rates_, "The rates to mature for each year", "");
-  parameters_.Bind<string>(PARAM_MISSING_YEARS_METHOD, &missing_years_method_, "How to handle rate value for missing years", "", PARAM_ERROR)
-      ->set_allowed_values({PARAM_ERROR, PARAM_ZERO, PARAM_FINAL_YEAR});
-  parameters_.Bind<string>(PARAM_PROJECTION_YEARS_METHOD, &missing_years_method_, "How to handle rate value for missing years", "", PARAM_FINAL_YEAR)
-      ->set_allowed_values({PARAM_ZERO, PARAM_FINAL_YEAR});
+  // clang-format off
+  parameters_.Bind<string>(PARAM_FROM, &from_category_names_, "The list of categories to mature from")
+    ->flag_is_category();
+  parameters_.Bind<string>(PARAM_TO, &to_category_names_, "The list of categories to mature to")
+    ->flag_is_category();
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities to use for maturation");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to be associated with the maturity rates");
+  parameters_.Bind<Double>(PARAM_RATES, &rates_, "The rates to mature for each year");
+  parameters_.Bind<string>(PARAM_MISSING_YEARS_METHOD, &missing_years_method_, "How to handle rate value for missing years")
+    ->set_default_value(PARAM_ERROR);
+  parameters_.Bind<string>(PARAM_PROJECTION_YEARS_METHOD, &missing_years_method_, "How to handle rate value for missing years")
+    ->set_default_value(PARAM_FINAL_YEAR);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_RATES, &rates_by_years_);
 
@@ -44,19 +49,24 @@ Maturation::Maturation(shared_ptr<Model> model) : Process(model), from_partition
  * Validate the values from the configuration file
  */
 void Maturation::DoValidate() {
-  if (selectivity_names_.size() == 1) {
-    auto val_sel = selectivity_names_[0];
-    selectivity_names_.assign(from_category_names_.size(), val_sel);
+  LOG_TRACE();
+  parameters_.ValidateVector(PARAM_FROM)->SameNumberOfElementsAs(PARAM_TO);
+
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_FROM)->SameNumberOfElementsAs(PARAM_FROM);
+  parameters_.ValidateVector(PARAM_RATES)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.Validate(PARAM_MISSING_YEARS_METHOD)->IsInList({PARAM_ERROR, PARAM_ZERO, PARAM_FINAL_YEAR});
+  parameters_.Validate(PARAM_PROJECTION_YEARS_METHOD)->IsInList({PARAM_ZERO, PARAM_FINAL_YEAR});
+
+  if (missing_years_method_ == PARAM_ERROR) {
+    parameters_.ValidateVector(PARAM_YEARS)->NumberOfElements(model_->years().size());
   }
+
+  rates_by_years_     = utilities::Map::create(years_, rates_);
+  missing_years_zero_ = missing_years_method_ == PARAM_ZERO;
 
   //  // Validate Categories
   niwa::Categories* categories = model_->categories();
-
-  // Validate the from and to vectors are the same size
-  if (from_category_names_.size() != to_category_names_.size()) {
-    LOG_ERROR_P(PARAM_TO) << ": Number of 'to' categories provided (" << to_category_names_.size() << ") does not match the number of 'from' categories provided ("
-                          << from_category_names_.size() << ").";
-  }
 
   // Validate that each from and to category have the same age range.
   for (unsigned i = 0; i < from_category_names_.size(); ++i) {
@@ -70,19 +80,6 @@ void Maturation::DoValidate() {
                               << " have the same age range as the 'to' category " << to_category_names_[i];
     }
   }
-
-  if (missing_years_method_ == PARAM_ERROR && years_.size() != model_->years().size()) {
-    LOG_ERROR_P(PARAM_YEARS) << "Not all years were specified for the model when the missing_years_method was defined as error.";
-  }
-
-  // Validate rates and years are the same length
-  if (rates_.size() != years_.size())
-    LOG_ERROR_P(PARAM_RATES) << ": The number of rates (" << rates_.size() << ") does not match the number of years (" << years_.size() << ").";
-  for (unsigned i = 0; i < years_.size(); ++i) rates_by_years_[years_[i]] = rates_[i];
-
-  LOG_FINEST() << "Missing years method: " << missing_years_method_;
-  LOG_FINEST() << "Projection years method" << projection_years_method_;
-  missing_years_zero_ = missing_years_method_ == PARAM_ZERO;
 }
 
 /**

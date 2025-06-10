@@ -17,6 +17,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
+#include "AgeLengths/AgeLength.h"
 #include "Categories/Categories.h"
 #include "Model/Managers.h"
 #include "Penalties/Manager.h"
@@ -25,7 +26,6 @@
 #include "TimeSteps/TimeStep.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
-#include "AgeLengths/AgeLength.h"
 
 // namespaces
 namespace niwa {
@@ -50,20 +50,20 @@ MortalityHollingRate::MortalityHollingRate(shared_ptr<Model> model) : Mortality(
   predator_selectivities_table_ = new parameters::Table(PARAM_PREDATOR_SELECTIVITIES);
   prey_selectivities_table_     = new parameters::Table(PARAM_PREY_SELECTIVITIES);
 
-  parameters_.BindTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR, predator_selectivities_table_, "The table of predator selectivities by year and age", "", true, true);
+  parameters_.Bind<string>(PARAM_PREY_CATEGORIES, &prey_category_labels_, "The prey categories labels")->flag_is_category();
+  parameters_.Bind<string>(PARAM_PREDATOR_CATEGORIES, &predator_category_labels_, "The predator categories labels")->flag_is_category();
+  parameters_.Bind<bool>(PARAM_IS_ABUNDANCE, &is_abundance_, "Is vulnerable amount of prey and predator an abundance [true] or biomass [false]")->set_default_value(true);
+  parameters_.Bind<Double>(PARAM_A, &a_, "Parameter a");
+  parameters_.Bind<Double>(PARAM_B, &b_, "Parameter b");
+  parameters_.Bind<Double>(PARAM_X, &x_, "This parameter controls the functional form: Holling function type 2 (x=2) or 3 (x=3), or generalised (Michaelis Menten, x>=1)");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)")->set_default_value(0.99);
+  parameters_.Bind<string>(PARAM_PREY_SELECTIVITIES, &prey_selectivity_labels_, "The selectivities for prey categories")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_PREDATOR_SELECTIVITIES, &predator_selectivity_labels_, "The selectivities for predator categories")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of penalty")->set_default_value("");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process");
+
   parameters_.BindTable(PARAM_PREY_SELECTIVITIES_BY_YEAR, prey_selectivities_table_, "The table of prey selectivities by year and age", "", true, true);
-  parameters_.Bind<string>(PARAM_PREY_CATEGORIES, &prey_category_labels_, "The prey categories labels", "");
-  parameters_.Bind<string>(PARAM_PREDATOR_CATEGORIES, &predator_category_labels_, "The predator categories labels", "");
-  parameters_.Bind<bool>(PARAM_IS_ABUNDANCE, &is_abundance_, "Is vulnerable amount of prey and predator an abundance [true] or biomass [false]", "", true);
-  parameters_.Bind<Double>(PARAM_A, &a_, "Parameter a", "")->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_B, &b_, "Parameter b", "")->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_X, &x_, "This parameter controls the functional form: Holling function type 2 (x=2) or 3 (x=3), or generalised (Michaelis Menten, x>=1)", "")
-      ->set_lower_bound(1.0);
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)", "", 0.99)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_PREY_SELECTIVITIES, &prey_selectivity_labels_, "The selectivities for prey categories", "", true);
-  parameters_.Bind<string>(PARAM_PREDATOR_SELECTIVITIES, &predator_selectivity_labels_, "The selectivities for predator categories", "", true);
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of penalty", "", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process", "");
+  parameters_.BindTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR, predator_selectivities_table_, "The table of predator selectivities by year and age", "", true, true);
 
   RegisterAsAddressable(PARAM_A, &a_);
   RegisterAsAddressable(PARAM_B, &b_);
@@ -79,51 +79,20 @@ MortalityHollingRate::MortalityHollingRate(shared_ptr<Model> model) : Mortality(
 
 void MortalityHollingRate::DoValidate() {
   LOG_TRACE();
+  parameters_.Validate(PARAM_A)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_B)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_X)->GreaterThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_U_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_PREY_SELECTIVITIES)
+      ->EitherOrTableDefined(PARAM_PREY_SELECTIVITIES_BY_YEAR)
+      ->ExpandToSameNumberOfElementsAs(PARAM_PREY_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_PREY_CATEGORIES);
+  parameters_.ValidateVector(PARAM_PREDATOR_SELECTIVITIES)
+      ->EitherOrTableDefined(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)
+      ->ExpandToSameNumberOfElementsAs(PARAM_PREDATOR_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_PREDATOR_CATEGORIES);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
 
-  /**
-   * Check All the categories are valid
-   */
-  for (const string& label : prey_category_labels_) {
-    if (!model_->categories()->IsValid(label))
-      LOG_ERROR_P(PARAM_CATEGORIES) << ": Prey category " << label << " was not found.";
-  }
-
-  for (const string& label : predator_category_labels_) {
-    if (!model_->categories()->IsValid(label))
-      LOG_ERROR_P(PARAM_CATEGORIES) << ": Predator category " << label << " was not found.";
-  }
-  LOG_TRACE();
-  LOG_FINEST() << "prey = " << parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined();
-  LOG_FINEST() << "prey by year = " << parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined();
-  LOG_TRACE();
-
-  // Check how the user has selected selectivities, this is an unusal process where we allow an alternative way to parameterise the selectivity
-  if (!parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined() && !parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
-    LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREY_SELECTIVITIES << "' or '" << PARAM_PREY_SELECTIVITIES_BY_YEAR << "' for this process";
-    LOG_TRACE();
-  }
-  if (parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined() && parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined())
-    LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREY_SELECTIVITIES << "' or '" << PARAM_PREY_SELECTIVITIES_BY_YEAR << "' for this process.";
-  LOG_TRACE();
-  if (!parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined() && !parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->HasBeenDefined())
-    LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREDATOR_SELECTIVITIES << "' or '" << PARAM_PREDATOR_SELECTIVITIES_BY_YEAR << "' for this process";
-  LOG_TRACE();
-  if (parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined() && parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->HasBeenDefined())
-    LOG_FATAL_P(PARAM_LABEL) << "Supply either '" << PARAM_PREDATOR_SELECTIVITIES << "' or '" << PARAM_PREDATOR_SELECTIVITIES_BY_YEAR << "' for this process.";
-
-  LOG_TRACE();
-  if (parameters_.Get(PARAM_PREY_SELECTIVITIES)->has_been_defined()) {
-    if (prey_category_labels_.size() != prey_selectivity_labels_.size())
-      LOG_ERROR_P(PARAM_PREY_CATEGORIES) << ": There are " << prey_selectivity_labels_.size() << " prey selectivities but there are " << prey_category_labels_.size()
-                                         << " prey categories";
-  }
-  LOG_TRACE();
-  if (parameters_.Get(PARAM_PREDATOR_SELECTIVITIES)->has_been_defined()) {
-    if (predator_category_labels_.size() != predator_selectivity_labels_.size())
-      LOG_ERROR_P(PARAM_PREDATOR_CATEGORIES) << ": There are " << predator_selectivity_labels_.size() << " predator selectivities but there are "
-                                             << predator_category_labels_.size() << " predator categories";
-  }
-  LOG_TRACE();
   // Populate maps from tables if user has defined them
   if (parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
     prey_selectivity_by_year_supplied_ = true;
@@ -320,7 +289,7 @@ void MortalityHollingRate::DoExecute() {
           for (unsigned i = 0; i < predator_categories->data_.size(); ++i)
             PredatorVulnerable += predator_categories->data_[i]
                                   * predator_selectivities_[predator_offset]->GetAgeResult(predator_categories->min_age_ + i, predator_categories->age_length_)
-                                  * predator_categories->age_length_->mean_weight(time_step_index,predator_categories->min_age_ + i);
+                                  * predator_categories->age_length_->mean_weight(time_step_index, predator_categories->min_age_ + i);
         }
       } else {
         if (predator_selectivity_by_year_supplied_) {

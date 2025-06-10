@@ -19,6 +19,7 @@
 #include "Selectivities/Manager.h"
 #include "Selectivities/Selectivity.h"
 #include "TimeSteps/Manager.h"
+#include "Utilities/Map.h"
 
 // Namespaces
 namespace niwa {
@@ -39,12 +40,16 @@ TagLoss::TagLoss(shared_ptr<Model> model) : Process(model), partition_(model) {
 
   partition_structure_ = PartitionType::kAge;
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories to apply", "");
-  parameters_.Bind<Double>(PARAM_TAG_LOSS_RATE, &tag_loss_input_, "The tag loss rates", "")->set_lower_bound(0.0, true);
-  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for tag loss", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<string>(PARAM_TAG_LOSS_TYPE, &tag_loss_type_, "The type of tag loss", "", PARAM_SINGLE)->set_allowed_values({PARAM_SINGLE, PARAM_DOUBLE_TAG});
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivities", "");
-  parameters_.Bind<unsigned>(PARAM_YEAR, &year_, "The year the first tagging release process was executed", "");
+  // clang-format off
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories to apply")
+    ->flag_is_category();
+  parameters_.Bind<Double>(PARAM_TAG_LOSS_RATE, &tag_loss_input_, "The tag loss rates");
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for tag loss");
+  parameters_.Bind<string>(PARAM_TAG_LOSS_TYPE, &tag_loss_type_, "The type of tag loss")
+    ->set_default_value(PARAM_SINGLE); //, "", PARAM_SINGLE)->set_allowed_values({PARAM_SINGLE, PARAM_DOUBLE_TAG});
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivities");
+  parameters_.Bind<unsigned>(PARAM_YEAR, &year_, "The year the first tagging release process was executed");
+  // clang-format on
 
   RegisterAsAddressable(PARAM_TAG_LOSS_RATE, &tag_loss_);
 }
@@ -62,44 +67,12 @@ TagLoss::TagLoss(shared_ptr<Model> model) : Process(model), partition_(model) {
 void TagLoss::DoValidate() {
   LOG_FINEST() << "the number of categories = " << category_labels_.size() << ", the number of proportions = " << tag_loss_input_.size();
 
-  if (tag_loss_input_.size() == 1) {
-    auto val_t = tag_loss_input_[0];
-    tag_loss_input_.assign(category_labels_.size(), val_t);
-  }
+  parameters_.ValidateVector(PARAM_TAG_LOSS_RATE)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->SumToOne();
+  parameters_.Validate(PARAM_YEAR)->IsModelYear();
 
-  if (selectivity_names_.size() == 1) {
-    auto val_s = selectivity_names_[0];
-    selectivity_names_.assign(category_labels_.size(), val_s);
-  }
-
-  if (tag_loss_input_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_TAG_LOSS_RATE) << ": the number of tag loss values provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                                     << ", tag loss size " << tag_loss_input_.size();
-  }
-
-  if (selectivity_names_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": the number of selectivities provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                                     << ", selectivities size " << selectivity_names_.size();
-  }
-
-  // Validate our instantaneous rates greater than 0.0
-  for (Double tag_loss : tag_loss_input_) {
-    if (tag_loss < 0.0)
-      LOG_ERROR_P(PARAM_TAG_LOSS_RATE) << ": Tag loss rate " << tag_loss << " must be greater or equal to 0.0";
-  }
-
-  for (unsigned i = 0; i < tag_loss_input_.size(); ++i) tag_loss_[category_labels_[i]] = tag_loss_input_[i];
-
-  // Validate the time step proportions sum to one
-  Double total = 0.0;
-  for (Double value : ratios_) {
-    total += value;
-  }
-#ifndef TESTMODE
-  if (!utilities::math::IsOne(total)) {
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << ": The time_step_proportions must be specified to sum to one, but they summed to " << total << ".";
-  }
-#endif
+  tag_loss_ = utilities::OrderedMap<string, Double>::create(category_labels_, tag_loss_input_);
 }
 
 /**

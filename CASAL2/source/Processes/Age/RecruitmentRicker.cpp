@@ -36,12 +36,17 @@ namespace math = niwa::utilities::math;
 RecruitmentRicker::RecruitmentRicker(shared_ptr<Model> model) : Process(model), partition_(model) {
   LOG_TRACE();
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels", "");
-  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "");
-  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "", true);
-  parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset", "", true);
+  // clang-format off
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model")
+    ->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model")
+    ->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category");
+  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment")
+    ->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset")
+    ->set_default_value(0u);
   parameters_.Bind<Double>(PARAM_STEEPNESS, &steepness_, "Steepness (h)", "", 1.0)->set_range(0.2, 1.0);
   parameters_.Bind<string>(PARAM_SSB, &ssb_label_, "The SSB label (i.e., the derived quantity label)", "");
   parameters_.Bind<string>(PARAM_B0_PHASE, &phase_b0_label_, "The initialisation phase label that B0 is from", "", "");
@@ -50,10 +55,10 @@ RecruitmentRicker::RecruitmentRicker(shared_ptr<Model> model) : Process(model), 
   parameters_.Bind<unsigned>(PARAM_STANDARDISE_YEARS, &standardise_years_, "The years that are included for year class standardisation", "", true);
 
   // these inputs are deprecated
-  parameters_.Bind<unsigned>(PARAM_STANDARDISE_YCS_YEARS, &standardise_ycs_years_, "The years that are included for year class standardisation", "", true);
-  parameters_.Bind<Double>(PARAM_YCS_VALUES, &ycs_values_, "The YCS values", "", true);
-  parameters_.Bind<unsigned>(PARAM_YCS_YEARS, &ycs_years_, "The recruitment years. A vector of years that relates to the year of the spawning event that created this cohort", "",
-                             true);
+  parameters_.Bind<unsigned>(PARAM_STANDARDISE_YCS_YEARS, &standardise_ycs_years_, "")->flag_deprecated(PARAM_STANDARDISE_YEARS);
+  parameters_.Bind<Double>(PARAM_YCS_VALUES, &ycs_values_, "")->flag_deprecated(PARAM_RECRUITMENT_MULTIPLIERS);
+  parameters_.Bind<unsigned>(PARAM_YCS_YEARS, &ycs_years_, "")->flag_deprecated();
+  // clang-format on
 
   RegisterAsAddressable(PARAM_R0, &r0_);
   RegisterAsAddressable(PARAM_B0, &b0_);
@@ -74,88 +79,30 @@ RecruitmentRicker::RecruitmentRicker(shared_ptr<Model> model) : Process(model), 
  */
 void RecruitmentRicker::DoValidate() {
   LOG_TRACE();
-  // Flag error
-  if (parameters_.Get(PARAM_YCS_VALUES)->has_been_defined())
-    LOG_FATAL_P(PARAM_YCS_VALUES) << PARAM_YCS_VALUES << " is deprecated. The replacement subcommand is " << PARAM_RECRUITMENT_MULTIPLIERS
-                                  << ". Refer to the user manual for more information";
-  if (parameters_.Get(PARAM_YCS_YEARS)->has_been_defined())
-    LOG_FATAL_P(PARAM_YCS_YEARS) << PARAM_YCS_YEARS << " is deprecated. Refer to user manual for more information";
-  if (parameters_.Get(PARAM_STANDARDISE_YCS_YEARS)->has_been_defined())
-    LOG_FATAL_P(PARAM_STANDARDISE_YCS_YEARS)
-        << PARAM_STANDARDISE_YCS_YEARS << " is deprecated. Please use " << PARAM_STANDARDISE_YEARS
-        << " to standardise. Note the years now refer to model years rather than the previous year_class_years. Refer to the user manual for more information";
 
-  if (!parameters_.Get(PARAM_AGE)->has_been_defined()) {
-    age_ = model_->min_age();
-  } else if (age_ != model_->min_age()) {
+  for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
+
+  parameters_.Validate(PARAM_R0)->GreaterThanOrEqualTo(0.0)->EitherOrDefined(PARAM_B0);
+  parameters_.Validate(PARAM_B0)->GreaterThanOrEqualTo(0.0)->ForbiddenIfDefined(PARAM_R0);
+  parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model_->min_age());
+  parameters_.ValidateVector(PARAM_PROPORTIONS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->SumToOne()
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_RECRUITMENT_MULTIPLIERS)->GreaterThanOrEqualTo(0.0)->NumberOfElements(years_.size());
+  parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year());
+  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
+
+  if (age_ != model_->min_age()) {
     LOG_WARNING_P(PARAM_AGE) << "(" << age_ << ") is not equal to the model min_age (" << model_->min_age()
                              << "). This is likely an error. Please check your input configuration files";
   }
 
-  if (parameters_.Get(PARAM_R0)->has_been_defined() && parameters_.Get(PARAM_B0)->has_been_defined())
-    LOG_ERROR_P(PARAM_R0) << "Cannot specify both R0 and B0 in the same recruitment process.";
-
-  if (!parameters_.Get(PARAM_R0)->has_been_defined() && !parameters_.Get(PARAM_B0)->has_been_defined())
-    LOG_FATAL() << "Specify either R0 or B0 to initialise the model with Ricker recruitment";
-
-  if (age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_AGE) << " (" << age_ << ") cannot be less than the model's min_age (" << model_->min_age() << ")";
-  if (age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_AGE) << " (" << age_ << ") cannot be greater than the model's max_age (" << model_->max_age() << ")";
-
-  if (category_labels_.size() != proportions_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << "One proportion is required to be defined per category. There are " << category_labels_.size() << " categories and " << proportions_.size()
-                                  << " proportions defined.";
-
-  Double running_total = 0.0;
-  for (Double value : proportions_)  // Again, ADOLC prevents std::accum
-    running_total += value;
-  if (!utilities::math::IsOne(running_total))
-    LOG_ERROR_P(PARAM_PROPORTIONS) << "The sum total is " << running_total << " which should be 1.0";
-
-  for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
-
-  if (recruitment_multipliers_.size() != years_.size()) {
-    LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "There are " << years_.size() << " model years and " << recruitment_multipliers_.size() << " " << PARAM_RECRUITMENT_MULTIPLIERS
-                                               << " defined. These inputs must be of equal length.";
-  }
-  // initialise ycs_values and check values aren't < 0.0
-  unsigned ycs_iter = 0;
-  for (unsigned ycs_year : years_) {
-    recruitment_multipliers_by_year_[ycs_year]              = recruitment_multipliers_[ycs_iter];
-    standardised_recruitment_multipliers_by_year_[ycs_year] = recruitment_multipliers_[ycs_iter];
-    if (recruitment_multipliers_[ycs_iter] < 0.0)
-      LOG_ERROR_P(PARAM_RECRUITMENT_MULTIPLIERS) << " value " << recruitment_multipliers_[ycs_iter] << " cannot be less than 0.0";
-    ycs_iter++;
-  }
-
-  // Check ascending order
-  if (standardise_years_.size() == 0) {
-    standardise_recruitment_multipliers_ = false;
-  } else if (standardise_years_.size() > 1) {
-    for (unsigned i = 1; i < standardise_years_.size(); ++i) {
-      LOG_FINE() << "standardised year = " << standardise_years_[i];
-      if (standardise_years_[i] < model_->start_year())
-        LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be less than model start year.";
-      if (standardise_years_[i] > model_->final_year())
-        LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be greater than model final year.";
-
-      if (standardise_years_[i - 1] >= standardise_years_[i])
-        LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "values must be in strictly increasing order. Value " << standardise_years_[i - 1] << " is not less than " << standardise_years_[i];
-    }
-    // need to focus on first value
-    if (standardise_years_[0] < model_->start_year())
-      LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be less than model start year.";
-    if (standardise_years_[0] > model_->final_year())
-      LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be greater than model final year.";
-  }
-
-  // Populate the proportions category, assumes there is a one to one relationship between categories, and proportions.
-  unsigned iter = 0;
-  for (auto& category : category_labels_) {
-    proportions_by_category_[category] = proportions_[iter];
-    ++iter;
-  }
+  recruitment_multipliers_by_year_              = utilities::Map::create(years_, recruitment_multipliers_);
+  standardised_recruitment_multipliers_by_year_ = utilities::Map::create(years_, recruitment_multipliers_);
+  proportions_by_category_                      = utilities::OrderedMap<string, Double>::create(category_labels_, proportions_);
 }
 
 /**

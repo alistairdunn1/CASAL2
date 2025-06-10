@@ -37,14 +37,17 @@ TransitionCategoryByAge::TransitionCategoryByAge(shared_ptr<Model> model) : Proc
   n_table_ = new parameters::Table(PARAM_N);
   n_table_->set_required_columns({PARAM_YEAR}, true);
 
-  parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories to transition from", "");
-  parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories to transition to", "");
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age to transition", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age to transition", "");
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label", "", "");
-  parameters_.Bind<Double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)", "", 0.99)->set_range(0.0, 1.0);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the transition in", "");
+  // clang-format off
+  parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories to transition from")->flag_is_category();
+  parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories to transition to")->flag_is_category();
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age to transition");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age to transition");
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label")->set_default_value("");
+  parameters_.Bind<Double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)")->set_default_value(0.99); // 
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the transition in");
+
   parameters_.BindTable(PARAM_N, n_table_, "The table of N data", "");
+  // clang-format on
 }
 
 /**
@@ -58,16 +61,11 @@ TransitionCategoryByAge::~TransitionCategoryByAge() {
  * Validate the parameters
  */
 void TransitionCategoryByAge::DoValidate() {
-  if (from_category_labels_.size() != to_category_labels_.size()) {
-    LOG_ERROR_P(PARAM_TO) << "the number of 'to' categories (" << to_category_labels_.size() << ") does not match the number of 'from' categories (" << from_category_labels_.size()
-                          << ")";
-  }
-  if (u_max_ <= 0.0 || u_max_ > 1.0)
-    LOG_ERROR_P(PARAM_U_MAX) << "(" << u_max_ << ") must be greater than 0.0 and less than or equal to 1.0";
-  if (min_age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_MIN_AGE) << "(" << min_age_ << ") is less than the model's minimum age (" << model_->min_age() << ")";
-  if (max_age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_MAX_AGE) << "(" << max_age_ << ") is greater than the model's maximum age (" << model_->max_age() << ")";
+  parameters_.ValidateVector(PARAM_FROM)->SameNumberOfElementsAs(PARAM_TO)->IsUniqueFrom(PARAM_TO);
+  parameters_.ValidateVector(PARAM_YEARS)->IsInIncreasingOrder()->IsModelYear()->DefaultToAllModelYears();
+  parameters_.Validate(PARAM_MIN_AGE)->GreaterThanOrEqualTo(model_->min_age());
+  parameters_.Validate(PARAM_MAX_AGE)->GreaterThanOrEqualTo(model_->min_age())->LessThanOrEqualTo(model_->max_age());
+  parameters_.Validate(PARAM_U_MAX)->GreaterThan(0.0)->LessThanOrEqualTo(1.0);
 
   unsigned age_spread = (max_age_ - min_age_) + 1;
 

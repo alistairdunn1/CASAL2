@@ -17,6 +17,7 @@
 #include "Selectivities/Manager.h"
 #include "Selectivities/Selectivity.h"
 #include "TimeSteps/Manager.h"
+#include "Utilities/Map.h"
 
 // Namespaces
 namespace niwa {
@@ -31,8 +32,8 @@ SurvivalConstantRate::SurvivalConstantRate(shared_ptr<Model> model) : Process(mo
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories", "");
-  parameters_.Bind<Double>(PARAM_S, &s_input_, "The survival rates", "")->set_lower_bound(0.0, true);
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_S, &s_input_, "The survival rates");
   parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for the survival rate S", "", true)->set_range(0.0, 1.0, false, true);
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivity labels for each category", "");
 
@@ -50,45 +51,15 @@ SurvivalConstantRate::SurvivalConstantRate(shared_ptr<Model> model) : Process(mo
  * - Check the categories are real
  */
 void SurvivalConstantRate::DoValidate() {
-  // If one S supplied expand for each category
-  if (s_input_.size() == 1) {
-    auto val_s = s_input_[0];
-    s_input_.assign(category_labels_.size(), val_s);
-  }
+  parameters_.ValidateVector(PARAM_S)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->SumToOne();
 
-  // Do the same for selectivity labels
-  if (selectivity_names_.size() == 1) {
-    auto val_sel = selectivity_names_[0];
-    selectivity_names_.assign(category_labels_.size(), val_sel);
-  }
-
-  // Check we have equal category labels as survival rates
-  if (s_input_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_S) << ": the number of Ms provided is not the same as the number of categories provided. Categories: " << category_labels_.size() << ", input size "
-                         << s_input_.size();
-  }
-  // Check we have equal category labels to selectivity labels
-  if (selectivity_names_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": the number of selectivities provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                                     << ", selectivities size " << selectivity_names_.size();
-  }
-
-  // Validate our S's are between 1.0 and 0.0
-  for (Double s : s_input_) {
-    if (s < 0.0 || s > 1.0)
-      LOG_ERROR_P(PARAM_S) << ": the survival rate value (" << AS_DOUBLE(s) << ") must be between 0.0 and 1.0 (inclusive)";
-  }
-
-  Double total = 0.0;
-  for (Double value : ratios_) {
-    total += value;
-  }
-  if (!utilities::math::IsOne(total)) {
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "summed to " << total << ". They must be specified to sum to one.";
-  }
-
-  // Assign survival rates to a map s_
-  for (unsigned i = 0; i < s_input_.size(); ++i) s_[category_labels_[i]] = s_input_[i];
+  s_ = utilities::OrderedMap<string, Double>::create(category_labels_, s_input_);
 }
 
 /**

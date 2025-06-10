@@ -19,6 +19,7 @@
 #include "Estimates/Manager.h"
 #include "InitialisationPhases/Manager.h"
 #include "TimeSteps/Manager.h"
+#include "Utilities/Map.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
 #include "Utilities/Vector.h"
@@ -36,25 +37,34 @@ namespace math = niwa::utilities::math;
 RecruitmentBevertonHoltWithDeviations::RecruitmentBevertonHoltWithDeviations(shared_ptr<Model> model) : Process(model), partition_(model) {
   LOG_TRACE();
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels", "");
-  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "");
-  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "", true);
-  parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset", "", true);
-  parameters_.Bind<Double>(PARAM_STEEPNESS, &steepness_, "Steepness (h)", "", 1.0)->set_range(0.2, 1.0);
-  parameters_.Bind<string>(PARAM_SSB, &ssb_, "The SSB label (i.e., the derived quantity label))", "");
-  parameters_.Bind<Double>(PARAM_SIGMA_R, &sigma_r_, "The standard deviation of recruitment, sigma_R", "")->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_B_MAX, &b_max_, "The maximum bias adjustment", "", 0.85)->set_range(0.0, 1.0);
-  parameters_.Bind<unsigned>(PARAM_LAST_YEAR_WITH_NO_BIAS, &year1_, "The last year (recruited year) with no bias adjustment", "", false);
-  parameters_.Bind<unsigned>(PARAM_FIRST_YEAR_WITH_BIAS, &year2_, "The first year (recruited year) with full bias adjustment", "", false);
-  parameters_.Bind<unsigned>(PARAM_LAST_YEAR_WITH_BIAS, &year3_, "The last year (recruited year) with full bias adjustment", "", false);
-  parameters_.Bind<unsigned>(PARAM_FIRST_RECENT_YEAR_WITH_NO_BIAS, &year4_, "The first recent year (recruited year) with no bias adjustment", "", false);
+  // clang-format off
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels")
+    ->flag_is_category();
+  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model")
+    ->set_is_optional(true); 
+  parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model")
+    ->set_is_optional(true); 
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category");
+  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment")
+    ->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset")
+    ->set_default_value(0u);
+  parameters_.Bind<Double>(PARAM_STEEPNESS, &steepness_, "Steepness (h)")
+    ->set_default_value(1.0);
+  parameters_.Bind<string>(PARAM_SSB, &ssb_, "The SSB label (i.e., the derived quantity label))");
+  parameters_.Bind<Double>(PARAM_SIGMA_R, &sigma_r_, "The standard deviation of recruitment, sigma_R");
+  parameters_.Bind<Double>(PARAM_B_MAX, &b_max_, "The maximum bias adjustment")
+    ->set_default_value(0.85); 
+  parameters_.Bind<unsigned>(PARAM_LAST_YEAR_WITH_NO_BIAS, &year1_, "The last year (recruited year) with no bias adjustment");
+  parameters_.Bind<unsigned>(PARAM_FIRST_YEAR_WITH_BIAS, &year2_, "The first year (recruited year) with full bias adjustment");
+  parameters_.Bind<unsigned>(PARAM_LAST_YEAR_WITH_BIAS, &year3_, "The last year (recruited year) with full bias adjustment");
+  parameters_.Bind<unsigned>(PARAM_FIRST_RECENT_YEAR_WITH_NO_BIAS, &year4_, "The first recent year (recruited year) with no bias adjustment");
+  parameters_.Bind<string>(PARAM_B0_PHASE, &phase_b0_label_, "The initialisation phase label that B0 is from")->set_default_value("");
+  parameters_.Bind<Double>(PARAM_DEVIATION_VALUES, &recruit_dev_values_, "The recruitment deviation values");
 
-  parameters_.Bind<string>(PARAM_B0_PHASE, &phase_b0_label_, "The initialisation phase label that B0 is from", "", "");
-  parameters_.Bind<Double>(PARAM_DEVIATION_VALUES, &recruit_dev_values_, "The recruitment deviation values", "");
-  parameters_.Bind<unsigned>(PARAM_DEVIATION_YEARS, &recruit_dev_years_,
-                             "The recruitment years. A vector of years that relates to the year of the spawning event that created this cohort", "", true);
+  // deprecated parameters
+  parameters_.Bind<unsigned>(PARAM_DEVIATION_YEARS, &recruit_dev_years_,"")->flag_deprecated();
+  // clang-format on
 
   RegisterAsAddressable(PARAM_R0, &r0_);
   RegisterAsAddressable(PARAM_B0, &b0_);
@@ -74,59 +84,30 @@ RecruitmentBevertonHoltWithDeviations::RecruitmentBevertonHoltWithDeviations(sha
  */
 void RecruitmentBevertonHoltWithDeviations::DoValidate() {
   LOG_TRACE();
-  if (parameters_.Get(PARAM_DEVIATION_YEARS)->has_been_defined())
-    LOG_ERROR_P(PARAM_DEVIATION_YEARS) << PARAM_DEVIATION_YEARS << " is deprecated, refer to user manual for more information.";
+  for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
 
-  recruit_dev_years_ = model_->years();  // set to model years
+  parameters_.Validate(PARAM_R0)->GreaterThanOrEqualTo(0.0)->EitherOrDefined(PARAM_B0);
+  parameters_.Validate(PARAM_B0)->GreaterThanOrEqualTo(0.0)->ForbiddenIfDefined(PARAM_R0);
+  parameters_.ValidateVector(PARAM_PROPORTIONS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->SumToOne()
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model_->min_age());
+  parameters_.Validate(PARAM_STEEPNESS)->GreaterThanOrEqualTo(0.2)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_SIGMA_R)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_B_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year());
+  parameters_.ValidateVector(PARAM_DEVIATION_VALUES)->NumberOfElements(years_.size());
 
-  if (!parameters_.Get(PARAM_AGE)->has_been_defined()) {
-    age_ = model_->min_age();
-  } else if (age_ != model_->min_age()) {
+  if (age_ != model_->min_age()) {
     LOG_WARNING_P(PARAM_AGE) << "(" << age_ << ") is not equal to the model min_age (" << model_->min_age()
                              << "). This is likely an error. Please check your input configuration files";
   }
 
-  if (parameters_.Get(PARAM_R0)->has_been_defined() && parameters_.Get(PARAM_B0)->has_been_defined())
-    LOG_FATAL_P(PARAM_R0) << "Cannot specify both R0 and B0 in the model for Beverton-Holt recruitment";
-
-  if (!parameters_.Get(PARAM_R0)->has_been_defined() && !parameters_.Get(PARAM_B0)->has_been_defined())
-    LOG_FATAL() << "Specify either R0 or B0 to initialise the model for Beverton-Holt recruitment";
-
-  if (age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_AGE) << "(" << age_ << ") cannot be less than the model's min_age (" << model_->min_age() << ")";
-  if (age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_AGE) << "(" << age_ << ") cannot be greater than the model's max_age (" << model_->max_age() << ")";
-
-  if (category_labels_.size() != proportions_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << "One proportion is required to be defined per category. There are " << category_labels_.size() << " categories and " << proportions_.size()
-                                  << " proportions defined.";
-
-  Double running_total = 0.0;
-  for (Double value : proportions_)  // Again, ADOLC prevents std::accum
-    running_total += value;
-  if (!math::IsOne(running_total))
-    LOG_ERROR_P(PARAM_PROPORTIONS) << "The sum total is " << running_total << " which should be 1.0";
-
-  for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
-
-  if (recruit_dev_values_.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_DEVIATION_VALUES) << "There must be a recruitment deviation specified for all years between start and final. Expected " << years_.size() << ", but found "
-                                        << recruit_dev_values_.size();
-  }
-
-  // initialise recruit devs
-  unsigned ycs_iter = 0;
-  for (unsigned recruited_year : years_) {
-    recruit_dev_value_by_year_[recruited_year] = recruit_dev_values_[ycs_iter];
-    ycs_iter++;
-  }
-
-  // Populate the proportions category, assumes there is a one to one relationship between categories, and proportions.
-  unsigned iter = 0;
-  for (auto& category : category_labels_) {
-    proportions_by_category_[category] = proportions_[iter];
-    ++iter;
-  }
+  recruit_dev_value_by_year_ = utilities::Map::create(years_, recruit_dev_values_);
+  proportions_by_category_   = utilities::OrderedMap<string, Double>::create(category_labels_, proportions_);
 }
 
 /**

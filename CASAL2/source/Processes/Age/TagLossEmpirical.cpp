@@ -24,6 +24,8 @@ namespace age {
 
 /**
  * Default Constructor
+ *
+ * This process differs from TagLoss in that every category gets the same tag loss rate in each year
  */
 TagLossEmpirical::TagLossEmpirical(shared_ptr<Model> model) : Process(model), partition_(model) {
   LOG_TRACE();
@@ -36,13 +38,15 @@ TagLossEmpirical::TagLossEmpirical(shared_ptr<Model> model) : Process(model), pa
 
   partition_structure_ = PartitionType::kAge;
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories to apply", "");
-  // Note: This process differs from TagLoss in that every category gets the same tag loss rate in each year
-  parameters_.Bind<Double>(PARAM_TAG_LOSS_RATE, &tag_loss_input_, "The tag loss rates", "")->set_lower_bound(0.0, true);
-  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for tag loss", "", true)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivities", "");
-  parameters_.Bind<unsigned>(PARAM_YEAR, &year_, "The year the first tagging release process was executed", "");
+  // clang-format off
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories to apply")
+    ->flag_is_category();
+  parameters_.Bind<Double>(PARAM_TAG_LOSS_RATE, &tag_loss_input_, "The tag loss rates"); 
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for tag loss"); 
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivities");
+  parameters_.Bind<unsigned>(PARAM_YEAR, &year_, "The year the first tagging release process was executed");
   parameters_.Bind<unsigned>(PARAM_YEARS_AT_LIBERTY, &years_at_liberty_, "Years at liberty to apply the annual tag loss rates of tags", "")->set_lower_bound(0, true);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_TAG_LOSS_RATE, &tag_loss_input_);
 }
@@ -60,48 +64,14 @@ TagLossEmpirical::TagLossEmpirical(shared_ptr<Model> model) : Process(model), pa
 void TagLossEmpirical::DoValidate() {
   LOG_FINEST() << "the number of years = " << years_at_liberty_.size() << ", the number of proportions = " << tag_loss_input_.size();
 
-  if (tag_loss_input_.size() == 1) {
-    auto val_t = tag_loss_input_[0];
-    tag_loss_input_.assign(years_at_liberty_.size(), val_t);
-  }
-
-  if (selectivity_names_.size() == 1) {
-    auto val_s = selectivity_names_[0];
-    selectivity_names_.assign(category_labels_.size(), val_s);
-  }
-
-  if (tag_loss_input_.size() != years_at_liberty_.size()) {
-    LOG_ERROR_P(PARAM_TAG_LOSS_RATE) << ": the number of tag loss values provided is not the same as the number of years at liberty provided. Years at liberty: "
-                                     << years_at_liberty_.size() << ", tag loss size " << tag_loss_input_.size();
-  }
-
-  if (selectivity_names_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": the number of selectivities provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                                     << ", selectivities size " << selectivity_names_.size();
-  }
-
-  // Validate our Ms are between 1.0 and 0.0
-  for (Double tag_loss : tag_loss_input_) {
-    if (tag_loss < 0.0)
-      LOG_ERROR_P(PARAM_TAG_LOSS_RATE) << ": Tag loss rate " << tag_loss << " must be greater or equal to 0.0";
-  }
-
-  // Validate the time step proportions sum to one
-  Double total = 0.0;
-  for (Double value : ratios_) {
-    total += value;
-  }
-  if (!utilities::math::IsOne(total)) {
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << ": The time_step_proportions must be specified to sum to one, but they summed to " << total << ".";
-  }
-  // validate years at liberty
-  for (unsigned value : years_at_liberty_) {
-    if (value < 0)
-      LOG_ERROR_P(PARAM_YEARS) << ": The years at liberty cannot be less than zero (the value '" << value << "' was found";
-    if (value > (model_->final_year() - model_->start_year() + 1))
-      LOG_WARNING_P(PARAM_YEARS) << ": The years at liberty (value = " << value << ") specified are larger than the number of years in the model. " << PARAM_YEARS
-                                 << " should be the number of years at liberty for each " << PARAM_TAG_LOSS_RATE << " supplied";
-  }
+  parameters_.ValidateVector(PARAM_TAG_LOSS_RATE)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS_AT_LIBERTY)
+      ->SameNumberOfElementsAs(PARAM_YEARS_AT_LIBERTY);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->SumToOne();
+  parameters_.Validate(PARAM_YEAR)->IsModelYear();
+  parameters_.ValidateVector(PARAM_YEARS_AT_LIBERTY)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year() + 1u);
 }
 
 /**

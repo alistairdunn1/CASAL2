@@ -45,15 +45,15 @@ MortalityPreySuitability::MortalityPreySuitability(shared_ptr<Model> model) : Mo
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
-  parameters_.Bind<string>(PARAM_PREY_CATEGORIES, &prey_category_labels_, "The prey categories labels", "");
-  parameters_.Bind<string>(PARAM_PREDATOR_CATEGORIES, &predator_category_labels_, "The predator categories labels", "");
-  parameters_.Bind<Double>(PARAM_CONSUMPTION_RATE, &consumption_rate_, "The predator consumption rate", "")->set_range(0.0, 1.0);
-  parameters_.Bind<Double>(PARAM_ELECTIVITIES, &electivities_, "The prey electivities", "")->set_range(0.0, 1.0);
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)", "", 0.99)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_PREY_SELECTIVITIES, &prey_selectivity_labels_, "The selectivities for prey categories", "");
-  parameters_.Bind<string>(PARAM_PREDATOR_SELECTIVITIES, &predator_selectivity_labels_, "The selectivities for predator categories", "");
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of the penalty", "", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The year that process occurs", "");
+  parameters_.Bind<string>(PARAM_PREY_CATEGORIES, &prey_category_labels_, "The prey categories labels")->flag_is_category();
+  parameters_.Bind<string>(PARAM_PREDATOR_CATEGORIES, &predator_category_labels_, "The predator categories labels")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_CONSUMPTION_RATE, &consumption_rate_, "The predator consumption rate");
+  parameters_.Bind<Double>(PARAM_ELECTIVITIES, &electivities_, "The prey electivities");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)")->set_default_value(0.99);
+  parameters_.Bind<string>(PARAM_PREY_SELECTIVITIES, &prey_selectivity_labels_, "The selectivities for prey categories");
+  parameters_.Bind<string>(PARAM_PREDATOR_SELECTIVITIES, &predator_selectivity_labels_, "The selectivities for predator categories");
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of the penalty")->set_default_value("");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The year that process occurs");
 
   RegisterAsAddressable(PARAM_CONSUMPTION_RATE, &consumption_rate_);
   RegisterAsAddressable(PARAM_ELECTIVITIES, &electivities_);
@@ -66,18 +66,17 @@ MortalityPreySuitability::MortalityPreySuitability(shared_ptr<Model> model) : Mo
  * Note: all parameters are populated from configuration files
  */
 void MortalityPreySuitability::DoValidate() {
-  // Check length of categories are the same as selectivities
-  if (prey_category_labels_.size() != prey_selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_PREY_CATEGORIES) << ": There are " << prey_selectivity_labels_.size() << " prey selectivities but there are " << prey_category_labels_.size()
-                                       << " prey categories";
-
-  if (predator_category_labels_.size() != predator_selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_PREY_CATEGORIES) << ": There are " << predator_selectivity_labels_.size() << " predator selectivities but there are " << predator_category_labels_.size()
-                                       << " predator categories";
-
-  if (prey_category_labels_.size() != electivities_.size())
-    LOG_ERROR_P(PARAM_ELECTIVITIES) << ": There are " << prey_category_labels_.size() << " prey categories but there are " << electivities_.size()
-                                    << " prey electivities. These must be the same length.";
+  parameters_.ValidateVector(PARAM_PREY_CATEGORIES)->IsUniqueFrom(PARAM_PREDATOR_CATEGORIES);
+  parameters_.Validate(PARAM_CONSUMPTION_RATE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_PREY_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_PREY_CATEGORIES)->SameNumberOfElementsAs(PARAM_PREY_CATEGORIES);
+  parameters_.ValidateVector(PARAM_PREDATOR_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_PREDATOR_CATEGORIES)->SameNumberOfElementsAs(PARAM_PREDATOR_CATEGORIES);
+  parameters_.ValidateVector(PARAM_ELECTIVITIES)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_PREY_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_PREY_CATEGORIES);
+  parameters_.Validate(PARAM_U_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
 }
 
 /**

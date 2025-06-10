@@ -26,9 +26,9 @@ namespace age {
  * Default constructor
  */
 MortalityInitialisationBaranov::MortalityInitialisationBaranov(shared_ptr<Model> model) : Mortality(model), partition_(model) {
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories", "");
-  parameters_.Bind<Double>(PARAM_FISHING_MORTALITY, &f_, "Fishing mortality ", "")->set_lower_bound(0.0, false);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_FISHING_MORTALITY, &f_, "Fishing mortality");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities");
 
   RegisterAsAddressable(PARAM_FISHING_MORTALITY, &f_);
 
@@ -43,11 +43,8 @@ MortalityInitialisationBaranov::MortalityInitialisationBaranov(shared_ptr<Model>
  * 2. Assign any remaining variables
  */
 void MortalityInitialisationBaranov::DoValidate() {
-  // Validate that the number of selectivities is the same as the number of categories
-  if (category_labels_.size() != selectivity_names_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "The number of selectivities provided (" << selectivity_names_.size() << ") does not match the number of categories provided ("
-                                     << category_labels_.size() << ").";
-  }
+  parameters_.Validate(PARAM_FISHING_MORTALITY)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
 }
 
 /**

@@ -16,6 +16,7 @@
 #include "Categories/Categories.h"
 #include "Penalties/Manager.h"
 #include "Selectivities/Manager.h"
+#include "Utilities/Map.h"
 #include "Utilities/Math.h"
 
 // Namespaces
@@ -27,12 +28,12 @@ namespace age {
  * Default constructor
  */
 MortalityEvent::MortalityEvent(shared_ptr<Model> model) : Mortality(model), partition_(model) {
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process", "");
-  parameters_.Bind<Double>(PARAM_CATCHES, &catches_, "The number of removals (catches) to apply for each year", "");
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)", "", 0.99)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities", "");
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_name_, "The label of the penalty to apply if the total number of removals cannot be taken", "", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories")->flag_is_category();
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process");
+  parameters_.Bind<Double>(PARAM_CATCHES, &catches_, "The number of removals (catches) to apply for each year");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)")->set_default_value(0.99);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities");
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_name_, "The label of the penalty to apply if the total number of removals cannot be taken")->set_default_value("");
 
   RegisterAsAddressable(PARAM_CATCHES, &catch_years_);
 
@@ -47,29 +48,12 @@ MortalityEvent::MortalityEvent(shared_ptr<Model> model) : Mortality(model), part
  * 2. Assign any remaining variables
  */
 void MortalityEvent::DoValidate() {
-  // Validate that our number of years_ and catches_ vectors are the same size
-  if (years_.size() != catches_.size()) {
-    LOG_ERROR_P(PARAM_CATCHES) << ": The number of catches provided (" << catches_.size() << ") does not match the number of years provided (" << years_.size() << " ).";
-  }
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->IsInIncreasingOrder()->SameNumberOfElementsAs(PARAM_CATCHES);
+  parameters_.ValidateVector(PARAM_CATCHES)->GreaterThanOrEqualTo(0.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_U_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
-  // Validate that the number of selectivities is the same as the number of categories
-  if (category_labels_.size() != selectivity_names_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "The number of selectivities provided (" << selectivity_names_.size() << ") does not match the number of categories provided ("
-                                     << category_labels_.size() << ").";
-  }
-
-  // Validate: catches_ and years_
-  for (unsigned i = 0; i < years_.size(); ++i) {
-    if (catch_years_.find(years_[i]) != catch_years_.end()) {
-      LOG_ERROR_P(PARAM_YEARS) << "year '" << years_[i] << "' has already been specified";
-    }
-
-    catch_years_[years_[i]] = catches_[i];
-  }
-
-  // Validate u_max
-  if (u_max_ < 0.0 || u_max_ > 1.0)
-    LOG_ERROR_P(PARAM_U_MAX) << ": u_max (" << u_max_ << ") must be between 0.0 and 1.0 (inclusive).";
+  catch_years_ = utilities::Map::create(years_, catches_);
 }
 
 /**

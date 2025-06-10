@@ -17,6 +17,7 @@
 #include "Penalties/Manager.h"
 #include "Selectivities/Manager.h"
 #include "TimeSteps/Manager.h"
+#include "Utilities/Map.h"
 #include "Utilities/Math.h"
 
 // namespaces
@@ -29,12 +30,12 @@ namespace math = niwa::utilities::math;
  * Default constructor
  */
 MortalityEventBiomass::MortalityEventBiomass(shared_ptr<Model> model) : Mortality(model), partition_(model) {
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities for each of the categories", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process", "");
-  parameters_.Bind<Double>(PARAM_CATCHES, &catches_, "The biomass of removals (catches) to apply for each year", "");
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate, U_max", "", 0.99)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of the penalty to apply if the total biomass of removals cannot be taken", "", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels")->flag_is_category();
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities for each of the categories");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process");
+  parameters_.Bind<Double>(PARAM_CATCHES, &catches_, "The biomass of removals (catches) to apply for each year");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate, U_max")->set_default_value(0.99);
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of the penalty to apply if the total biomass of removals cannot be taken")->set_default_value("");
 
   RegisterAsAddressable(PARAM_CATCHES, &catch_years_);
 
@@ -46,30 +47,12 @@ MortalityEventBiomass::MortalityEventBiomass(shared_ptr<Model> model) : Mortalit
  * Validate the objects
  */
 void MortalityEventBiomass::DoValidate() {
-  if (u_max_ <= 0.0 || u_max_ >= 1.0)
-    LOG_ERROR_P(PARAM_U_MAX) << "(" << u_max_ << ") must be between 0.0 and 1.0 exclusive";
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
+  parameters_.ValidateVector(PARAM_CATCHES)->SameNumberOfElementsAs(PARAM_YEARS)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_U_MAX)->GreaterThan(0.0)->LessThan(1.0);
 
-  if (category_labels_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "The number of selectivities provided (" << selectivity_labels_.size() << ") must match the number of "
-                                     << "categories provided (" << category_labels_.size() << ")";
-  if (years_.size() != catches_.size())
-    LOG_ERROR_P(PARAM_CATCHES) << "The number of catches provided (" << catches_.size() << ") must match the number of "
-                               << "years provided (" << years_.size() << ")";
-
-  // Validate: catches_ and years_
-  for (unsigned i = 0; i < years_.size(); ++i) {
-    if (catch_years_.find(years_[i]) != catch_years_.end()) {
-      LOG_ERROR_P(PARAM_YEARS) << "year '" << years_[i] << "' has already been specified.";
-    }
-    catch_years_[years_[i]] = catches_[i];
-  }
-
-  // add extra years in to model for things like forward projection
-  vector<unsigned> model_years = model_->years();
-  for (unsigned year : model_years) {
-    if (catch_years_.find(year) == catch_years_.end())
-      catch_years_[year] = 0.0;
-  }
+  catch_years_ = utilities::Map::create(years_, catches_);
 }
 
 /**

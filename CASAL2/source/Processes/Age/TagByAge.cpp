@@ -31,30 +31,41 @@ namespace age {
 
 /**
  * Default constructor
+ *
+ * Why this was changed from type transition to mortality. CASAL includes this in the 'mortality block'
+ * CASAL reference see population_section.cpp line: 1924-2006
+ * There is mortality in this process, so does make sense
  */
 TagByAge::TagByAge(shared_ptr<Model> model) : Process(model), to_partition_(model), from_partition_(model) {
   process_type_ = ProcessType::kMortality;
-  // Why this was changed from type transition to mortality. CASAL includes this in the 'mortality block'
-  // CASAL reference see population_section.cpp line: 1924-2006
-  // There is mortality in this process, so does make sense
-  partition_structure_ = PartitionType::kAge;
-  numbers_table_       = new parameters::Table(PARAM_NUMBERS);
-  proportions_table_   = new parameters::Table(PARAM_PROPORTIONS);
+
+  numbers_table_     = new parameters::Table(PARAM_NUMBERS);
+  proportions_table_ = new parameters::Table(PARAM_PROPORTIONS);
+
   // clang-format off
-  parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories that are selected for tagging (i.e., transition from)", "");
-  parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories that are being tagged (i.e., transition to)", "");
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age to transition", "", model->min_age());
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age to transition", "", model->max_age());
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label", "", "");
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate, U_max", "", 0.99)->set_range(0.0, 1.0, true, false);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the tagging events in", "");
-  parameters_.Bind<Double>(PARAM_INITIAL_MORTALITY, &initial_mortality_, "The initial mortality to apply to tags as a proportion", "", 0.0)->set_range(0.0, 1.0, true, true);
-  parameters_.Bind<string>(PARAM_INITIAL_MORTALITY_SELECTIVITY, &initial_mortality_selectivity_label_, "The initial mortality selectivity label", "", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "Selectivity of the tagging process", "");
-  parameters_.Bind<Double>(PARAM_N, &n_, "The number of individuals tagged", "", true);
+  parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories that are selected for tagging (i.e., transition from)")
+    ->flag_is_category(true);
+  parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories that are being tagged (i.e., transition to)")
+    ->flag_is_category();
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age to transition");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age to transition");
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label")
+    ->set_default_value("");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate, U_max")
+    ->set_default_value(0.99);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the tagging events in");
+  parameters_.Bind<Double>(PARAM_INITIAL_MORTALITY, &initial_mortality_, "The initial mortality to apply to tags as a proportion")
+    ->set_default_value(0.0);
+  parameters_.Bind<string>(PARAM_INITIAL_MORTALITY_SELECTIVITY, &initial_mortality_selectivity_label_, "The initial mortality selectivity label")
+    ->set_default_value("");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "Selectivity of the tagging process");
+  parameters_.Bind<Double>(PARAM_N, &n_, "The number of individuals tagged")
+    ->set_is_optional(true);
+  parameters_.Bind<double>(PARAM_TOLERANCE, &tolerance_, "Tolerance for checking the specificed proportions sum to one")
+    ->set_default_value(1e-5); 
+
   parameters_.BindTable(PARAM_NUMBERS, numbers_table_, "The data table of numbers to tag", "", false, true);
   parameters_.BindTable(PARAM_PROPORTIONS, proportions_table_, "The data table of proportions to tag", "", false, true);
-  parameters_.Bind<double>(PARAM_TOLERANCE, &tolerance_, "Tolerance for checking the specificed proportions sum to one", "", 1e-5)->set_range(0, 1.0);
   // clang-format on
 }
 
@@ -72,16 +83,19 @@ TagByAge::~TagByAge() {
 void TagByAge::DoValidate() {
   LOG_TRACE();
 
-  if (min_age_ < model_->min_age())
-    LOG_FATAL_P(PARAM_MIN_AGE) << " (" << min_age_ << ") is less than the model's minimum age (" << model_->min_age() << ")";
-  if (max_age_ > model_->max_age())
-    LOG_FATAL_P(PARAM_MAX_AGE) << " (" << max_age_ << ") is greater than the model's maximum age (" << model_->max_age() << ")";
-  if (min_age_ > max_age_)
-    LOG_FATAL_P(PARAM_MIN_AGE) << " (" << min_age_ << ") cannot be greater than max_age (" << max_age_ << ")";
+  parameters_.Validate(PARAM_MIN_AGE)->IsAge()->GreaterThanOrEqualTo(model_->min_age())->LessThanOrEqualTo(model_->max_age())->DefaultValue(model_->min_age());
+  parameters_.Validate(PARAM_MAX_AGE)->IsAge()->GreaterThanOrEqualTo(model_->min_age())->LessThanOrEqualTo(model_->max_age())->DefaultValue(model_->max_age());
+  parameters_.Validate(PARAM_U_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->IsInIncreasingOrder()->DefaultToAllModelYears();
+  parameters_.Validate(PARAM_INITIAL_MORTALITY)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_TOLERANCE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->SameNumberOfElementsAs(PARAM_TO);
+  parameters_.ValidateVector(PARAM_N)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS);
 
+  n_by_year_         = utilities::Map::create(years_, n_);
   age_spread_        = (max_age_ - min_age_) + 1;
   number_categories_ = from_category_labels_.size();
-  min_age_offset_ = min_age_ - model_->min_age();
+  min_age_offset_    = min_age_ - model_->min_age();
 
   if (tolerance_ > 0.01) {
     LOG_WARNING_P(PARAM_TOLERANCE) << "Your tolerance is larger than " << 0.01
@@ -104,65 +118,19 @@ void TagByAge::DoValidate() {
       LOG_FATAL_P(PARAM_N) << "If a table of numbers (using subcommand table numbers) is provided, then the subcommand N should be omitted";
   }
 
-  // Check if the user has specified combined categories, if so check the same number of categories are
-  for (auto& category : to_category_labels_) {
-    bool check_combined = model_->categories()->IsCombinedLabels(category);
-    if (check_combined)
-      LOG_FATAL_P(PARAM_TO) << "The combined category " << category << " was supplied. This subcommand can take separate categories only.";
-  }
   if (from_category_labels_.size() != 1) {
     LOG_FATAL_P(PARAM_FROM) << "This process cannot specify a many-to-many tagging event. If proportions are tagged by category then create a @tag process."
                             << " 'From' category labels size " << from_category_labels_.size();
   }
 
-  vector<string> split_category_labels;
-  unsigned       no_combined = 0;
-
-  for (auto category : from_category_labels_) {
-    if (model_->categories()->IsCombinedLabels(category)) {
-      // TODO: Combined categories are mostly coded below, but theres an error that will need to be resolved when time permits.
-      // TODO: Once fixed, then the following LOG_FATAL_P() can be removed
-      // LOG_FATAL_P(PARAM_FROM) << "combined categories are not yet implemented";
-      no_combined = model_->categories()->GetNumberOfCategoriesDefined(category);
-      if (no_combined != to_category_labels_.size()) {
-        LOG_ERROR_P(PARAM_TO) << "'" << no_combined << "' combined 'From' categories was specified, but '" << to_category_labels_.size()
-                              << "' 'To' categories were supplied. The number of 'From' and 'To' categories must be the same.";
-      }
-      boost::split(split_category_labels, category, boost::is_any_of("+"));
-
-      for (const string& split_category_label : split_category_labels) {
-        LOG_FINE() << "split category " << split_category_label;
-        if (!model_->categories()->IsValid(split_category_label)) {
-          if (split_category_label == category) {
-            LOG_ERROR_P(PARAM_FROM) << ": The category " << split_category_label << " is not a valid category.";
-          } else {
-            LOG_ERROR_P(PARAM_FROM) << ": The category " << split_category_label << " is not a valid category."
-                                    << " It was defined in the category collection " << category;
-          }
-        }
-      }
-      for (auto& split_category : split_category_labels) split_from_category_labels_.push_back(split_category);
-    } else
-      split_from_category_labels_.push_back(category);
-  }
-
-  LOG_FINEST() << "from categories";
-  for (auto category : split_from_category_labels_) {
-    LOG_FINEST() << category;
-  }
-
+  split_from_category_labels_ = model_->categories()->SplitCombinedCategory(from_category_labels_[0], parameters_.location(PARAM_FROM));
   if (split_from_category_labels_.size() != to_category_labels_.size()) {
-    LOG_ERROR_P(PARAM_TO) << " the number of values supplied (" << to_category_labels_.size() << ") does not match the number of 'From' categories provided ("
-                          << split_from_category_labels_.size() << ")";
+    LOG_FATAL_P(PARAM_FROM) << "The number of 'From' categories (" << split_from_category_labels_.size() << ") does not match the number of 'To' categories ("
+                            << to_category_labels_.size() << "). These must be the same.";
   }
-
-  if (to_category_labels_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "the number of selectivities must match the number of 'to_categories'. " << to_category_labels_.size()
-                                     << " 'to_categories' were supplied, but " << selectivity_labels_.size() << " selectivity labels were supplied";
 
   // Get our first year
   first_year_ = years_[0];
-  std::for_each(years_.begin(), years_.end(), [this](unsigned year) { first_year_ = year < first_year_ ? year : first_year_; });
 
   // Load our table data
   if (numbers_table_->row_count() != 0) {
@@ -206,14 +174,6 @@ void TagByAge::DoValidate() {
       LOG_FATAL_P(PARAM_NUMBERS) << "do not match the number of years. The number of rows supplied was " << numbers_table_->row_count() << " and the number of years supplied was "
                                  << years_.size() << ". These need to be the same";
     }
-
-    // build a map of n data by year
-    if (n_.size() == 1) {
-      auto val_n = n_[0];
-      n_.assign(years_.size(), val_n);
-    } else if (n_.size() != years_.size())
-      LOG_ERROR_P(PARAM_N) << "The number of values provided (" << n_.size() << ") does not match the number of years (" << years_.size() << ")";
-    n_by_year_ = utilities::Map::create(years_, n_);
 
     // load our table data in to our map
     vector<vector<string>> data       = proportions_table_->data();
@@ -261,8 +221,7 @@ void TagByAge::DoValidate() {
     actual_tagged_fish_to_[year_ndx].resize(to_category_labels_.size());
     for (unsigned from_category_ndx = 0; from_category_ndx < split_from_category_labels_.size(); ++from_category_ndx)
       tagged_fish_after_init_mort_[year_ndx][from_category_ndx].resize(age_spread_, 0.0);
-    for (unsigned to_category_ndx = 0; to_category_ndx < to_category_labels_.size(); ++to_category_ndx)
-      actual_tagged_fish_to_[year_ndx][to_category_ndx].resize(age_spread_, 0.0);
+    for (unsigned to_category_ndx = 0; to_category_ndx < to_category_labels_.size(); ++to_category_ndx) actual_tagged_fish_to_[year_ndx][to_category_ndx].resize(age_spread_, 0.0);
   }
 }
 
@@ -310,8 +269,7 @@ void TagByAge::DoBuild() {
 
   tagged_fish_by_year_.resize(years_.size(), 0.0);
   for (unsigned year_ndx = 0; year_ndx < years_.size(); ++year_ndx) {
-    for (unsigned age_ndx = 0; age_ndx < age_spread_; ++age_ndx) 
-      tagged_fish_by_year_[year_ndx] += numbers_[years_[year_ndx]][age_ndx];
+    for (unsigned age_ndx = 0; age_ndx < age_spread_; ++age_ndx) tagged_fish_by_year_[year_ndx] += numbers_[years_[year_ndx]][age_ndx];
   }
 
   tag_to_fish_by_age_.resize(age_spread_, 0.0);
@@ -363,7 +321,7 @@ void TagByAge::DoExecute() {
 
   from_iter          = from_partition_.begin();
   from_category_iter = 0;
-  
+
   for (; from_iter != from_partition_.end(); from_iter++, from_category_iter++, to_iter++) {
     Double amount = 0.0;
     LOG_FINE() << "category = " << (*from_iter)->name_;
@@ -374,8 +332,10 @@ void TagByAge::DoExecute() {
         exploitation_by_age_category_[from_category_iter][age_ndx] = u_max_;
         // flag penalty
         if (penalty_) {
-          LOG_FINEST() << " exploitation expected = " << exploitation_by_age_category_[from_category_iter][age_ndx] << " available = " << (*from_iter)->data_[min_age_offset_ + age_ndx];
-          penalty_->Trigger((*from_iter)->data_[min_age_offset_ + age_ndx], (*from_iter)->data_[min_age_offset_ + age_ndx] * exploitation_by_age_category_[from_category_iter][age_ndx]);
+          LOG_FINEST() << " exploitation expected = " << exploitation_by_age_category_[from_category_iter][age_ndx]
+                       << " available = " << (*from_iter)->data_[min_age_offset_ + age_ndx];
+          penalty_->Trigger((*from_iter)->data_[min_age_offset_ + age_ndx],
+                            (*from_iter)->data_[min_age_offset_ + age_ndx] * exploitation_by_age_category_[from_category_iter][age_ndx]);
         }
       }
       // fish to move

@@ -16,11 +16,10 @@
 #include "../../Utilities/Math.h"
 #include "Categories/Categories.h"
 #include "Logging/Logging.h"
+#include "Utilities/Map.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::age {
 
 using niwa::partition::accessors::CategoriesWithAge;
 
@@ -28,10 +27,14 @@ using niwa::partition::accessors::CategoriesWithAge;
  * Default Constructor
  */
 RecruitmentConstant::RecruitmentConstant(shared_ptr<Model> model) : Process(model) {
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories", "");
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "", true);
-  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment", "");
-  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the recruitment used for annual recruits and initialise the model", "")->set_lower_bound(0.0);
+  // clang-format off
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories")
+    ->flag_is_category();
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category")
+    ->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_AGE, &age_, "The age at recruitment");
+  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the recruitment used for annual recruits and initialise the model");
+  // clang-format on
 
   RegisterAsAddressable(PARAM_R0, &r0_);
   RegisterAsAddressable(PARAM_PROPORTIONS, &proportions_categories_);
@@ -48,48 +51,22 @@ RecruitmentConstant::RecruitmentConstant(shared_ptr<Model> model) : Process(mode
  * 3. Assign remaining local parameters
  */
 void RecruitmentConstant::DoValidate() {
-  /**
-   * Validate age
-   */
-  if (age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_AGE) << " (" << age_ << ") is less than the model's min_age (" << model_->min_age() << ")";
-  if (age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_AGE) << " (" << age_ << ") is greater than the model's max_age (" << model_->max_age() << ")";
+  parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model_->min_age());
+  parameters_.Validate(PARAM_R0)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_PROPORTIONS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->SumToOne()
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
 
-  /**
-   * Check our parameter proportion is the correct length
-   * and sums to 1.0. If it doesn't sum to 1.0 we'll make it
-   * and print a warning message
-   */
-  if (proportions_.size() > 0) {
-    if (proportions_.size() != category_labels_.size()) {
-      LOG_ERROR_P(PARAM_PROPORTIONS) << ": The number of proportions provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                                     << ", proportions size " << proportions_.size();
-    }
-
-    Double proportion_total = 0.0;
-
-    for (Double proportion : proportions_) proportion_total += proportion;
-
-    if (!utilities::math::IsOne(proportion_total)) {
-      LOG_WARNING() << parameters_.location(PARAM_PROPORTIONS) << ": proportion does not sum to 1.0. Proportion sums to " << AS_DOUBLE(proportion_total)
-                    << ". Auto-scaling proportions to sum to 1.0";
-
-      for (Double& proportion : proportions_) proportion /= proportion_total;
-    }
-
-    for (unsigned i = 0; i < category_labels_.size(); ++i) {
-      proportions_categories_[category_labels_[i]] = proportions_[i];
-    }
-
-  } else {
-    // Assign equal proportions to every category
+  // Default the proportions if not defined
+  if (proportions_.size() == 0 && category_labels_.size() > 0) {
     Double proportion = category_labels_.size() / 1.0;
-    for (string category : category_labels_) {
-      proportions_categories_[category] = proportion;
-      LOG_FINE() << "category " << category << " prop = " << proportion;
-    }
+    proportions_.assign(category_labels_.size(), proportion);
   }
+
+  proportions_categories_ = utilities::OrderedMap<std::string, Double>::create(category_labels_, proportions_);
 }
 
 /**
@@ -135,6 +112,4 @@ void RecruitmentConstant::FillReportCache(ostringstream& cache) {}
  */
 void RecruitmentConstant::FillTabularReportCache(ostringstream& cache, bool first_run) {}
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+}  // namespace niwa::processes::age

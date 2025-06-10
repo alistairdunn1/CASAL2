@@ -30,10 +30,10 @@ namespace age {
  */
 MortalityConstantRate::MortalityConstantRate(shared_ptr<Model> model) : Mortality(model), partition_(model) {
   LOG_TRACE();
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of category labels", "");
-  parameters_.Bind<Double>(PARAM_M, &m_input_, "The mortality rates", "")->set_lower_bound(0.0);
-  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for the mortality rates", "", false)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_RELATIVE_M_BY_AGE, &selectivity_names_, "The list of mortality by age ogive labels for the categories", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of category labels")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_M, &m_input_, "The mortality rates");
+  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for the mortality rates");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of mortality by age ogive labels for the categories")->set_alias_labels({PARAM_RELATIVE_M_BY_AGE});
 
   RegisterAsAddressable(PARAM_M, &m_);
 }
@@ -50,36 +50,16 @@ MortalityConstantRate::MortalityConstantRate(shared_ptr<Model> model) : Mortalit
  * - Check the categories are real
  */
 void MortalityConstantRate::DoValidate() {
-  if (m_input_.size() == 1) {
-    auto val_m = m_input_[0];
-    m_input_.assign(category_labels_.size(), val_m);
-  }
+  LOG_TRACE();
+  parameters_.ValidateVector(PARAM_M)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0)->SumToOne();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
 
-  if (selectivity_names_.size() == 1) {
-    auto val_sel = selectivity_names_[0];
-    selectivity_names_.assign(category_labels_.size(), val_sel);
-  }
-
-  if (m_input_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_M) << ": The number of Ms provided (" << m_input_.size() << ") does not match the number of categories provided (" << category_labels_.size() << ").";
-  }
-
-  if (selectivity_names_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_RELATIVE_M_BY_AGE) << ": The number of M-by-age ogives provided (" << selectivity_names_.size() << ") does not match the number of categories provided ("
-                                         << category_labels_.size() << ").";
-  }
-
-  // Validate our Ms are greater than or equal to 0.0
-  for (unsigned i = 0; i < m_input_.size(); ++i) m_[category_labels_[i]] = m_input_[i];
-
-  // Check that the time step ratios sum to one
-  Double total = 0.0;
-  for (Double value : ratios_) {
-    total += value;
-  }
-  if (!utilities::math::IsOne(total)) {
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "summed to " << total << ". They must be specified to sum to one.";
-  }
+  m_ = utilities::OrderedMap<string, Double>::create(category_labels_, m_input_);
 }
 
 /**

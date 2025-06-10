@@ -50,17 +50,19 @@ MortalityInstantaneousRetained::MortalityInstantaneousRetained(shared_ptr<Model>
 
   catches_table_ = new parameters::Table(PARAM_CATCHES);
   method_table_  = new parameters::Table(PARAM_METHOD);
-
   catches_table_->set_required_columns({PARAM_YEAR}, true);
-  method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_U_MAX, PARAM_PENALTY, PARAM_RETAINED_SELECTIVITY, PARAM_DISCARD_MORTALITY_SELECTIVITY}, true);
+  method_table_->set_required_columns(
+      {PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_U_MAX, PARAM_PENALTY, PARAM_RETAINED_SELECTIVITY, PARAM_DISCARD_MORTALITY_SELECTIVITY}, true);
   method_table_->set_optional_columns({PARAM_AGE_WEIGHT_LABEL});
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_M, &m_input_, "The natural mortality rates for each category");
+  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_ratios_temp_, "The time step proportions for natural mortality")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The M-by-age ogives to apply on the categories for natural mortality")
+      ->set_alias_labels({PARAM_RELATIVE_M_BY_AGE});
+
   parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
   parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
-  parameters_.Bind<Double>(PARAM_M, &m_input_, "The natural mortality rates for each category", "")->set_lower_bound(0.0);
-  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_ratios_temp_, "The time step proportions for natural mortality", "", true)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_RELATIVE_M_BY_AGE, &selectivity_labels_, "The M-by-age ogives to apply on the categories for natural mortality", "");
 
   RegisterAsAddressable(PARAM_M, &m_);
 }
@@ -80,19 +82,15 @@ MortalityInstantaneousRetained::~MortalityInstantaneousRetained() {
  * Note: all parameters are populated from configuration files
  */
 void MortalityInstantaneousRetained::DoValidate() {
-  // Check Natural Mortality parameter first
-  for (auto M_proportion : time_step_ratios_temp_) {
-    if (M_proportion < 0.0)
-      LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "Natural mortality time step proportions cannot be less than 0.0 for a given time step";
-  }
+  parameters_.ValidateVector(PARAM_M)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->GreaterThanOrEqualTo(0.0)->SumToOne();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
 
-  Double total = 0.0;
-  for (Double value : time_step_ratios_temp_) {
-    total += value;
-  }
-  if (!utilities::math::IsOne(total)) {
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "summed to " << total << ". They must be specified to sum to one.";
-  }
+  m_ = utilities::OrderedMap<string, Double>::create(category_labels_, m_input_);
 
   /**
    * Load a temporary map of the fishery catch data so we can use this
@@ -126,30 +124,6 @@ void MortalityInstantaneousRetained::DoValidate() {
       fishery_catch_[columns[i]][year]     = value;  // needed for Mortality.h checks
     }
   }
-
-  /**
-   * Validate the non-table parameters now. These are mostly related to the natural mortality
-   * aspect of the process.
-   */
-  if (selectivity_labels_.size() == 1) {
-    auto val_sel = selectivity_labels_[0];
-    selectivity_labels_.assign(category_labels_.size(), val_sel);
-  }
-
-  if (selectivity_labels_.size() != category_labels_.size()) {
-    LOG_FATAL_P(PARAM_RELATIVE_M_BY_AGE) << ": The number of M-by-age ogives provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                                         << ", Ogives: " << selectivity_labels_.size();
-  }
-
-  if (m_input_.size() == 1) {
-    auto val_m = m_input_[0];
-    m_input_.assign(category_labels_.size(), val_m);
-  }
-
-  if (m_input_.size() != category_labels_.size())
-    LOG_FATAL_P(PARAM_M) << ": The number of Ms provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                         << ", Ms: " << m_input_.size();
-  for (unsigned i = 0; i < m_input_.size(); ++i) m_[category_labels_[i]] = m_input_[i];
 
   /**
    * Build all of our category objects

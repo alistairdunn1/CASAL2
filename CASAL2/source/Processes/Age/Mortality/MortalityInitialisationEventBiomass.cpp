@@ -30,11 +30,11 @@ namespace age {
  * Default constructor
  */
 MortalityInitialisationEventBiomass::MortalityInitialisationEventBiomass(shared_ptr<Model> model) : Mortality(model), partition_(model) {
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories", "");
-  parameters_.Bind<Double>(PARAM_CATCH, &catch_, "The amount of removals (catches) to apply for each year", "");
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)", "", 0.99)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities", "");
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_name_, "The label of the penalty to apply if the total amount of removals cannot be taken", "", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_CATCH, &catch_, "The amount of removals (catches) to apply for each year");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)")->set_default_value(0.99);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of selectivities");
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_name_, "The label of the penalty to apply if the total amount of removals cannot be taken")->set_default_value("");
 
   RegisterAsAddressable(PARAM_CATCH, &catch_);
 
@@ -49,15 +49,9 @@ MortalityInitialisationEventBiomass::MortalityInitialisationEventBiomass(shared_
  * 2. Assign any remaining variables
  */
 void MortalityInitialisationEventBiomass::DoValidate() {
-  // Validate that the number of selectivities is the same as the number of categories
-  if (category_labels_.size() != selectivity_names_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "The number of selectivities provided does not match the number of categories provided."
-                                     << " Categories: " << category_labels_.size() << ", Selectivities: " << selectivity_names_.size();
-  }
-
-  // Validate u_max
-  if (u_max_ < 0.0 || u_max_ > 1.0)
-    LOG_ERROR_P(PARAM_U_MAX) << ": u_max (" << u_max_ << ") must be between 0.0 and 1.0 (inclusive).";
+  parameters_.Validate(PARAM_CATCH)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_U_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 }
 
 /**
