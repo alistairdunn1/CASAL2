@@ -302,10 +302,15 @@ shared_ptr<Validator> Validator::LessThanOrEqualToModelMaxAge() {
     LOG_CODE_ERROR() << "Validator::LessThanOrEqualToModelMaxAge() - Parameter " << parameter_->label() << " is not a double or unsigned type";
   }
 
-  unsigned value = param_unsigned ? *param_unsigned->target() : static_cast<unsigned>(*param_double->target());
-  if (value > model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << value << ") is invalid. Must be less than or equal to model max age ("
-                << model_->max_age() << ")";
+  // Do this unrolled because we can't use static_cast or (unsigned) case on Betadiff adouble type.
+  if (param_double && *param_double->target() > model_->max_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_double->target()
+                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
+  }
+
+  if (param_unsigned && *param_unsigned->target() > model_->max_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_unsigned->target()
+                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
   }
 
   return shared_from_this();
@@ -321,10 +326,15 @@ shared_ptr<Validator> Validator::LessThanModelMaxAge() {
     LOG_CODE_ERROR() << "Validator::LessThanModelMaxAge() - Parameter " << parameter_->label() << " is not a double or unsigned type";
   }
 
-  unsigned value = param_unsigned ? *param_unsigned->target() : static_cast<unsigned>(*param_double->target());
-  if (value >= model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << value << ") is invalid. Must be less than or equal to model max age ("
-                << model_->max_age() << ")";
+  // Do this unrolled because we can't use static_cast or (unsigned) case on Betadiff adouble type.
+  if (param_double && *param_double->target() >= model_->max_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_double->target()
+                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
+  }
+
+  if (param_unsigned && *param_unsigned->target() >= model_->max_age()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_unsigned->target()
+                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
   }
 
   return shared_from_this();

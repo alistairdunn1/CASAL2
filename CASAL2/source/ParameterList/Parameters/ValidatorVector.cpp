@@ -412,7 +412,8 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
   }
 
   if (param->target() != nullptr || param->target()->size() == 0) {
-    *param->target() = model_->length_bins();
+    // Use .assign() instead of = because of Betadiff scalar conversion issues with double to adouble.
+    (*param->target()).assign(model_->length_bins().begin(), model_->length_bins().end());
   }
 
   return shared_from_this();

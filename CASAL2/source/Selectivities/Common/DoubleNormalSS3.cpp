@@ -51,11 +51,15 @@ DoubleNormalSS3::DoubleNormalSS3(shared_ptr<Model> model) : Selectivity(model) {
  * Then do some basic checks on the local
  * variables to ensure they are within the business
  * rules for the model.
+ *
+ * Note: The (Double) cast is required for BetaDiff/Adolc. For whatever reason they will
+ * convert the -20.0 value to an unsigned value of 0.
+ *
  */
 void DoubleNormalSS3::DoValidate() {
   parameters_.Validate(PARAM_PEAK)->GreaterThan(0.0);
-  parameters_.Validate(PARAM_Y0)->GreaterThanOrEqualTo(-20.0)->LessThanOrEqualTo(0.0);
-  parameters_.Validate(PARAM_Y1)->GreaterThanOrEqualTo(-20.0)->LessThanOrEqualTo(10.0);
+  parameters_.Validate(PARAM_Y0)->GreaterThanOrEqualTo((Double)-20.0)->LessThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_Y1)->GreaterThanOrEqualTo((Double)-20.0)->LessThanOrEqualTo(10.0);
   parameters_.Validate(PARAM_ASCENDING)->GreaterThan(0.0);
   parameters_.Validate(PARAM_DESCENDING)->GreaterThan(0.0);
   parameters_.Validate(PARAM_L)->GreaterThan(0.0);
