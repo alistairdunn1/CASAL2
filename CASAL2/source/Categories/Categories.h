@@ -31,9 +31,9 @@ class GrowthIncrement;
 struct CategoryInfo {
   string           name_ = "";
   vector<unsigned> years_;
-  unsigned         min_age_       = 0;
-  unsigned         max_age_       = 0;
-  AgeLength*       age_length_    = nullptr;
+  unsigned         min_age_          = 0;
+  unsigned         max_age_          = 0;
+  AgeLength*       age_length_       = nullptr;
   GrowthIncrement* growth_increment_ = nullptr;
 };
 
@@ -49,24 +49,26 @@ public:
   virtual ~Categories() = default;
   void           Validate();
   void           Build();
-  void           Verify(shared_ptr<Model> model){};
-  void           Reset(){};
+  void           Verify(shared_ptr<Model> model) {};
+  void           Reset() {};
   bool           IsValid(const string& label) const;
   bool           IsCombinedLabels(const string& label) const;
   unsigned       GetNumberOfCategoriesDefined(const string& label) const;
+  vector<string> SplitCombinedCategory(const string& label, const string& parameter_location) const;
   void           Clear();
   vector<string> ExpandLabels(const vector<string>& category_labels, const string& parameter_location);
   string         GetCategoryLabels(const string& lookup_string, const string& parameter_location);
   vector<string> GetCategoryLabelsV(const string& lookup_string, const string& parameter_location);
 
   // Accessors
-  string                 format() const { return format_; }
-  virtual vector<string> category_names() const { return category_names_; }
-  unsigned               min_age(const string& category_name);
-  unsigned               max_age(const string& category_name);
-  vector<unsigned>       years(const string& category_name);
-  virtual AgeLength*     age_length(const string& category_name);
-  virtual GrowthIncrement*  growth_increment(const string& category_name);
+  string                   format() const { return format_; }
+  virtual vector<string>   category_names() const { return category_names_; }
+  unsigned                 min_age(const string& category_name);
+  unsigned                 max_age(const string& category_name);
+  vector<unsigned>         years(const string& category_name);
+  virtual AgeLength*       age_length(const string& category_name);
+  virtual GrowthIncrement* growth_increment(const string& category_name);
+  unsigned                 total_categories_defined(const vector<string>& category_names);
   // AgeWeight*             age_weight(const string& category_name);
 
 protected:

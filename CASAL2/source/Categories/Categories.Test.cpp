@@ -10,12 +10,13 @@
 #ifdef TESTMODE
 
 // Headers
+#include "Categories.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "../TestResources/MockClasses/Model.h"
 #include "../TestResources/TestFixtures/InternalEmptyModel.h"
-#include "Categories.h"
 
 // Namespaces
 namespace niwa {
@@ -256,6 +257,53 @@ public:
 // }
 
 /**
+ * This code will check that we can accurately count the number of categories that
+ * have been defined in totality. This includes expanding any combined categories
+ * and counting them as individual categories.
+ */
+TEST_F(InternalEmptyModel, Categories_TotalCategoriesDefined) {
+  Categories* categories = model_->categories();
+  model_->set_partition_type(PartitionType::kAge);
+  vector<string> names;
+
+  vector<string> sexes  = {"male", "female"};
+  vector<string> stages = {"immature", "mature"};
+  vector<string> tags   = {"notag", "2000", "2001", "2002"};
+  vector<string> age_length_lab;  //   = {"age_length_none * 16"};
+
+  for (string sex : sexes)
+    for (string stage : stages)
+      for (string tag : tags) {
+        names.push_back(sex + "." + stage + "." + tag);
+        age_length_lab.push_back("no_age_length");
+      }
+
+  categories->set_block_type(PARAM_CATEGORIES);
+  categories->parameters().Add(PARAM_FORMAT, "sex.stage.tag", __FILE__, __LINE__);
+  categories->parameters().Add(PARAM_NAMES, names, __FILE__, __LINE__);
+  categories->parameters().Add(PARAM_AGE_LENGTHS, age_length_lab, __FILE__, __LINE__);
+
+  categories->Validate();
+
+  // Note: This doesn't check for validity, just that the category lookup format is correct
+  vector<string> names1 = {"male+female", "female"};
+  unsigned       total  = categories->total_categories_defined(names1);
+  EXPECT_EQ(3u, total);
+
+  vector<string> names2 = {"*"};
+  total                 = categories->total_categories_defined(names2);
+  EXPECT_EQ(16u, total);
+
+  vector<string> names3 = {"*+"};
+  total                 = categories->total_categories_defined(names3);
+  EXPECT_EQ(16u, total);
+
+  vector<string> names4 = {"male", "female"};
+  total                 = categories->total_categories_defined(names4);
+  EXPECT_EQ(2u, total);
+}
+
+/**
  *
  */
 TEST_F(InternalEmptyModel, Categories_GetCategoryLabels) {
@@ -266,11 +314,14 @@ TEST_F(InternalEmptyModel, Categories_GetCategoryLabels) {
   vector<string> sexes  = {"male", "female"};
   vector<string> stages = {"immature", "mature"};
   vector<string> tags   = {"notag", "2000", "2001", "2002"};
-  vector<string> age_length_lab; //   = {"age_length_none * 16"};
+  vector<string> age_length_lab;  //   = {"age_length_none * 16"};
 
   for (string sex : sexes)
     for (string stage : stages)
-      for (string tag : tags) { names.push_back(sex + "." + stage + "." + tag); age_length_lab.push_back("no_age_length"); }
+      for (string tag : tags) {
+        names.push_back(sex + "." + stage + "." + tag);
+        age_length_lab.push_back("no_age_length");
+      }
 
   categories->set_block_type(PARAM_CATEGORIES);
   categories->parameters().Add(PARAM_FORMAT, "sex.stage.tag", __FILE__, __LINE__);

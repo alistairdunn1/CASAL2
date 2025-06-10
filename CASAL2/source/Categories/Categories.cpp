@@ -519,6 +519,26 @@ unsigned Categories::GetNumberOfCategoriesDefined(const string& label) const {
 }
 
 /**
+ * This method splits a combined category label into its individual components.
+ * for example
+ * male+female will return a vector with two elements
+ *
+ * @param label The combined category label to split
+ * @param parameter_location The location string for the parameter to print in case of error
+ * @return A vector of strings containing the individual category labels
+ */
+vector<string> Categories::SplitCombinedCategory(const string& label, const string& parameter_location) const {
+  vector<string> category_labels;
+  boost::split(category_labels, label, boost::is_any_of("+"));
+
+  if (category_labels.size() == 0) {
+    LOG_ERROR() << parameter_location << " short hand category string (" << label << ") is not in the correct format, e.g., <category1>+<category2>+<category3>";
+  }
+
+  return category_labels;
+}
+
+/**
  * Get the minimum age for the target category
  *
  * @param category_name The name of the category
@@ -585,6 +605,29 @@ GrowthIncrement* Categories::growth_increment(const string& category_name) {
   }
   */
   return categories_[category_name].growth_increment_;
+}
+
+/**
+ *
+ */
+unsigned Categories::total_categories_defined(const vector<string>& category_names) {
+  if (model_->partition_type() == PartitionType::kPiApprox) {
+    LOG_FATAL() << "There is no functionality for model types that are not age or length";
+  }
+
+  unsigned       total = 0;
+  vector<string> translated_categories;
+  vector<string> individual_categories;
+  for (const auto& category : category_names) {
+    translated_categories = GetCategoryLabelsV(category, category);
+
+    for (auto& label : translated_categories) {
+      boost::split(individual_categories, label, boost::is_any_of("+"));
+      total += individual_categories.size();
+    }
+  }
+
+  return total;
 }
 
 /**
