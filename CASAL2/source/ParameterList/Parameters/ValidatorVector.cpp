@@ -439,7 +439,7 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
     auto category_total_size = model_->categories()->total_categories_defined(target_string->values());
     if (source_size != category_total_size) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << source_size << " elements, but category parameter '" << label << "' has "
-                  << category_total_size << " elements";
+                  << category_total_size << " elements. Combined categories are not considered a single category.";
     }
 
     return shared_from_this();
@@ -468,14 +468,20 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
     }
     auto& src = *param->target();
     auto& dst = *param2->target();
-    if (src.size() != 1 && src.size() != dst.size()) {
+
+    unsigned destination_size = dst.size();
+    if (param2->is_categories()) {
+      destination_size = model_->categories()->total_categories_defined(param2->values());
+    }
+
+    if (src.size() != 1 && src.size() != destination_size) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " requires either 1 element or same number of elements as " << label << " ("
-                  << dst.size() << "), but has " << src.size() << " elements";
+                  << destination_size << "), but has " << src.size() << " elements";
       return;
     }
     if (src.size() == 1) {
       auto temp = src[0];
-      src.assign(dst.size(), temp);
+      src.assign(destination_size, temp);
     }
   };
 
