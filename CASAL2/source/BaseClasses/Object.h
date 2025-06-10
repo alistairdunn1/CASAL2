@@ -68,7 +68,7 @@ class Object {
 public:
   // Methods
   Object() = default;
-  virtual ~Object(){};
+  virtual ~Object() {};
   bool                        HasAddressable(const string& label) const;
   bool                        HasAddressableUsage(const string& label, const addressable::Usage&) const;
   void                        SetAddressableIsUsed(const string& label, const addressable::Usage&);
