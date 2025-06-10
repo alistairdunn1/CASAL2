@@ -31,14 +31,14 @@ namespace niwa {
  * Default Constructor
  */
 Observation::Observation(shared_ptr<Model> model) : model_(model) {
-  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the observation", "");
-  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of observation", "");
-  parameters_.Bind<string>(PARAM_LIKELIHOOD, &likelihood_type_, "The type of likelihood to use", "");
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels to use", "", true);
-  parameters_.Bind<Double>(PARAM_DELTA, &delta_, "The robustification value (delta) for the likelihood", "", utilities::math::DELTA)->set_lower_bound(0.0);
-  parameters_.Bind<string>(PARAM_SIMULATION_LIKELIHOOD, &simulation_likelihood_label_, "The simulation likelihood to use", "", "");
-  parameters_.Bind<Double>(PARAM_LIKELIHOOD_MULTIPLIER, &likelihood_multiplier_, "The likelihood score multiplier", "", Double(1.0))->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_ERROR_VALUE_MULTIPLIER, &error_value_multiplier_, "The error value multiplier for likelihood", "", Double(1.0))->set_lower_bound(0.0);
+  parameters_.Bind<string>(PARAM_LABEL, &label_, "The label of the observation");
+  parameters_.Bind<string>(PARAM_TYPE, &type_, "The type of observation");
+  parameters_.Bind<string>(PARAM_LIKELIHOOD, &likelihood_type_, "The type of likelihood to use");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels to use")->flag_is_category(true);
+  parameters_.Bind<Double>(PARAM_DELTA, &delta_, "The robustification value (delta) for the likelihood")->set_default_value(utilities::math::DELTA);
+  parameters_.Bind<string>(PARAM_SIMULATION_LIKELIHOOD, &simulation_likelihood_label_, "The simulation likelihood to use")->set_default_value("");
+  parameters_.Bind<Double>(PARAM_LIKELIHOOD_MULTIPLIER, &likelihood_multiplier_, "The likelihood score multiplier")->set_default_value(1.0);
+  parameters_.Bind<Double>(PARAM_ERROR_VALUE_MULTIPLIER, &error_value_multiplier_, "The error value multiplier for likelihood")->set_default_value(1.0);
 
   RegisterAsAddressable(PARAM_LIKELIHOOD_MULTIPLIER, &likelihood_multiplier_);
   RegisterAsAddressable(PARAM_ERROR_VALUE_MULTIPLIER, &error_value_multiplier_);
@@ -52,8 +52,11 @@ Observation::Observation(shared_ptr<Model> model) : model_(model) {
 void Observation::Validate() {
   LOG_TRACE();
   parameters_.Populate(model_);
-  LOG_FINEST() << "validating obs " << label_ << " of type = " << type_;
+  parameters_.Validate(PARAM_DELTA)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_LIKELIHOOD_MULTIPLIER)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_ERROR_VALUE_MULTIPLIER)->GreaterThanOrEqualTo(0.0);
 
+  LOG_FINEST() << "validating obs " << label_ << " of type = " << type_;
   if (model_->run_mode() == RunMode::kSimulation) {
     if (likelihood_type_ == PARAM_PSEUDO) {
       likelihood_type_ = simulation_likelihood_label_;
