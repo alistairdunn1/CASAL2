@@ -35,6 +35,15 @@ Manager::Manager() {
 Manager::~Manager() noexcept(true) {}
 
 /**
+ *
+ */
+void Manager::Clear() {
+  objects_.clear();
+  ordered_time_steps_.clear();
+  derived_quantities_.clear();
+}
+
+/**
  * Get the time step
  *
  * @param label The label of the time step
@@ -256,6 +265,43 @@ unsigned Manager::current_time_step() const {
     LOG_CODE_ERROR() << "Model State is not Init or Execute. It is: " << (unsigned)model_->state();
 
   return current_time_step_;
+}
+
+/**
+ *  Subscribe to a block in a specific time step for a specific executor
+ */
+void Manager::SubscribeToBlock(const string& time_step_label, Executor* executor, vector<unsigned>& year) {
+  // Find the time step
+  TimeStep* time_step = GetTimeStep(time_step_label);
+  if (time_step == nullptr) {
+    LOG_ERROR() << "Time step with label '" << time_step_label << "' not found for object " << executor->label() << ".";
+    return;
+  }
+
+  // Subscribe to the block
+  for (unsigned y : year) {
+    time_step->SubscribeToBlock(executor, y);
+  }
+}
+
+/**
+ * Subscribe to a process in a specific time step for a specific executor
+ */
+void Manager::SubscribeToProcess(const string& time_step_label, Executor* executor, const string& process_label, vector<unsigned>& years) {
+  // Find the time step
+  TimeStep* time_step = GetTimeStep(time_step_label);
+  if (time_step == nullptr) {
+    LOG_ERROR() << "Time step with label '" << time_step_label << "' not found for object " << executor->label() << ".";
+    return;
+  }
+
+  // Subscribe to the process
+  for (unsigned year : years) {
+    Process* process = time_step->SubscribeToProcess(executor, year, process_label);
+    if (process == nullptr) {
+      LOG_ERROR() << "Process with label '" << process_label << "' not found in time step '" << time_step_label << "' for year " << year << ".";
+    }
+  }
 }
 
 } /* namespace timesteps */

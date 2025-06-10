@@ -28,18 +28,14 @@ class Manager : public niwa::base::Manager<niwa::timesteps::Manager, niwa::TimeS
 public:
   // Methods
   virtual ~Manager() noexcept(true);
-  void      Validate() override final;
-  void      Validate(shared_ptr<Model> model);
-  void      Build() override final;
-  void      Verify(shared_ptr<Model> model) final;
-  void      Execute(unsigned year);
-  void      ExecuteInitialisation(const string& phase_label, unsigned years);
-  TimeStep* GetTimeStep(const string& label) const;
-  void      Clear() override final {
-    objects_.clear();
-    ordered_time_steps_.clear();
-    derived_quantities_.clear();
-  }
+  void                Validate() override final;
+  void                Validate(shared_ptr<Model> model);
+  void                Build() override final;
+  void                Verify(shared_ptr<Model> model) final;
+  void                Execute(unsigned year);
+  void                ExecuteInitialisation(const string& phase_label, unsigned years);
+  TimeStep*           GetTimeStep(const string& label) const;
+  void                Clear() override final;
   unsigned            GetTimeStepIndex(const string& time_step_label) const;
   bool                CheckTimeStep(const string& time_step_label) const;
   unsigned            GetTimeStepIndexForProcess(const string& process_label) const;
@@ -47,6 +43,8 @@ public:
   vector<unsigned>    GetTimeStepIndexesForProcess(const string& process_label) const;
   vector<ProcessType> GetOrderedProcessTypes();
   unsigned            GetProcessIndex(const string& process_label) const;
+  void                SubscribeToBlock(const string& time_step_label, Executor* executor, vector<unsigned>& year);
+  void                SubscribeToProcess(const string& time_step_label, Executor* executor, const string& process_label, vector<unsigned>& years);
 
   // accessors
   const vector<TimeStep*>& ordered_time_steps() const { return ordered_time_steps_; }
