@@ -344,12 +344,23 @@ shared_ptr<ValidatorVector> ValidatorVector::IsLengthBin() {
 
   auto model_length_bins = model_->length_bins();
   for (auto& val : *param->target()) {
+    bool is_valid = false;
+
     for (const auto& bin : model_length_bins) {
       if (utilities::math::IsEqual(val, bin)) {
-        return shared_from_this();  // found a match
+        is_valid = true;  // exact match
+        break;
       }
     }
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be a valid length bin";
+    if (!is_valid) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be a valid length bin";
+    }
+  }
+
+  // see if we have any duplicate values in the vector
+  std::set<Double> unique_values(param->target()->begin(), param->target()->end());
+  if (unique_values.size() != param->target()->size()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has duplicate values. Each length bin must be unique.";
   }
 
   return shared_from_this();
@@ -374,6 +385,34 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
 
   if (param->target() != nullptr || param->target()->size() == 0) {
     *param->target() = model_->years();
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will return a ValidatorVector that defaults to all model length bins
+ * if the parameter has not been defined.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  auto* param = GetParameterAsVectorDouble();
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelLengthBins " << parameter_->label() << " is not a vector<double> type";
+    return shared_from_this();
+  }
+
+  if (model_->length_bins().size() == 0) {
+    LOG_CODE_ERROR() << "Model::length_bins() is empty. Cannot default to all model length bins for parameter " << parameter_->label()
+                     << ". Please define length bins in the model.";
+    return shared_from_this();
+  }
+
+  if (param->target() != nullptr || param->target()->size() == 0) {
+    *param->target() = model_->length_bins();
   }
 
   return shared_from_this();
@@ -609,17 +648,22 @@ shared_ptr<ValidatorVector> ValidatorVector::IsInIncreasingOrder() {
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorUnsigned();
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::IsInIncreasingOrder " << parameter_->label() << " is not a vector<unsigned> type";
-  }
-
-  const auto& values = *param->target();
-  for (size_t i = 1; i < values.size(); ++i) {
-    if (values[i] < values[i - 1]) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " values (" << values[i - 1] << ", " << values[i]
-                  << ") are not in increasing order at index " << i;
+  auto check_increasing_order = [](const auto& values, const std::string& label, const std::string& location) {
+    for (size_t i = 1; i < values.size(); ++i) {
+      if (values[i] < values[i - 1]) {
+        LOG_ERROR() << location << " parameter " << label << " values (" << values[i - 1] << ", " << values[i] << ") are not in increasing order at index " << i;
+      }
     }
+  };
+
+  if (auto* param_unsigned = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    const auto& values = *param_unsigned->target();
+    check_increasing_order(values, parameter_->label(), this->parameter_->location());
+  } else if (auto* param_double = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    const auto& values = *param_double->target();
+    check_increasing_order(values, parameter_->label(), this->parameter_->location());
+  } else {
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::IsInIncreasingOrder " << parameter_->label() << " is not a vector<double/unsigned> type";
   }
 
   return shared_from_this();

@@ -54,6 +54,7 @@ public:
   shared_ptr<ValidatorVector> IsModelYear();
   shared_ptr<ValidatorVector> IsLengthBin();
   shared_ptr<ValidatorVector> DefaultToAllModelYears();
+  shared_ptr<ValidatorVector> DefaultToAllModelLengthBins();
   shared_ptr<ValidatorVector> NumberOfElements(unsigned count);
   shared_ptr<ValidatorVector> SameNumberOfElementsAs(const string& label);
   shared_ptr<ValidatorVector> ExpandToSameNumberOfElementsAs(const string& label);
