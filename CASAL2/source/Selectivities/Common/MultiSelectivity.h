@@ -39,13 +39,13 @@ public:
 
 private:
   // Members
-  vector<unsigned>            years_;
-  vector<string>              selectivity_labels_;
+  vector<unsigned>            years_ = {};
+  vector<string>              selectivity_labels_ = {};
   map<unsigned, Selectivity*> selectivities_;
-  string                      default_selectivity_label_;
-  string                      projection_selectivity_label_;
-  Selectivity*                default_selectivity_;
-  Selectivity*                projection_selectivity_;
+  string                      default_selectivity_label_ = "";
+  string                      projection_selectivity_label_ = "";
+  Selectivity*                default_selectivity_ = nullptr;
+  Selectivity*                projection_selectivity_ = nullptr;
 };
 
 } /* namespace selectivities */

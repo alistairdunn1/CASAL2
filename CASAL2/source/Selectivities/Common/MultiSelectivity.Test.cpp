@@ -78,13 +78,13 @@ TEST_F(InternalEmptyModel, MultiSelectivity) {
   niwa::selectivities::Manager* selectivity_manager = model_->managers()->selectivity();
   ASSERT_NE(selectivity_manager, nullptr);
 
-  auto* inverse_logistic = selectivity_manager->GetSelectivity("inverse_logistic");
+  auto inverse_logistic = selectivity_manager->GetSelectivity("inverse_logistic");
   ASSERT_NE(inverse_logistic, nullptr);
 
-  auto* logistic = selectivity_manager->GetSelectivity("logistic");
+  auto logistic = selectivity_manager->GetSelectivity("logistic");
   ASSERT_NE(logistic, nullptr);
 
-  auto* multi = selectivity_manager->GetSelectivity("multi");
+  auto multi = selectivity_manager->GetSelectivity("multi");
   ASSERT_NE(multi, nullptr);
 
   model_->set_current_year(1990);

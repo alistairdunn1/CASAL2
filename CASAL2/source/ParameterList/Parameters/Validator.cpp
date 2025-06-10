@@ -49,6 +49,10 @@ Bindable<unsigned>* Validator::GetParameterAsUnsigned(bool null_on_error) {
  * This method will check that the value of the parameter is greater than the value passed
  */
 shared_ptr<Validator> Validator::GreaterThan(Double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
   auto*  param  = GetParameterAsDouble();
   Double source = *param->target();
   if (source <= value) {
@@ -63,6 +67,10 @@ shared_ptr<Validator> Validator::GreaterThan(Double value) {
  * This method will check that the value of the parameter is greater than the value passed
  */
 shared_ptr<Validator> Validator::GreaterThan(unsigned value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
   auto*    param  = GetParameterAsUnsigned();
   unsigned source = *param->target();
   if (source <= value) {
@@ -77,6 +85,10 @@ shared_ptr<Validator> Validator::GreaterThan(unsigned value) {
  * in as the parameter
  */
 shared_ptr<Validator> Validator::GreaterThanOrEqualTo(Double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
   auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
   if (param == nullptr) {
     LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualTo " << parameter_->label() << " is not a double type";
@@ -95,6 +107,10 @@ shared_ptr<Validator> Validator::GreaterThanOrEqualTo(Double value) {
  * This method will check that the value of the parameter is greater than or equal to the value passed
  */
 shared_ptr<Validator> Validator::GreaterThanOrEqualTo(unsigned value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
   auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
   if (param == nullptr) {
     LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualTo " << parameter_->label() << " is not an unsigned type";

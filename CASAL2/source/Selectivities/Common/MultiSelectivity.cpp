@@ -78,11 +78,11 @@ void MultiSelectivity::DoBuild() {
     }
   }
 
-  // Then overwrite with the year value if user supplied for either/both run and projection years
-  for (unsigned y_ndx = 0; y_ndx < all_years.size(); ++y_ndx) {
+  // Then overwrite with the year value if user supplied for either/both run and projection years  
+  for (unsigned y_ndx = 0; y_ndx < years_.size(); ++y_ndx) {
     Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(selectivity_labels_[y_ndx]);
     if (selectivity) {
-      selectivities_[all_years[y_ndx]] = selectivity;
+      selectivities_[years_[y_ndx]] = selectivity;
     }
   }
 
