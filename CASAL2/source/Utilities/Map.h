@@ -81,6 +81,22 @@ public:
   auto begin() { return storage_.begin(); }
   auto end() { return storage_.end(); }
 
+  /**
+   * Build a map from 2 vectors where the first vector
+   * is the key and the second vector is the value
+   *
+   * @param key The keys to use
+   * @param value The values to use
+   * @return a Map of keys and values
+   */
+  static OrderedMap<_Key, _Tp> create(const std::vector<_Key>& key, const std::vector<_Tp>& value) {
+    OrderedMap<_Key, _Tp> result;
+
+    for (unsigned i = 0; i < key.size(); ++i) result[key[i]] = value[i];
+
+    return result;
+  }
+
 private:
   vector<std::pair<_Key, _Tp>> storage_;
 };
@@ -101,6 +117,11 @@ public:
   static std::map<unsigned, Double> create(const std::vector<unsigned>& key, const std::vector<Double>& value) {
     std::map<unsigned, Double> result;
 
+    if (key.size() != value.size()) {
+      LOG_FATAL() << "Map::create: key and value vectors must be of the same size. Key size: " << key.size() << ", Value size: " << value.size();
+      return result;  // return empty map
+    }
+
     for (unsigned i = 0; i < key.size(); ++i) result[key[i]] = value[i];
 
     return result;
@@ -116,6 +137,11 @@ public:
    */
   static std::map<std::string, Double> create(const std::vector<std::string>& key, const std::vector<Double>& value) {
     std::map<std::string, Double> result;
+
+    if (key.size() != value.size()) {
+      LOG_FATAL() << "Map::create: key and value vectors must be of the same size. Key size: " << key.size() << ", Value size: " << value.size();
+      return result;  // return empty map
+    }
 
     for (unsigned i = 0; i < key.size(); ++i) result[key[i]] = value[i];
 
