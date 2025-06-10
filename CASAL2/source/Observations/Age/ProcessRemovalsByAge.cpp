@@ -29,9 +29,7 @@
 #include "Utilities/Vector.h"
 
 // Namespaces
-namespace niwa {
-namespace observations {
-namespace age {
+namespace niwa::observations::age {
 
 /**
  * Default constructor
@@ -39,34 +37,28 @@ namespace age {
 ProcessRemovalsByAge::ProcessRemovalsByAge(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group", "", true);
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The label of process error to use", "", true);
-  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of the ageing error to use", "", "");
-  parameters_.Bind<string>(PARAM_METHOD_OF_REMOVAL, &method_, "The label of the observed method of removals", "", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
-  parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality process for the observation", "");
-  parameters_.Bind<bool>(PARAM_SIMULATED_DATA_SUM_TO_ONE, &simulated_data_sum_to_one_, "Whether simulated data is discrete or scaled by totals to be proportions for each year", "",
-                         true);
-  parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1", "", false);
+
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age");
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group")->set_default_value(true);
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-steps that the observation occurs in");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The label of process error to use")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of the ageing error to use")->set_default_value("");
+  parameters_.Bind<string>(PARAM_METHOD_OF_REMOVAL, &method_, "The label of the observed method of removals")->set_default_value("");
+  parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality process for the observation");
+  parameters_.Bind<bool>(PARAM_SIMULATED_DATA_SUM_TO_ONE, &simulated_data_sum_to_one_, "Whether simulated data is discrete or scaled by totals to be proportions for each year")
+      ->set_default_value(true);
+  parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1")->set_default_value(false);
 
   mean_proportion_method_ = false;
 
   RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
 
-  allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
-  allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
-  allowed_likelihood_types_.push_back(PARAM_DIRICHLET);
-  allowed_likelihood_types_.push_back(PARAM_DIRICHLET_MULTINOMIAL);
-  allowed_likelihood_types_.push_back(PARAM_LOGISTIC_NORMAL);
-
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_INSTANTANEOUS);
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_HYBRID);
+  allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL, PARAM_DIRICHLET, PARAM_DIRICHLET_MULTINOMIAL, PARAM_LOGISTIC_NORMAL};
+  allowed_mortality_types_  = {PARAM_MORTALITY_INSTANTANEOUS, PARAM_MORTALITY_HYBRID};
 }
 
 /**
@@ -81,6 +73,16 @@ ProcessRemovalsByAge::~ProcessRemovalsByAge() {
  * Validate configuration file parameters
  */
 void ProcessRemovalsByAge::DoValidate() {
+  parameters_.Validate(PARAM_MIN_AGE)->IsAge();
+  parameters_.Validate(PARAM_MAX_AGE)->IsAge();
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  parameters_.ValidateVector(PARAM_METHOD_OF_REMOVAL)->SameNumberOfElementsAs(PARAM_TIME_STEP);
+
+  if (process_error_values_.size() == 0)
+    process_error_values_.assign(years_.size(), 0.0);
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
+
   age_spread_ = (max_age_ - min_age_) + 1;
 
   map<unsigned, vector<double>> error_values_by_year;
@@ -89,38 +91,12 @@ void ProcessRemovalsByAge::DoValidate() {
   /**
    * Do some simple checks
    */
-  if (min_age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_MIN_AGE) << ": min_age (" << min_age_ << ") is less than the model's min_age (" << model_->min_age() << ")";
-  if (max_age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_MAX_AGE) << ": max_age (" << max_age_ << ") is greater than the model's max_age (" << model_->max_age() << ")";
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
 
   // if only one value supplied then assume its the same for all years
   if (process_error_values_.size() == 1) {
     Double temp = process_error_values_[0];
     process_error_values_.resize(years_.size(), temp);
   }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were provided, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
-
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years
@@ -232,11 +208,6 @@ void ProcessRemovalsByAge::DoValidate() {
         LOG_WARNING_P(PARAM_OBS) << ": The sum of the values for year " << iter->first << " was " << total << " and do not sum to 1.0";
       }
     }
-  }
-
-  if (time_step_label_.size() != method_.size()) {
-    LOG_ERROR_P(PARAM_TIME_STEP) << "Specify the same number of time step labels as methods. " << time_step_label_.size() << " time-step labels were specified, but "
-                                 << method_.size() << " methods were specified";
   }
 }
 
@@ -484,6 +455,4 @@ void ProcessRemovalsByAge::CalculateScore() {
   }
 }
 
-} /* namespace age */
-}  // namespace observations
-}  // namespace niwa
+}  // namespace niwa::observations::age
