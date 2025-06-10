@@ -33,15 +33,27 @@ namespace utils = niwa::utilities;
 Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
   obs_table_ = new parameters::Table(PARAM_OBS);
 
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error", "", Double(0.0))->set_lower_bound(0.0);
-  parameters_.Bind<string>(PARAM_AGE_WEIGHT_LABELS, &age_weight_labels_,
-                           R"(The labels for the \command{$age\_weight$} block which corresponds to each category, to use the weight calculation method for biomass calculations)",
-                           "", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values", "");
+  // clang-format off
+  // Process parameters
+  parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The label of the process for the observation")
+    ->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_PROCESS_PROPORTION, &process_proportion_, "The proportion through the process when the observation is evaluated")
+    ->set_default_value(0.5);
+  // Timestep parameters
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+    ->set_default_value(0.5);
+  // Generic parameters
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error")
+    ->set_default_value(0.0);
+  parameters_.Bind<string>(PARAM_AGE_WEIGHT_LABELS, &age_weight_labels_, "The labels for the age_weights block which corresponds to each category, to use the weight calculation method")
+    ->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values");
+
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values and error values", "", false);
+  // clang-format on
 
   RegisterAsAddressable(PARAM_PROCESS_ERROR, &process_error_value_);
 
@@ -62,26 +74,15 @@ Biomass::~Biomass() {
  */
 void Biomass::DoValidate() {
   LOG_TRACE();
-
-  for (auto category_label : category_labels_) LOG_FINEST() << category_label;
-
-  if (category_labels_.size() != selectivity_labels_.size() && expected_selectivity_count_ != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Number of selectivities provided (" << selectivity_labels_.size()
-                                     << ") is not valid. Specify either the number of category collections (" << category_labels_.size() << ") or "
-                                     << "the number of total categories (" << expected_selectivity_count_ << ")";
-
-  if (parameters_.Get(PARAM_AGE_WEIGHT_LABELS)->has_been_defined()) {
-    if (category_labels_.size() != age_weight_labels_.size() && expected_selectivity_count_ != age_weight_labels_.size())
-      LOG_ERROR_P(PARAM_AGE_WEIGHT_LABELS) << ": Number of age weights provided (" << age_weight_labels_.size()
-                                           << ") is not valid. Specify either the number of category collections (" << category_labels_.size() << ") or "
-                                           << "the number of total categories (" << expected_selectivity_count_ << ")";
-  }
-
-  // Delta
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
-  if (process_error_value_ < 0.0)
-    LOG_ERROR_P(PARAM_PROCESS_ERROR) << ": process_error (" << AS_DOUBLE(process_error_value_) << ") cannot be less than 0.0";
+  parameters_.Validate(PARAM_TYPE)->IsInList({PARAM_BIOMASS, PARAM_PROCESS_BIOMASS});
+  parameters_.Validate(PARAM_PROCESS)->EitherOrDefined(PARAM_TIME_STEP_PROPORTION);
+  parameters_.Validate(PARAM_PROCESS_PROPORTION)->ForbiddenIfDefined(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->RequiredIf(type_ == PARAM_ABUNDANCE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_AGE_WEIGHT_LABELS)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
 
   // Obs
   unsigned                num_obs       = category_labels_.size();
@@ -128,6 +129,17 @@ void Biomass::DoValidate() {
  */
 void Biomass::DoBuild() {
   LOG_TRACE();
+  if (type_ == PARAM_BIOMASS) {
+    // TimeStep
+    mean_proportion_method_ = true;
+    proportion_of_time_     = time_step_proportion_;
+    model_->managers()->time_step()->SubscribeToBlock(time_step_label_, this, years_);
+  } else {
+    // Process
+    mean_proportion_method_ = false;
+    proportion_of_time_     = process_proportion_;
+    model_->managers()->time_step()->SubscribeToProcess(time_step_label_, this, process_label_, years_);
+  }
 
   catchability_ = model_->managers()->catchability()->GetCatchability(catchability_label_);
   if (!catchability_)

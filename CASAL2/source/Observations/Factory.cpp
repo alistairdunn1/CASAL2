@@ -17,8 +17,7 @@
 #include "Model/Model.h"
 #include "Observations/Age/Abundance.h"
 #include "Observations/Age/AgeLength.h"
-#include "Observations/Age/Biomass/Process.h"
-#include "Observations/Age/Biomass/TimeStep.h"
+#include "Observations/Age/Biomass.h"
 #include "Observations/Age/ProcessRemovalsByAge.h"
 #include "Observations/Age/ProcessRemovalsByAgeRetained.h"
 #include "Observations/Age/ProcessRemovalsByAgeRetainedTotal.h"
@@ -68,16 +67,12 @@ Observation* Factory::Create(shared_ptr<Model> model, const string& object_type,
 
   if (model->partition_type() == PartitionType::kAge) {
     if (object_type == PARAM_OBSERVATION) {
-      if (sub_type == PARAM_ABUNDANCE)
+      if (sub_type == PARAM_ABUNDANCE || sub_type == PARAM_PROCESS_ABUNDANCE)
         result = new age::Abundance(model);
       if (sub_type == PARAM_AGE_LENGTH)
         result = new age::AgeLength(model);
-      else if (sub_type == PARAM_PROCESS_ABUNDANCE)
-        result = new age::Abundance(model);
-      else if (sub_type == PARAM_BIOMASS)
-        result = new age::TimeStepBiomass(model);
-      else if (sub_type == PARAM_PROCESS_BIOMASS)
-        result = new age::ProcessBiomass(model);
+      else if (sub_type == PARAM_BIOMASS || sub_type == PARAM_PROCESS_BIOMASS)
+        result = new age::Biomass(model);
       else if (sub_type == PARAM_PROPORTIONS_AT_AGE)
         result = new age::TimeStepProportionsAtAge(model);
       else if (sub_type == PARAM_PROPORTIONS_MATURE_BY_AGE)

@@ -67,20 +67,13 @@ Abundance::~Abundance() {
  */
 void Abundance::DoValidate() {
   LOG_TRACE();
-  mean_proportion_method_ = type_ != PARAM_ABUNDANCE;
-
   parameters_.Validate(PARAM_TYPE)->IsInList({PARAM_ABUNDANCE, PARAM_PROCESS_ABUNDANCE});
   parameters_.Validate(PARAM_PROCESS)->EitherOrDefined(PARAM_TIME_STEP_PROPORTION);
   parameters_.Validate(PARAM_PROCESS_PROPORTION)->ForbiddenIfDefined(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->RequiredIf(type_ == PARAM_ABUNDANCE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
-  parameters_.ValidateVector(PARAM_SELECTIVITIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.Validate(PARAM_DELTA)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
-
-  if (category_labels_.size() != selectivity_labels_.size() && expected_selectivity_count_ != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Number of selectivities provided (" << selectivity_labels_.size()
-                                     << ") is not valid. Specify either the number of category collections (" << category_labels_.size() << ") or "
-                                     << "the number of total categories (" << expected_selectivity_count_ << ")";
 
   // Obs
   unsigned                num_obs       = category_labels_.size();

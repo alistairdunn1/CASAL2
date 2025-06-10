@@ -41,11 +41,11 @@ namespace age {
  */
 AgeLength::AgeLength(shared_ptr<Model> model) : Observation(model) {
   // clang-format off
-  parameters_.Bind<unsigned>(PARAM_YEAR, &year_, "The year this observation occurs in.", "");
+  parameters_.Bind<unsigned>(PARAM_YEAR, &year_, "The year this observation occurs in.");
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error", "", true);
-  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use", "", "");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_default_value(0.0);
+  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use")->set_default_value("");
   parameters_.Bind<string>(PARAM_NUMERATOR_CATEGORIES, &numerator_categories_, "The categories sampled (used in the numerator for the observation)", "", true);
   parameters_.Bind<string>(PARAM_SAMPLING_TYPE, &sample_type_, "The sampling type used to collect this data", "", PARAM_LENGTH)->set_allowed_values({PARAM_AGE, PARAM_LENGTH, PARAM_RANDOM});
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",Double(0.5))->set_range(0.0, 1.0);
@@ -67,21 +67,16 @@ AgeLength::~AgeLength() {}
 
 void AgeLength::DoValidate() {
   LOG_TRACE();
+
+  parameters_.ValidateVector(PARAM_CATEGORIES)->NumberOfElements(1u);
+  parameters_.Validate(PARAM_YEAR)->IsModelYear();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_AGES)->SameNumberOfElementsAs(PARAM_LENGTHS)->IsModelAge();
+  parameters_.ValidateVector(PARAM_LENGTHS)->SameNumberOfElementsAs(PARAM_AGES);
+  parameters_.ValidateVector(PARAM_NUMERATOR_CATEGORIES)->DuplicateParameterIfNotAssigned(PARAM_CATEGORIES);
+
   // check ages and parameters are sensible
   age_spread_ = model_->age_spread();
-  if (individual_ages_.size() != individual_lengths_.size())
-    LOG_ERROR_P(PARAM_AGES) << "needs to have the same number of elements as " << PARAM_LENGTHS << ". '" << individual_ages_.size() << "' ages supplied but '"
-                            << individual_lengths_.size() << "' lengths.";
-  if (category_labels_.size() > 1) {
-    LOG_ERROR_P(PARAM_CATEGORIES) << " only a single category label or a combined category label are allowed i.e., male or male+female.";
-  }
-
-  // if users don't supply this paramater we set it equal to category_labels_
-  if (!parameters_.Get(PARAM_NUMERATOR_CATEGORIES)->has_been_defined()) {
-    LOG_FINEST() << "users hasn't specified " << PARAM_NUMERATOR_CATEGORIES << " so we are setting it to category_labels which contains";
-    for (unsigned i = 0; i < category_labels_.size(); ++i) LOG_FINEST() << category_labels_[i];
-    numerator_categories_ = category_labels_;
-  }
 
   // set sum internal flags
   // enums have a cheaper lookup cost than string
@@ -104,13 +99,6 @@ void AgeLength::DoValidate() {
   }
   n_fish_ = individual_ages_.size();
 
-  // check no ages are less than min_age or greater than max_age
-  for (unsigned i = 0; i < n_fish_; i++) {
-    if (individual_ages_[i] < model_->min_age())
-      LOG_ERROR_P(PARAM_AGES) << "age '" << individual_ages_[i] << "' at element '" << i + 1 << "' is less than the model min_age. This is not allowed.";
-    if (individual_ages_[i] > model_->max_age())
-      LOG_ERROR_P(PARAM_AGES) << "age '" << individual_ages_[i] << "' at element '" << i + 1 << "' is greater than the model max_age. This is not allowed.";
-  }
   // split out all combined categories that were supplied
   // do some simple sanity checks on these categories
   vector<string> split_category_labels;
