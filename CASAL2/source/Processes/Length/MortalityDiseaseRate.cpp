@@ -16,6 +16,7 @@
 #include "../../Categories/Categories.h"
 #include "../../TimeSteps/Manager.h"
 #include "Selectivities/Manager.h"
+#include "Utilities/Map.h"
 
 // Namespaces
 namespace niwa {
@@ -30,11 +31,11 @@ MortalityDiseaseRate::MortalityDiseaseRate(shared_ptr<Model> model) : Process(mo
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kLength;
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories labels", "");
-  parameters_.Bind<Double>(PARAM_DISEASE_MORTALITY_RATE, &dm_input_, "The disease mortality rate", "")->set_range(0.0, 10, true, true);
-  parameters_.Bind<Double>(PARAM_YEAR_EFFECTS, &year_effect_input_, "Annual deviations around the disease mortality rate", "")->set_lower_bound(0.0, true);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivity labels", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &process_years_, "Years to apply disease mortality in", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories labels")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_DISEASE_MORTALITY_RATE, &dm_input_, "The disease mortality rate");
+  parameters_.Bind<Double>(PARAM_YEAR_EFFECTS, &year_effect_input_, "Annual deviations around the disease mortality rate");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivity labels");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &process_years_, "Years to apply disease mortality in");
 
   RegisterAsAddressable(PARAM_YEAR_EFFECTS, &year_effect_by_year_);
   RegisterAsAddressable(PARAM_DISEASE_MORTALITY_RATE, &dm_);
@@ -50,33 +51,17 @@ MortalityDiseaseRate::MortalityDiseaseRate(shared_ptr<Model> model) : Process(mo
  * - Check the categories are real
  */
 void MortalityDiseaseRate::DoValidate() {
-  if (year_effect_input_.size() != process_years_.size()) {
-    LOG_ERROR_P(PARAM_YEAR_EFFECTS) << " Supply a value for each year the process is applied. You supplied '" << year_effect_input_.size() << "' but there are '"
-                                    << process_years_.size() << "' years";
-  }
+  parameters_.ValidateVector(PARAM_DISEASE_MORTALITY_RATE)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(10.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_YEAR_EFFECTS)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
 
-  if (dm_input_.size() == 1) {
-    auto val_m = dm_input_[0];
-    dm_input_.assign(category_labels_.size(), val_m);
-  }
-
-  if (selectivity_names_.size() == 1) {
-    auto val_sel = selectivity_names_[0];
-    selectivity_names_.assign(category_labels_.size(), val_sel);
-  }
-
-  if (dm_input_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_DISEASE_MORTALITY_RATE) << ": The number of rates provided (" << dm_input_.size() << ") does not match the number of categories provided ("
-                                              << category_labels_.size() << ").";
-  }
-
-  if (selectivity_names_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": The number of selectivity labels provided (" << selectivity_names_.size() << ") does not match the number of categories provided ("
-                                     << category_labels_.size() << ").";
-  }
-
-  for (unsigned i = 0; i < dm_input_.size(); ++i) dm_[category_labels_[i]] = dm_input_[i];
-  for (unsigned i = 0; i < year_effect_input_.size(); ++i) year_effect_by_year_[process_years_[i]] = year_effect_input_[i];
+  dm_                  = utilities::OrderedMap<string, Double>::create(category_labels_, dm_input_);
+  year_effect_by_year_ = utilities::Map::create(process_years_, year_effect_input_);
 }
 
 /**

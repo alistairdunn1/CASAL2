@@ -34,15 +34,16 @@ Tagging::Tagging(shared_ptr<Model> model) : Process(model), to_partition_(model)
 
   proportions_table_ = new parameters::Table(PARAM_PROPORTIONS);
   parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories to transition from", "");
-  parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories to transition to", "");
-  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label", "", "");
-  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate, U_max", "", 0.99)->set_range(0.0, 1.0, true, false);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the transition in", "");
-  parameters_.Bind<Double>(PARAM_INITIAL_MORTALITY, &initial_mortality_, "The initial mortality proportion", "", 0.0)->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_INITIAL_MORTALITY_SELECTIVITY, &initial_mortality_selectivity_label_, "The initial mortality selectivity label", "", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The selectivity labels", "");
-  parameters_.Bind<Double>(PARAM_N, &n_, "Number of tags (N)", "");
-  parameters_.Bind<double>(PARAM_TOLERANCE, &tolerance_, "Tolerance for checking the specificed proportions sum to one", "", 1e-5)->set_range(0, 1.0);
+  parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories to transition to");
+  parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label")->set_default_value("");
+  parameters_.Bind<double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate, U_max")->set_default_value(0.99);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the transition in");
+  parameters_.Bind<Double>(PARAM_INITIAL_MORTALITY, &initial_mortality_, "The initial mortality proportion")->set_default_value(0.0);
+  parameters_.Bind<string>(PARAM_INITIAL_MORTALITY_SELECTIVITY, &initial_mortality_selectivity_label_, "The initial mortality selectivity label")->set_default_value("");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The selectivity labels");
+  parameters_.Bind<Double>(PARAM_N, &n_, "Number of tags (N)");
+  parameters_.Bind<double>(PARAM_TOLERANCE, &tolerance_, "Tolerance for checking the specificed proportions sum to one")->set_default_value(1e-5);
+
   parameters_.BindTable(PARAM_PROPORTIONS, proportions_table_, "The table of proportions to move", "", true, true);
 }
 
@@ -61,11 +62,13 @@ Tagging::~Tagging() {
  * 3. Assign remaining local parameters
  */
 void Tagging::DoValidate() {
-  LOG_TRACE();
-  if (from_category_labels_.size() != to_category_labels_.size()) {
-    LOG_ERROR_P(PARAM_TO) << "number of values supplied (" << to_category_labels_.size() << ") does not match the number of from categories provided ("
-                          << from_category_labels_.size() << ")";
-  }
+  parameters_.ValidateVector(PARAM_FROM)->SameNumberOfElementsAs(PARAM_TO);
+  parameters_.Validate(PARAM_U_MAX)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->IsInIncreasingOrder()->DefaultToAllModelYears();
+  parameters_.Validate(PARAM_INITIAL_MORTALITY)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_TOLERANCE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->SameNumberOfElementsAs(PARAM_TO);
+  parameters_.ValidateVector(PARAM_N)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS);
 
   // Load data from proportions table using n parameter
   vector<string> columns = proportions_table_->columns();

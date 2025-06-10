@@ -24,6 +24,7 @@
 #include "Selectivities/Manager.h"
 #include "TimeSteps/Manager.h"
 #include "TimeSteps/TimeStep.h"
+#include "Utilities/Map.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
 #include "Utilities/Vector.h"
@@ -54,13 +55,15 @@ MortalityInstantaneous::MortalityInstantaneous(shared_ptr<Model> model) : Proces
   catches_table_->set_required_columns({PARAM_YEAR}, true);
   method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_U_MAX, PARAM_PENALTY});
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality", "");
-  parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_M, &m_input_, "The natural mortality rates for each category");
+  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_ratios_temp_, "The time step proportions for natural mortality");
+  parameters_.Bind<bool>(PARAM_BIOMASS, &is_catch_biomass_, "Indicator to denote if the catches are as biomass (true) or abundance (false)")->set_default_value(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The M-by-length bin ogives to apply to each category for natural mortality")
+      ->set_alias_labels({PARAM_RELATIVE_M_BY_LENGTH});
+
   parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
-  parameters_.Bind<Double>(PARAM_M, &m_input_, "The natural mortality rates for each category", "")->set_lower_bound(0.0);
-  parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &time_step_ratios_temp_, "The time step proportions for natural mortality", "", false)->set_range(0.0, 1.0);
-  parameters_.Bind<bool>(PARAM_BIOMASS, &is_catch_biomass_, "Indicator to denote if the catches are as biomass (true) or abundance (false)", "", true);
-  parameters_.Bind<string>(PARAM_RELATIVE_M_BY_LENGTH, &selectivity_labels_, "The M-by-length bin ogives to apply to each category for natural mortality", "");
+  parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
 
   RegisterAsAddressable(PARAM_M, &m_);
 }
@@ -80,13 +83,11 @@ MortalityInstantaneous::~MortalityInstantaneous() {
  * Note: all parameters are populated from configuration files
  */
 void MortalityInstantaneous::DoValidate() {
-  Double total = 0.0;
-  for (Double value : time_step_ratios_temp_) {
-    total += value;
-  }
-  if (!utilities::math::IsOne(total)) {
-    LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "summed to " << total << ". They must be specified to sum to one.";
-  }
+  parameters_.ValidateVector(PARAM_M)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0)->SumToOne();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+
+  m_ = utilities::OrderedMap<string, Double>::create(category_labels_, m_input_);
 
   /**
    * Load a temporary map of the fishery catch data so we can use this
@@ -122,30 +123,6 @@ void MortalityInstantaneous::DoValidate() {
       fishery_year_catch[columns[i]][year] = value;
     }
   }
-
-  /**
-   * Validate the non-table parameters now. These are mostly related to the natural mortality
-   * aspect of the process.
-   */
-  if (selectivity_labels_.size() == 1) {
-    auto val_sel = selectivity_labels_[0];
-    selectivity_labels_.assign(category_labels_.size(), val_sel);
-  }
-
-  if (selectivity_labels_.size() != category_labels_.size()) {
-    LOG_FATAL_P(PARAM_RELATIVE_M_BY_LENGTH) << ": The number of M-by-length ogives provided is not the same as the number of categories provided. Categories: "
-                                            << category_labels_.size() << ", Ogives: " << selectivity_labels_.size();
-  }
-
-  if (m_input_.size() == 1) {
-    auto val_m = m_input_[0];
-    m_input_.assign(category_labels_.size(), val_m);
-  }
-
-  if (m_input_.size() != category_labels_.size())
-    LOG_FATAL_P(PARAM_M) << ": The number of Ms provided is not the same as the number of categories provided. Categories: " << category_labels_.size()
-                         << ", Ms: " << m_input_.size();
-  for (unsigned i = 0; i < m_input_.size(); ++i) m_[category_labels_[i]] = m_input_[i];
 
   /**
    * Build all of our category objects

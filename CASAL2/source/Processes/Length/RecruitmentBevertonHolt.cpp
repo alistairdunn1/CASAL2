@@ -35,25 +35,24 @@ namespace math = niwa::utilities::math;
 RecruitmentBevertonHolt::RecruitmentBevertonHolt(shared_ptr<Model> model) : Process(model), partition_(model) {
   LOG_TRACE();
 
-  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels", "");
-  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model", "", false)->set_lower_bound(0.0);
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category", "");
+  parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The category labels")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_R0, &r0_, "R0, the mean recruitment used to scale annual recruits or initialise the model")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_B0, &b0_, "B0, the SSB corresponding to R0, and used to scale annual recruits or initialise the model")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportion for each category");
   parameters_.Bind<unsigned>(PARAM_SSB_OFFSET, &ssb_offset_, "The spawning biomass year offset", "");
   parameters_.Bind<Double>(PARAM_STEEPNESS, &steepness_, "Steepness (h)", "", 1.0)->set_range(0.0, 1.0);
   parameters_.Bind<string>(PARAM_SSB, &ssb_label_, "The SSB label (i.e., the derived quantity label)", "");
   parameters_.Bind<string>(PARAM_B0_PHASE, &phase_b0_label_, "The initialisation phase label that B0 is from", "", "");
-
-  parameters_.Bind<Double>(PARAM_RECRUITMENT_MULTIPLIERS, &recruitment_multipliers_, "The YCS values", "");
-  parameters_.Bind<unsigned>(PARAM_STANDARDISE_YEARS, &standardise_years_, "The years that are included for year class standardisation", "", true);
-  parameters_.Bind<Double>(PARAM_INITIAL_MEAN_LENGTH, &initial_mean_length_, "Mean length at recruitment for each categories", "");
-  parameters_.Bind<Double>(PARAM_INITIAL_LENGTH_CV, &initial_length_cv_, "CV for recruitment of each categories", "");
+  parameters_.Bind<Double>(PARAM_RECRUITMENT_MULTIPLIERS, &recruitment_multipliers_, "The YCS values");
+  parameters_.Bind<unsigned>(PARAM_STANDARDISE_YEARS, &standardise_years_, "The years that are included for year class standardisation")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_INITIAL_MEAN_LENGTH, &initial_mean_length_, "Mean length at recruitment for each categories");
+  parameters_.Bind<Double>(PARAM_INITIAL_LENGTH_CV, &initial_length_cv_, "CV for recruitment of each categories");
 
   // these inputs are deprecated left in to warn the user what to change it in
   // unfortunately it comes through into the reports
-  parameters_.Bind<unsigned>(PARAM_STANDARDISE_YCS_YEARS, &standardise_ycs_years_, "The years that are included for year class standardisation", "", true);
-  parameters_.Bind<Double>(PARAM_YCS_VALUES, &ycs_values_, "The YCS values", "", true);
-  parameters_.Bind<unsigned>(PARAM_YCS_YEARS, &ycs_years_, "The recruitment years. A vector of years that relates to the year of the spawning event that created this cohort", "", true);
+  parameters_.Bind<unsigned>(PARAM_STANDARDISE_YCS_YEARS, &standardise_ycs_years_, "")->flag_deprecated(PARAM_STANDARDISE_YEARS);
+  parameters_.Bind<Double>(PARAM_YCS_VALUES, &ycs_values_, "")->flag_deprecated(PARAM_RECRUITMENT_MULTIPLIERS);
+  parameters_.Bind<unsigned>(PARAM_YCS_YEARS, &ycs_years_, "")->flag_deprecated();
 
   RegisterAsAddressable(PARAM_R0, &r0_);
   RegisterAsAddressable(PARAM_B0, &b0_);
@@ -62,9 +61,7 @@ RecruitmentBevertonHolt::RecruitmentBevertonHolt(shared_ptr<Model> model) : Proc
   RegisterAsAddressable(PARAM_RECRUITMENT_MULTIPLIERS, &recruitment_multipliers_by_year_);
   RegisterAsAddressable(PARAM_INITIAL_MEAN_LENGTH, &initial_mean_length_);
   RegisterAsAddressable(PARAM_INITIAL_LENGTH_CV, &initial_length_cv_);
-
-  // Allow these to be used in additional priors.
-  RegisterAsAddressable(PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS, &standardised_recruitment_multipliers_by_year_, addressable::kAll);
+  RegisterAsAddressable(PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS, &standardised_recruitment_multipliers_by_year_);
 
   phase_b0_            = 0;
   process_type_        = ProcessType::kRecruitment;
@@ -76,90 +73,27 @@ RecruitmentBevertonHolt::RecruitmentBevertonHolt(shared_ptr<Model> model) : Proc
  */
 void RecruitmentBevertonHolt::DoValidate() {
   LOG_TRACE();
-  // Flag error for deprecated values
-  if (parameters_.Get(PARAM_YCS_VALUES)->has_been_defined())
-    LOG_ERROR_P(PARAM_YCS_VALUES) << PARAM_YCS_VALUES << " is deprecated. The new input is " << PARAM_RECRUITMENT_MULTIPLIERS << ", refer to the user manual for more information";
-  if (parameters_.Get(PARAM_YCS_YEARS)->has_been_defined())
-    LOG_ERROR_P(PARAM_YCS_YEARS) << PARAM_YCS_YEARS << " is deprecated, refer to user manual for more information";
-  if (parameters_.Get(PARAM_STANDARDISE_YCS_YEARS)->has_been_defined())
-    LOG_ERROR_P(PARAM_STANDARDISE_YCS_YEARS)
-        << PARAM_STANDARDISE_YCS_YEARS << " is deprecated. Please use " << PARAM_STANDARDISE_YEARS
-        << " to standardise. Note the years now refer to model years rather than the previous year_class_years. Refer to the user manual for more information";
-
-  if (parameters_.Get(PARAM_R0)->has_been_defined() && parameters_.Get(PARAM_B0)->has_been_defined())
-    LOG_FATAL_P(PARAM_R0) << "Cannot specify both R0 and B0 in the model";
-
-  if (!parameters_.Get(PARAM_R0)->has_been_defined() && !parameters_.Get(PARAM_B0)->has_been_defined())
-    LOG_FATAL() << "Specify either R0 or B0 to initialise the model with Beverton-Holt recruitment";
-
-  if (category_labels_.size() != proportions_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << "One proportion is required to be defined per category. There are " << category_labels_.size() << " categories and " << proportions_.size()
-                                  << " proportions defined.";
-  // if users only give one value assign it to all categories
-  if (initial_mean_length_.size() == 1) {
-    Double temp = initial_mean_length_[0];
-    initial_mean_length_.assign(category_labels_.size(), temp);
-  }
-  // if users only give one value assign it to all categories
-  if (initial_length_cv_.size() == 1) {
-    Double temp = initial_length_cv_[0];
-    initial_length_cv_.assign(category_labels_.size(), temp);
-  }
-
-  if (initial_length_cv_.size() != category_labels_.size())
-    LOG_FATAL_P(PARAM_INITIAL_LENGTH_CV) << "There needs to be a value for each category";
-  if (initial_mean_length_.size() != category_labels_.size())
-    LOG_FATAL_P(PARAM_INITIAL_MEAN_LENGTH) << "There needs to be a value for each category";
-  Double running_total = 0.0;
-  for (Double value : proportions_)  // Again, ADOLC prevents std::accum
-    running_total += value;
-  if (!utilities::math::IsOne(running_total))
-    LOG_ERROR_P(PARAM_PROPORTIONS) << "The total is " << running_total << " which should be 1.0";
-
+  // years_ = model_->years();
   for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
 
-  if (recruitment_multipliers_.size() != years_.size()) {
-    LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "There are " << years_.size() << " model years and " << recruitment_multipliers_.size() << " " << PARAM_RECRUITMENT_MULTIPLIERS
-                                               << " defined. These inputs must be of equal length.";
-  }
+  parameters_.Validate(PARAM_R0)->GreaterThanOrEqualTo(0.0)->EitherOrDefined(PARAM_B0);
+  parameters_.Validate(PARAM_B0)->GreaterThanOrEqualTo(0.0)->ForbiddenIfDefined(PARAM_R0);
+  parameters_.ValidateVector(PARAM_PROPORTIONS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->LessThanOrEqualTo(1.0)
+      ->SumToOne()
+      ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
+      ->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_STEEPNESS)->GreaterThanOrEqualTo(0.2)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_RECRUITMENT_MULTIPLIERS)->GreaterThanOrEqualTo(0.0)->NumberOfElements(years_.size());
+  parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year());
+  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
+  parameters_.ValidateVector(PARAM_INITIAL_MEAN_LENGTH)->GreaterThan(0.0)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_INITIAL_LENGTH_CV)->GreaterThan(0.0)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
 
-  // initialise ycs_values and check values aren't < 0.0
-  unsigned ycs_iter = 0;
-  for (unsigned ycs_year : years_) {
-    recruitment_multipliers_by_year_[ycs_year]              = recruitment_multipliers_[ycs_iter];
-    standardised_recruitment_multipliers_by_year_[ycs_year] = recruitment_multipliers_[ycs_iter];
-    if (recruitment_multipliers_[ycs_iter] < 0.0)
-      LOG_ERROR_P(PARAM_RECRUITMENT_MULTIPLIERS) << "value " << recruitment_multipliers_[ycs_iter] << " cannot be less than 0.0";
-    ycs_iter++;
-  }
-
-  // Check ascending order
-  if (standardise_years_.size() == 0) {
-    standardise_recruitment_multipliers_ = false;
-  } else if (standardise_years_.size() > 1) {
-    for (unsigned i = 1; i < standardise_years_.size(); ++i) {
-      LOG_FINE() << "standardised year = " << standardise_years_[i];
-      if (standardise_years_[i] < model_->start_year())
-        LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be less than model start year.";
-      if (standardise_years_[i] > model_->final_year())
-        LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be greater than model final year.";
-
-      if (standardise_years_[i - 1] >= standardise_years_[i])
-        LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "values must be in strictly increasing order. Value " << standardise_years_[i - 1] << " is not less than " << standardise_years_[i];
-    }
-    // need to focus on first value
-    if (standardise_years_[0] < model_->start_year())
-      LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be less than model start year.";
-    if (standardise_years_[0] > model_->final_year())
-      LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "cannot be greater than model final year.";
-  }
-
-  // Populate the proportions category, assumes there is a one to one relationship between categories, and proportions.
-  unsigned iter = 0;
-  for (auto& category : category_labels_) {
-    proportions_by_category_[category] = proportions_[iter];
-    ++iter;
-  }
+  recruitment_multipliers_by_year_              = utilities::Map::create(years_, recruitment_multipliers_);
+  standardised_recruitment_multipliers_by_year_ = utilities::Map::create(years_, recruitment_multipliers_);
+  proportions_by_category_                      = utilities::OrderedMap<string, Double>::create(category_labels_, proportions_);
 }
 
 /**
@@ -218,13 +152,14 @@ void RecruitmentBevertonHolt::DoVerify(shared_ptr<Model> model) {
       LOG_VERIFY() << "There is an @parameter_transformation for the parameter " << PARAM_RECRUITMENT_MULTIPLIERS
                    << ". If this is type=simplex, you should not specify the subcommand " << PARAM_STANDARDISE_YEARS;
   }
-  if(model_->run_mode() == RunMode::kProjection) {
-    if(IsAddressableUsedFor(PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS, addressable::kProject) & IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kProject))
-      LOG_ERROR_P(PARAM_LABEL) << "- found an @project for both " << PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS << " and " << PARAM_RECRUITMENT_MULTIPLIERS << ". This is not allowed, you must choose one or the other not both.";
+  if (model_->run_mode() == RunMode::kProjection) {
+    if (IsAddressableUsedFor(PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS, addressable::kProject) & IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kProject))
+      LOG_ERROR_P(PARAM_LABEL) << "- found an @project for both " << PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS << " and " << PARAM_RECRUITMENT_MULTIPLIERS
+                               << ". This is not allowed, you must choose one or the other not both.";
     if (IsAddressableUsedFor(PARAM_STANDARDISED_RECRUITMENT_MULTIPLIERS, addressable::kProject)) {
       LOG_FINE() << "Projecting standardised multipliers";
       project_standardised_ycs_ = true;
-    } else if(IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kProject)) {
+    } else if (IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kProject)) {
       LOG_FINE() << "Projecting multipliers";
       project_standardised_ycs_ = false;
     } else {
@@ -336,32 +271,33 @@ void RecruitmentBevertonHolt::DoExecute() {
       // we are in projection run mode
       // either recruitment_multipliers_by_year_ or standardised_recruitment_multipliers_by_year_ will be automatically
       // updated by the @project class so just make sure we have the right one.
-      if(project_standardised_ycs_) {
+      if (project_standardised_ycs_) {
         // reporting purpose
-        // Note we-don't update recruitment_multipliers_by_year_. We can't tell if standardised_recruitment_multipliers_by_year_ have been changed 
+        // Note we-don't update recruitment_multipliers_by_year_. We can't tell if standardised_recruitment_multipliers_by_year_ have been changed
         // by @project prior to final_year so just leave it as is.
         ycs = standardised_recruitment_multipliers_by_year_[current_year];
       } else {
         // if @project is on recruitment multipliers check years to see if it has been updated so we can update the
-        // standardised values that actually get used 
+        // standardised values that actually get used
         if (current_year <= model_->final_year()) {
           if (recruitment_multipliers_by_year_[current_year] != recruitment_multipliers_[year_counter_])
             standardised_recruitment_multipliers_by_year_[current_year] = recruitment_multipliers_by_year_[current_year];
           ycs = recruitment_multipliers_by_year_[current_year];
         } else {
-            // definetly in a projection year
+          // definetly in a projection year
           standardised_recruitment_multipliers_by_year_[current_year] = recruitment_multipliers_by_year_[current_year];
-          ycs = recruitment_multipliers_by_year_[current_year];
+          ycs                                                         = recruitment_multipliers_by_year_[current_year];
         }
       }
-        
+
       if (ycs == 0.0) {
         LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but found value of " << PARAM_RECRUITMENT_MULTIPLIERS << " = 0 for year "
-                                                  << model_->current_year()
-                                                  << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+                                                   << model_->current_year()
+                                                   << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
       }
 
-      LOG_FINE() << "ssb year = " << ssb_year << " value = " << ycs << " last val = " << model_->final_year() << " counter = " << year_counter_ << " size of vector " << recruitment_multipliers_.size();
+      LOG_FINE() << "ssb year = " << ssb_year << " value = " << ycs << " last val = " << model_->final_year() << " counter = " << year_counter_ << " size of vector "
+                 << recruitment_multipliers_.size();
       LOG_FINE() << "Projected ycs = " << ycs << " what is in the original " << recruitment_multipliers_[year_counter_];
       // else business as usual
     } else {

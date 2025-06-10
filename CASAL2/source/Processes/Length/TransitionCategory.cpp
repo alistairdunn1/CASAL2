@@ -27,11 +27,11 @@ namespace length {
 TransitionCategory::TransitionCategory(shared_ptr<Model> model) : Process(model), from_partition_(model), to_partition_(model) {
   LOG_TRACE();
 
-  parameters_.Bind<string>(PARAM_FROM, &from_category_names_, "The categories to transition from", "");
-  parameters_.Bind<string>(PARAM_TO, &to_category_names_, "The categories to transition to", "");
-  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportions to transition for each category", "")->set_range(0.0, 1.0);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivities to apply to each proportion", "");
-  parameters_.Bind<bool>(PARAM_INCLUDE_IN_MORTALITY_BLOCK, &process_is_in_mortality_block_, "Is the process is in the mortality block", "", false);
+  parameters_.Bind<string>(PARAM_FROM, &from_category_names_, "The categories to transition from")->flag_is_category();
+  parameters_.Bind<string>(PARAM_TO, &to_category_names_, "The categories to transition to")->flag_is_category();
+  parameters_.Bind<Double>(PARAM_PROPORTIONS, &proportions_, "The proportions to transition for each category");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivities to apply to each proportion");
+  parameters_.Bind<bool>(PARAM_INCLUDE_IN_MORTALITY_BLOCK, &process_is_in_mortality_block_, "Is the process is in the mortality block")->set_default_value(false);
 
   RegisterAsAddressable(PARAM_PROPORTIONS, &proportions_by_category_);
 
@@ -53,58 +53,14 @@ TransitionCategory::TransitionCategory(shared_ptr<Model> model) : Process(model)
  * - Check all proportions are between 0.0 and 1.0
  */
 void TransitionCategory::DoValidate() {
-  if (process_is_in_mortality_block_) {
-    LOG_MEDIUM() << "this process will be set to be inside the mortality process";
-    process_type_ = ProcessType::kMortality;
-  }
-
   LOG_TRACE();
+  process_type_ = process_is_in_mortality_block_ ? ProcessType::kMortality : process_type_;
 
-  if (selectivity_names_.size() == 1) {
-    auto val_s = selectivity_names_[0];
-    selectivity_names_.assign(from_category_names_.size(), val_s);
-  }
-  //  // Validate Categories
-  //  auto categories = model_->categories();
+  parameters_.ValidateVector(PARAM_FROM)->SameNumberOfElementsAs(PARAM_TO)->IsUniqueFrom(PARAM_TO);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_FROM)->SameNumberOfElementsAs(PARAM_FROM);
+  parameters_.ValidateVector(PARAM_PROPORTIONS)->ExpandToSameNumberOfElementsAs(PARAM_FROM)->SameNumberOfElementsAs(PARAM_FROM)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
-  // Validate the from and to vectors are the same size
-  if (from_category_names_.size() != to_category_names_.size()) {
-    LOG_ERROR_P(PARAM_TO) << ": the number of 'to' categories provided does not match the number of 'from' categories provided. " << from_category_names_.size()
-                          << " categories were supplied, but " << to_category_names_.size() << " categories are required";
-  }
-
-  // Allow a one to many relationship between proportions and number of categories.
-  if (proportions_.size() == 1) {
-    Double temp = proportions_[0];
-    proportions_.resize(to_category_names_.size(), temp);
-  }
-
-  // Validate the to category and proportions vectors are the same size
-  if (to_category_names_.size() != proportions_.size()) {
-    LOG_ERROR_P(PARAM_PROPORTIONS) << ": the number of proportions provided does not match the number of 'to' categories provided. " << to_category_names_.size()
-                                   << " categories were supplied, but proportions size is " << proportions_.size();
-  }
-
-  // Validate the number of selectivities matches the number of proportions
-  if (proportions_.size() != selectivity_names_.size() && proportions_.size() != 1) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": the number of selectivities provided does not match the number of proportions provided. "
-                                     << " proportions size is " << proportions_.size() << " but number of selectivities is " << selectivity_names_.size();
-  }
-
-  // Validate no categories are in both to_ and from_
-  for (unsigned i = 0; i < to_category_names_.size(); ++i) {
-    for (unsigned j = 0; j < from_category_names_.size(); ++j) {
-      if (to_category_names_[i] == from_category_names_[j]) {
-        LOG_ERROR_P(PARAM_TO) << ": A 'from' category (" << from_category_names_[j] << ") cannot be the same as a 'to' category (" << to_category_names_[i] << ")";
-      }
-    }
-  }
-
-  for (unsigned i = 0; i < to_category_names_.size(); ++i) {
-    proportions_by_category_[to_category_names_[i]] = proportions_[i];
-    LOG_FINE() << "i = " << i << " from  category = " << from_category_names_[i] << " to = " << to_category_names_[i] << " selectivity = " << selectivity_names_[i]
-               << " prop = " << proportions_[i];
-  }
+  proportions_by_category_ = utilities::OrderedMap<string, Double>::create(to_category_names_, proportions_);
 }
 
 /**
