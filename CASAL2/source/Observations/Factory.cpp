@@ -15,8 +15,7 @@
 
 #include "Model/Managers.h"
 #include "Model/Model.h"
-#include "Observations/Age/Abundance/Process.h"
-#include "Observations/Age/Abundance/TimeStep.h"
+#include "Observations/Age/Abundance.h"
 #include "Observations/Age/AgeLength.h"
 #include "Observations/Age/Biomass/Process.h"
 #include "Observations/Age/Biomass/TimeStep.h"
@@ -70,11 +69,11 @@ Observation* Factory::Create(shared_ptr<Model> model, const string& object_type,
   if (model->partition_type() == PartitionType::kAge) {
     if (object_type == PARAM_OBSERVATION) {
       if (sub_type == PARAM_ABUNDANCE)
-        result = new age::TimeStepAbundance(model);
+        result = new age::Abundance(model);
       if (sub_type == PARAM_AGE_LENGTH)
         result = new age::AgeLength(model);
       else if (sub_type == PARAM_PROCESS_ABUNDANCE)
-        result = new age::ProcessAbundance(model);
+        result = new age::Abundance(model);
       else if (sub_type == PARAM_BIOMASS)
         result = new age::TimeStepBiomass(model);
       else if (sub_type == PARAM_PROCESS_BIOMASS)
