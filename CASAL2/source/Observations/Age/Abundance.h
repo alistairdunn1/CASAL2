@@ -21,7 +21,6 @@
 #include "../../Partition/Accessors/CombinedCategories.h"
 #include "../Observation.h"
 
-
 // Namespaces
 namespace niwa {
 class Selectivity;
@@ -63,11 +62,13 @@ protected:
   string                      time_step_label_       = "";
   Nuisance*                   nuisance_catchability_ = nullptr;
   bool                        nuisance_q_            = false;
+  string                      process_label_         = "";
+  Double                      process_proportion_    = 0.0;
+  Double                      time_step_proportion_  = 0.0;
 
   map<unsigned, vector<double> > proportions_by_year_;
   map<unsigned, double>          error_values_by_year_;
-  bool                         calculate_nuisance_q_ = true; // more for simualtions, if nuisance Q we don't want to keep applying it to expected values
-
+  bool                           calculate_nuisance_q_ = true;  // more for simualtions, if nuisance Q we don't want to keep applying it to expected values
 };
 
 }  // namespace age

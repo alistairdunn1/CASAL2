@@ -1,16 +1,18 @@
 /**
- * @file Biomass.Test.cpp
+ * @file Abundance.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
- * @date 26/02/2014
+ * @date 2025/06/10
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright Casal2 Project 2025 - https://github.com/Casal2/
  *
  */
 #ifdef TESTMODE
 
-// Headers
-#include "Process.h"
+#include "Abundance.h"
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <iostream>
 
@@ -18,13 +20,103 @@
 #include "Observations/Manager.h"
 #include "TestResources/TestFixtures/InternalEmptyModel.h"
 
-// Namespaces
 namespace niwa {
-namespace age {
 
 using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
 using std::endl;
+
+const std::string test_cases_observation_abundance =
+    R"(
+@model
+min_age 1
+max_age 20
+age_plus t
+start_year 1994
+final_year 2008
+base_weight_units kgs
+time_steps step_one
+
+@categories
+format stage.sex
+names immature.male mature.male immature.female mature.female
+age_lengths no_age_length*4
+
+@age_length no_age_length
+type none
+length_weight no_length_weight
+
+@length_weight no_length_weight
+type none
+
+@time_step step_one
+processes ageing recruitment mortality
+
+@ageing ageing
+categories immature.male immature.female
+
+@recruitment recruitment
+type constant
+categories immature.male immature.female
+proportions 0.6 0.4
+r0 100000
+age 1
+
+@mortality mortality
+type constant_rate
+categories immature.male immature.female mature.male mature.female
+m 0.065
+relative_m_by_age constant_one
+time_step_proportions 1.0
+
+@selectivity constant_one
+type constant
+c 1
+
+@catchability catchability
+type free
+q 0.000153139
+
+@observation abundance
+type abundance
+catchability catchability
+time_step step_one
+categories immature.male+immature.female immature.female
+selectivities constant_one constant_one constant_one
+likelihood lognormal
+time_step_proportion 1.0
+years 2008
+table obs
+2008 22.50 11.25 0.2
+end_table
+
+@report DQ
+type derived_quantity
+
+)";
+
+TEST_F(InternalEmptyModel, Observation_Abundance) {
+  AddConfigurationLine(test_cases_observation_abundance, __FILE__, 32);
+  LoadConfiguration();
+
+  model_->Start(RunMode::kTesting);
+  model_->FullIteration();
+
+  const vector<obs::Comparison>& comparisons = model_->managers()->observation()->GetObservation("abundance")->comparisons(2008);
+  ASSERT_EQ(2u, comparisons.size());
+
+  EXPECT_EQ("immature.male+immature.female", comparisons[0].category_);
+  EXPECT_DOUBLE_EQ(0.2, comparisons[0].error_value_);
+  EXPECT_DOUBLE_EQ(142.01537476494462, comparisons[0].expected_);
+  EXPECT_DOUBLE_EQ(22.5, comparisons[0].observed_);
+  EXPECT_DOUBLE_EQ(40.738892086047329, comparisons[0].score_);
+
+  EXPECT_EQ("immature.female", comparisons[1].category_);
+  EXPECT_DOUBLE_EQ(0.2, comparisons[1].error_value_);
+  EXPECT_DOUBLE_EQ(56.806149905977861, comparisons[1].expected_);
+  EXPECT_DOUBLE_EQ(11.25, comparisons[1].observed_);
+  EXPECT_DOUBLE_EQ(31.002921785658106, comparisons[1].score_);
+}
 
 const std::string test_cases_observation_process_abundance =
     R"(
@@ -216,7 +308,5 @@ TEST_F(InternalEmptyModel, Observation_Process_Abundance) {
   EXPECT_DOUBLE_EQ(10523.04778953198, comparisons[year][0].score_);
 }
 
-} /* namespace age */
-} /* namespace niwa */
-
-#endif /* TESTMODE */
+}  // namespace niwa
+#endif  // TESTMODE
