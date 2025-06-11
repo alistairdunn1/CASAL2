@@ -381,7 +381,7 @@ shared_ptr<ValidatorVector> ValidatorVector::IsLengthBin() {
       }
     }
     if (!is_valid) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be a valid length bin";
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be a valid length bin";
     }
   }
 
@@ -679,15 +679,8 @@ shared_ptr<ValidatorVector> ValidatorVector::IsInIncreasingOrder() {
     }
   };
 
-  if (auto* param_unsigned = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    const auto& values = *param_unsigned->target();
-    check_increasing_order(values, parameter_->label(), this->parameter_->location());
-  } else if (auto* param_double = dynamic_cast<BindableVector<Double>*>(parameter_)) {
-    const auto& values = *param_double->target();
-    check_increasing_order(values, parameter_->label(), this->parameter_->location());
-  } else {
-    LOG_CODE_ERROR() << "Parameter::ValidatorVector::IsInIncreasingOrder " << parameter_->label() << " is not a vector<double/unsigned> type";
-  }
+  auto values = ConvertValuesToDouble();
+  check_increasing_order(values, parameter_->label(), this->parameter_->location());
 
   return shared_from_this();
 }
