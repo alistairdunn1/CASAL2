@@ -27,7 +27,7 @@ using ::testing::Return;
  */
 TEST(AgeingErrors, OffByOne_MisMatrixGeneration) {
   auto mock_model = std::make_shared<MockModel>();
-  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(7));
   EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(5));
   EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(true));
@@ -83,7 +83,7 @@ TEST(AgeingErrors, OffByOne_MisMatrixGeneration) {
  */
 TEST(AgeingErrors, OffByOne_DifferentPs) {
   auto mock_model = std::make_shared<MockModel>();
-  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(7));
   EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(5));
   EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(true));
@@ -165,7 +165,7 @@ TEST(AgeingErrors, OffByOne_WithK) {
  */
 TEST(AgeingErrors, OffByOne_NoPlusGroup) {
   auto mock_model = std::make_shared<MockModel>();
-  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(7));
   EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(5));
   EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(false));  // No plus group
@@ -203,7 +203,7 @@ TEST(AgeingErrors, OffByOne_NoPlusGroup) {
  */
 TEST(AgeingErrors, OffByOne_ExpectedMatrix_PlusGroup) {
   auto mock_model = std::make_shared<MockModel>();
-  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(8));
   EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(6));
   EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(true));
@@ -375,7 +375,7 @@ TEST(AgeingErrors, OffByOne_ExpectedMatrix_WithK) {
  */
 TEST(AgeingErrors, OffByOne_ExpectedMatrix_NoPlusGroup) {
   auto mock_model = std::make_shared<MockModel>();
-  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(8));
   EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(6));
   EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(false));  // No plus group

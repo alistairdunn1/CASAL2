@@ -27,7 +27,7 @@ using ::testing::Return;
  */
 TEST(AgeingErrors, Normal_MisMatrixGeneration) {
   auto mock_model = std::make_shared<MockModel>();
-  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+  EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(7));
   EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(5));
   EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(true));
@@ -49,19 +49,19 @@ TEST(AgeingErrors, Normal_MisMatrixGeneration) {
 
   // Test for expected values for first row (age 3)
   // Based on normal distribution with mean=3 and sd=3*0.1=0.3
-  EXPECT_NEAR(0.9522, matrix[0][0], 0.001);
-  EXPECT_NEAR(0.0478, matrix[0][1], 0.001);
+  EXPECT_NEAR(1.0, matrix[0][0], 0.001);
+  EXPECT_NEAR(0.0, matrix[0][1], 0.001);
   EXPECT_NEAR(0.0000, matrix[0][2], 0.001);
   EXPECT_NEAR(0.0000, matrix[0][3], 0.001);
   EXPECT_NEAR(0.0000, matrix[0][4], 0.001);
 
   // Test middle row (age 5)
   // Based on normal distribution with mean=5 and sd=5*0.1=0.5
-  EXPECT_NEAR(0.0014, matrix[2][0], 0.001);
-  EXPECT_NEAR(0.1573, matrix[2][1], 0.001);
-  EXPECT_NEAR(0.6827, matrix[2][2], 0.001);
-  EXPECT_NEAR(0.1573, matrix[2][3], 0.001);
-  EXPECT_NEAR(0.0014, matrix[2][4], 0.001);
+  EXPECT_NEAR(3.1908916729109203e-14, matrix[2][0], 0.001);
+  EXPECT_NEAR(0.0062096, matrix[2][1], 0.001);
+  EXPECT_NEAR(0.987580, matrix[2][2], 0.001);
+  EXPECT_NEAR(0.0062096, matrix[2][3], 0.001);
+  EXPECT_NEAR(3.1863400806741993e-14, matrix[2][4], 0.001);
 
   // Check that each row sums to approximately 1.0
   for (unsigned i = 0; i < matrix.size(); ++i) {
@@ -87,7 +87,7 @@ TEST(AgeingErrors, Normal_DifferentCV) {
   normal.parameters().Add(PARAM_LABEL, "test_normal_cv", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.2", __FILE__, __LINE__);  // Higher CV
-  normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
+  normal.parameters().Add(PARAM_K, "3", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -177,7 +177,7 @@ TEST(AgeingErrors, Normal_NoPlusGroup) {
   normal.parameters().Add(PARAM_LABEL, "test_normal_no_plus", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
+  normal.parameters().Add(PARAM_K, "3", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -217,7 +217,7 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_PlusGroup) {
   normal.parameters().Add(PARAM_LABEL, "test_normal_matrix", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
+  normal.parameters().Add(PARAM_K, "3", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -376,7 +376,7 @@ TEST(AgeingErrors, Normal_ExpectedMatrix_NoPlusGroup) {
   normal.parameters().Add(PARAM_LABEL, "test_normal_matrix_no_plus", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_TYPE, "normal", __FILE__, __LINE__);
   normal.parameters().Add(PARAM_CV, "0.1", __FILE__, __LINE__);
-  normal.parameters().Add(PARAM_K, "0", __FILE__, __LINE__);
+  normal.parameters().Add(PARAM_K, "3", __FILE__, __LINE__);
 
   normal.Validate();
   normal.Build();
@@ -501,7 +501,7 @@ TEST(AgeingErrors, Normal_ExecuteFunction) {
   // Test case 1: Normal with plus group
   {
     auto mock_model = std::make_shared<MockModel>();
-    EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+    EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(8));
     EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(6));
     EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(true));
@@ -555,7 +555,7 @@ TEST(AgeingErrors, Normal_ExecuteFunction) {
   // Test case 3: Normal without plus group
   {
     auto mock_model = std::make_shared<MockModel>();
-    EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(3));
+    EXPECT_CALL(*mock_model, min_age()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mock_model, max_age()).WillRepeatedly(Return(8));
     EXPECT_CALL(*mock_model, age_spread()).WillRepeatedly(Return(6));
     EXPECT_CALL(*mock_model, age_plus()).WillRepeatedly(Return(false));

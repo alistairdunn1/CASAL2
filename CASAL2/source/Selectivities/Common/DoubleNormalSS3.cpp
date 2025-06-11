@@ -58,8 +58,8 @@ DoubleNormalSS3::DoubleNormalSS3(shared_ptr<Model> model) : Selectivity(model) {
  */
 void DoubleNormalSS3::DoValidate() {
   parameters_.Validate(PARAM_PEAK)->GreaterThan(0.0);
-  parameters_.Validate(PARAM_Y0)->GreaterThanOrEqualTo((Double)-20.0)->LessThanOrEqualTo(0.0);
-  parameters_.Validate(PARAM_Y1)->GreaterThanOrEqualTo((Double)-20.0)->LessThanOrEqualTo(10.0);
+  parameters_.Validate(PARAM_Y0)->GreaterThanOrEqualTo(-20.0)->LessThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_Y1)->GreaterThanOrEqualTo(-20.0)->LessThanOrEqualTo(10.0);
   parameters_.Validate(PARAM_ASCENDING)->GreaterThan(0.0);
   parameters_.Validate(PARAM_DESCENDING)->GreaterThan(0.0);
   parameters_.Validate(PARAM_L)->GreaterThan(0.0);

@@ -80,9 +80,13 @@ TEST(TimeVarying, Constant_Validate) {
   MockObjects           mock_objects(model);
   MockSelectivity       c(model);
 
+  vector<unsigned> all_years = {1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995};
+
   EXPECT_CALL(*model, objects()).WillRepeatedly(ReturnRef(mock_objects));
   EXPECT_CALL(*model, start_year()).WillRepeatedly(Return(1983));
   EXPECT_CALL(*model, final_year()).WillRepeatedly(Return(1995));
+  EXPECT_CALL(*model, years()).WillRepeatedly(Return(all_years));
+  EXPECT_CALL(*model, years_all()).WillRepeatedly(Return(all_years));
   EXPECT_CALL(*model, objects()).WillRepeatedly(ReturnRef(mock_objects));
   EXPECT_CALL(mock_objects, FindObject(_)).WillRepeatedly(Return(&c));
   EXPECT_CALL(c, GetAgeResult(_, nullptr)).WillRepeatedly(Return(10.0));
@@ -110,9 +114,13 @@ TEST(TimeVarying, Constant_Validate_Fails) {
   MockObjects           mock_objects(model);
   MockSelectivity       c(model);
 
+  vector<unsigned> all_years = {1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995};
+
   EXPECT_CALL(*model, objects()).WillRepeatedly(ReturnRef(mock_objects));
   EXPECT_CALL(*model, start_year()).WillRepeatedly(Return(1983));
   EXPECT_CALL(*model, final_year()).WillRepeatedly(Return(1995));
+  EXPECT_CALL(*model, years()).WillRepeatedly(Return(all_years));
+  EXPECT_CALL(*model, years_all()).WillRepeatedly(Return(all_years));
   EXPECT_CALL(mock_objects, FindObject(_)).WillRepeatedly(Return(&c));
   EXPECT_CALL(c, GetAgeResult(_, nullptr)).WillRepeatedly(Return(10.0));
 

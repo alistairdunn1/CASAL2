@@ -40,18 +40,18 @@ public:
   ValidatorVector(shared_ptr<Model> model, niwa::ParameterList* list, niwa::parameterlist::Parameter* param) : model_(model), parameters_(list), parameter_(param) {};
   ~ValidatorVector() {};
 
-  shared_ptr<ValidatorVector> GreaterThan(Double value);
+  shared_ptr<ValidatorVector> GreaterThan(double value);
   shared_ptr<ValidatorVector> GreaterThan(unsigned value);
-  shared_ptr<ValidatorVector> GreaterThanOrEqualTo(Double value);
+  shared_ptr<ValidatorVector> GreaterThanOrEqualTo(double value);
   shared_ptr<ValidatorVector> GreaterThanOrEqualTo(unsigned value);
-  shared_ptr<ValidatorVector> LessThan(Double value);
-  shared_ptr<ValidatorVector> LessThanOrEqualTo(Double value);
+  shared_ptr<ValidatorVector> LessThan(double value);
+  shared_ptr<ValidatorVector> LessThanOrEqualTo(double value);
   shared_ptr<ValidatorVector> LessThanOrEqualTo(unsigned value);
   shared_ptr<ValidatorVector> SumToOne();
   shared_ptr<ValidatorVector> IsInList(initializer_list<string> list);
   shared_ptr<ValidatorVector> LessThanOrEqualToParameter(const string& label);
-  shared_ptr<ValidatorVector> IsModelAge();
   shared_ptr<ValidatorVector> IsModelYear();
+  shared_ptr<ValidatorVector> IsAge();
   shared_ptr<ValidatorVector> IsLengthBin();
   shared_ptr<ValidatorVector> DefaultToAllModelYears();
   shared_ptr<ValidatorVector> DefaultToAllModelLengthBins();
@@ -66,6 +66,8 @@ public:
   shared_ptr<ValidatorVector> EitherOrTableDefined(const string& table_label);
 
 protected:
+  vector<unsigned>             ConvertValuesToUnsigned() const;
+  vector<double>               ConvertValuesToDouble() const;
   BindableVector<Double>*      GetParameterAsVectorDouble(bool null_on_error = false);
   BindableVector<unsigned>*    GetParameterAsVectorUnsigned(bool null_on_error = false);
   BindableVector<std::string>* GetParameterAsVectorString(bool null_on_error = false);

@@ -88,7 +88,8 @@ void TagByLength::DoValidate() {
   parameters_.ValidateVector(PARAM_N)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS);
   parameters_.Validate(PARAM_COMPATIBILITY)->IsInList({PARAM_CASAL, PARAM_CASAL2});
 
-  n_by_year_  = utilities::Map::create(years_, n_);
+  if (parameters_.Get(PARAM_N)->has_been_defined())
+    n_by_year_ = utilities::Map::create(years_, n_);
   min_age_    = model_->min_age();
   max_age_    = model_->max_age();
   age_spread_ = model_->age_spread();

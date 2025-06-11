@@ -71,7 +71,7 @@ void AgeLength::DoValidate() {
   parameters_.ValidateVector(PARAM_CATEGORIES)->NumberOfElements(1u);
   parameters_.Validate(PARAM_YEAR)->IsModelYear();
   parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
-  parameters_.ValidateVector(PARAM_AGES)->SameNumberOfElementsAs(PARAM_LENGTHS)->IsModelAge();
+  parameters_.ValidateVector(PARAM_AGES)->SameNumberOfElementsAs(PARAM_LENGTHS)->IsAge();
   parameters_.ValidateVector(PARAM_LENGTHS)->SameNumberOfElementsAs(PARAM_AGES);
   parameters_.ValidateVector(PARAM_NUMERATOR_CATEGORIES)->DuplicateParameterIfNotAssigned(PARAM_CATEGORIES);
 

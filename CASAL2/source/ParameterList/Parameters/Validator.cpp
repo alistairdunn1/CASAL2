@@ -19,45 +19,63 @@
 #include "../ParameterList.h"
 #include "Bindable.h"
 #include "BindableVector.h"
+#include "Utilities/To.h"
 
 namespace niwa::parameters {
 using niwa::parameters::Bindable;
 
 /**
- * This method will return the current parameter as a Bindaable storing a double
+ * This method will convert the values of the parameter to a vector of doubles.
+ * If the parameter is not a vector of doubles, it will error out.
+ *
+ * @return A vector of doubles representing the parameter values.
  */
-Bindable<Double>* Validator::GetParameterAsDouble(bool null_on_error) {
-  auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr && !null_on_error) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GetParameterAsDouble " << parameter_->label() << " is not a double type";
+vector<double> Validator::ConvertValuesToDouble() const {
+  vector<double> parameter_values;
+  auto           invalid = utilities::To<double>(parameter_->values(), parameter_values);
+
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
   }
-  return param;
+
+  return parameter_values;
 }
 
 /**
- * This method will return the current parameter as a Bindaable storing an unsigned
+ * This method will convert the values of the parameter to a vector of unsigned integers.
+ * If the parameter is not a vector of unsigned integers, it will error out.
+ *
+ * @return A vector of unsigned integers representing the parameter values.
  */
-Bindable<unsigned>* Validator::GetParameterAsUnsigned(bool null_on_error) {
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr && !null_on_error) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GetParameterAsUnsigned " << parameter_->label() << " is not an unsigned type";
+vector<unsigned> Validator::ConvertValuesToUnsigned() const {
+  vector<unsigned> parameter_values;
+  auto             invalid = utilities::To<unsigned>(parameter_->values(), parameter_values);
+
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
   }
-  return param;
+
+  return parameter_values;
 }
 
 /**
  * This method will check that the value of the parameter is greater than the value passed
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<Validator> Validator::GreaterThan(Double value) {
+shared_ptr<Validator> Validator::GreaterThan(double value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto*  param  = GetParameterAsDouble();
-  Double source = *param->target();
-  if (source <= value) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be greater than "
-                << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source <= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
+    }
   }
 
   return shared_from_this();
@@ -65,16 +83,20 @@ shared_ptr<Validator> Validator::GreaterThan(Double value) {
 
 /**
  * This method will check that the value of the parameter is greater than the value passed
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::GreaterThan(unsigned value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto*    param  = GetParameterAsUnsigned();
-  unsigned source = *param->target();
-  if (source <= value) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source <= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
+    }
   }
 
   return shared_from_this();
@@ -83,21 +105,20 @@ shared_ptr<Validator> Validator::GreaterThan(unsigned value) {
 /**
  * This method will check that the value of the parameter is greater than or equal to the value passed
  * in as the parameter
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<Validator> Validator::GreaterThanOrEqualTo(Double value) {
+shared_ptr<Validator> Validator::GreaterThanOrEqualTo(double value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualTo " << parameter_->label() << " is not a double type";
-  }
-
-  Double source = *param->target();
-  if (source < value) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be greater than or equal to "
-                << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source < value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
+    }
   }
 
   return shared_from_this();
@@ -105,20 +126,20 @@ shared_ptr<Validator> Validator::GreaterThanOrEqualTo(Double value) {
 
 /**
  * This method will check that the value of the parameter is greater than or equal to the value passed
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::GreaterThanOrEqualTo(unsigned value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualTo " << parameter_->label() << " is not an unsigned type";
-  }
-
-  unsigned source = *param->target();
-  if (source < value) {
-    LOG_ERROR() << this->parameter_->location() << "parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than or equal to " << value;
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source < value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
+    }
   }
 
   return shared_from_this();
@@ -127,206 +148,237 @@ shared_ptr<Validator> Validator::GreaterThanOrEqualTo(unsigned value) {
 /**
  * This method will check that the value of the parameter is greater than or equal to the value of
  * the parameter passed in as the label
+ *
+ * @param label The label of the parameter to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::GreaterThanOrEqualToParameter(const string& label) {
-  auto* source_unsigned = GetParameterAsUnsigned(true);
-  auto* source_double   = GetParameterAsDouble(true);
-  if (source_unsigned == nullptr && source_double == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << parameter_->label() << " is not a double or unsigned type";
+  auto target_parameter = parameters_->Get(label);
+  if (target_parameter == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " does not exist in the parameter list";
   }
 
-  auto* target_unsigned = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
-  auto* target_double   = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
-  if (target_unsigned == nullptr && target_double == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " is not a double or unsigned type";
+  vector<double> target_parameter_values;
+  auto           invalid = utilities::To<double>(target_parameter->values(), target_parameter_values);
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
   }
 
-  Double source = source_double ? *source_double->target() : static_cast<Double>(*source_unsigned->target());
-  Double target = target_double ? *target_double->target() : static_cast<Double>(*target_unsigned->target());
-  if (source < target) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be greater than or equal to "
-                << label << " (" << AS_DOUBLE(target) << ")";
-  }
-
-  return shared_from_this();
-}
-
-/**
- * This method will check that the value of the parameter is greater than or equal to the value passed
- */
-shared_ptr<Validator> Validator::LessThan(Double value) {
-  auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThan " << parameter_->label() << " is not a double type";
-  }
-  Double source = *param->target();
-  if (source >= value) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than "
-                << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& target_value : target_parameter_values) {
+    for (const auto& source_value : parameter_values) {
+      if (source_value < target_value) {
+        LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source_value << ") is invalid. Must be greater than or equal to "
+                    << label << " (" << target_value << ")";
+      }
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method does a validation to ensure the current parameter value is less than the value passed in.
+ * This check is done by checking the current parameter value is not greater than or equal to the value passed in.
  *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<Validator> Validator::LessThanOrEqualTo(Double value) {
-  if (!parameter_->has_been_defined() && !parameter_->is_optional()) {
+shared_ptr<Validator> Validator::LessThan(double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualTo " << parameter_->label() << " is not a double type";
-  }
-  Double source = *param->target();
-  if (source > value) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to "
-                << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source >= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than " << value;
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is less than or equal to the value passed.
+ * This check is done by checking the current parameter value is not greater than the value passed in.
  *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<Validator> Validator::LessThanOrEqualTo(double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source > value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to " << value;
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the value of the parameter is less than or equal to the value passed.
+ * This check is done by checking the current parameter value is not greater than the value passed in.
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::LessThanOrEqualTo(unsigned value) {
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualTo " << parameter_->label() << " is not an unsigned type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
-  unsigned source = *param->target();
-  if (source > value) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to " << value;
+
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source > value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to " << value;
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is less than the value of the parameter passed in as the label.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @param label The label of the parameter to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::LessThanParameter(const string& label) {
-  if (auto* param = dynamic_cast<Bindable<Double>*>(parameter_)) {
-    // Handle for when the parameters are both double
-    auto* param2 = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter " << label << " is not a double type. Cannot compare to " << param->label() << " which is a double type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto target_parameter = parameters_->Get(label);
+  if (target_parameter == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " does not exist in the parameter list";
+  }
+
+  vector<double> target_parameter_values;
+  auto           invalid = utilities::To<double>(target_parameter->values(), target_parameter_values);
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
+  }
+
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& target_value : target_parameter_values) {
+    for (const auto& source_value : parameter_values) {
+      if (source_value >= target_value) {
+        LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source_value << ") is invalid. Must be less than " << label << " ("
+                    << target_value << ")";
+      }
     }
-
-    Double source = *param->target();
-    Double target = *param2->target();
-
-    if (source >= target) {
-      LOG_ERROR() << this->parameter_->location() << " parameter" << param->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than " << label << " ("
-                  << AS_DOUBLE(target) << ")";
-    }
-
-  } else if (auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_)) {
-    // handle for when the parameters are both unsigned
-    auto* param2 = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter " << label << " is not an unsigned type. Cannot compare to " << param->label() << " which is an unsigned type";
-    }
-
-    unsigned source = *param->target();
-    unsigned target = *param2->target();
-
-    if (source >= target) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << param->label() << " value (" << source << ") is invalid. Must be less than " << label << " (" << target
-                  << ")";
-    }
-
-  } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanParameter " << parameter_->label() << " is not a double/unsigned or string type";
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is less than or equal to the value of the parameter passed in as the label.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @param label The label of the parameter to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::LessThanOrEqualToParameter(const string& label) {
-  auto* source_unsigned = GetParameterAsUnsigned(true);
-  auto* source_double   = GetParameterAsDouble(true);
-  if (source_unsigned == nullptr && source_double == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << parameter_->label() << " is not a double or unsigned type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  auto* target_unsigned = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
-  auto* target_double   = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
-  if (target_unsigned == nullptr && target_double == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << label << " is not a double or unsigned type";
+  auto target_parameter = parameters_->Get(label);
+  if (target_parameter == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " does not exist in the parameter list";
   }
 
-  Double source = source_double ? *source_double->target() : static_cast<Double>(*source_unsigned->target());
-  Double target = target_double ? *target_double->target() : static_cast<Double>(*target_unsigned->target());
-  if (source > target) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to "
-                << label << " (" << AS_DOUBLE(target) << ")";
+  vector<double> target_parameter_values;
+  auto           invalid = utilities::To<double>(target_parameter->values(), target_parameter_values);
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
+  }
+
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& target_value : target_parameter_values) {
+    for (const auto& source_value : parameter_values) {
+      if (source_value > target_value) {
+        LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source_value << ") is invalid. Must be less than " << label << " ("
+                    << target_value << ")";
+      }
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is greater than or equal to the model min age.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::GreaterThanOrEqualToModelMinAge() {
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a double type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  unsigned source = *param->target();
-  if (source < model_->min_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than or equal to model min age ("
-                << model_->min_age() << ")";
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source < model_->min_age()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source
+                  << ") is invalid. Must be greater than or equal to model min age (" << model_->min_age() << ")";
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is greater than the model min age.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::GreaterThanModelMinAge() {
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a double type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  unsigned source = *param->target();
-  if (source <= model_->min_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than model min age ("
-                << model_->min_age() << ")";
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source <= model_->min_age()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source
+                  << ") is invalid. Must be greater than or equal to model min age (" << model_->min_age() << ")";
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is less than or equal to the model max age.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::LessThanOrEqualToModelMaxAge() {
-  auto* param_double   = GetParameterAsDouble(true);
-  auto* param_unsigned = GetParameterAsUnsigned(true);
-  if (param_double == nullptr && param_unsigned == nullptr) {
-    LOG_CODE_ERROR() << "Validator::LessThanOrEqualToModelMaxAge() - Parameter " << parameter_->label() << " is not a double or unsigned type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  // Do this unrolled because we can't use static_cast or (unsigned) case on Betadiff adouble type.
-  if (param_double && *param_double->target() > model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_double->target()
-                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
-  }
-
-  if (param_unsigned && *param_unsigned->target() > model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_unsigned->target()
-                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source > model_->max_age()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to model max age ("
+                  << model_->max_age() << ")";
+    }
   }
 
   return shared_from_this();
@@ -334,23 +386,21 @@ shared_ptr<Validator> Validator::LessThanOrEqualToModelMaxAge() {
 
 /**
  * This method will check that the value of the parameter is less than the model max age
+ * If the parameter is optional and has not been defined, it will return without checking.
+ *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::LessThanModelMaxAge() {
-  auto* param_double   = GetParameterAsDouble(true);
-  auto* param_unsigned = GetParameterAsUnsigned(true);
-  if (param_double == nullptr && param_unsigned == nullptr) {
-    LOG_CODE_ERROR() << "Validator::LessThanModelMaxAge() - Parameter " << parameter_->label() << " is not a double or unsigned type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  // Do this unrolled because we can't use static_cast or (unsigned) case on Betadiff adouble type.
-  if (param_double && *param_double->target() >= model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_double->target()
-                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
-  }
-
-  if (param_unsigned && *param_unsigned->target() >= model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << *param_unsigned->target()
-                << ") is invalid. Must be less than or equal to model max age (" << model_->max_age() << ")";
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source >= model_->max_age()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than model max age ("
+                  << model_->max_age() << ")";
+    }
   }
 
   return shared_from_this();
@@ -358,50 +408,54 @@ shared_ptr<Validator> Validator::LessThanModelMaxAge() {
 
 /**
  * This method will check that the value of the parameter is an age in the model (between min_age and max_age inclusive)
+ * If the parameter is optional and has not been defined, it will return without checking.
+ *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::IsAge() {
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a double type";
-  }
-
-  unsigned source = *param->target();
-
-  // If the parameter is optional and we're using the default value, then we don't need to validate
-  if (param->is_optional() && source == param->default_value()) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  if (source < model_->min_age() || source > model_->max_age()) {
-    LOG_ERROR() << this->parameter_->location() << "value (" << source << ") is invalid. Must be between model min age (" << model_->min_age() << ") and max age ("
-                << model_->max_age() << ")";
-  }
-
-  return shared_from_this();
-}
-
-/**
- *
- */
-shared_ptr<Validator> Validator::IsInList(initializer_list<string> list) {
-  auto* param = dynamic_cast<Bindable<string>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a vector-string type";
-  }
-
-  string source = *param->target();
-  for (const auto& item : list) {
-    if (source == item) {
-      return shared_from_this();
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source < model_->min_age() || source > model_->max_age()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model min age ("
+                  << model_->min_age() << ") and max age (" << model_->max_age() << ")";
     }
   }
 
-  LOG_ERROR() << this->parameter_->location() << "value (" << source << ") is invalid. Must be in the list";
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is in the list of values passed in.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @param list An initializer list of strings that the parameter values should be in.
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<Validator> Validator::IsInList(initializer_list<string> list) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto parameter_values = parameter_->values();
+  for (const auto& source : parameter_values) {
+    if (std::find(list.begin(), list.end(), source) == list.end()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid.";
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will duplicate the value of the parameter if it has not been assigned yet.
+ * It will look for the parameter with the label passed in and copy its value to the current parameter.
+ *
+ * @param label The label of the parameter to duplicate the value from.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::DuplicateParameterIfNotAssigned(const string& label) {
   // If it's already been defined we don't need to do anything
@@ -438,26 +492,34 @@ shared_ptr<Validator> Validator::DuplicateParameterIfNotAssigned(const string& l
 }
 
 /**
+ * This method will check that the value of the parameter is a valid model year.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::IsModelYear() {
-  auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not an unsigned type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  unsigned source = *param->target();
-  auto     years  = model_->years_all();
-  if (std::find(years.begin(), years.end(), source) == years.end()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model start year ("
-                << *years.begin() << ") and end year (" << *years.rbegin() << ")";
+  auto parameter_values = ConvertValuesToUnsigned();
+  auto years            = model_->years_all();
+  for (const auto& source : parameter_values) {
+    if (std::find(years.begin(), years.end(), source) == years.end()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model start year ("
+                  << *years.begin() << ") and end year (" << *years.rbegin() << ")";
+    }
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will set the default value of the parameter to the value passed in.
+ * If the parameter has already been defined, it will return without doing anything.
  *
+ * @param value The default value to set for the parameter.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::DefaultValue(unsigned value) {
   if (parameter_->has_been_defined()) {
@@ -466,7 +528,7 @@ shared_ptr<Validator> Validator::DefaultValue(unsigned value) {
 
   auto* param = dynamic_cast<Bindable<unsigned>*>(parameter_);
   if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not an unsigned type";
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " cannot set default value because it is not an unsigned type";
   }
 
   *param->target() = value;
@@ -475,15 +537,15 @@ shared_ptr<Validator> Validator::DefaultValue(unsigned value) {
 }
 
 /**
- * This method will return a shared pointer to a Validator that will check if the parameter is required
- * based on the boolean value passed in.
+ * This method will check if the parameter is true or false, if the parameter is true then
+ * the current parameter is required and must have been defined with values.
  */
 shared_ptr<Validator> Validator::RequiredIf(bool required) {
   if (parameter_->has_been_defined()) {
     return shared_from_this();
   }
 
-  if (required) {
+  if (required && !parameter_->has_been_defined() && !parameter_->values().empty()) {
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " is required but has not been defined.";
   } else {
     LOG_WARNING() << this->parameter_->location() << " parameter " << parameter_->label() << " is optional and has not been defined.";
@@ -493,20 +555,26 @@ shared_ptr<Validator> Validator::RequiredIf(bool required) {
 }
 
 /**
- * This method will return a shared pointer to a Validator that will check if the parameter is forbidden
- * if the label passed in is defined.
+ * This method will check if the parameter defined by the parameter label has been defined. If it
+ * has then the current parameter is forbidden to be defined.
+ *
+ * @param label The label of the parameter that is checked to see if it has been defined.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::ForbiddenIfDefined(const string& label) {
   if (parameter_->has_been_defined() && parameters_->Get(label)->has_been_defined()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " is forbidden if " << label << " is defined.";
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " is forbidden because " << label << " has been defined.";
   }
 
   return shared_from_this();
 }
 
 /**
- * This method will return a shared pointer to a Validator that will check if the parameter is either
- * defined or not defined.
+ * This method will check if the current parameter or the parameter defined by the label has been defined.
+ * If neither has been defined, it will log an error.
+ *
+ * @param label The label of the parameter that is checked to see if it has been defined.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<Validator> Validator::EitherOrDefined(const string& label) {
   auto* param = parameters_->Get(label);

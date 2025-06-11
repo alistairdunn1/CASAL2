@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
+#include <numeric>
 
 #include "Bindable.h"
 #include "Categories/Categories.h"
@@ -22,58 +23,85 @@
 #include "ParameterList/Parameter.h"
 #include "ParameterList/ParameterList.h"
 #include "Utilities/Math.h"
+#include "Utilities/To.h"
 
 namespace niwa::parameters {
 using niwa::parameters::Bindable;
-using std::cout;
-using std::endl;
 
 /**
+ * This method will convert the values of the parameter to a vector of doubles.
+ * If the parameter is not a vector of doubles, it will error out.
  *
+ * @return A vector of doubles representing the parameter values.
  */
+vector<double> ValidatorVector::ConvertValuesToDouble() const {
+  vector<double> parameter_values;
+  auto           invalid = utilities::To<double>(parameter_->values(), parameter_values);
+
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
+  }
+
+  return parameter_values;
+}
+
+/**
+ * This method will convert the values of the parameter to a vector of unsigned integers.
+ * If the parameter is not a vector of unsigned integers, it will error out.
+ *
+ * @return A vector of unsigned integers representing the parameter values.
+ */
+vector<unsigned> ValidatorVector::ConvertValuesToUnsigned() const {
+  vector<unsigned> parameter_values;
+  auto             invalid = utilities::To<unsigned>(parameter_->values(), parameter_values);
+
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
+  }
+
+  return parameter_values;
+}
+
 BindableVector<Double>* ValidatorVector::GetParameterAsVectorDouble(bool null_on_error) {
   auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
   if (param == nullptr && !null_on_error) {
-    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorDouble " << parameter_->label() << " is not a vector<double> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorDouble " << this->parameter_->location() << " " << parameter_->label() << " is not a vector<double> type";
   }
   return param;
 }
-
-/**
- * This method will return the current parameter as a Bindaable storing an unsigned
- */
 BindableVector<unsigned>* ValidatorVector::GetParameterAsVectorUnsigned(bool null_on_error) {
   auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_);
   if (param == nullptr && !null_on_error) {
-    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorUnsigned " << parameter_->label() << " is not a vector<unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorUnsigned " << this->parameter_->location() << " " << parameter_->label()
+                     << " is not a vector<unsigned> type";
   }
   return param;
 }
-
-/**
- * This method will return the current parameter as a Bindable storing a vector of strings
- */
 BindableVector<std::string>* ValidatorVector::GetParameterAsVectorString(bool null_on_error) {
   auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_);
   if (param == nullptr && !null_on_error) {
-    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorString " << parameter_->label() << " is not a vector<string> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GetParameterAsVectorString " << this->parameter_->location() << " " << parameter_->label() << " is not a vector<string> type";
   }
   return param;
 }
 
 /**
  * This method will check that the value of the parameter is greater than the value passed
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(Double value) {
+shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(double value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorDouble();
-  for (auto& val : *param->target()) {
-    if (val <= value) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be greater than "
-                  << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source <= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
     }
   }
 
@@ -82,16 +110,19 @@ shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(Double value) {
 
 /**
  * This method will check that the value of the parameter is greater than the value passed
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(unsigned value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorUnsigned();
-  for (auto& val : *param->target()) {
-    if (val <= value) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be greater than " << value;
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source <= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
     }
   }
 
@@ -101,21 +132,19 @@ shared_ptr<ValidatorVector> ValidatorVector::GreaterThan(unsigned value) {
 /**
  * This method will check that the value of the parameter is greater than or equal to the value passed
  * in as the parameter
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(Double value) {
+shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(double value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GreaterThanOrEqualTo " << parameter_->label() << " is not a vector<double> type";
-  }
-
-  for (auto& val : *param->target()) {
-    if (val < value) {
-      LOG_ERROR() << this->parameter_->location() << "parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be greater than or equal to "
-                  << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source < value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
     }
   }
 
@@ -124,20 +153,19 @@ shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(Double value) 
 
 /**
  * This method will check that the value of the parameter is greater than or equal to the value passed
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(unsigned value) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GreaterThanOrEqualTo " << parameter_->label() << " is not an unsigned type";
-  }
-
-  for (auto& val : *param->target()) {
-    if (val < value) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be greater than or equal to " << value;
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source < value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be greater than " << value;
     }
   }
 
@@ -145,35 +173,21 @@ shared_ptr<ValidatorVector> ValidatorVector::GreaterThanOrEqualTo(unsigned value
 }
 
 /**
+ * This method does a validation to ensure the current parameter value is less than the value passed in.
+ * This check is done by checking the current parameter value is not greater than or equal to the value passed in.
  *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<ValidatorVector> ValidatorVector::LessThan(Double value) {
-  LOG_CODE_ERROR() << "ValidatorVector::LessThan is not implemented";
-  auto* param = dynamic_cast<Bindable<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThan " << parameter_->label() << " is not a double type";
-  }
-  Double source = *param->target();
-  if (source >= value) {
-    LOG_ERROR() << this->parameter_->location() << "value (" << AS_DOUBLE(source) << ") is invalid. Must be less than " << AS_DOUBLE(value);
+shared_ptr<ValidatorVector> ValidatorVector::LessThan(double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  return shared_from_this();
-}
-
-/**
- *
- */
-shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualTo(Double value) {
-  auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualTo " << parameter_->label() << " is not a vector<double> type";
-  }
-
-  for (auto& val : *param->target()) {
-    if (val > value) {
-      LOG_ERROR() << this->parameter_->location() << "parameter " << parameter_->label() << " value (" << AS_DOUBLE(val) << ") is invalid. Must be less than or equal to "
-                  << AS_DOUBLE(value);
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source >= value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than " << value;
     }
   }
 
@@ -181,17 +195,43 @@ shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualTo(Double value) {
 }
 
 /**
- * This method will check that the value of the parameter is less than or equal to the value passed
+ * This method will check that the value of the parameter is less than or equal to the value passed.
+ * This check is done by checking the current parameter value is not greater than the value passed in.
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualTo(double value) {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& source : parameter_values) {
+    if (source > value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to " << value;
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the value of the parameter is less than or equal to the value passed.
+ * This check is done by checking the current parameter value is not greater than the value passed in.
+ *
+ * @param value The value to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualTo(unsigned value) {
-  auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualTo " << parameter_->label() << " is not a vector<unsigned> type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  for (auto& val : *param->target()) {
-    if (val > value) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be less than or equal to " << value;
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source > value) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to " << value;
     }
   }
 
@@ -199,151 +239,139 @@ shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualTo(unsigned value) {
 }
 
 /**
- *
+ * This method will check that the values of the parameter sum to one.
+ * If the parameter is not defined, it will return the current instance if it is optional.
  */
 shared_ptr<ValidatorVector> ValidatorVector::SumToOne() {
-  auto* param = dynamic_cast<BindableVector<Double>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a vector-double type";
-  }
+  if (!parameter_->has_been_defined() && parameter_->is_optional())
+    return shared_from_this();
 
-  Double sum = 0.0;
-  for (const auto& value : *param->target()) {
-    sum += value;
-  }
-
-  if (!utilities::math::IsOne(sum)) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " values do not sum to one. Sum is " << AS_DOUBLE(sum);
-  }
+  auto   parameter_values = ConvertValuesToDouble();
+  double sum              = std::accumulate(parameter_values.begin(), parameter_values.end(), 0.0);
+  if (!utilities::math::IsOne(sum))
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " values do not sum to one. Sum is " << sum;
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is in the list of values passed in.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @param list An initializer list of strings that the parameter values should be in.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::IsInList(initializer_list<string> list) {
-  LOG_CODE_ERROR() << "ValidatorVector::IsInList is not implemented";
-  auto* param = dynamic_cast<Bindable<string>*>(parameter_);
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter " << parameter_->label() << " is not a vector-string type";
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
   }
 
-  string source = *param->target();
-  for (const auto& item : list) {
-    if (source == item) {
-      return shared_from_this();
+  auto parameter_values = parameter_->values();
+  for (const auto& source : parameter_values) {
+    if (std::find(list.begin(), list.end(), source) == list.end()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid.";
     }
   }
 
-  LOG_ERROR() << this->parameter_->location() << "value (" << source << ") is invalid. Must be in the list";
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is less than or equal to the value of the parameter passed in as the label.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
+ * @param label The label of the parameter to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualToParameter(const string& label) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
-    // handle for when the parameters are both double
-    auto* param2 = dynamic_cast<Bindable<Double>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << label << " is not a double type";
-    }
+  auto target_parameter = parameters_->Get(label);
+  if (target_parameter == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " does not exist in the parameter list";
+  }
 
-    Double target = *param2->target();
-    for (auto& source : *param->target()) {
-      if (source > target) {
-        LOG_ERROR() << this->parameter_->location() << " parameter " << param->label() << " value (" << AS_DOUBLE(source) << ") is invalid. Must be less than or equal to " << label
-                    << " (" << AS_DOUBLE(target) << ")";
+  vector<double> target_parameter_values;
+  auto           invalid = utilities::To<double>(target_parameter->values(), target_parameter_values);
+  if (!invalid.empty()) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << invalid.size()
+                     << " invalid values. This should've been picked up earlier";
+  }
+
+  auto parameter_values = ConvertValuesToDouble();
+  for (const auto& target_value : target_parameter_values) {
+    for (const auto& source_value : parameter_values) {
+      if (source_value > target_value) {
+        LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source_value << ") is invalid. Must be less than " << label << " ("
+                    << target_value << ")";
       }
     }
-
-  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    // handle for when the parameters are both unsigned
-    auto* param2 = dynamic_cast<Bindable<unsigned>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << label << " is not an unsigned type";
-    }
-    unsigned target = *param2->target();
-    for (auto& source : *param->target()) {
-      if (source > target) {
-        LOG_ERROR() << this->parameter_->location() << " parameter " << param->label() << " value (" << source << ") is invalid. Must be less than or equal to " << label << " ("
-                    << target << ")";
-      }
-    }
-
-  } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::LessThanOrEqualToParameter " << parameter_->label() << " is not a double/unsigned type";
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the value of the parameter is a valid model year.
+ * If the parameter is optional and has not been defined, it will return without checking.
  *
- */
-shared_ptr<ValidatorVector> ValidatorVector::IsModelAge() {
-  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
-    return shared_from_this();
-  }
-
-  auto* param = GetParameterAsVectorUnsigned();
-  for (auto& val : *param->target()) {
-    if (val < model_->min_age() || val > model_->max_age()) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be between " << model_->min_age() << " and "
-                  << model_->max_age();
-    }
-  }
-
-  return shared_from_this();
-}
-/**
- *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::IsModelYear() {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto*                   param      = GetParameterAsVectorUnsigned();
-  auto                    final_year = fmax(model_->final_year(), model_->projection_final_year());
-  map<unsigned, unsigned> seen_years;
-  for (auto& val : *param->target()) {
-    if (val < model_->start_year() || val > final_year) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be between " << model_->start_year()
-                  << " and " << final_year;
+  auto parameter_values = ConvertValuesToUnsigned();
+  auto years            = model_->years_all();
+  for (const auto& source : parameter_values) {
+    if (std::find(years.begin(), years.end(), source) == years.end()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model start year ("
+                  << *years.begin() << ") and end year (" << *years.rbegin() << ")";
     }
-
-    if (seen_years[val] > 0) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << val << ") is invalid. Must be only defined once in the parameter.";
-    }
-    seen_years[val]++;  // mark this year as seen
   }
 
   return shared_from_this();
 }
 
 /**
- * This method will check that the values of the parameter are valid length bins
+ * This method will check that the value of the parameter is an age in the model (between min_age and max_age inclusive)
+ * If the parameter is optional and has not been defined, it will return without checking.
+ *
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::IsAge() {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto parameter_values = ConvertValuesToUnsigned();
+  for (const auto& source : parameter_values) {
+    if (source < model_->min_age() || source > model_->max_age()) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model min age ("
+                  << model_->min_age() << ") and max age (" << model_->max_age() << ")";
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check that the values of the parameter are valid length bins. It
+ * will also check that all length bin values are unique.
+ *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::IsLengthBin() {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorDouble();
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::IsLengthBin " << parameter_->label() << " is not a vector<double> type";
-    return shared_from_this();
-  }
-
+  auto parameter_values  = ConvertValuesToDouble();
   auto model_length_bins = model_->length_bins();
-  for (auto& val : *param->target()) {
+  for (const auto& val : parameter_values) {
     bool is_valid = false;
 
     for (const auto& bin : model_length_bins) {
@@ -358,8 +386,8 @@ shared_ptr<ValidatorVector> ValidatorVector::IsLengthBin() {
   }
 
   // see if we have any duplicate values in the vector
-  std::set<Double> unique_values(param->target()->begin(), param->target()->end());
-  if (unique_values.size() != param->target()->size()) {
+  std::set<Double> unique_values(parameter_values.begin(), parameter_values.end());
+  if (unique_values.size() != parameter_values.size()) {
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has duplicate values. Each length bin must be unique.";
   }
 
@@ -367,24 +395,21 @@ shared_ptr<ValidatorVector> ValidatorVector::IsLengthBin() {
 }
 
 /**
+ * This method will check if the current paramter has been defined. If it has not, then
+ * it will default the parameter to all model years.
  *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
-  if (parameter_->has_been_defined()) {
-    return shared_from_this();
-  }
+  if (parameter_->has_been_defined())
+    return shared_from_this();  // do nothing
 
-  auto* param = GetParameterAsVectorUnsigned();
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelYears " << parameter_->label() << " is not a vector<unsigned> type";
-    return shared_from_this();
-  }
-
-  // std::cout << "Model Years Size: " << model_->years().size() << endl;
-  // return shared_from_this();
-
-  if (param->target() != nullptr || param->target()->size() == 0) {
-    *param->target() = model_->years();
+  if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    if (param->target() != nullptr || param->target()->size() == 0) {
+      *param->target() = model_->years();
+    }
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelYears " << parameter_->location() << " " << parameter_->label() << " is not a vector<unsigned> type";
   }
 
   return shared_from_this();
@@ -393,49 +418,41 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
 /**
  * This method will return a ValidatorVector that defaults to all model length bins
  * if the parameter has not been defined.
+ *
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
-  if (parameter_->has_been_defined()) {
-    return shared_from_this();
-  }
-
-  auto* param = GetParameterAsVectorDouble();
-  if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelLengthBins " << parameter_->label() << " is not a vector<double> type";
-    return shared_from_this();
-  }
+  if (parameter_->has_been_defined())
+    return shared_from_this();  // do nothing
 
   if (model_->length_bins().size() == 0) {
     LOG_CODE_ERROR() << "Model::length_bins() is empty. Cannot default to all model length bins for parameter " << parameter_->label()
                      << ". Please define length bins in the model.";
-    return shared_from_this();
   }
 
-  if (param->target() != nullptr || param->target()->size() == 0) {
-    // Use .assign() instead of = because of Betadiff scalar conversion issues with double to adouble.
-    (*param->target()).assign(model_->length_bins().begin(), model_->length_bins().end());
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    if (param->target() != nullptr || param->target()->size() == 0) {
+      (*param->target()).assign(model_->length_bins().begin(), model_->length_bins().end());
+    }
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelLengthBins " << parameter_->location() << " " << parameter_->label() << " is not a vector<Double> type";
   }
 
   return shared_from_this();
 }
 
 /**
+ * This method will check that the number of elements in the parameter matches the count passed in.
  *
+ * @param count The number of elements that the parameter should have.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::NumberOfElements(unsigned count) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param_double   = GetParameterAsVectorDouble(true);
-  auto* param_unsigned = GetParameterAsVectorUnsigned(true);
-  auto* param_string   = GetParameterAsVectorString(true);
-  if (param_double == nullptr && param_unsigned == nullptr && param_string == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::NumberOfElements " << parameter_->label() << " is not a vector<double/unsigned/string> type";
-    return shared_from_this();
-  }
-
-  unsigned actual_count = param_double ? param_double->target()->size() : (param_unsigned ? param_unsigned->target()->size() : param_string->target()->size());
+  size_t actual_count = parameter_->values().size();
   if (actual_count != count) {
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << actual_count << " elements, but requires exactly " << count;
   }
@@ -444,49 +461,47 @@ shared_ptr<ValidatorVector> ValidatorVector::NumberOfElements(unsigned count) {
 }
 
 /**
+ * This method will check that the number of elements in the parameter matches the number of elements in the parameter with the label passed in.
  *
+ * @param label The label of the parameter to compare against the current parameter value.
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string& label) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* source_double   = GetParameterAsVectorDouble(true);
-  auto* source_unsigned = GetParameterAsVectorUnsigned(true);
-  auto* source_string   = GetParameterAsVectorString(true);
-  if (source_double == nullptr && source_unsigned == nullptr && source_string == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned/string> type";
-    return shared_from_this();
-  }
-  auto source_size = source_double ? source_double->target()->size() : (source_unsigned ? source_unsigned->target()->size() : source_string->target()->size());
-
-  auto* target = parameters_->Get(label);
-  if (target == nullptr) {
+  // Get our expected parameter and count
+  auto expected_parameter = parameters_->Get(label);
+  if (expected_parameter == nullptr) {
     LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " does not exist in the parameter list";
     return shared_from_this();
   }
+  auto expected_count = expected_parameter->values().size();
 
-  auto* target_double   = dynamic_cast<BindableVector<Double>*>(target);
-  auto* target_unsigned = dynamic_cast<BindableVector<unsigned>*>(target);
-  auto* target_string   = dynamic_cast<BindableVector<std::string>*>(target);
-  if (target_double == nullptr && target_unsigned == nullptr && target_string == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " is not a vector<double/unsigned/string> type";
-    return shared_from_this();
-  }
-  auto target_size = target_double ? target_double->target()->size() : (target_unsigned ? target_unsigned->target()->size() : target_string->target()->size());
-
-  if (target_string != nullptr && target_string->is_categories()) {
-    auto category_total_size = model_->categories()->total_categories_defined(target_string->values());
-    if (source_size != category_total_size) {
-      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << source_size << " elements, but category parameter '" << label << "' has "
-                  << category_total_size << " elements. Combined categories are not considered a single category.";
+  // Check if the expected parameter is actuall a category holding parameter.
+  // if it is, we want to expand the categories out to handle combined categories as individual values.
+  if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
+    if (target_string->is_categories()) {
+      expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
     }
-
-    return shared_from_this();
   }
 
-  if (source_size != target_size) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << source_size << " elements, but " << label << " has " << target_size
+  // We need to check the target size here and not just the values size because the target may have been expanded to match the expected count.
+  unsigned actual_target_size = 0;
+  if (auto* target_vector = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    actual_target_size = target_vector->target()->size();
+  } else if (auto* target_vector = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    actual_target_size = target_vector->target()->size();
+  } else if (auto* target_vector = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
+    actual_target_size = target_vector->target()->size();
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned/string> type";
+  }
+
+  // Do our final check and now
+  if (actual_target_size != expected_count) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << actual_target_size << " elements, but " << label << " has " << expected_count
                 << " elements";
   }
 
@@ -501,61 +516,49 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
     return shared_from_this();
   }
 
-  auto expand = [&](auto* param, auto* param2, const char* type_name1, const char* type_name2) {
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label << " is not a vector<" << type_name2 << "> type";
+  // Get our expected parameter and count
+  auto expected_parameter = parameters_->Get(label);
+  if (expected_parameter == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label << " does not exist in the parameter list";
+    return shared_from_this();
+  }
+  auto expected_count = expected_parameter->values().size();
+
+  // Check if the expected parameter is actuall a category holding parameter.
+  // if it is, we want to expand the categories out to handle combined categories as individual values.
+  if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
+    if (target_string->is_categories()) {
+      expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
+    }
+  }
+
+  // Set up a lambda to expand the parameter to the expected count
+  // if it is not already the expected count.
+  auto expand = [&](auto* param) {
+    if (param == nullptr) {
+      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label << " is null";
       return;
     }
     auto& src = *param->target();
-    auto& dst = *param2->target();
-
-    unsigned destination_size = dst.size();
-    if (param2->is_categories()) {
-      destination_size = model_->categories()->total_categories_defined(param2->values());
-    }
-
-    if (src.size() != 1 && src.size() != destination_size) {
+    if (src.size() != 1 && src.size() != expected_count) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " requires either 1 element or same number of elements as " << label << " ("
-                  << destination_size << "), but has " << src.size() << " elements";
+                  << expected_count << "), but has " << src.size() << " elements";
       return;
     }
     if (src.size() == 1) {
       auto temp = src[0];
-      src.assign(destination_size, temp);
+      src.assign(expected_count, temp);
     }
   };
 
+  // Call the lambda based on the type of the parameter
+  // We can use dynamic_cast here because we know the parameter is a BindableVector type.
   if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
-    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
-      expand(param, param2, "double", "double");
-    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
-      expand(param, param2, "double", "unsigned");
-    } else if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
-      expand(param, param2, "double", "string");
-    } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
-    }
+    expand(param);
   } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
-      expand(param, param2, "unsigned", "double");
-    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
-      expand(param, param2, "unsigned", "unsigned");
-    } else if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
-      expand(param, param2, "double", "string");
-    } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
-    }
+    expand(param);
   } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
-    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label))) {
-      expand(param, param2, "string", "double");
-    } else if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
-      expand(param, param2, "string", "unsigned");
-    } else if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
-      expand(param, param2, "string", "string");
-    } else {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned/string> type";
-    }
-
+    expand(param);
   } else {
     LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
   }
@@ -564,11 +567,13 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
 }
 
 /**
- * This method will take the current parameter and check if it has been defined by the user in the configuration file.
+ * This method will duplicate the values of another parameter into the current parameter if the current parameter has not been defined.
+ * This method is modifying a parameter which has already been populated, so we will need to modify the target and not the values vector.
  *
- * If the parameter has not been defined, then we're going to assign it based on the parameter passed in as the label.
+ * This means we will need to be considerate of the source and destination types.
  *
  * @param label The label of the parameter to copy from if current parameter has not been defined
+ * @return A shared pointer to the Validator object for method chaining.
  */
 shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(const string& label) {
   // If it's already been defined we don't need to do anything
@@ -576,26 +581,41 @@ shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(con
     return shared_from_this();
   }
 
+  auto source = parameters_->Get(label);
+  if (source == nullptr) {
+    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " does not exist in the parameter list";
+    return shared_from_this();
+  }
+
   if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
-    auto* param2 = dynamic_cast<BindableVector<Double>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<double> type";
+    if (auto* param2 = dynamic_cast<BindableVector<Double>*>(source)) {
+      if (param2->target() == nullptr) {
+        LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " target is null";
+      }
+      param->target()->assign(param2->target()->begin(), param2->target()->end());
+      return shared_from_this();
     }
-    param->target()->assign(param2->target()->begin(), param2->target()->end());
 
   } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<unsigned> type";
+    if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
+      if (param2->target() == nullptr) {
+        LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " target is null";
+      }
+      param->target()->assign(param2->target()->begin(), param2->target()->end());
+      return shared_from_this();
     }
-    param->target()->assign(param2->target()->begin(), param2->target()->end());
+
+    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<unsigned> type";
 
   } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
-    auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label));
-    if (param2 == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<string> type";
+    if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
+      if (param2->target() == nullptr) {
+        LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " target is null";
+      }
+      param->target()->assign(param2->target()->begin(), param2->target()->end());
+      return shared_from_this();
     }
-    param->target()->assign(param2->target()->begin(), param2->target()->end());
+    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<string> type";
 
   } else {
     LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << parameter_->label() << " is not a vector<double/unsigned> type";
@@ -607,14 +627,16 @@ shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(con
 /**
  * This method will check that the number of elements in the parameter is the same as the model age spread.
  * If the parameter is optional and has not been defined, it will return the current instance without validation.
+ *
+ * @return A shared pointer to the Validator object for method chaining.
+ *
  */
 shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsModelAgeSpread() {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorDouble();
-  if (param->target()->size() != model_->age_spread()) {
+  if (parameter_->values().size() != model_->age_spread()) {
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than the model age spread (" << model_->age_spread()
                 << ")";
   }

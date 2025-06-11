@@ -40,13 +40,13 @@ public:
   Validator(shared_ptr<Model> model, niwa::ParameterList* list, niwa::parameterlist::Parameter* param) : model_(model), parameters_(list), parameter_(param) {};
   ~Validator() {};
 
-  shared_ptr<Validator> GreaterThan(Double value);
+  shared_ptr<Validator> GreaterThan(double value);
   shared_ptr<Validator> GreaterThan(unsigned value);
-  shared_ptr<Validator> GreaterThanOrEqualTo(Double value);
+  shared_ptr<Validator> GreaterThanOrEqualTo(double value);
   shared_ptr<Validator> GreaterThanOrEqualTo(unsigned value);
   shared_ptr<Validator> GreaterThanOrEqualToParameter(const string& label);
-  shared_ptr<Validator> LessThan(Double value);
-  shared_ptr<Validator> LessThanOrEqualTo(Double value);
+  shared_ptr<Validator> LessThan(double value);
+  shared_ptr<Validator> LessThanOrEqualTo(double value);
   shared_ptr<Validator> LessThanOrEqualTo(unsigned value);
   shared_ptr<Validator> LessThanParameter(const string& label);
   shared_ptr<Validator> LessThanOrEqualToParameter(const string& label);
@@ -64,6 +64,8 @@ public:
   shared_ptr<Validator> EitherOrDefined(const string& label);
 
 protected:
+  vector<unsigned>    ConvertValuesToUnsigned() const;
+  vector<double>      ConvertValuesToDouble() const;
   Bindable<Double>*   GetParameterAsDouble(bool null_on_error = false);
   Bindable<unsigned>* GetParameterAsUnsigned(bool null_on_error = false);
 
