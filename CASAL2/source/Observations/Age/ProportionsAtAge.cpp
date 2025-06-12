@@ -294,7 +294,7 @@ void ProportionsAtAge::Execute() {
     auto cached_category_iter = cached_partition_iter->begin();
     for (; category_iter != partition_iter->end(); ++cached_category_iter, ++category_iter) {
       if (selectivity_iter >= selectivities_.size())
-        LOG_CODE_ERROR() << "selectivity_iter > selectivities_.size()";
+        LOG_CODE_ERROR() << "selectivity_iter ( " << selectivity_iter << ") >= selectivities_.size() (" << selectivities_.size() << ")";
 
       LOG_FINEST() << "using selectivity = " << selectivities_[selectivity_iter]->label();
       for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
@@ -320,9 +320,9 @@ void ProportionsAtAge::Execute() {
         LOG_FINE() << "start_value: " << start_value << "; end_value: " << end_value << "; final_value: " << final_value;
         LOG_FINE() << "Numbers at age before ageing error is applied: " << numbers_age_[data_offset];
       }
-      if (selectivity_for_combined_categories_) {
-        ++selectivity_iter;
-      }
+      // if (selectivity_for_combined_categories_) {
+      //   ++selectivity_iter;
+      // }
     }
 
     /*
