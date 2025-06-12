@@ -61,14 +61,8 @@ ProcessRemovalsByLength::ProcessRemovalsByLength(shared_ptr<Model> model) : Obse
 
   RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
 
-  allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
-  allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
-  allowed_likelihood_types_.push_back(PARAM_DIRICHLET);
-  allowed_likelihood_types_.push_back(PARAM_DIRICHLET_MULTINOMIAL);
-  allowed_likelihood_types_.push_back(PARAM_LOGISTIC_NORMAL);
-
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_INSTANTANEOUS);
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_HYBRID);
+  allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL, PARAM_DIRICHLET, PARAM_DIRICHLET_MULTINOMIAL, PARAM_LOGISTIC_NORMAL};
+  allowed_mortality_types_  = {PARAM_MORTALITY_INSTANTANEOUS, PARAM_MORTALITY_HYBRID};
 }
 
 /**
@@ -86,7 +80,13 @@ void ProcessRemovalsByLength::DoValidate() {
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
-  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(0.0, years_.size());
+
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
 
   // Do some checks if we're not using all of the model length bins
   using_model_length_bins = length_bins_.size() == model_->length_bins().size();
@@ -100,85 +100,7 @@ void ProcessRemovalsByLength::DoValidate() {
   map<unsigned, vector<double>> error_values_by_year;
   map<unsigned, vector<double>> obs_by_year;
 
-  /**
-   * Do some simple checks
-   * e.g Validate that the length_bins are strictly increasing
-   */
-  // vector<double> model_length_bins = model_->length_bins();
-  // if (length_bins_.size() == 0) {
-  //   LOG_FINE() << "using model length bins";
-  //   length_bins_            = model_length_bins;
-  //   using_model_length_bins = true;
-  //   // length_plus_     = model_->length_plus();
-  // } else {
-  //   LOG_FINE() << "using bespoke length bins";
-  //   // allow for the use of observation-defined length bins, as long as all values are in the set of model length bin values
-  //   using_model_length_bins = false;
-  //   // check users haven't just respecified the moedl length bins
-  //   bool length_bins_match = false;
-  //   LOG_FINE() << length_bins_.size() << "  " << model_length_bins.size();
-  //   if (length_bins_.size() == model_length_bins.size()) {
-  //     length_bins_match = true;
-  //     for (unsigned len_ndx = 0; len_ndx < length_bins_.size(); len_ndx++) {
-  //       if (length_bins_[len_ndx] != model_length_bins[len_ndx])
-  //         length_bins_match = false;
-  //     }
-  //   }
-  //   if (length_bins_match) {
-  //     LOG_FINE() << "using have actually just respecified model bins so we are ignoring it";
-  //     using_model_length_bins = true;
-  //   } else {
-  //     // Need to validate length bins are subclass of mdoel length bins.
-  //     if (!model_->are_length_bin_compatible_with_model_length_bins(length_bins_)) {
-  //       LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bins need to be a subset of the model length bins. See manual for more information";
-  //     }
-  //     LOG_FINE() << "length bins = " << length_bins_.size();
-  //     map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
-
-  //     LOG_FINE() << "check index";
-  //     for (unsigned i = 0; i < map_local_length_bins_to_global_length_bins_.size(); ++i) {
-  //       LOG_FINE() << "map_local_length_bins_to_global_length_bins_[" << i << "] = " << map_local_length_bins_to_global_length_bins_[i];
-  //     }
-  //   }
-  // }
-
-  // more checks on the model length bins.
-  // for (unsigned length = 0; length < length_bins_.size(); ++length) {
-  //   if (length_bins_[length] < 0.0)
-  //     LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be positive. '" << length_bins_[length] << "' is less than 0";
-
-  //   if (length > 0 && length_bins_[length - 1] >= length_bins_[length])
-  //     LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bins must be strictly increasing. " << length_bins_[length - 1] << " is greater than or equal to "
-  //                                    << length_bins_[length];
-
-  //   if (std::find(model_length_bins.begin(), model_length_bins.end(), length_bins_[length]) == model_length_bins.end())
-  //     LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be in the set of model length bins. Length '" << length_bins_[length]
-  //                                    << "' is not in the set of model length bins.";
-  // }
-
   number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
-
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were provided, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years

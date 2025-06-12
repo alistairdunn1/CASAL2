@@ -38,7 +38,7 @@ public:
   virtual ~TagRecaptureByAge() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void PreExecute() override final;
   void Execute() override final;
   void CalculateScore() override final;
@@ -51,12 +51,12 @@ protected:
   unsigned                    max_age_    = 0;
   bool                        plus_group_ = false;
   unsigned                    age_spread_ = 0;
-  Double                      detection_;
+  Double                      detection_  = 0.0;
   vector<string>              tagged_category_labels_;
   vector<string>              tagged_selectivity_labels_;
-  parameters::Table*          recaptures_table_ = nullptr;
-  string                      ageing_error_label_;
-  parameters::Table*          scanned_table_ = nullptr;
+  parameters::Table*          recaptures_table_   = nullptr;
+  string                      ageing_error_label_ = "";
+  parameters::Table*          scanned_table_      = nullptr;
   CachedCombinedCategoriesPtr cached_partition_;
   CombinedCategoriesPtr       partition_;
   CachedCombinedCategoriesPtr tagged_cached_partition_;
@@ -65,8 +65,8 @@ protected:
   vector<Selectivity*>        tagged_selectivities_;
   vector<string>              selectivity_labels_;
   vector<Selectivity*>        selectivities_;
-  string                      time_step_label_ = "";
-  Double                      time_step_proportion_;
+  string                      time_step_label_      = "";
+  Double                      time_step_proportion_ = 0.0;
 
   map<unsigned, map<string, vector<double>>> recaptures_;
   map<unsigned, map<string, vector<double>>> scanned_;

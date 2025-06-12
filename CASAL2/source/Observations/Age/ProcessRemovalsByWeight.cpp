@@ -38,32 +38,32 @@ namespace age {
 ProcessRemovalsByWeight::ProcessRemovalsByWeight(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-
-  parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality instantaneous process for the observation", "");
-  parameters_.Bind<string>(PARAM_METHOD_OF_REMOVAL, &method_, "The label of observed method of removals", "", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The time step to execute in", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error", "", true);
-  parameters_.Bind<Double>(PARAM_LENGTH_WEIGHT_CV, &length_weight_cv_, "The CV for the length-weight relationship", "", double(0.10))->set_lower_bound(0.0, false);
-  parameters_.Bind<string>(PARAM_LENGTH_WEIGHT_DISTRIBUTION, &length_weight_distribution_label_, "The distribution of the length-weight relationship", "", PARAM_NORMAL)
-      ->set_allowed_values({PARAM_NORMAL, PARAM_LOGNORMAL});
-  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins", "");
-  parameters_.Bind<double>(PARAM_LENGTH_BINS_N, &length_bins_n_, "The average number in each length bin", "");
-  parameters_.Bind<string>(PARAM_UNITS, &units_, "The units for the weight bins (grams, kilograms (kgs), or tonnes)", "", PARAM_KGS)
-      ->set_allowed_values({PARAM_GRAMS, PARAM_TONNES, PARAM_KGS, PARAM_KILOGRAMS});
-  parameters_.Bind<Double>(PARAM_FISHBOX_WEIGHT, &fishbox_weight_, "The target weight of each box", "", double(20.0))->set_lower_bound(0.0, false);
-  parameters_.Bind<double>(PARAM_WEIGHT_BINS, &weight_bins_, "The weight bins", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "Table of observed values", "", false);
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
+
+  // clang-format off
+  parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality instantaneous process for the observation");
+  parameters_.Bind<string>(PARAM_METHOD_OF_REMOVAL, &method_, "The label of observed method of removals")->set_default_value("");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The time step to execute in");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_LENGTH_WEIGHT_CV, &length_weight_cv_, "The CV for the length-weight relationship")->set_default_value(0.10); 
+  parameters_.Bind<string>(PARAM_LENGTH_WEIGHT_DISTRIBUTION, &length_weight_distribution_label_, "The distribution of the length-weight relationship")
+    ->set_default_value(PARAM_NORMAL);
+  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);
+  parameters_.Bind<double>(PARAM_LENGTH_BINS_N, &length_bins_n_, "The average number in each length bin");
+  parameters_.Bind<string>(PARAM_UNITS, &units_, "The units for the weight bins (grams, kilograms (kgs), or tonnes)")->set_default_value(PARAM_KGS);
+      // ->set_allowed_values({PARAM_GRAMS, PARAM_TONNES, PARAM_KGS, PARAM_KILOGRAMS});
+  parameters_.Bind<Double>(PARAM_FISHBOX_WEIGHT, &fishbox_weight_, "The target weight of each box")->set_default_value(20.0); 
+  parameters_.Bind<double>(PARAM_WEIGHT_BINS, &weight_bins_, "The weight bins");
+  // clang-format on
 
   mean_proportion_method_ = false;
 
   RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
 
-  allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
-  allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
-
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_INSTANTANEOUS);
+  allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL};
+  allowed_mortality_types_  = {PARAM_MORTALITY_INSTANTANEOUS};
 }
 
 /**
@@ -78,14 +78,20 @@ ProcessRemovalsByWeight::~ProcessRemovalsByWeight() {
  * Validate configuration file parameters
  */
 void ProcessRemovalsByWeight::DoValidate() {
-  // Check value for initial mortality
-  if (model_->length_bins().size() == 0)
-    LOG_FATAL_P(PARAM_LENGTH_BINS) << ": No length bins have been specified in @model. This observation requires those to be defined";
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.Validate(PARAM_LENGTH_WEIGHT_CV)->GreaterThan(0.0);
+  parameters_.Validate(PARAM_LENGTH_WEIGHT_DISTRIBUTION)->IsInList({PARAM_NORMAL, PARAM_LOGNORMAL});
+  parameters_.Validate(PARAM_UNITS)->IsInList({PARAM_GRAMS, PARAM_KGS, PARAM_KILOGRAMS, PARAM_TONNES});
+  parameters_.Validate(PARAM_FISHBOX_WEIGHT)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(0.0, years_.size());
+  parameters_.ValidateVector(PARAM_LENGTH_BINS_N)->SameNumberOfElementsAs(PARAM_LENGTH_BINS)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_WEIGHT_BINS)->GreaterThan(0.0)->IsInIncreasingOrder();
 
-  // Need to validate length bins are subclass of mdoel length bins.
-  if (!model_->are_length_bin_compatible_with_model_length_bins(length_bins_)) {
-    LOG_FATAL_P(PARAM_LENGTH_BINS) << "Length bins need to be a subset of the model length bins. See manual for more information";
-  }
   // How many elements are expected in our observed table;
   number_length_bins_ = length_bins_.size();
   number_weight_bins_ = weight_bins_.size();
@@ -97,74 +103,10 @@ void ProcessRemovalsByWeight::DoValidate() {
   else
     LOG_CODE_ERROR() << "The length-weight distribution '" << length_weight_distribution_label_ << "' is not valid.";
 
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
 
   map<unsigned, vector<double>> error_values_by_year;
   map<unsigned, vector<double>> obs_by_year;
-
-  /**
-   * Do some simple checks
-   * e.g., validate that the length and weight bins are strictly increasing
-   */
-
-  vector<double> model_length_bins = model_->length_bins();
-  if (length_bins_[0] < model_length_bins[0])
-    LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Length bin value " << length_bins_[0] << " is smaller than the smallest model length bin " << model_length_bins[0];
-  if (length_bins_[(number_length_bins_ - 1)] > model_length_bins[(model_length_bins.size() - 1)])
-    LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Length bin value " << length_bins_[(number_length_bins_ - 1)] << " is larger than the largest model length bin "
-                                   << model_length_bins[(model_length_bins.size() - 1)];
-
-  if (length_bins_.size() != length_bins_n_.size())
-    LOG_ERROR_P(PARAM_LENGTH_BINS_N) << ": The number of length bins " << length_bins_.size() << " does not match the number of length bin number values " << length_bins_n_.size();
-
-  for (unsigned length = 0; length < length_bins_.size(); ++length) {
-    if (length_bins_[length] < 0.0)
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Length bin values must be positive: " << length_bins_[length] << " is less than 0.0";
-
-    if (length > 0 && length_bins_[length - 1] >= length_bins_[length])
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Length bin values must be strictly increasing: " << length_bins_[length - 1] << " is greater than or equal to " << length_bins_[length];
-  }
-
-  for (unsigned length = 0; length < length_bins_n_.size(); ++length) {
-    if (length_bins_n_[length] <= 0.0)
-      LOG_ERROR_P(PARAM_LENGTH_BINS_N) << ": Length bin number values must be positive: " << length_bins_n_[length] << " is less than or equal to 0.0";
-  }
-
-  for (unsigned weight = 0; weight < weight_bins_.size(); ++weight) {
-    if (weight_bins_[weight] < 0.0)
-      LOG_ERROR_P(PARAM_WEIGHT_BINS) << ": Weight bin values must be positive: " << weight_bins_[weight] << " is less than 0.0";
-
-    if (weight > 0 && weight_bins_[weight - 1] >= weight_bins_[weight])
-      LOG_ERROR_P(PARAM_WEIGHT_BINS) << ": Weight bin values must be strictly increasing: " << weight_bins_[weight - 1] << " is greater than or equal to " << weight_bins_[weight];
-  }
-
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were provided, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
-
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years

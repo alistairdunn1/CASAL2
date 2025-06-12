@@ -34,20 +34,22 @@ namespace age {
 TagRecaptureByAge::TagRecaptureByAge(shared_ptr<Model> model) : Observation(model) {
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
   scanned_table_    = new parameters::Table(PARAM_SCANNED);
-  // clang-format off
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group?", "", true);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities of the scanned categories", "", true);
-  parameters_.Bind<string>(PARAM_TAGGED_CATEGORIES, &tagged_category_labels_, "The categories of tagged individuals", "");
-  parameters_.Bind<string>(PARAM_TAGGED_SELECTIVITIES, &tagged_selectivity_labels_, "The labels of the selectivities of the tagged categories ", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  parameters_.Bind<Double>(PARAM_DETECTION_PARAMETER, &detection_, "The probability of detecting a recaptured individual", "")->set_range(0.0, 1.0);
-  parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)  ", "", true)->set_lower_bound(0.0);
   parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
   parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each age class", "", false);
-  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "", Double(0.5))->set_range(0.0, 1.0);
+
+  // clang-format off
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age");
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group?")->set_default_value(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities of the scanned categories");
+  parameters_.Bind<string>(PARAM_TAGGED_CATEGORIES, &tagged_category_labels_, "The categories of tagged individuals")->flag_is_category(true);
+  parameters_.Bind<string>(PARAM_TAGGED_SELECTIVITIES, &tagged_selectivity_labels_, "The labels of the selectivities of the tagged categories");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<Double>(PARAM_DETECTION_PARAMETER, &detection_, "The probability of detecting a recaptured individual");
+  parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+    ->set_default_value(0.5);
   // clang-format on
 
   RegisterAsAddressable(PARAM_DETECTION_PARAMETER, &detection_);
@@ -61,42 +63,31 @@ TagRecaptureByAge::TagRecaptureByAge(shared_ptr<Model> model) : Observation(mode
  * Validate configuration file parameters
  */
 void TagRecaptureByAge::DoValidate() {
-  unsigned expected_selectivity_count = 0;
-  auto     categories                 = model_->categories();
-  for (const string& category_label : category_labels_) expected_selectivity_count += categories->GetNumberOfCategoriesDefined(category_label);
+  parameters_.Validate(PARAM_MIN_AGE)->IsAge()->LessThanOrEqualToParameter(PARAM_MAX_AGE);
+  parameters_.Validate(PARAM_MAX_AGE)->IsAge();
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TAGGED_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TAGGED_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES);
+  parameters_.Validate(PARAM_DETECTION_PARAMETER)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_DISPERSION)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(1.0, years_.size());
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ")";
-  }
-
-  if (category_labels_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << ": Number of categories (" << category_labels_.size() << ") does not match the number of " PARAM_SELECTIVITIES << " ("
-                                  << selectivity_labels_.size() << ")";
-
-  if (tagged_category_labels_.size() != tagged_selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << ": Number of tagged categories (" << tagged_category_labels_.size() << ") does not match the number of " PARAM_TAGGED_SELECTIVITIES
-                                         << " (" << tagged_selectivity_labels_.size() << ")";
+  dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
 
   age_spread_ = (max_age_ - min_age_) + 1;
-  map<unsigned, vector<double>> recaptures_by_year;
-  map<unsigned, vector<double>> scanned_by_year;
-
-  // Do some simple checks
-  if (min_age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_MIN_AGE) << ": min_age (" << min_age_ << ") is less than the model's min_age (" << model_->min_age() << ")";
-  if (max_age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_MAX_AGE) << ": max_age (" << max_age_ << ") is greater than the model's max_age (" << model_->max_age() << ")";
-  if (detection_ < 0.0 || detection_ > 1.0)
-    LOG_ERROR_P(PARAM_DETECTION_PARAMETER) << ": detection probability must be between 0.0 and 1.0 (inclusive)";
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
 
   // Validate the number of recaptures provided matches age spread* category_labels* years
   //  This is because we'll have 1 set of recaptures per category collection provided.
   //  categories male+female male = 2 collections
-  unsigned                obs_expected    = age_spread_ * category_labels_.size() + 1;
-  vector<vector<string>>& recaptures_data = recaptures_table_->data();
+  map<unsigned, vector<double>> scanned_by_year;
+  map<unsigned, vector<double>> recaptures_by_year;
+  unsigned                      obs_expected    = age_spread_ * category_labels_.size() + 1;
+  vector<vector<string>>&       recaptures_data = recaptures_table_->data();
 
   if (recaptures_data.size() != years_.size()) {
     LOG_ERROR_P(PARAM_RECAPTURED) << "has " << recaptures_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
@@ -191,28 +182,6 @@ void TagRecaptureByAge::DoValidate() {
         }
       }
     }
-  }
-
-  // validate and build dispersion (e.g. process_error)
-  for (Double dispersion : dispersion_) {
-    if (dispersion < 0.0)
-      LOG_ERROR_P(PARAM_DISPERSION) << ": dispersion (" << AS_DOUBLE(dispersion) << ") cannot be less than 0.0";
-  }
-  // if only one value supplied then assume its the same for all years
-  if (dispersion_.size() == 1) {
-    Double temp = dispersion_[0];
-    dispersion_.resize(years_.size(), temp);
-  }
-
-  if (dispersion_.size() != 0) {
-    if (dispersion_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_DISPERSION) << "Supply one value of dispersion that is used for every year, or a value of dispersion for each year. Values for " << dispersion_.size()
-                                    << " years were supplied, but " << years_.size() << " years are required";
-    }
-    dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
-  } else {
-    Double dispersion_val = 1.0;
-    dispersion_by_year_   = utilities::Map::create(years_, dispersion_val);
   }
 }
 

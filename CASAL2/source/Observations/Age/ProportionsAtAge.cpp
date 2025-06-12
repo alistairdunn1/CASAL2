@@ -36,26 +36,24 @@ namespace age {
 ProportionsAtAge::ProportionsAtAge(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group?", "", true);
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error", "", true);
-  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use", "", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "", "", false);
-  parameters_.Bind<bool>(PARAM_SIMULATED_DATA_SUM_TO_ONE, &simulated_data_sum_to_one_, "Whether simulated data is discrete or scaled by totals to be proportions for each year", "",
-                         true);
-  parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1", "", false);
 
-  allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
-  allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
-  allowed_likelihood_types_.push_back(PARAM_DIRICHLET);
-  allowed_likelihood_types_.push_back(PARAM_DIRICHLET_MULTINOMIAL);
-  allowed_likelihood_types_.push_back(PARAM_LOGISTIC_NORMAL);
+  // clang-format off
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age");
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Is the maximum age the age plus group?")->set_default_value(true);
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use")->set_default_value("");
+  parameters_.Bind<bool>(PARAM_SIMULATED_DATA_SUM_TO_ONE, &simulated_data_sum_to_one_, "Whether simulated data is discrete or scaled by totals to be proportions for each year")
+    ->set_default_value(true);
+  parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1")->set_default_value(false);
+  // clang-format on
+
+  allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL, PARAM_DIRICHLET, PARAM_DIRICHLET_MULTINOMIAL, PARAM_LOGISTIC_NORMAL};
 }
 
 /**
@@ -70,61 +68,28 @@ ProportionsAtAge::~ProportionsAtAge() {
  * Validate configuration file parameters
  */
 void ProportionsAtAge::DoValidate() {
-  LOG_TRACE();
-  age_spread_ = (max_age_ - min_age_) + 1;
+  parameters_.Validate(PARAM_MIN_AGE)->IsAge()->LessThanOrEqualToParameter(PARAM_MAX_AGE);
+  parameters_.Validate(PARAM_MAX_AGE)->IsAge();
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(0.0, years_.size());
 
-  map<unsigned, vector<double>> error_values_by_year;
-  map<unsigned, vector<double>> obs_by_year;
-
-  LOG_FINEST() << "category_labels_.size() = " << category_labels_.size();
-  if (category_labels_.size() != selectivity_labels_.size() && expected_selectivity_count_ != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Number of selectivities provided (" << selectivity_labels_.size()
-                                     << ") is not valid. Specify either the number of category collections (" << category_labels_.size() << ") or "
-                                     << "the number of total categories (" << expected_selectivity_count_ << ")";
-  /**
-   * Do some simple checks
-   */
-  if (min_age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_MIN_AGE) << ": min_age (" << min_age_ << ") is less than the model's min_age (" << model_->min_age() << ")";
-  if (max_age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_MAX_AGE) << ": max_age (" << max_age_ << ") is greater than the model's max_age (" << model_->max_age() << ")";
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
-
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were supplied, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
-
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
+  age_spread_             = (max_age_ - min_age_) + 1;
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years
    * This is because we'll have 1 set of obs per category collection provided.
    * categories male+female male = 2 collections
    */
-  unsigned                obs_expected = age_spread_ * category_labels_.size() + 1;
-  vector<vector<string>>& obs_data     = obs_table_->data();
+  map<unsigned, vector<double>> obs_by_year;
+  map<unsigned, vector<double>> error_values_by_year;
+  unsigned                      obs_expected = age_spread_ * category_labels_.size() + 1;
+  vector<vector<string>>&       obs_data     = obs_table_->data();
   if (obs_data.size() != years_.size()) {
     LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
   }

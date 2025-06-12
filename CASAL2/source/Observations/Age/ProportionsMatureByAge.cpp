@@ -28,6 +28,7 @@
 #include "Utilities/Map.h"
 #include "Utilities/Math.h"
 #include "Utilities/To.h"
+
 // Namespaces
 namespace niwa {
 namespace observations {
@@ -39,22 +40,22 @@ namespace age {
 ProportionsMatureByAge::ProportionsMatureByAge(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in", "");
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Use the age plus group?", "", true);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use", "", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of proportions at age mature ", "", false);
-  // TODO:  is tolerance missing?
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note the units depend on the likelihood)", "", false);
+
+  // clang-format off
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in");
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Use the age plus group?")->set_default_value(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations");
+  parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of ageing error to use")->set_default_value("");
   parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_,
-                           "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)", "", true);
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+      "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)")
+      ->flag_is_category(true);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+      ->set_default_value(0.5);
+  // clang-format on
 
   mean_proportion_method_ = false;
 
@@ -73,85 +74,23 @@ ProportionsMatureByAge::~ProportionsMatureByAge() {
  * Validate total_categories command
  */
 void ProportionsMatureByAge::DoValidate() {
+  parameters_.Validate(PARAM_MIN_AGE)->IsAge()->LessThanOrEqualToParameter(PARAM_MAX_AGE);
+  parameters_.Validate(PARAM_MAX_AGE)->IsAge();
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_TOTAL_CATEGORIES)->IsUniqueFrom(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+
   age_spread_ = (max_age_ - min_age_) + 1;
-
-  map<unsigned, vector<double>> error_values_by_year;
-  map<unsigned, vector<double>> obs_by_year;
-
-  /**
-   * Now go through each category and split it if required, then check each piece to ensure
-   * it's a valid category
-   */
-  Categories* categories = model_->categories();
-  LOG_FINEST() << "Number of different total categories " << total_category_labels_.size();
-  vector<string> split_category_labels;
-
-  for (const string& category_label : total_category_labels_) {
-    boost::split(split_category_labels, category_label, boost::is_any_of("+"));
-    for (const string& split_category_label : split_category_labels) {
-      if (!categories->IsValid(split_category_label)) {
-        if (split_category_label == category_label) {
-          LOG_ERROR_P(PARAM_TOTAL_CATEGORIES) << ": The category " << split_category_label << " is not a valid category.";
-        } else {
-          LOG_ERROR_P(PARAM_TOTAL_CATEGORIES) << ": The category " << split_category_label << " is not a valid category."
-                                              << " It was defined in the category collection " << category_label;
-        }
-      }
-    }
-  }
-  for (auto tot_category : total_category_labels_) {
-    if (std::find(category_labels_.begin(), category_labels_.end(), tot_category) != category_labels_.end())
-      LOG_ERROR_P(PARAM_TOTAL_CATEGORIES) << "category '" << tot_category << "' was found in the parameter " << PARAM_CATEGORIES << ". Please remove it from the "
-                                          << PARAM_TOTAL_CATEGORIES << " parameter";
-  }
-  LOG_FINEST() << "Number of different total categories after splitting " << total_category_labels_.size();
-
-  /**
-   * Do some simple checks
-   */
-  if (min_age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_MIN_AGE) << ": min_age (" << min_age_ << ") is less than the model's min_age (" << model_->min_age() << ")";
-
-  if (max_age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_MAX_AGE) << ": max_age (" << max_age_ << ") is greater than the model's max_age (" << model_->max_age() << ")";
-
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
-
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were provided, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
-
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years
    * This is because we'll have 1 set of obs per category collection provided.
    * categories male+female male = 2 collections
    */
-  unsigned                obs_expected = age_spread_ * category_labels_.size() + 1;
-  vector<vector<string>>& obs_data     = obs_table_->data();
+  map<unsigned, vector<double>> error_values_by_year;
+  map<unsigned, vector<double>> obs_by_year;
+  unsigned                      obs_expected = age_spread_ * category_labels_.size() + 1;
+  vector<vector<string>>&       obs_data     = obs_table_->data();
   if (obs_data.size() != years_.size()) {
     LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
   }

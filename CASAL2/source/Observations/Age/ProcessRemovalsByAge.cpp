@@ -76,33 +76,24 @@ void ProcessRemovalsByAge::DoValidate() {
   parameters_.Validate(PARAM_MIN_AGE)->IsAge();
   parameters_.Validate(PARAM_MAX_AGE)->IsAge();
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
-  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)->GreaterThanOrEqualTo(0.0)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(0.0, years_.size());
   parameters_.ValidateVector(PARAM_METHOD_OF_REMOVAL)->SameNumberOfElementsAs(PARAM_TIME_STEP);
 
-  if (process_error_values_.size() == 0)
-    process_error_values_.assign(years_.size(), 0.0);
   process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-
-  age_spread_ = (max_age_ - min_age_) + 1;
-
-  map<unsigned, vector<double>> error_values_by_year;
-  map<unsigned, vector<double>> obs_by_year;
-
-  /**
-   * Do some simple checks
-   */
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
+  age_spread_             = (max_age_ - min_age_) + 1;
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years
    * This is because we'll have 1 set of obs per category collection provided.
    * categories male+female male = 2 collections
    */
+  map<unsigned, vector<double>> error_values_by_year;
+  map<unsigned, vector<double>> obs_by_year;
+
   unsigned                obs_expected = age_spread_ * category_labels_.size() + 1;
   vector<vector<string>>& obs_data     = obs_table_->data();
   if (obs_data.size() != years_.size()) {

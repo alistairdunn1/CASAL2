@@ -34,22 +34,20 @@ namespace age {
 ProportionsByCategory::ProportionsByCategory(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-
-  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age", "");
-  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Use the age plus group?", "", true);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<string>(PARAM_TARGET_CATEGORIES, &target_category_labels_, "The target categories", "");
-  parameters_.Bind<string>(PARAM_TARGET_SELECTIVITIES, &target_selectivity_labels_, "The target selectivities", "");
-  // TODO:  is tolerance missing?
-  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error", "", true);
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
 
-  allowed_likelihood_types_.push_back(PARAM_BINOMIAL);
-  // allowed_likelihood_types_.push_back(PARAM_MULTINOMIAL);
+  parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
+  parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &plus_group_, "Use the age plus group?")->set_default_value(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
+  parameters_.Bind<string>(PARAM_TARGET_CATEGORIES, &target_category_labels_, "The target categories")->flag_is_category(true);
+  parameters_.Bind<string>(PARAM_TARGET_SELECTIVITIES, &target_selectivity_labels_, "The target selectivities");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_is_optional(true);
+
+  allowed_likelihood_types_ = {PARAM_BINOMIAL};
 }
 
 /**
@@ -64,69 +62,31 @@ ProportionsByCategory::~ProportionsByCategory() {
  * Validate configuration file parameters
  */
 void ProportionsByCategory::DoValidate() {
-  unsigned expected_selectivity_count = 0;
-  auto     categories                 = model_->categories();
-  for (const string& category_label : category_labels_) expected_selectivity_count += categories->GetNumberOfCategoriesDefined(category_label);
+  parameters_.Validate(PARAM_MIN_AGE)->IsAge()->LessThanOrEqualToParameter(PARAM_MAX_AGE);
+  parameters_.Validate(PARAM_MAX_AGE)->IsAge();
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TARGET_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES, false)->IsUniqueFrom(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TARGET_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_TARGET_CATEGORIES)->SameNumberOfElementsAs(PARAM_TARGET_CATEGORIES);
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(0.0, years_.size());
 
-  if (category_labels_.size() != target_category_labels_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << ": Number of categories(" << category_labels_.size() << ") does not match the number of " PARAM_TARGET_CATEGORIES << "("
-                                  << target_category_labels_.size() << ")";
-
-  if (target_category_labels_.size() != target_selectivity_labels_.size() && expected_selectivity_count != target_selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_TARGET_SELECTIVITIES) << ": Number of selectivities provided (" << target_selectivity_labels_.size()
-                                            << ") is not valid. Specify either the number of category collections (" << target_category_labels_.size() << ") or "
-                                            << "the number of total categories (" << expected_selectivity_count << ")";
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
 
   age_spread_ = (max_age_ - min_age_) + 1;
 
-  map<unsigned, vector<double>> error_values_by_year;
-  map<unsigned, vector<double>> obs_by_year;
-
-  /**
-   * Do some simple checks
-   */
-  if (min_age_ < model_->min_age())
-    LOG_ERROR_P(PARAM_MIN_AGE) << ": min_age (" << min_age_ << ") is less than the model's min_age (" << model_->min_age() << ")";
-
-  if (max_age_ > model_->max_age())
-    LOG_ERROR_P(PARAM_MAX_AGE) << ": max_age (" << max_age_ << ") is greater than the model's max_age (" << model_->max_age() << ")";
-
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were provided, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
-
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
-
-  if (category_labels_.size() != selectivity_labels_.size() && expected_selectivity_count_ != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Number of selectivities provided (" << selectivity_labels_.size()
-                                     << ") is not valid. Specify either the number of category collections (" << category_labels_.size() << ") or "
-                                     << "the number of total categories (" << expected_selectivity_count_ << ")";
   /**
    * Validate the number of obs provided matches age spread * category_labels * years
    * This is because we'll have 1 set of obs per category collection provided.
    * categories male+female male = 2 collections
    */
-  unsigned                obs_expected = age_spread_ * category_labels_.size() + 1;
-  vector<vector<string>>& obs_data     = obs_table_->data();
+  map<unsigned, vector<double>> error_values_by_year;
+  map<unsigned, vector<double>> obs_by_year;
+  unsigned                      obs_expected = age_spread_ * category_labels_.size() + 1;
+  vector<vector<string>>&       obs_data     = obs_table_->data();
   if (obs_data.size() != years_.size()) {
     LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
   }
