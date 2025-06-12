@@ -537,6 +537,28 @@ shared_ptr<Validator> Validator::DefaultValue(unsigned value) {
 }
 
 /**
+ * This method will set the default value of the parameter to the value passed in.
+ * If the parameter has already been defined, it will return without doing anything.
+ *
+ * @param value The default value to set for the parameter.
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<Validator> Validator::DefaultValue(bool value) {
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();
+  }
+
+  auto* param = dynamic_cast<Bindable<bool>*>(parameter_);
+  if (param == nullptr) {
+    LOG_CODE_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " cannot set default value because it is not an boolean type";
+  }
+
+  *param->target() = value;
+
+  return shared_from_this();
+}
+
+/**
  * This method will check if the parameter is true or false, if the parameter is true then
  * the current parameter is required and must have been defined with values.
  */

@@ -464,9 +464,10 @@ shared_ptr<ValidatorVector> ValidatorVector::NumberOfElements(unsigned count) {
  * This method will check that the number of elements in the parameter matches the number of elements in the parameter with the label passed in.
  *
  * @param label The label of the parameter to compare against the current parameter value.
+ * @param split_combined_categories If true, the method will expand combined categories into individual values.
  * @return A shared pointer to the Validator object for method chaining.
  */
-shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string& label) {
+shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string& label, bool split_combined_categories) {
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
@@ -482,7 +483,7 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
   // Check if the expected parameter is actuall a category holding parameter.
   // if it is, we want to expand the categories out to handle combined categories as individual values.
   if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
-    if (target_string->is_categories()) {
+    if (split_combined_categories && target_string->is_categories()) {
       expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
     }
   }
@@ -494,7 +495,11 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
   } else if (auto* target_vector = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
     actual_target_size = target_vector->target()->size();
   } else if (auto* target_vector = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
-    actual_target_size = target_vector->target()->size();
+    if (split_combined_categories && target_vector->is_categories())
+      actual_target_size = model_->categories()->total_categories_defined(target_vector->values());
+    else
+      actual_target_size = target_vector->target()->size();
+
   } else {
     LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned/string> type";
   }
@@ -736,6 +741,29 @@ shared_ptr<ValidatorVector> ValidatorVector::EitherOrTableDefined(const string& 
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " must be defined if table " << table_label << " is not defined";
   }
 
+  return shared_from_this();
+}
+
+/**
+ * This method will set the default value of the parameter to a vector of doubles with the specified value and count.
+ * If the parameter has already been defined, it will return the current instance without modifying the parameter.
+ *
+ * @param value The default value to set for each element in the vector.
+ * @param count The number of elements in the vector.
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::DefaultValue(double value, unsigned count) {
+  if (parameter_->has_been_defined()) {
+    return shared_from_this();  // do nothing
+  }
+
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    if (param->target()->size() == 0) {
+      param->target()->assign(count, value);
+    }
+  } else {
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DefaultValue " << parameter_->label() << " is not a vector<double> type";
+  }
   return shared_from_this();
 }
 
