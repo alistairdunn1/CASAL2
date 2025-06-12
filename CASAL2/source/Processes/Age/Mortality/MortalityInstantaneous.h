@@ -20,15 +20,13 @@
 #include "Model/Model.h"
 #include "Partition/Accessors/Categories.h"
 #include "Penalties/Common/Process.h"
+#include "Processes/Age/Mortality.h"
 #include "Processes/Process.h"
 #include "Selectivities/Selectivity.h"
 #include "Utilities/Map.h"
-#include "Processes/Age/Mortality.h"
 
 // namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::age {
 
 namespace accessor = niwa::partition::accessors;
 using utilities::OrderedMap;
@@ -39,51 +37,51 @@ class MortalityInstantaneous : public Mortality {
    * FisheryData holds all the information related to a fishery
    */
   struct FisheryData {
-    unsigned         fishery_ndx_;  // used to reference which fishery this is. Used when this is accessed via the category fishery struct
-    string           label_;
-    string           time_step_label_;
-    unsigned         time_step_index_;
-    Double           u_max_;
-    string           penalty_label_;
-    Penalty*         penalty_ = nullptr;
-    vector<unsigned> years_;
+    unsigned         fishery_ndx_     = 0;  // used to reference which fishery this is. Used when this is accessed via the category fishery struct
+    string           label_           = "";
+    string           time_step_label_ = "";
+    unsigned         time_step_index_ = 0;
+    Double           u_max_           = 0.0;
+    string           penalty_label_   = "";
+    Penalty*         penalty_         = nullptr;
+    vector<unsigned> years_           = {};
     // These objects want to be a map as more useful for projection methods
-    map<unsigned, Double> catches_;
-    map<unsigned, Double> actual_catches_;
-    map<unsigned, Double> exploitation_by_year_;
-    map<unsigned, Double> uobs_by_year_;
+    map<unsigned, Double> catches_              = {};  // map<year, catch>
+    map<unsigned, Double> actual_catches_       = {};  // map<year, actual catch>
+    map<unsigned, Double> exploitation_by_year_ = {};  // map<year, exploitation>
+    map<unsigned, Double> uobs_by_year_         = {};  // map<year, uobs_fishery>
 
-    Double  vulnerability_;
-    Double  uobs_fishery_;
-    Double  exploitation_;
+    Double vulnerability_ = 0.0;
+    Double uobs_fishery_  = 0.0;
+    Double exploitation_  = 0.0;
   };
 
   struct CategoryData {
-    string               category_label_;
-    partition::Category* category_;
-    Double*              m_;
-    vector<Double>       exploitation_;
-    vector<Double>       exp_values_half_m_;
-    string               selectivity_label_;
-    Selectivity*         selectivity_;
-    vector<Double>       selectivity_values_;
-    AgeWeight*           age_weight_ = nullptr;
-    string               age_weight_label_;
-    bool                 used_in_current_timestep_;
-    unsigned             category_ndx_;  // used for a look up to store info in containers
+    string               category_label_           = "";
+    partition::Category* category_                 = nullptr;
+    Double*              m_                        = nullptr;
+    vector<Double>       exploitation_             = {};
+    vector<Double>       exp_values_half_m_        = {};
+    string               selectivity_label_        = "";
+    Selectivity*         selectivity_              = nullptr;
+    vector<Double>       selectivity_values_       = {};
+    AgeWeight*           age_weight_               = nullptr;
+    string               age_weight_label_         = "";
+    bool                 used_in_current_timestep_ = false;
+    unsigned             category_ndx_             = 0;  // used for a look up to store info in containers
   };
   /**
    * FisheryCategoryData is used to store 1 Fishery x Category x Selectivity
    */
   struct FisheryCategoryData {
-    FisheryCategoryData(FisheryData& x, CategoryData& y) : fishery_(x), category_(y){};
+    FisheryCategoryData(FisheryData& x, CategoryData& y) : fishery_(x), category_(y) {};
     FisheryData&   fishery_;
     CategoryData&  category_;
-    string         fishery_label_;
-    string         category_label_;
-    string         selectivity_label_;
-    Selectivity*   selectivity_ = nullptr;
-    vector<Double> selectivity_values_;
+    string         fishery_label_      = "";
+    string         category_label_     = "";
+    string         selectivity_label_  = "";
+    Selectivity*   selectivity_        = nullptr;
+    vector<Double> selectivity_values_ = {};
   };
 
 public:
@@ -98,7 +96,6 @@ public:
   void FillReportCache(ostringstream& cache) override final;
   void FillTabularReportCache(ostringstream& cache, bool first_run) override final;
 
-
   // set
 
 private:
@@ -111,14 +108,14 @@ private:
   parameters::Table*          catches_table_ = nullptr;
   parameters::Table*          method_table_  = nullptr;
   accessor::Categories        partition_;
-  Double                      current_m_ = 0.0;
+  Double                      current_m_        = 0.0;
   bool                        is_catch_biomass_ = true;
 
   // members from mortality event
   // Double                      u_max_ = 0.99; // Now attached to the fishery object
   string              penalty_label_ = "";
   penalties::Process* penalty_       = nullptr;
-  string              unit_;
+  string              unit_          = "";
 
   // members from natural mortality
   vector<Double>             m_input_;
@@ -134,8 +131,6 @@ private:
   vector<vector<vector<Double>>> removals_by_year_category_age_;  // year[year_ndx][category_ndx][age_ndx]
 };
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+}  // namespace niwa::processes::age
 
 #endif /* SOURCE_PROCESSES_CHILDREN_MORTALITYINSTANTANEOUS_H_ */
