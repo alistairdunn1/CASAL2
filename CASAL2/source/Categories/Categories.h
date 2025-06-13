@@ -69,6 +69,7 @@ public:
   virtual AgeLength*       age_length(const string& category_name);
   virtual GrowthIncrement* growth_increment(const string& category_name);
   unsigned                 total_categories_defined(const vector<string>& category_names);
+  vector<vector<string>>   total_categories(const vector<string>& category_names);
   // AgeWeight*             age_weight(const string& category_name);
 
 protected:

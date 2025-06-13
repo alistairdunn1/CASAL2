@@ -38,39 +38,30 @@ namespace age {
  */
 TagRecaptureByFishery::TagRecaptureByFishery(shared_ptr<Model> model) : Observation(model) {
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
+  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
 
   parameters_.Unbind(PARAM_CATEGORIES);  // we don't use categories in this observation
 
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-
-  parameters_.Bind<string>(PARAM_TAGGED_CATEGORIES, &tagged_category_labels_, "The categories of tagged individuals for the observation", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-
-  parameters_.Bind<string>(PARAM_METHOD_OF_REMOVAL, &method_, "The label of the observed method of removals", "", "");
-  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
-  parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality process for the observation", "");
-  parameters_.Bind<Double>(PARAM_REPORTING_RATE, &reporting_rate_, "The probability of detecting a recaptured individual", "")->set_range(0.0, 1.0);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_TAGGED_CATEGORIES, &tagged_category_labels_, "The categories of tagged individuals for the observation")->flag_is_category();
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<string>(PARAM_METHOD_OF_REMOVAL, &method_, "The label of the observed method of removals")->set_default_value("");
+  parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality process for the observation");
+  parameters_.Bind<Double>(PARAM_REPORTING_RATE, &reporting_rate_, "The probability of detecting a recaptured individual");
 
   RegisterAsAddressable(PARAM_REPORTING_RATE, &reporting_rate_);
 
-  allowed_likelihood_types_.push_back(PARAM_POISSON);
-  // allowed_likelihood_types_.push_back(PARAM_NEGATIVE_BINOMIAL);
-
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_INSTANTANEOUS);
-  allowed_mortality_types_.push_back(PARAM_MORTALITY_HYBRID);
+  allowed_likelihood_types_ = {PARAM_POISSON};
+  allowed_mortality_types_  = {PARAM_MORTALITY_INSTANTANEOUS, PARAM_MORTALITY_HYBRID};
 }
 
 /**
  * Validate configuration file parameters
  */
 void TagRecaptureByFishery::DoValidate() {
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
-
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_TIME_STEP)->SameNumberOfElementsAs(PARAM_METHOD_OF_REMOVAL);
+  parameters_.Validate(PARAM_REPORTING_RATE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
   /**
    * Validate the number of obs provided matches age spread * tagged_category_labels_ * years
@@ -104,11 +95,6 @@ void TagRecaptureByFishery::DoValidate() {
     expected_recaptures_[year].resize(1, 0.0);
     if (observed_recaptures_[year].size() != obs_expected - 1)
       LOG_FATAL_P(PARAM_RECAPTURED) << " " << observed_recaptures_[year].size() << " ages were supplied, but " << obs_expected - 1 << " ages are required";
-  }
-
-  if (time_step_label_.size() != method_.size()) {
-    LOG_ERROR_P(PARAM_TIME_STEP) << "Specify the same number of time step labels as methods. " << time_step_label_.size() << " time-step labels were specified, but "
-                                 << method_.size() << " methods were specified";
   }
 }
 

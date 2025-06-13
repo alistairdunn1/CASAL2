@@ -40,18 +40,19 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
   scanned_table_    = new parameters::Table(PARAM_SCANNED);
   // clang-format off
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The time step to execute in", "");
-  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins", "", true);  // optional
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? (defaults to @model value)", "", model->length_plus());  // default to the model value
-  parameters_.Bind<string>(PARAM_TAGGED_CATEGORIES, &tagged_category_labels_, "The categories of tagged individuals for the observation", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities used for untagged categories", "", true);
-  parameters_.Bind<string>(PARAM_TAGGED_SELECTIVITIES, &tagged_selectivity_labels_, "The labels of the tag category selectivities", "");
-  parameters_.Bind<Double>(PARAM_DETECTION_PARAMETER, &detection_, "The probability of detecting a recaptured individual", "")->set_range(0.0, 1.0);
-  parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)  ", "", true)->set_lower_bound(0.0);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? (defaults to @model value)")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities of the scanned categories");
+  parameters_.Bind<string>(PARAM_TAGGED_CATEGORIES, &tagged_category_labels_, "The categories of tagged individuals")->flag_is_category(true);
+  parameters_.Bind<string>(PARAM_TAGGED_SELECTIVITIES, &tagged_selectivity_labels_, "The labels of the selectivities of the tagged categories");
+  parameters_.Bind<Double>(PARAM_DETECTION_PARAMETER, &detection_, "The probability of detecting a recaptured individual");
+  parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)")->set_is_optional(true);
   parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each length bin", "", false);
   parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each length bin", "", false);
-  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "", Double(0.5))->set_range(0.0, 1.0);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+    ->set_default_value(0.5);
   // clang-format on
 
   RegisterAsAddressable(PARAM_DETECTION_PARAMETER, &detection_);
@@ -65,128 +66,45 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
  * Validate configuration file parameters
  */
 void TagRecaptureByLength::DoValidate() {
-  /**
-   * Do some simple checks
-   * e.g Validate that the length_bins are strictly increasing
-   */
-  // Check value for initial mortality
-  if (model_->length_bins().size() == 0)
-    LOG_ERROR_P(PARAM_LABEL) << ": No length bins have been specified in @model. This observation requires those to be defined";
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TAGGED_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES);
+  parameters_.Validate(PARAM_DETECTION_PARAMETER)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_DISPERSION)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(1.0, years_.size());
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
+
+  // Do some checks if we're not using all of the model length bins
+  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  if (!using_model_length_bins)
+    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
   if (length_plus_ & !model_->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
-  /**
-   * Do some simple checks
-   * e.g Validate that the length_bins are strictly increasing
-   */
-  vector<double> model_length_bins = model_->length_bins();
-  if (length_bins_.size() == 0) {
-    LOG_FINE() << "using model length bins";
-    length_bins_            = model_length_bins;
-    using_model_length_bins = true;
-    // length_plus_     = model_->length_plus();
-  } else {
-    LOG_FINE() << "using bespoke length bins";
-    // allow for the use of observation-defined length bins, as long as all values are in the set of model length bin values
-    using_model_length_bins = false;
-    // check users haven't just respecified the model length bins
-    bool length_bins_match = false;
-    LOG_FINE() << length_bins_.size() << "  " << model_length_bins.size();
-    if (length_bins_.size() == model_length_bins.size()) {
-      length_bins_match = true;
-      for (unsigned len_ndx = 0; len_ndx < length_bins_.size(); len_ndx++) {
-        if (length_bins_[len_ndx] != model_length_bins[len_ndx])
-          length_bins_match = false;
-      }
-    }
-    if (length_bins_match) {
-      LOG_FINE() << "using have actually just respecified model bins so we are ignoring bespoke length bin code";
-      using_model_length_bins = true;
-    } else {
-      // Need to validate length bins are subclass of model length bins.
-      if (!model_->are_length_bin_compatible_with_model_length_bins(length_bins_)) {
-        LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bins need to be a subset of the model length bins. See manual for more information";
-      }
-      LOG_FINE() << "length bins = " << length_bins_.size();
-      map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
-      LOG_FINE() << "check index";
-      for (unsigned i = 0; i < map_local_length_bins_to_global_length_bins_.size(); ++i) {
-        LOG_FINE() << "i = " << i << " " << map_local_length_bins_to_global_length_bins_[i];
-      }
-    }
-  }
-  // more checks on the model length bins.
-  /*
-   * //TODO: this should be moved to the model to check rather than replicating in every child
-   */
-  for (unsigned length = 0; length < length_bins_.size(); ++length) {
-    if (length_bins_[length] < 0.0)
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be positive. '" << length_bins_[length] << "' is less than 0";
+  dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
 
-    if (length > 0 && length_bins_[length - 1] >= length_bins_[length])
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bins must be strictly increasing. " << length_bins_[length - 1] << " is greater than or equal to "
-                                     << length_bins_[length];
-
-    if (std::find(model_length_bins.begin(), model_length_bins.end(), length_bins_[length]) == model_length_bins.end())
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be in the set of model length bins. Length '" << length_bins_[length]
-                                     << "' is not in the set of model length bins.";
-  }
   number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
 
-  // Check if number of categories is equal to number of selectivities for category and tagged_categories
-  unsigned expected_selectivity_count = 0;
-  auto     categories                 = model_->categories();
-  for (const string& category_label : category_labels_) expected_selectivity_count += categories->GetNumberOfCategoriesDefined(category_label);
+  category_split_labels_        = model_->categories()->total_categories(category_labels_);
+  tagged_category_split_labels_ = model_->categories()->total_categories(tagged_category_labels_);
 
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
-
-  if (tagged_category_labels_.size() != category_labels_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << ": Number of categories(" << category_labels_.size() << ") does not match the number of " PARAM_SELECTIVITIES << "("
-                                  << selectivity_labels_.size() << ")";
-
-  /**
-   * Now go through each tagged category and split it if required, then check each piece to ensure
-   * it's a valid category
-   */
-  LOG_FINEST() << "Number of tagged categories before splitting " << tagged_category_labels_.size();
-  vector<string> split_tagged_category_labels;
-  for (const string& category_label : tagged_category_labels_) {
-    boost::split(split_tagged_category_labels, category_label, boost::is_any_of("+"));
-
-    for (const string& split_category_label : split_tagged_category_labels) {
-      if (!categories->IsValid(split_category_label)) {
-        if (split_category_label == category_label) {
-          LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << ": The category " << split_category_label << " is not a valid category.";
-        } else {
-          LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << ": The category " << split_category_label << " is not a valid category."
-                                               << " It was defined in the category collection " << category_label;
-        }
+  // Do a check so that every Tagged category must be in the categories as well
+  // TBH. I don't know why this is necessary when we could just define categories and copy it ta tagged?
+  for (unsigned i = 0; i < tagged_category_split_labels_.size(); ++i) {
+    for (unsigned j = 0; j < tagged_category_split_labels_[i].size(); ++j) {
+      if (find(category_split_labels_[i].begin(), category_split_labels_[i].end(), tagged_category_split_labels_[i][j]) == category_split_labels_[i].end()) {
+        LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << "The category " << tagged_category_split_labels_[i][j] << " is not in the " << PARAM_CATEGORIES << " at element " << i + 1
+                                             << ". All tagged individuals should be in the categories";
       }
     }
-  }
-  LOG_FINEST() << "Number of tagged categories after splitting " << split_tagged_category_labels.size();
-
-  if (category_labels_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << ": Number of categories(" << category_labels_.size() << ") does not match the number of " PARAM_SELECTIVITIES << "("
-                                  << selectivity_labels_.size() << ")";
-  if (tagged_category_labels_.size() != tagged_selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << ": Number of selectivities provided (" << tagged_selectivity_labels_.size()
-                                         << ") is not valid. Specify either the number of category collections (" << tagged_category_labels_.size() << ") or "
-                                         << "the number of total categories (" << expected_selectivity_count << ")";
-
-  map<unsigned, vector<double>> recaptures_by_year;
-  map<unsigned, vector<double>> scanned_by_year;
-
-  if (detection_ < 0.0 || detection_ > 1.0) {
-    LOG_ERROR_P(PARAM_DETECTION_PARAMETER) << ": detection probability must be between 0.0 and 1.0 inclusive";
-  }
-  if (delta_ < 0.0) {
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
   }
 
   /**
@@ -194,7 +112,9 @@ void TagRecaptureByLength::DoValidate() {
    * This is because we'll have 1 set of recaptures per category collection provided.
    * categories male+female male = 2 collections
    */
-  unsigned obs_expected = number_bins_ * tagged_category_labels_.size() + 1;
+  map<unsigned, vector<double>> recaptures_by_year;
+  map<unsigned, vector<double>> scanned_by_year;
+  unsigned                      obs_expected = number_bins_ * tagged_category_labels_.size() + 1;
   LOG_FINE() << "expected obs = " << obs_expected << " number of bins = " << number_bins_ << " tagged categories = " << tagged_category_labels_.size();
   vector<vector<string>>& recaptures_data = recaptures_table_->data();
   if (recaptures_data.size() != years_.size()) {
@@ -292,83 +212,6 @@ void TagRecaptureByLength::DoValidate() {
         }
       }
     }
-  }
-
-  // Split up categories if they are +
-  vector<string> split_category_labels;
-  category_split_labels_.resize(category_labels_.size());
-  unsigned category_counter = 0;
-  for (auto category : category_labels_) {
-    if (model_->categories()->IsCombinedLabels(category)) {
-      boost::split(split_category_labels, category, boost::is_any_of("+"));
-      for (const string& split_category_label : split_category_labels) {
-        if (!model_->categories()->IsValid(split_category_label)) {
-          if (split_category_label == category) {
-            LOG_ERROR_P(PARAM_CATEGORIES) << ": The category " << split_category_label << " is not a valid category.";
-          } else {
-            LOG_ERROR_P(PARAM_CATEGORIES) << ": The category " << split_category_label << " is not a valid category."
-                                          << " It was defined in the category collection " << category;
-          }
-        }
-      }
-      for (auto& split_category : split_category_labels) category_split_labels_[category_counter].push_back(split_category);
-    } else
-      category_split_labels_[category_counter].push_back(category);
-    category_counter++;
-  }
-
-  category_counter = 0;
-  split_category_labels.clear();
-  tagged_category_split_labels_.resize(tagged_category_labels_.size());
-  for (auto category : tagged_category_labels_) {
-    if (model_->categories()->IsCombinedLabels(category)) {
-      boost::split(split_category_labels, category, boost::is_any_of("+"));
-      for (const string& split_category_label : split_category_labels) {
-        if (!model_->categories()->IsValid(split_category_label)) {
-          if (split_category_label == category) {
-            LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << ": The category " << split_category_label << " is not a valid category.";
-          } else {
-            LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << ": The category " << split_category_label << " is not a valid category."
-                                                 << " It was defined in the category collection " << category;
-          }
-        }
-      }
-      for (auto& split_category : split_category_labels) tagged_category_split_labels_[category_counter].push_back(split_category);
-    } else
-      tagged_category_split_labels_[category_counter].push_back(category);
-
-    category_counter++;
-  }
-  // Do a check so that every Tagged category must be in the categories as well
-  for (unsigned i = 0; i < tagged_category_split_labels_.size(); ++i) {
-    for (unsigned j = 0; j < tagged_category_split_labels_[i].size(); ++j) {
-      if (find(category_split_labels_[i].begin(), category_split_labels_[i].end(), tagged_category_split_labels_[i][j]) == category_split_labels_[i].end()) {
-        LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << "The category " << tagged_category_split_labels_[i][j] << " is not in the " << PARAM_CATEGORIES << " at element " << i + 1
-                                             << ". All tagged individuals should be in the categories";
-      }
-    }
-  }
-
-  // validate and build dispersion (e.g. process_error)
-  for (Double dispersion : dispersion_) {
-    if (dispersion < 0.0)
-      LOG_ERROR_P(PARAM_DISPERSION) << ": dispersion (" << AS_DOUBLE(dispersion) << ") cannot be less than 0.0";
-  }
-  // if only one value supplied then assume its the same for all years
-  if (dispersion_.size() == 1) {
-    Double temp = dispersion_[0];
-    dispersion_.resize(years_.size(), temp);
-  }
-
-  if (dispersion_.size() != 0) {
-    if (dispersion_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_DISPERSION) << "Supply one value of dispersion that is used for every year, or a value of dispersion for each year. Values for " << dispersion_.size()
-                                    << " years were supplied, but " << years_.size() << " years are required";
-    }
-    dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
-  } else {
-    Double dispersion_val = 1.0;
-    dispersion_by_year_   = utilities::Map::create(years_, dispersion_val);
   }
 }
 

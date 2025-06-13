@@ -41,9 +41,9 @@ public:
   // Methods
   explicit ProportionsAtAge(shared_ptr<Model> model);
   virtual ~ProportionsAtAge();
-  void         DoValidate() override final;
+  void         DoValidate() override;
   virtual void DoBuild() override;
-  void         DoReset() override final{};
+  void         DoReset() override final {};
   void         PreExecute() override final;
   void         Execute() override final;
   void         CalculateScore() override final;
@@ -51,30 +51,30 @@ public:
 
 protected:
   // Members
-  vector<unsigned>            years_;
-  unsigned                    min_age_    = 0;
-  unsigned                    max_age_    = 0;
-  bool                        plus_group_ = false;
-  unsigned                    age_spread_ = 0;
-  parameters::Table*          obs_table_  = nullptr;
-  vector<Double>              process_error_values_;
-  map<unsigned, Double>       process_errors_by_year_;
-  string                      ageing_error_label_;
-  parameters::Table*          error_values_table_ = nullptr;
-  CachedCombinedCategoriesPtr cached_partition_;
-  CombinedCategoriesPtr       partition_;
-  AgeingError*                ageing_error_ = nullptr;
-  vector<Double>              age_results_;
-  MortalityInstantaneous*     mortality_instantaneous_ = nullptr;
-  vector<string>              selectivity_labels_;
-  vector<Selectivity*>        selectivities_;
+  vector<unsigned>            years_                               = {};
+  unsigned                    min_age_                             = 0;
+  unsigned                    max_age_                             = 0;
+  bool                        plus_group_                          = false;
+  unsigned                    age_spread_                          = 0;
+  parameters::Table*          obs_table_                           = nullptr;
+  vector<Double>              process_error_values_                = {};
+  map<unsigned, Double>       process_errors_by_year_              = {};
+  string                      ageing_error_label_                  = "";
+  parameters::Table*          error_values_table_                  = nullptr;
+  CachedCombinedCategoriesPtr cached_partition_                    = nullptr;
+  CombinedCategoriesPtr       partition_                           = nullptr;
+  AgeingError*                ageing_error_                        = nullptr;
+  vector<Double>              age_results_                         = {};
+  MortalityInstantaneous*     mortality_instantaneous_             = nullptr;
+  vector<string>              selectivity_labels_                  = {};
+  vector<Selectivity*>        selectivities_                       = {};
   string                      time_step_label_                     = "";
   bool                        selectivity_for_combined_categories_ = false;
-  vector<Double>              expected_values_;
-  vector<Double>              numbers_age_;
-  vector<Double>              numbers_at_age_with_error_;
-  bool                        simulated_data_sum_to_one_;
-  bool                        sum_to_one_;
+  vector<Double>              expected_values_                     = {};
+  vector<Double>              numbers_age_                         = {};
+  vector<Double>              numbers_at_age_with_error_           = {};
+  bool                        simulated_data_sum_to_one_           = false;
+  bool                        sum_to_one_                          = false;
 
   map<unsigned, map<string, vector<double>>> proportions_;
   map<unsigned, map<string, vector<double>>> error_values_;

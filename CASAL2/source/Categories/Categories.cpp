@@ -608,7 +608,12 @@ GrowthIncrement* Categories::growth_increment(const string& category_name) {
 }
 
 /**
+ * This method will take a vector of category names that may or may not contain the combined
+ * category operator (+) and return the total number of individual categories
+ * that are defined in the model.
  *
+ * @param category_names A vector of category names that may contain combined categories
+ * @return The total number of individual categories that are defined in the model
  */
 unsigned Categories::total_categories_defined(const vector<string>& category_names) {
   if (model_->partition_type() == PartitionType::kPiApprox) {
@@ -628,6 +633,35 @@ unsigned Categories::total_categories_defined(const vector<string>& category_nam
   }
 
   return total;
+}
+
+/**
+ * This method will take a vector of category names that may or may not contain the combined
+ * category operator (+) and return a vector of all of the individual categories
+ * that are defined in the model.
+ *
+ * @param category_names A vector of category names that may contain combined categories
+ * @return A vector of vector of all individual categories that are defined in the model
+ */
+vector<vector<string>> Categories::total_categories(const vector<string>& category_names) {
+  if (model_->partition_type() == PartitionType::kPiApprox) {
+    LOG_FATAL() << "There is no functionality for model types that are not age or length";
+  }
+
+  vector<vector<string>> result;
+  vector<string>         translated_categories;
+  vector<string>         individual_categories;
+  for (const auto& category : category_names) {
+    translated_categories = GetCategoryLabelsV(category, category);
+
+    for (auto& label : translated_categories) {
+      boost::split(individual_categories, label, boost::is_any_of("+"));
+      result.push_back(individual_categories);
+      individual_categories.clear();
+    }
+  }
+
+  return result;
 }
 
 /**
