@@ -47,6 +47,7 @@ jobs:
       - name: Build Unit Tests
         run: |
           cd BuildSystem
+          set GITHUB_ACTIONS_WINDOWS=1
           ./doBuild.bat test          
 
       - name: Run Unit Tests
