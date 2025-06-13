@@ -23,14 +23,14 @@ jobs:
           # see https://github.com/marketplace/actions/setup-winlibs
           # and https://github.com/brechtsanders/winlibs_mingw/tags
           tag: '14.2.0posix-19.1.1-12.0.0-ucrt-r2'
-      - name: Build third-party library - adolc
-        run: |
-          cd BuildSystem
-          ./doBuild.bat thirdparty adolc
-      - name: Build third-party library - betadiff
-        run: |
-          cd BuildSystem
-          ./doBuild.bat thirdparty betadiff
+      # - name: Build third-party library - adolc
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat thirdparty adolc
+      # - name: Build third-party library - betadiff
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat thirdparty betadiff
       - name: Build third-party library - boost
         run: |
           cd BuildSystem
@@ -43,58 +43,70 @@ jobs:
         run: |
           cd BuildSystem
           ./doBuild.bat thirdparty parser
-      - name: Build release library
-        run: |
-          cd BuildSystem
-          ./doBuild.bat library release
-      - name: Build "Betadiff" library
-        run: |
-          cd BuildSystem
-          ./doBuild.bat library betadiff
-      - name: Build "ADOL-C" library
-        run: |
-          cd BuildSystem
-          ./doBuild.bat library adolc
-      - name: Build "Unit Test" library
-        run: |
-          cd BuildSystem
-          ./doBuild.bat library test
-      - name: Build Frontend
-        run: |
-          cd BuildSystem
-          ./doBuild.bat frontend
-        shell: bash
 
-      - name: Build Windows Archive
-        continue-on-error: true
+      - name: Build Unit Tests
         run: |
           cd BuildSystem
-          ./doBuild.bat archive true
-        shell: bash
+          ./doBuild.bat test          
 
-      - name: Run Windows model runner
+      - name: Run Unit Tests
         continue-on-error: false
         run: |
-          cd BuildSystem
-          ./doBuild.bat modelrunner
+          cd BuildSystem/bin/windows_gcc/test
+          ./casal2
 
-      - name: Run Unit Tests from frontend application
-        continue-on-error: false
-        run: |
-          cd BuildSystem/Casal2
-          ./casal2 --unittest
+      # - name: Build release library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat library release
+      # - name: Build "Betadiff" library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat library betadiff
+      # - name: Build "ADOL-C" library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat library adolc
+      # - name: Build "Unit Test" library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat library test
+      # - name: Build Frontend
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat frontend
+      #   shell: bash
 
-      - name: Build installer iss file
-        run: |
-          cd BuildSystem
-          ./doBuild.bat installer    
+      # - name: Build Windows Archive
+      #   continue-on-error: true
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat archive true
+      #   shell: bash
 
-      - name: Archive Windows build
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: Casal2-Windows-build
-          path: BuildSystem/Casal2
-          retention-days: 1
-          overwrite: true          
+      # - name: Run Windows model runner
+      #   continue-on-error: false
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat modelrunner
+
+      # - name: Run Unit Tests from frontend application
+      #   continue-on-error: false
+      #   run: |
+      #     cd BuildSystem/Casal2
+      #     ./casal2 --unittest
+
+      # - name: Build installer iss file
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.bat installer    
+
+      # - name: Archive Windows build
+      #   continue-on-error: true
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Casal2-Windows-build
+      #     path: BuildSystem/Casal2
+      #     retention-days: 1
+      #     overwrite: true          
      

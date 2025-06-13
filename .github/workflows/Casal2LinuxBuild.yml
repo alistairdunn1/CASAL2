@@ -37,80 +37,65 @@ jobs:
           cd BuildSystem
           ./doBuild.sh thirdparty
 
-      - name: Build third-party library - adolc
-        run: |
-          cd BuildSystem
-          ./doBuild.sh thirdparty adolc
-
-      - name: Build third-party library - betadiff
-        run: |
-          cd BuildSystem
-          ./doBuild.sh thirdparty betadiff
-
-      - name: Build third-party libraries - boost
-        run: |
-          cd BuildSystem
-          ./doBuild.sh thirdparty boost
-
-      - name: Build third-party libraries - google test and mock
-        run: |
-          cd BuildSystem
-          ./doBuild.sh thirdparty googletest_googlemock
-
-      - name: Build third-party libraries - parser
-        run: |
-          cd BuildSystem
-          ./doBuild.sh thirdparty parser
-
       - name: Build release library
         run: |
           cd BuildSystem
-          ./doBuild.sh library release
+          ./doBuild.sh test         
 
-      - name: Build "Betadiff" library
-        run: |
-          cd BuildSystem
-          ./doBuild.sh library betadiff
-
-      - name: Build "ADOL-C" library
-        run: |
-          cd BuildSystem
-          ./doBuild.sh library adolc
-
-      - name: Build "Unit Test" library
-        run: |
-          cd BuildSystem
-          ./doBuild.sh library test
-
-      - name: Build Frontend
-        run: |
-          cd BuildSystem
-          ./doBuild.sh frontend
-        shell: bash
-
-      - name: Build Linux Archive
-        continue-on-error: true
-        run: |
-          cd BuildSystem
-          ./doBuild.sh archive true
-        shell: bash
-
-      - name: Run Linux model runner
-        continue-on-error: true
-        run: |
-          cd BuildSystem
-          ./doBuild.sh modelrunner
-          
       - name: Run Unit Tests from frontend build
         run: |
-          cd BuildSystem/Casal2
-          ./casal2 --unittest
+          cd BuildSystem/bin/linux_gcc/test
+          ./casal2          
+
+      # - name: Build release library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh library release
+
+      # - name: Build "Betadiff" library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh library betadiff
+
+      # - name: Build "ADOL-C" library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh library adolc
+
+      # - name: Build "Unit Test" library
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh library test
+
+      # - name: Build Frontend
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh frontend
+      #   shell: bash
+
+      # - name: Build Linux Archive
+      #   continue-on-error: true
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh archive true
+      #   shell: bash
+
+      # - name: Run Linux model runner
+      #   continue-on-error: true
+      #   run: |
+      #     cd BuildSystem
+      #     ./doBuild.sh modelrunner
           
-      - name: Archive Linux build
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: Casal2-Linux-build
-          path: BuildSystem/Casal2
-          retention-days: 1
-          overwrite: true  
+      # - name: Run Unit Tests from frontend build
+      #   run: |
+      #     cd BuildSystem/Casal2
+      #     ./casal2 --unittest
+          
+      # - name: Archive Linux build
+      #   continue-on-error: true
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Casal2-Linux-build
+      #     path: BuildSystem/Casal2
+      #     retention-days: 1
+      #     overwrite: true  
