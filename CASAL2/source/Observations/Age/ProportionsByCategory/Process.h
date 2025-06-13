@@ -30,12 +30,13 @@ public:
   // methods
   ProcessProportionsByCategory(shared_ptr<Model> model);
   virtual ~ProcessProportionsByCategory() = default;
+  void DoValidate() override final;
   void DoBuild() override final;
 
 private:
   // members
-  string process_label_;
-  Double process_proportion_;
+  string process_label_      = "";   ///< The label of the process for the observation
+  Double process_proportion_ = 0.0;  ///< The proportion through the process when the observation is evaluated
 };
 
 } /* namespace age */

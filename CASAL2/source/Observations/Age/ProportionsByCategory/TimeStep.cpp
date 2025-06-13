@@ -23,8 +23,7 @@ namespace age {
  * Default constructor
  */
 TimeStepProportionsByCategory::TimeStepProportionsByCategory(shared_ptr<Model> model) : observations::age::ProportionsByCategory(model) {
-  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the time step to analyse the partition from", "", Double(0.5))
-      ->set_range(0.0, 1.0);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the time step to analyse the partition from")->set_default_value(0.5);
 
   mean_proportion_method_ = true;
 }

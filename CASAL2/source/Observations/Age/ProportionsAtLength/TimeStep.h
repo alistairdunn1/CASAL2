@@ -30,10 +30,11 @@ public:
   // methods
   TimeStepProportionsAtLength(shared_ptr<Model> model);
   virtual ~TimeStepProportionsAtLength() = default;
+  void DoValidate() override final;
   void DoBuild() override final;
 
 private:
-  Double time_step_proportion_;
+  Double time_step_proportion_ = 0.0;  ///< The proportion through the time step when the observation is evaluated
 };
 
 } /* namespace age */

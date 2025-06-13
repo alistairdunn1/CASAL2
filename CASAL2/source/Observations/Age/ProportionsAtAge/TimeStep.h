@@ -30,10 +30,11 @@ public:
   // methods
   TimeStepProportionsAtAge(shared_ptr<Model> model);
   virtual ~TimeStepProportionsAtAge() = default;
+  void DoValidate() override final;
   void DoBuild() override final;
 
 private:
-  Double time_step_proportion_;
+  Double time_step_proportion_ = 0.0;
 };
 
 } /* namespace age */

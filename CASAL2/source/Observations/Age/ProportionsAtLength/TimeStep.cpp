@@ -23,12 +23,18 @@ namespace age {
  * Default constructor
  */
 TimeStepProportionsAtLength::TimeStepProportionsAtLength(shared_ptr<Model> model) : observations::age::ProportionsAtLength(model) {
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+      ->set_default_value(0.5);
 
   mean_proportion_method_ = true;
+}
+
+/**
+ * This method is called to validate the observation
+ */
+void TimeStepProportionsAtLength::DoValidate() {
+  ProportionsAtLength::DoValidate();
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 }
 
 /**
