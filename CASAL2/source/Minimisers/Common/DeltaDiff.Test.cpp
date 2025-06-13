@@ -54,7 +54,7 @@ TEST_F(DeltaDiffModel, Minimise_TwoSex_OneThread) {
 
   auto estimates = model->managers()->estimate()->GetIsEstimated();
   ASSERT_EQ(4u, estimates.size());
-#ifdef GITHUB_ACTIONS_WINDOWS
+#ifdef __GITHUB_ACTIONS_WINDOWS
   EXPECT_DOUBLE_EQ(1.3923340393224122e-06, estimates[0]->value());
   EXPECT_DOUBLE_EQ(20158673.650022902, estimates[1]->value());
   EXPECT_DOUBLE_EQ(10.134307762912039, estimates[2]->value());
@@ -94,7 +94,7 @@ TEST_F(DeltaDiffModel, Minimise_TwoSex_FourThreads) {
 
   auto estimates = model->managers()->estimate()->GetIsEstimated();
   ASSERT_EQ(4u, estimates.size());
-#ifdef GITHUB_ACTIONS_WINDOWS
+#ifdef __GITHUB_ACTIONS_WINDOWS
   EXPECT_DOUBLE_EQ(1.3923340393224122e-06, estimates[0]->value());
   EXPECT_DOUBLE_EQ(20158673.650022902, estimates[1]->value());
   EXPECT_DOUBLE_EQ(10.134307762912039, estimates[2]->value());

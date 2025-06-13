@@ -42,6 +42,12 @@ class SystemInfo:
       print("-- Setting default number of build threads to 8")
       Globals.threads_ = 8
 
+    print("-- Checking if we're runnoing in a GitHub Actions environment")
+    print("-- GITHUB_ACTIONS environment variable: " + str(os.environ.get("GITHUB_ACTIONS")))
+    if (os.environ.get("GITHUB_ACTIONS") != None):
+      Globals.github_actions = True
+      print("-- Running in a GitHub Actions environment")
+
   """
   Populate the Global variables with the different EXE locations based on the Operating
   System
@@ -281,6 +287,9 @@ class SystemInfo:
       Globals.cmake_compiler_ = '-DOUTPUT_PATH:STRING=windows_msvc'
     else:
       Globals.cmake_compiler_ = "get_cmake_compiler_string() error"
+
+    if Globals.github_actions:
+      Globals.cmake_compiler_ += ' -DGITHUB_ACTIONS:BOOL=ON'
     
     return True
   
