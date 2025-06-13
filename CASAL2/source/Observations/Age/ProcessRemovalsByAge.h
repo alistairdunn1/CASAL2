@@ -39,9 +39,9 @@ public:
   // Methods
   explicit ProcessRemovalsByAge(shared_ptr<Model> model);
   virtual ~ProcessRemovalsByAge();
-  void DoValidate() override final;
+  void DoValidate() override;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void PreExecute() override final;
   void Execute() override final;
   void CalculateScore() override final;
@@ -49,35 +49,35 @@ public:
 
 protected:
   // Members
-  vector<unsigned>        years_;
-  unsigned                min_age_    = 0;
-  unsigned                max_age_    = 0;
-  bool                    plus_group_ = false;
-  unsigned                age_spread_ = 0;
-  parameters::Table*      obs_table_  = nullptr;
-  vector<Double>          process_error_values_;
-  map<unsigned, Double>   process_errors_by_year_;
-  string                  ageing_error_label_ = "";
-  vector<string>          method_;
-  parameters::Table*      error_values_table_ = nullptr;
-  CombinedCategoriesPtr   partition_;
-  AgeingError*            ageing_error_ = nullptr;
-  vector<Double>          age_results_;
-  age::Mortality*         mortality_process_ = nullptr;
-  vector<string>          time_step_label_;
-  string                  process_label_;
-  unsigned                time_step_to_execute_;
-  vector<Double>          expected_values_;
-  vector<Double>          accumulated_expected_values_;
-  vector<unsigned>        fishery_ndx_to_get_catch_at_info_;
-  vector<unsigned>        year_ndx_to_get_catch_at_info_;
-  map<string, unsigned >  category_lookup_for_ndx_to_get_catch_at_info_;
-  vector<Double>          numbers_at_age_with_ageing_error_;
+  vector<unsigned>                           years_;
+  unsigned                                   min_age_    = 0;
+  unsigned                                   max_age_    = 0;
+  bool                                       plus_group_ = false;
+  unsigned                                   age_spread_ = 0;
+  parameters::Table*                         obs_table_  = nullptr;
+  vector<Double>                             process_error_values_;
+  map<unsigned, Double>                      process_errors_by_year_;
+  string                                     ageing_error_label_ = "";
+  vector<string>                             method_;
+  parameters::Table*                         error_values_table_ = nullptr;
+  CombinedCategoriesPtr                      partition_;
+  AgeingError*                               ageing_error_ = nullptr;
+  vector<Double>                             age_results_;
+  age::Mortality*                            mortality_process_ = nullptr;
+  vector<string>                             time_step_label_;
+  string                                     process_label_;
+  unsigned                                   time_step_to_execute_;
+  vector<Double>                             expected_values_;
+  vector<Double>                             accumulated_expected_values_;
+  vector<unsigned>                           fishery_ndx_to_get_catch_at_info_;
+  vector<unsigned>                           year_ndx_to_get_catch_at_info_;
+  map<string, unsigned>                      category_lookup_for_ndx_to_get_catch_at_info_;
+  vector<Double>                             numbers_at_age_with_ageing_error_;
   map<unsigned, map<string, vector<double>>> proportions_;
   map<unsigned, map<string, vector<double>>> error_values_;
-  bool                    simulated_data_sum_to_one_;
-  bool                    sum_to_one_;
-  vector<string>          allowed_mortality_types_;
+  bool                                       simulated_data_sum_to_one_;
+  bool                                       sum_to_one_;
+  vector<string>                             allowed_mortality_types_;
 };
 
 } /* namespace age */

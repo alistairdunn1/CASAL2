@@ -29,6 +29,14 @@ TimeStepProportionsByCategory::TimeStepProportionsByCategory(shared_ptr<Model> m
 }
 
 /**
+ * This method is called to validate the observation
+ */
+void TimeStepProportionsByCategory::DoValidate() {
+  ProportionsByCategory::DoValidate();
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+}
+
+/**
  * Build
  */
 void TimeStepProportionsByCategory::DoBuild() {

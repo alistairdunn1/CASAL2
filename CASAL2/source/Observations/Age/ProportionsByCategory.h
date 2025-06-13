@@ -36,9 +36,9 @@ public:
   // methods
   ProportionsByCategory(shared_ptr<Model> model);
   virtual ~ProportionsByCategory();
-  void         DoValidate() override final;
+  void         DoValidate() override;
   virtual void DoBuild() override;
-  void         DoReset() override final{};
+  void         DoReset() override final {};
   void         PreExecute() override final;
   void         Execute() override final;
   void         CalculateScore() override final;

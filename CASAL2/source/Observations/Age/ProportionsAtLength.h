@@ -38,9 +38,9 @@ public:
   // Methods
   explicit ProportionsAtLength(shared_ptr<Model> model);
   virtual ~ProportionsAtLength();
-  void         DoValidate() override final;
+  void         DoValidate() override;
   virtual void DoBuild() override;
-  void         DoReset() override final{};
+  void         DoReset() override final {};
   void         PreExecute() override final;
   void         Execute() override final;
   void         CalculateScore() override final;
@@ -64,8 +64,8 @@ protected:
   vector<Double>              cached_numbers_at_length_;
   bool                        using_model_length_bins = true;
   vector<int>                 map_local_length_bins_to_global_length_bins_;
-  vector<double> length_bins_;
-  bool           length_plus_     = false;  // have to be assigned a value to be optional, note in the constructpr the default is model_->length_plus()
+  vector<double>              length_bins_;
+  bool                        length_plus_ = false;  // have to be assigned a value to be optional, note in the constructpr the default is model_->length_plus()
   bool                        simulated_data_sum_to_one_;
   bool                        sum_to_one_;
 
