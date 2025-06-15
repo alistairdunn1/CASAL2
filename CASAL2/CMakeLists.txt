@@ -68,7 +68,7 @@ IF (WIN32)
  		SET(thirdPartyLibraries ${thirdPartyLibraries} pthread ws2_32 gdi32 comctl32 user32 winmm ws2_32 imm32)
 	ENDIF ()
 
-	IF (GITHUB_ACTIONS)
+	IF (GITHUB_ACTIONS EQUAL 1)
 		# If we're building on GitHub Actions, we need to set a compiler
 		MESSAGE("-- Building on GitHub Actions")
 		SET(COMPILE_OPTIONS "${COMPILE_OPTIONS} -D__GITHUB_ACTIONS_WINDOWS")
