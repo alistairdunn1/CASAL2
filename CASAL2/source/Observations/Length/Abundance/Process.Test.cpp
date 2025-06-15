@@ -10,11 +10,12 @@
 #ifdef TESTMODE
 
 // Headers
+#include "Process.h"
+
 #include <iostream>
 
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Observations/Manager.h"
-#include "Process.h"
 #include "TestResources/TestFixtures/InternalEmptyModel.h"
 
 // Namespaces
@@ -25,12 +26,11 @@ using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
 using std::endl;
 
-
 /**
  *
 
 TEST_F(InternalEmptyModel, Observation_Process_Abundance_Length) {
-  
+
 }
  */
 } /* namespace age */

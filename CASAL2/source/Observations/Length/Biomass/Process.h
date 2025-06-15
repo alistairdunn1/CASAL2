@@ -29,12 +29,13 @@ class ProcessBiomass : public observations::length::Biomass {
 public:
   explicit ProcessBiomass(shared_ptr<Model> model);
   virtual ~ProcessBiomass() = default;
+  void DoValidate() override final;
   void DoBuild() override final;
 
 private:
   // members
-  string process_label_;
-  Double process_proportion_;
+  string process_label_      = "";
+  Double process_proportion_ = 0.0;
 };
 
 } /* namespace length */

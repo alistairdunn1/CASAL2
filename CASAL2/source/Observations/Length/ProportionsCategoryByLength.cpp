@@ -38,23 +38,22 @@ namespace length {
 ProportionsCategoryByLength::ProportionsCategoryByLength(shared_ptr<Model> model) : Observation(model) {
   obs_table_          = new parameters::Table(PARAM_OBS);
   error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins (minimum values) for the observations.", "", true);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities for categories", "", true);
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? if false the last length_bin is an maximum value", "",
-                         true);  // default to the model value
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in", "");
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of proportions at length mature ", "", false);
-  // TODO:  is tolerance missing?
   parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note the units depend on the likelihood)", "", false);
-  parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_,
-                           "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)", "", true);
-  parameters_.Bind<string>(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES, &total_selectivity_labels_, "The labels of the selectivities for total categories", "", true);
 
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+  // clang-format off
+  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins (minimum values) for the observations.")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities for categories");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_is_optional(true);
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? if false the last length_bin is an maximum value")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in");
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_,
+        "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES, &total_selectivity_labels_, "The labels of the selectivities for total categories");
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+    ->set_default_value(0.5);
+  // clang-format on
 
   mean_proportion_method_ = false;
 
@@ -73,88 +72,40 @@ ProportionsCategoryByLength::~ProportionsCategoryByLength() {
  * Validate total_categories command
  */
 void ProportionsCategoryByLength::DoValidate() {
-  // Check value for initial mortality
-  if (model_->length_bins().size() == 0)
-    LOG_ERROR_P(PARAM_LABEL) << ": No length bins have been specified in @model. This observation requires those to be defined";
+  parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->DefaultToAllModelLengthBins();
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_TOTAL_CATEGORIES);
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_TOTAL_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->SameNumberOfElementsAs(PARAM_CATEGORIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES)->SameNumberOfElementsAs(PARAM_TOTAL_CATEGORIES)->ExpandToSameNumberOfElementsAs(PARAM_TOTAL_CATEGORIES);
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(0.0, years_.size());
+
+  // Do some checks if we're not using all of the model length bins
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
+
+  // Do some checks if we're not using all of the model length bins
+  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  if (!using_model_length_bins)
+    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
   if (length_plus_ & !model_->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
-  for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
-  }
+  number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
 
-  if (total_category_labels_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_TOTAL_CATEGORIES) << "different number of categoires supplied '" << total_category_labels_.size() << "' to " << PARAM_CATEGORIES << " '"
-                                        << category_labels_.size() << "'";
-  }
-  if (selectivity_labels_.size() != category_labels_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << "different number of selectivities supplied '" << selectivity_labels_.size() << "' to " << PARAM_CATEGORIES << " '"
-                                     << category_labels_.size() << "'";
-  }
-  if (total_selectivity_labels_.size() != total_category_labels_.size()) {
-    LOG_ERROR_P(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES) << "different number of selectivities supplied '" << total_selectivity_labels_.size() << "' to " << PARAM_TOTAL_CATEGORIES
-                                                          << " '" << total_category_labels_.size() << "'";
-  }
-  map<unsigned, vector<double>> error_values_by_year;
-  map<unsigned, vector<double>> obs_by_year;
   /**
    * Do some simple checks
    * e.g Validate that the length_bins are strictly increasing
    */
-  vector<double> model_length_bins = model_->length_bins();
-  if (length_bins_.size() == 0) {
-    LOG_FINE() << "using model length bins";
-    length_bins_            = model_length_bins;
-    using_model_length_bins = true;
-    // length_plus_     = model_->length_plus();
-  } else {
-    LOG_FINE() << "using bespoke length bins";
-    // allow for the use of observation-defined length bins, as long as all values are in the set of model length bin values
-    using_model_length_bins = false;
-    // check users haven't just respecified the moedl length bins
-    bool length_bins_match = false;
-    LOG_FINE() << length_bins_.size() << "  " << model_length_bins.size();
-    if (length_bins_.size() == model_length_bins.size()) {
-      length_bins_match = true;
-      for (unsigned len_ndx = 0; len_ndx < length_bins_.size(); len_ndx++) {
-        if (length_bins_[len_ndx] != model_length_bins[len_ndx])
-          length_bins_match = false;
-      }
-    }
-    if (length_bins_match) {
-      LOG_FINE() << "using have actually just respecified model bins so we are ignoring it";
-      using_model_length_bins = true;
-    } else {
-      // Need to validate length bins are subclass of mdoel length bins.
-      if (!model_->are_length_bin_compatible_with_model_length_bins(length_bins_)) {
-        LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bins need to be a subset of the model length bins. See manual for more information";
-      }
-      LOG_FINE() << "length bins = " << length_bins_.size();
-      map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
-
-      LOG_FINE() << "check index";
-      for (unsigned i = 0; i < map_local_length_bins_to_global_length_bins_.size(); ++i) {
-        LOG_FINE() << "map_local_length_bins_to_global_length_bins_[" << i << "] = " << map_local_length_bins_to_global_length_bins_[i];
-      }
-    }
-  }
-  // more checks on the model length bins.
-  for (unsigned length = 0; length < length_bins_.size(); ++length) {
-    if (length_bins_[length] < 0.0)
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be positive. '" << length_bins_[length] << "' is less than 0";
-
-    if (length > 0 && length_bins_[length - 1] >= length_bins_[length])
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bins must be strictly increasing. " << length_bins_[length - 1] << " is greater than or equal to "
-                                     << length_bins_[length];
-
-    if (std::find(model_length_bins.begin(), model_length_bins.end(), length_bins_[length]) == model_length_bins.end())
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be in the set of model length bins. Length '" << length_bins_[length]
-                                     << "' is not in the set of model length bins.";
-  }
-  number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
+  map<unsigned, vector<double>> error_values_by_year;
+  map<unsigned, vector<double>> obs_by_year;
 
   // expand category labels
   total_category_labels_ = model_->categories()->ExpandLabels(total_category_labels_, parameters_.Get(PARAM_TOTAL_CATEGORIES)->location());
@@ -163,23 +114,7 @@ void ProportionsCategoryByLength::DoValidate() {
    * Now go through each category and split it if required, then check each piece to ensure
    * it's a valid category
    */
-  Categories* categories = model_->categories();
   LOG_FINEST() << "Number of different total categories " << total_category_labels_.size();
-  vector<string> split_category_labels;
-
-  for (const string& category_label : total_category_labels_) {
-    boost::split(split_category_labels, category_label, boost::is_any_of("+"));
-    for (const string& split_category_label : split_category_labels) {
-      if (!categories->IsValid(split_category_label)) {
-        if (split_category_label == category_label) {
-          LOG_ERROR_P(PARAM_TOTAL_CATEGORIES) << ": The category " << split_category_label << " is not a valid category.";
-        } else {
-          LOG_ERROR_P(PARAM_TOTAL_CATEGORIES) << ": The category " << split_category_label << " is not a valid category."
-                                              << " It was defined in the category collection " << category_label;
-        }
-      }
-    }
-  }
   // Check to see if categories have been specified in total categories
   for (auto category : category_labels_) {
     if (std::find(total_category_labels_.begin(), total_category_labels_.end(), category) == total_category_labels_.end())
@@ -187,31 +122,6 @@ void ProportionsCategoryByLength::DoValidate() {
                                     << ". Please make sure all categories are within in " << PARAM_TOTAL_CATEGORIES << " parameter";
   }
   LOG_FINEST() << "Number of different total categories after splitting " << total_category_labels_.size();
-
-  /**
-   * Do some simple checks
-   */
-  for (Double process_error : process_error_values_) {
-    if (process_error < 0.0)
-      LOG_ERROR_P(PARAM_PROCESS_ERRORS) << ": process_error (" << AS_DOUBLE(process_error) << ") cannot be less than 0.0";
-  }
-
-  // if only one value supplied then assume its the same for all years
-  if (process_error_values_.size() == 1) {
-    Double temp = process_error_values_[0];
-    process_error_values_.resize(years_.size(), temp);
-  }
-
-  if (process_error_values_.size() != 0) {
-    if (process_error_values_.size() != years_.size()) {
-      LOG_FATAL_P(PARAM_PROCESS_ERRORS) << "Supply a process error for each year. Values for " << process_error_values_.size() << " years were provided, but " << years_.size()
-                                        << " years are required";
-    }
-    process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  } else {
-    Double process_val      = 0.0;
-    process_errors_by_year_ = utilities::Map::create(years_, process_val);
-  }
 
   /**
    * Validate the number of obs provided matches length bins * category_labels * years

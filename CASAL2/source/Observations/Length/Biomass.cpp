@@ -31,19 +31,17 @@ namespace utils = niwa::utilities;
  */
 Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
   obs_table_ = new parameters::Table(PARAM_OBS);
-
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error", "", Double(0.0))->set_lower_bound(0.0);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values", "");
   parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values and error values", "", false);
+
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)");
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error")->set_default_value(0.0);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values");
 
   RegisterAsAddressable(PARAM_PROCESS_ERROR, &process_error_value_);
 
-  allowed_likelihood_types_.push_back(PARAM_NORMAL);
-  allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
-  allowed_likelihood_types_.push_back(PARAM_PSEUDO);
+  allowed_likelihood_types_ = {PARAM_NORMAL, PARAM_LOGNORMAL, PARAM_PSEUDO};
 }
 
 /**
@@ -58,19 +56,13 @@ Biomass::~Biomass() {
  */
 void Biomass::DoValidate() {
   LOG_TRACE();
-
-  for (auto category_label : category_labels_) LOG_FINEST() << category_label;
-
-  if (category_labels_.size() != selectivity_labels_.size() && expected_selectivity_count_ != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Number of selectivities provided (" << selectivity_labels_.size()
-                                     << ") is not valid. Specify either the number of category collections (" << category_labels_.size() << ") or "
-                                     << "the number of total categories (" << expected_selectivity_count_ << ")";
-
-  // Delta
-  if (delta_ < 0.0)
-    LOG_ERROR_P(PARAM_DELTA) << ": delta (" << delta_ << ") cannot be less than 0.0";
-  if (process_error_value_ < 0.0)
-    LOG_ERROR_P(PARAM_PROCESS_ERROR) << ": process_error (" << AS_DOUBLE(process_error_value_) << ") cannot be less than 0.0";
+  // parameters_.Validate(PARAM_TYPE)->IsInList({PARAM_BIOMASS, PARAM_PROCESS_BIOMASS});
+  // parameters_.Validate(PARAM_PROCESS)->EitherOrDefined(PARAM_TIME_STEP_PROPORTION);
+  // parameters_.Validate(PARAM_PROCESS_PROPORTION)->ForbiddenIfDefined(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  // parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->RequiredIf(type_ == PARAM_ABUNDANCE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
 
   // Obs
   unsigned                num_obs       = category_labels_.size();

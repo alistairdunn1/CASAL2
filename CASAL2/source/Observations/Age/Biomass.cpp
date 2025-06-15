@@ -82,7 +82,6 @@ void Biomass::DoValidate() {
   parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.ValidateVector(PARAM_AGE_WEIGHT_LABELS)->SameNumberOfElementsAs(PARAM_CATEGORIES);
-  parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
 
   // Obs
   unsigned                num_obs       = category_labels_.size();

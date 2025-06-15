@@ -38,7 +38,7 @@ public:
   // methods
   Biomass(shared_ptr<Model> model);
   virtual ~Biomass();
-  void         DoValidate() override final;
+  void         DoValidate() override;
   virtual void DoBuild() override;
   void         DoReset() override final;
   void         PreExecute() override final;
@@ -48,24 +48,23 @@ public:
 
 protected:
   // members
-  vector<unsigned>            years_;
-  string                      catchability_label_  = "";
-  Catchability*               catchability_        = nullptr;
-  Double                      process_error_value_ = 0;
-  CachedCombinedCategoriesPtr cached_partition_;
-  CombinedCategoriesPtr       partition_;
-  parameters::Table*          obs_table_ = nullptr;
-  vector<string>              selectivity_labels_;
-  vector<Selectivity*>        selectivities_;
-  string                      time_step_label_       = "";
-  Nuisance*                   nuisance_catchability_ = nullptr;
-  bool                        nuisance_q_            = false;
-  vector<string>              age_weight_labels_;
+  vector<unsigned>               years_                 = {};
+  string                         catchability_label_    = "";
+  Catchability*                  catchability_          = nullptr;
+  Double                         process_error_value_   = 0;
+  CachedCombinedCategoriesPtr    cached_partition_      = nullptr;
+  CombinedCategoriesPtr          partition_             = nullptr;
+  parameters::Table*             obs_table_             = nullptr;
+  vector<string>                 selectivity_labels_    = {};
+  vector<Selectivity*>           selectivities_         = {};
+  string                         time_step_label_       = "";
+  Nuisance*                      nuisance_catchability_ = nullptr;
+  bool                           nuisance_q_            = false;
+  vector<string>                 age_weight_labels_     = {};  // labels of age weights to use for biomass calculations
+  map<unsigned, vector<double> > proportions_by_year_   = {};  // map<year, vector<proportions at length>>
+  map<unsigned, double>          error_values_by_year_  = {};  // map<year, error value>
 
-  map<unsigned, vector<double> > proportions_by_year_;
-  map<unsigned, double>          error_values_by_year_;
-
-  bool                         calculate_nuisance_q_ = true; // more for simualtions, if nuisance Q we don't want to keep applying it to expected values
+  bool calculate_nuisance_q_ = true;  // more for simualtions, if nuisance Q we don't want to keep applying it to expected values
 };
 
 } /* namespace length */

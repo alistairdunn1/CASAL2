@@ -30,11 +30,12 @@ public:
   // methods
   TimeStepBiomass(shared_ptr<Model> model);
   virtual ~TimeStepBiomass() = default;
+  void DoValidate() override final;
   void DoBuild() override final;
 
 private:
   // members
-  Double time_step_proportion_;
+  Double time_step_proportion_ = 0.0;
 };
 
 } /* namespace length */

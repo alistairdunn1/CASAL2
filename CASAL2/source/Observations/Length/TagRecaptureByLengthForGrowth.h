@@ -38,7 +38,7 @@ public:
   virtual ~TagRecaptureByLengthForGrowth() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void PreExecute() override final;
   void Execute() override final;
   void CalculateScore() override final;
@@ -46,33 +46,29 @@ public:
 
 protected:
   // Members
-  vector<unsigned>            years_;
-  parameters::Table*          recaptures_table_ = nullptr;
-  vector<Double>              process_error_values_;
-  map<unsigned, Double>       process_errors_by_year_;
-  CachedCombinedCategoriesPtr cached_partition_;
-  CombinedCategoriesPtr       partition_;
-  vector<string>              selectivity_labels_;
-  vector<Selectivity*>        selectivities_;
-  string                      time_step_label_ = "";
-  Double                      time_step_proportion_;
-
-  unsigned                    number_bins_ = 0;
-  bool                        using_model_length_bins = true;
-  vector<int>                 map_local_length_bins_to_global_length_bins_;
-  vector<double>              length_bins_;
-  bool                        length_plus_;  // have to be assigned a value to be optional, note in the constructpr the default is model_->length_plus()
-
-  vector<vector<Double>>         numbers_at_length_;
-  vector<vector<Double>>         cached_numbers_at_length_;
-  vector<Double>                 length_results_;
-
-  vector<vector<string>>         category_split_labels_;
-  vector<string>                 categories_for_comparison_;
-  vector<double>                 length_bins_for_comparison_;
-
-  map<unsigned, vector<double>> recaptures_;
-  map<unsigned, double> n_;
+  vector<unsigned>              years_                                       = {};
+  parameters::Table*            recaptures_table_                            = nullptr;
+  vector<Double>                process_error_values_                        = {};
+  map<unsigned, Double>         process_errors_by_year_                      = {};
+  CachedCombinedCategoriesPtr   cached_partition_                            = nullptr;
+  CombinedCategoriesPtr         partition_                                   = nullptr;
+  vector<string>                selectivity_labels_                          = {};
+  vector<Selectivity*>          selectivities_                               = {};
+  string                        time_step_label_                             = "";
+  Double                        time_step_proportion_                        = 0.0;
+  unsigned                      number_bins_                                 = 0;
+  bool                          using_model_length_bins                      = true;
+  vector<int>                   map_local_length_bins_to_global_length_bins_ = {};
+  vector<double>                length_bins_                                 = {};
+  bool                          length_plus_                                 = false;
+  vector<vector<Double>>        numbers_at_length_                           = {};
+  vector<vector<Double>>        cached_numbers_at_length_                    = {};
+  vector<Double>                length_results_                              = {};
+  vector<vector<string>>        category_split_labels_                       = {};
+  vector<string>                categories_for_comparison_                   = {};
+  vector<double>                length_bins_for_comparison_                  = {};
+  map<unsigned, vector<double>> recaptures_                                  = {};
+  map<unsigned, double>         n_                                           = {};
 };
 
 } /* namespace length */

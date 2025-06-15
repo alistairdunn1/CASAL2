@@ -67,7 +67,7 @@ TEST_F(InternalEmptyLengthModel, Observation_TagRecapture_By_Length_For_Growth) 
   model_->Start(RunMode::kBasic);
 
   ObjectiveFunction& obj_function = model_->objective_function();
-  EXPECT_NEAR(407.32576555281048, obj_function.score(), 0.001);
+  EXPECT_NEAR(8.9853421051625126, obj_function.score(), 0.001);
 
   Observation* observation = model_->managers()->observation()->GetObservation("observation1");
 
@@ -81,12 +81,12 @@ TEST_F(InternalEmptyLengthModel, Observation_TagRecapture_By_Length_For_Growth) 
   EXPECT_DOUBLE_EQ(52, comparisons[year][0].error_value_);
   EXPECT_DOUBLE_EQ(0.0, comparisons[year][0].expected_);
   EXPECT_DOUBLE_EQ(0.057692307692307696, comparisons[year][0].observed_);
-  EXPECT_NEAR(79.856509079711401, comparisons[year][0].score_, 0.001);
+  EXPECT_NEAR(1.4428123880214689, comparisons[year][0].score_, 0.001);
 
   EXPECT_DOUBLE_EQ(52, comparisons[year][7].error_value_);
   EXPECT_DOUBLE_EQ(0.99720481393411942, comparisons[year][7].expected_);
   EXPECT_DOUBLE_EQ(0.19230769230769232, comparisons[year][7].observed_);
-  EXPECT_NEAR(15.132403572010436, comparisons[year][7].score_, 0.001);
+  EXPECT_NEAR(-0.081492235327594101, comparisons[year][7].score_, 0.001);
 }
 
 }  // namespace niwa::length

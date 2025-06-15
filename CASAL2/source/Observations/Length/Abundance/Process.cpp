@@ -22,11 +22,18 @@ namespace length {
  * Default constructor
  */
 ProcessAbundance::ProcessAbundance(shared_ptr<Model> model) : observations::length::Abundance(model) {
-  parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The label of the process for the observation", "");
-  parameters_.Bind<Double>(PARAM_PROCESS_PROPORTION, &process_proportion_, "The proportion through the process when the observation is evaluated", "", Double(0.5))
-      ->set_range(0.0, 1.0);
+  parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The label of the process for the observation");
+  parameters_.Bind<Double>(PARAM_PROCESS_PROPORTION, &process_proportion_, "The proportion through the process when the observation is evaluated")->set_default_value(0.5);
 
   mean_proportion_method_ = false;
+}
+
+/**
+ * Validate
+ */
+void ProcessAbundance::DoValidate() {
+  length::Abundance::DoValidate();
+  parameters_.Validate(PARAM_PROCESS_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 }
 
 /**

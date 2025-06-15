@@ -46,32 +46,30 @@ public:
 
 protected:
   // Members
-  vector<unsigned>            years_;
-  vector<double>              length_bins_;
-  bool                        length_plus_;  
-  unsigned                    number_bins_ = 0;
-  parameters::Table*          obs_table_   = nullptr;
-  vector<Double>              process_error_values_;
-  map<unsigned, Double>       process_errors_by_year_;
-  string                      method_;
-  parameters::Table*          error_values_table_ = nullptr;
-  CombinedCategoriesPtr       partition_;
-  length::MortalityInstantaneous*     mortality_instantaneous_ = nullptr;
-  string                      time_step_label_         = "";
-  string                      process_label_;
-  vector<Double>              expected_values_;
-  bool                        using_model_length_bins = true;
-  vector<int>                 map_local_length_bins_to_global_length_bins_;
-  vector<unsigned>            fishery_ndx_to_get_catch_at_info_;
-  vector<unsigned>            year_ndx_to_get_catch_at_info_;
-  map<string, unsigned >      category_lookup_for_ndx_to_get_catch_at_info_;
-  bool                        simulated_data_sum_to_one_;
-  bool                        sum_to_one_;
-
-  vector<Double>              final_denominator_;
-
-  map<unsigned, map<string, vector<double>>> proportions_;
-  map<unsigned, map<string, vector<double>>> error_values_;
+  vector<unsigned>                           years_                                        = {};
+  vector<double>                             length_bins_                                  = {};
+  bool                                       length_plus_                                  = false;  // Is the last length bin a plus group?
+  unsigned                                   number_bins_                                  = 0;
+  parameters::Table*                         obs_table_                                    = nullptr;
+  vector<Double>                             process_error_values_                         = {};
+  map<unsigned, Double>                      process_errors_by_year_                       = {};
+  string                                     method_                                       = "";
+  parameters::Table*                         error_values_table_                           = nullptr;
+  CombinedCategoriesPtr                      partition_                                    = nullptr;
+  length::MortalityInstantaneous*            mortality_instantaneous_                      = nullptr;
+  string                                     time_step_label_                              = "";
+  string                                     process_label_                                = "";
+  vector<Double>                             expected_values_                              = {};
+  bool                                       using_model_length_bins                       = true;
+  vector<int>                                map_local_length_bins_to_global_length_bins_  = {};
+  vector<unsigned>                           fishery_ndx_to_get_catch_at_info_             = {};
+  vector<unsigned>                           year_ndx_to_get_catch_at_info_                = {};
+  map<string, unsigned>                      category_lookup_for_ndx_to_get_catch_at_info_ = {};
+  bool                                       simulated_data_sum_to_one_ = true;   // Whether simulated data is discrete or scaled by totals to be proportions for each year
+  bool                                       sum_to_one_                = false;  // Scale year (row) observed values by the total, so they sum = 1
+  vector<Double>                             final_denominator_         = {};     // The denominator for each year, used to scale expected values to proportions
+  map<unsigned, map<string, vector<double>>> proportions_               = {};     // map<year, map<category, vector<proportions at length>>>
+  map<unsigned, map<string, vector<double>>> error_values_              = {};     // map<year, map<category, vector<error values at length>>>
 };
 
 } /* namespace length */

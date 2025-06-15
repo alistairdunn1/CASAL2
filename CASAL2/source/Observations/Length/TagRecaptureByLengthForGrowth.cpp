@@ -35,19 +35,18 @@ namespace length {
  */
 TagRecaptureByLengthForGrowth::TagRecaptureByLengthForGrowth(shared_ptr<Model> model) : Observation(model) {
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
-  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins", "", true);  // optional defaults to model length bins if ignroed
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? (defaults to @model value)", "", true);  // default to the model value
-
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in", "");
-  // TODO:  is tolerance missing?
-  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error", "", true);
   parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
-  parameters_
-      .Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated", "",
-                    Double(0.5))
-      ->set_range(0.0, 1.0);
+
+  // clang-format off
+  parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group?")->set_is_optional(true);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
+  parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
+    ->set_default_value(0.5);
+  // clang-format on
 
   mean_proportion_method_ = true;
 
@@ -58,90 +57,43 @@ TagRecaptureByLengthForGrowth::TagRecaptureByLengthForGrowth(shared_ptr<Model> m
  * Validate configuration file parameters
  */
 void TagRecaptureByLengthForGrowth::DoValidate() {
-  // Check value for initial mortality
-  if (model_->length_bins().size() == 0)
-    LOG_ERROR_P(PARAM_LABEL) << ": No length bins have been specified in @model. This observation requires those to be defined";
+  parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(1.0, years_.size());
+  parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
   if (length_plus_ & !model_->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
-  /**
-   * Do some simple checks
-   * e.g Validate that the length_bins are strictly increasing
-   */
-  vector<double> model_length_bins = model_->length_bins();
-  if (length_bins_.size() == 0) {
-    LOG_FINE() << "using model length bins";
-    length_bins_            = model_length_bins;
-    using_model_length_bins = true;
-    // length_plus_     = model_->length_plus();
-  } else {
-    LOG_FINE() << "using bespoke length bins";
-    // allow for the use of observation-defined length bins, as long as all values are in the set of model length bin values
-    using_model_length_bins = false;
-    // check users haven't just respecified the moedl length bins
-    bool length_bins_match = false;
-    LOG_FINE() << length_bins_.size() << "  " << model_length_bins.size();
-    if (length_bins_.size() == model_length_bins.size()) {
-      length_bins_match = true;
-      for (unsigned len_ndx = 0; len_ndx < length_bins_.size(); len_ndx++) {
-        if (length_bins_[len_ndx] != model_length_bins[len_ndx])
-          length_bins_match = false;
-      }
-    }
-    if (length_bins_match) {
-      LOG_FINE() << "using have actually just respecified model bins so we are ignoring bespoke length bin code";
-      using_model_length_bins = true;
-    } else {
-      // Need to validate length bins are subclass of mdoel length bins.
-      if (!model_->are_length_bin_compatible_with_model_length_bins(length_bins_)) {
-        LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bins need to be a subset of the model length bins. See manual for more information";
-      }
-      LOG_FINE() << "length bins = " << length_bins_.size();
-      map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
 
-      LOG_FINE() << "check index";
-      for (unsigned i = 0; i < map_local_length_bins_to_global_length_bins_.size(); ++i) {
-        LOG_FINE() << "i = " << i << " " << map_local_length_bins_to_global_length_bins_[i];
-      }
-    }
-  }
-  // more checks on the model length bins.
-  /*
-   * TODO: this should be moved to the model to check rather than replicating in every child
-   */
-  for (unsigned length = 0; length < length_bins_.size(); ++length) {
-    if (length_bins_[length] < 0.0)
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be positive. '" << length_bins_[length] << "' is less than 0";
+  // Do some checks if we're not using all of the model length bins
+  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  if (!using_model_length_bins)
+    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
-    if (length > 0 && length_bins_[length - 1] >= length_bins_[length])
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bins must be strictly increasing. " << length_bins_[length - 1] << " is greater than or equal to "
-                                     << length_bins_[length];
+  if (length_plus_ & !model_->length_plus())
+    LOG_ERROR_P(PARAM_LENGTH_PLUS)
+        << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
-    if (std::find(model_length_bins.begin(), model_length_bins.end(), length_bins_[length]) == model_length_bins.end())
-      LOG_ERROR_P(PARAM_LENGTH_BINS) << ": Observation length bin values must be in the set of model length bins. Length '" << length_bins_[length]
-                                     << "' is not in the set of model length bins.";
-  }
   number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
 
-  // Check if number of categories is equal to number of selectivities for category and tagged_categories
-  unsigned expected_selectivity_count = 0;
-  auto     categories                 = model_->categories();
-  for (const string& category_label : category_labels_) expected_selectivity_count += categories->GetNumberOfCategoriesDefined(category_label);
-
-  if (category_labels_.size() != selectivity_labels_.size())
-    LOG_ERROR_P(PARAM_CATEGORIES) << ": Number of categories(" << category_labels_.size() << ") does not match the number of " PARAM_SELECTIVITIES << "("
-                                  << selectivity_labels_.size() << ")";
-
-  map<unsigned, vector<double>> recaptures_by_year;
+  category_split_labels_ = model_->categories()->total_categories(category_labels_);
 
   /**
    * Validate the number of recaptures provided matches age spread * category_labels * years
    * This is because we'll have 1 set of recaptures per category collection provided.
    * categories male+female male = 2 collections
    */
-  unsigned obs_expected = number_bins_ * category_labels_.size() + 1;
+  map<unsigned, vector<double>> recaptures_by_year;
+  unsigned                      obs_expected = number_bins_ * category_labels_.size() + 1;
   LOG_FINE() << "expected obs = " << obs_expected << " number of bins = " << number_bins_ << " tagged categories = " << category_labels_.size();
   vector<vector<string>>& recaptures_data = recaptures_table_->data();
   if (recaptures_data.size() != years_.size()) {
@@ -195,29 +147,6 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
     }
     n_[iter->first] = total;
     LOG_FINE() << "total_recaptures in year = " << iter->first << " = " << n_[iter->first];
-  }
-
-  // Split up categories if they are +
-  vector<string> split_category_labels;
-  category_split_labels_.resize(category_labels_.size());
-  unsigned category_counter = 0;
-  for (auto category : category_labels_) {
-    if (model_->categories()->IsCombinedLabels(category)) {
-      boost::split(split_category_labels, category, boost::is_any_of("+"));
-      for (const string& split_category_label : split_category_labels) {
-        if (!model_->categories()->IsValid(split_category_label)) {
-          if (split_category_label == category) {
-            LOG_ERROR_P(PARAM_CATEGORIES) << ": The category " << split_category_label << " is not a valid category.";
-          } else {
-            LOG_ERROR_P(PARAM_CATEGORIES) << ": The category " << split_category_label << " is not a valid category."
-                                          << " It was defined in the category collection " << category;
-          }
-        }
-      }
-      for (auto& split_category : split_category_labels) category_split_labels_[category_counter].push_back(split_category);
-    } else
-      category_split_labels_[category_counter].push_back(category);
-    category_counter++;
   }
 }
 

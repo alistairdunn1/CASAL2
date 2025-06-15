@@ -22,7 +22,7 @@
 
 // Namespace
 namespace niwa {
-  class Selectivity;
+class Selectivity;
 namespace observations {
 namespace length {
 
@@ -39,7 +39,7 @@ public:
   virtual ~ProportionsCategoryByLength();
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void PreExecute() override final;
   void Execute() override final;
   void CalculateScore() override final;
@@ -47,44 +47,41 @@ public:
 
 protected:
   // Members
-  vector<unsigned>            years_;
-  vector<double>              length_bins_;
-  bool                        length_plus_;  
-  unsigned                    number_bins_ = 0;
-  bool                        using_model_length_bins = true;
-  vector<int>                 map_local_length_bins_to_global_length_bins_;
-
-  parameters::Table*          obs_table_  = nullptr;
-  vector<Double>              process_error_values_;
-  map<unsigned, Double>       process_errors_by_year_;
-  parameters::Table*          error_values_table_ = nullptr;
-  CachedCombinedCategoriesPtr cached_partition_;
-  CombinedCategoriesPtr       partition_;
-  vector<string>              total_category_labels_;
-  CachedCombinedCategoriesPtr total_cached_partition_;
-  CombinedCategoriesPtr       total_partition_;
-  Double                      time_step_proportion_;
-  vector<Double>              total_numbers_at_length_;
-  vector<Double>              cached_total_numbers_at_length_;
-  vector<Double>              numbers_at_length_;
-  vector<Double>              cached_numbers_at_length_;
-  vector<string>              total_selectivity_labels_;
-  vector<string>              selectivity_labels_;
-  vector<Selectivity*>        selectivities_;
-  vector<Selectivity*>        total_selectivities_;
-
-  vector<Double>              length_results_;
-  vector<string>              categories_for_comparison_;
-  vector<double>              length_bins_for_comparison_;
-  string                      time_step_label_ = "";
-  bool                        simulated_data_sum_to_one_;
-  bool                        sum_to_one_;
-
-  map<unsigned, vector<double>> proportions_;
-  map<unsigned, vector<double>> error_values_;
+  vector<unsigned>              years_                                       = {};
+  vector<double>                length_bins_                                 = {};
+  bool                          length_plus_                                 = false;
+  unsigned                      number_bins_                                 = 0;
+  bool                          using_model_length_bins                      = true;
+  vector<int>                   map_local_length_bins_to_global_length_bins_ = {};
+  parameters::Table*            obs_table_                                   = nullptr;
+  vector<Double>                process_error_values_                        = {};
+  map<unsigned, Double>         process_errors_by_year_                      = {};
+  parameters::Table*            error_values_table_                          = nullptr;
+  CachedCombinedCategoriesPtr   cached_partition_                            = nullptr;
+  CombinedCategoriesPtr         partition_                                   = nullptr;
+  vector<string>                total_category_labels_                       = {};
+  CachedCombinedCategoriesPtr   total_cached_partition_                      = nullptr;
+  CombinedCategoriesPtr         total_partition_                             = nullptr;
+  Double                        time_step_proportion_                        = 0.5;
+  vector<Double>                total_numbers_at_length_                     = {};
+  vector<Double>                cached_total_numbers_at_length_              = {};
+  vector<Double>                numbers_at_length_                           = {};
+  vector<Double>                cached_numbers_at_length_                    = {};
+  vector<string>                total_selectivity_labels_                    = {};
+  vector<string>                selectivity_labels_                          = {};
+  vector<Selectivity*>          selectivities_                               = {};
+  vector<Selectivity*>          total_selectivities_                         = {};
+  vector<Double>                length_results_                              = {};
+  vector<string>                categories_for_comparison_                   = {};
+  vector<double>                length_bins_for_comparison_                  = {};
+  string                        time_step_label_                             = "";
+  bool                          simulated_data_sum_to_one_                   = false;
+  bool                          sum_to_one_                                  = false;
+  map<unsigned, vector<double>> proportions_                                 = {};
+  map<unsigned, vector<double>> error_values_                                = {};
 };
 
-} /* namespace age */
+}  // namespace length
 } /* namespace observations */
 } /* namespace niwa */
 

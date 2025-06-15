@@ -39,6 +39,9 @@ namespace age {
 TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observation(model) {
   recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
   scanned_table_    = new parameters::Table(PARAM_SCANNED);
+  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each length bin", "", false);
+  parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each length bin", "", false);
+
   // clang-format off
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
@@ -49,8 +52,6 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
   parameters_.Bind<string>(PARAM_TAGGED_SELECTIVITIES, &tagged_selectivity_labels_, "The labels of the selectivities of the tagged categories");
   parameters_.Bind<Double>(PARAM_DETECTION_PARAMETER, &detection_, "The probability of detecting a recaptured individual");
   parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)")->set_is_optional(true);
-  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each length bin", "", false);
-  parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each length bin", "", false);
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
     ->set_default_value(0.5);
   // clang-format on
