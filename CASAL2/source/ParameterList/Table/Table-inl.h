@@ -101,6 +101,81 @@ inline vector<string> Table::GetColumnValuesAs(const string& column) {
   return result;
 }
 
+/**
+ * This method will map the columns in a table to a year.
+ * It will return a map of the year to a vector of proportions.
+ *
+ * @param year_column_index The index of the column containing the year values
+ * @param data_index_start The starting index of the data columns to map
+ * @param data_index_end The ending index of the data columns to map
+ * @return A map of year to vector of proportions
+ */
+template <typename T>
+std::map<unsigned, std::vector<T>> Table::MapColumnsToYear(unsigned year_column_index, unsigned data_index_start, unsigned data_index_end) const {
+  std::map<unsigned, std::vector<T>> result;
+
+  for (const auto& row : data_) {
+    if (year_column_index >= row.size())
+      LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << year_column_index << ". We expected it to contain year values.";
+
+    unsigned year;
+    if (!utilities::To<string, unsigned>(row[year_column_index], year))
+      LOG_ERROR() << location() << "The value" << row[year_column_index] << " in column at index " << year_column_index << " could not be converted to type "
+                  << utilities::demangle(typeid(year).name());
+
+    std::vector<T> values;
+    for (unsigned i = data_index_start; i <= data_index_end; ++i) {
+      if (i >= row.size())
+        LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << i << ". We expected it to contain data values for the year.";
+
+      T value;
+      if (!utilities::To<string, T>(row[i], value))
+        LOG_ERROR() << location() << "The value" << row[i] << " in column at index " << i << " could not be converted to type " << utilities::demangle(typeid(value).name());
+
+      values.push_back(value);
+    }
+
+    result[year] = values;
+  }
+
+  return result;
+}
+
+/**
+ * This method will map a specific column to a year.
+ * It will return a map of the year to the value in the specified column.
+ *
+ * @param year_column_index The index of the column containing the year values
+ * @param data_column_index The index of the column containing the data values
+ * @return A map of year to value in the specified column
+ */
+template <typename T>
+std::map<unsigned, T> Table::MapColumnToYear(unsigned year_column_index, unsigned data_column_index) const {
+  std::map<unsigned, T> result;
+
+  for (const auto& row : data_) {
+    if (year_column_index >= row.size())
+      LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << year_column_index << ". We expected it to contain year values.";
+
+    unsigned year;
+    if (!utilities::To<string, unsigned>(row[year_column_index], year))
+      LOG_ERROR() << location() << "The value" << row[year_column_index] << " in column at index " << year_column_index << " could not be converted to type "
+                  << utilities::demangle(typeid(year).name());
+
+    if (data_column_index >= row.size())
+      LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << data_column_index << ". We expected it to contain data values for the year.";
+
+    T value;
+    if (!utilities::To<string, T>(row[data_column_index], value))
+      LOG_ERROR() << location() << "The value" << row[data_column_index] << " in column at index " << data_column_index << " could not be converted to type "
+                  << utilities::demangle(typeid(value).name());
+
+    result[year] = value;
+  }
+
+  return result;
+}
+
 }  // namespace niwa::parameters::table
 
 #endif /* SOURCE_PARAMETERS_TABLE_TABLE_INL_H_ */

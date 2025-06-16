@@ -230,19 +230,40 @@ TEST_F(InternalEmptyModel, Observation_Process_Removals_By_Age_for_fishery_Singl
   map<unsigned, vector<obs::Comparison> >& comparisons = observation->comparisons();
   ASSERT_EQ(7u, comparisons.size());
 
+  // string   category_       = "";
+  // unsigned age_            = 0;
+  // Double   length_         = 0;
+  // Double   expected_       = 0;
+  // double   observed_       = 0;
+  // Double   process_error_  = 0;
+  // double   error_value_    = 0;
+  // Double   adjusted_error_ = 0;
+  // Double   delta_          = 0;
+  // Double   score_          = 0;
+
   unsigned year = 1997;
   ASSERT_FALSE(comparisons.find(year) == comparisons.end());
   ASSERT_EQ(18u, comparisons[year].size());
   EXPECT_EQ("stock", comparisons[year][0].category_);
-  EXPECT_DOUBLE_EQ(15, comparisons[year][0].error_value_);
+  EXPECT_EQ(4u, comparisons[year][0].age_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][0].length_);
   EXPECT_DOUBLE_EQ(0.19433803070960726, comparisons[year][0].expected_);
   EXPECT_DOUBLE_EQ(0.129, comparisons[year][0].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][0].process_error_);
+  EXPECT_DOUBLE_EQ(15, comparisons[year][0].error_value_);
+  EXPECT_DOUBLE_EQ(15, comparisons[year][0].adjusted_error_);
+  EXPECT_DOUBLE_EQ(9.9999999999999994e-12, comparisons[year][0].delta_);
   EXPECT_DOUBLE_EQ(3.8038399067647219, comparisons[year][0].score_);
 
   EXPECT_EQ("stock", comparisons[year][1].category_);
-  EXPECT_DOUBLE_EQ(15, comparisons[year][1].error_value_);
+  EXPECT_EQ(5u, comparisons[year][1].age_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][1].length_);
   EXPECT_DOUBLE_EQ(0.18541336567128386, comparisons[year][1].expected_);
   EXPECT_DOUBLE_EQ(0.1608, comparisons[year][1].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][1].process_error_);
+  EXPECT_DOUBLE_EQ(15, comparisons[year][1].error_value_);
+  EXPECT_DOUBLE_EQ(15, comparisons[year][1].adjusted_error_);
+  EXPECT_DOUBLE_EQ(9.9999999999999994e-12, comparisons[year][1].delta_);
   EXPECT_DOUBLE_EQ(5.1698115319248554, comparisons[year][1].score_);
 
   EXPECT_EQ("stock", comparisons[year][2].category_);

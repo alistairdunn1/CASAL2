@@ -16,6 +16,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
+#include <numeric>
 
 #include "AgeingErrors/Manager.h"
 #include "Categories/Categories.h"
@@ -65,6 +66,11 @@ ProcessRemovalsByAge::ProcessRemovalsByAge(shared_ptr<Model> model) : Observatio
  * Validate configuration file parameters
  */
 void ProcessRemovalsByAge::DoValidate() {
+  // set up some variables we'll need
+  age_spread_                    = (max_age_ - min_age_) + 1;
+  unsigned expected_column_count = age_spread_ * category_labels_.size() + 1;  // +1 for the year column
+
+  // validate parameters
   parameters_.Validate(PARAM_MIN_AGE)->IsAge();
   parameters_.Validate(PARAM_MAX_AGE)->IsAge();
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
@@ -75,8 +81,37 @@ void ProcessRemovalsByAge::DoValidate() {
       ->DefaultValue(0.0, years_.size());
   parameters_.ValidateVector(PARAM_METHOD_OF_REMOVAL)->SameNumberOfElementsAs(PARAM_TIME_STEP);
 
+  parameters_.ValidateTable(PARAM_OBS)
+      ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
+      ->Columns(expected_column_count, "Expected year, observation values, and error value columns in the observation table")
+      ->ColumnIsYear(0, "First column of the observation table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (data + error value) for the observation")
+      ->GreaterThan(expected_column_count - 1, 0.0);
+
+  parameters_.ValidateTable(PARAM_ERROR_VALUES)
+      ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
+      ->Columns(category_labels_.size() + 1, "Expected year and error value columns in the error values table")
+      ->ColumnIsYear(0, "First column of the error values table must be a model year")
+      ->DoubleDataRange(1, category_labels_.size(), "All columns except the first must be a double value (error values) for the observation")
+      ->GreaterThanForRange(1, category_labels_.size(), 0.0);
+
   process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  age_spread_             = (max_age_ - min_age_) + 1;
+
+  proportions_  = obs_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
+  error_values_ = error_values_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, category_labels_.size());
+
+  if (sum_to_one_) {
+    for (auto& year_pair : proportions_) {
+      niwa::utilities::map::scale_to_one<string>(year_pair.second);
+    }
+  }
+}
+
+/**
+ *Run some old code
+ */
+void ProcessRemovalsByAge::old_code() {
+  age_spread_ = (max_age_ - min_age_) + 1;
 
   /**
    * Validate the number of obs provided matches age spread * category_labels * years
@@ -192,6 +227,28 @@ void ProcessRemovalsByAge::DoValidate() {
       }
     }
   }
+
+  std::cout << "Proportions parameter values:" << std::endl;
+  for (const auto& year_pair : proportions_) {
+    std::cout << "Year: " << year_pair.first << std::endl;
+    for (const auto& cat_pair : year_pair.second) {
+      std::cout << "  Category: " << cat_pair.first << " Values: [";
+      for (size_t i = 0; i < cat_pair.second.size(); ++i) {
+        std::cout << std::fixed << std::setprecision(6) << cat_pair.second[i];
+        if (i + 1 < cat_pair.second.size())
+          std::cout << ", ";
+      }
+      std::cout << "]" << std::endl;
+    }
+  }
+
+  // std::cout << "Error values parameter values:" << std::endl;
+  // for (const auto& year_pair : error_values_) {
+  //   std::cout << "Year: " << year_pair.first << std::endl;
+  //   for (const auto& cat_pair : year_pair.second) {
+  //     std::cout << "  Category: " << cat_pair.first << " Values: [" << boost::algorithm::join(ToStringVector(cat_pair.second, 6), ", ") << "]" << std::endl;
+  //   }
+  // }
 }
 
 /**
@@ -374,7 +431,7 @@ void ProcessRemovalsByAge::Execute() {
         LOG_FINEST() << "Numbers at age for category: " << category_labels_[category_offset] << " for age " << min_age_ + i << " = " << accumulated_expected_values_[i];
         SaveComparison(category_labels_[category_offset], min_age_ + i, 0.0, accumulated_expected_values_[i],
                        proportions_[model_->current_year()][category_labels_[category_offset]][i], process_errors_by_year_[model_->current_year()],
-                       error_values_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
+                       error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
       }
     }
   }

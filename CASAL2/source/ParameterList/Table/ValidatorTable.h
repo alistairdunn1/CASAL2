@@ -39,6 +39,10 @@ public:
 
   shared_ptr<ValidatorTable> Rows(unsigned count, const string& error_message = "");
   shared_ptr<ValidatorTable> Columns(unsigned count, const string& error_message = "");
+  shared_ptr<ValidatorTable> ColumnIsYear(unsigned column_index, const string& error_message = "");
+  shared_ptr<ValidatorTable> DoubleDataRange(unsigned start_index, unsigned end_index, const string& error_message = "");
+  shared_ptr<ValidatorTable> GreaterThan(unsigned column_index, double value, const string& error_message = "");
+  shared_ptr<ValidatorTable> GreaterThanForRange(unsigned start_column_index, unsigned end_column_index, double value, const string& error_message = "");
 
   // shared_ptr<ValidatorVector> GreaterThan(double value);
   // shared_ptr<ValidatorVector> GreaterThan(unsigned value);

@@ -30,7 +30,6 @@ namespace processes {
 namespace age {
 
 namespace accessor = niwa::partition::accessors;
-using utilities::map2D;
 
 // classes
 class MortalityHollingRate : public Mortality {

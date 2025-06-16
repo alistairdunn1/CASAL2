@@ -70,6 +70,13 @@ public:
   template <typename T>
   vector<T> GetColumnValuesAs(const string& column);
 
+  template <typename T>
+  std::map<unsigned, std::vector<T>> MapColumnsToYear(unsigned year_column_index, unsigned data_index_start, unsigned data_index_end) const;
+  template <typename T>
+  std::map<unsigned, T>                                     MapColumnToYear(unsigned year_column_index, unsigned data_column_index) const;
+  std::map<unsigned, std::map<string, std::vector<double>>> MapColumnsToYearAndCategory(const vector<string>& category_labels, unsigned year_column_index,
+                                                                                        unsigned data_index_start, unsigned data_index_end) const;
+
   // accessors
   const string&           label() const { return label_; }
   void                    set_file_name(const string& file_name) { file_name_ = file_name; }

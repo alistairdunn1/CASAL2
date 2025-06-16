@@ -69,56 +69,19 @@ void Abundance::DoValidate() {
   parameters_.Validate(PARAM_DELTA)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
 
-  // parameters_.ValidateTable(PARAM_OBS)
-  // ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
-  // ->Columns(1 + category_labels_.size() + 1, "Number of columns in the observation table must match the number of categories plus two (year and error value)");
-  //     ->ColumnIndex(PARAM_YEAR, 0, "The first column of the observation table must be the year")
-  //     ->ColumnIndex(PARAM_ERROR, category_labels_.size() + 1, "The last column of the observation table must be the error value for the observation")
-  //     ->ColumnIsModelYear(0, "First column of the observation table must be a model year")
-  //     ->ColumnIsDataRange(1, -1, "All columns except the first and last must be data values for the observation")
-  //     ->ColumnIsDouble(category_labels_.size() + 1, "The last column of the observation table must be a double representing the error value for the observation");
+  parameters_.ValidateTable(PARAM_OBS)
+      ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
+      ->Columns(1 + category_labels_.size() + 1, "Expected year, observation values, and error value columns in the observation table")
+      ->ColumnIsYear(0, "First column of the observation table must be a model year")
+      ->DoubleDataRange(1, category_labels_.size() + 1, "All columns except the first must be a double value (data + error value) for the observation")
+      ->GreaterThan(category_labels_.size() + 1, 0.0);
 
-  // proportions_by_year_  = obs_table_->map_proportions_to_year<unsigned, vector<double>>();
-  // error_values_by_year_ = obs_table_->map_error_values_to_year<unsigned, double>();
-
-  // Obs
-  unsigned                num_obs       = category_labels_.size();
-  unsigned                vals_expected = 1 + num_obs + 1;  // year, observation value(s), error value
-  vector<vector<string>>& obs_data      = obs_table_->data();
-  if (obs_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_OBS) << " has " << obs_data.size() << " rows defined, but "
-                           << "does not match the number of years provided " << years_.size();
-  }
-
-  LOG_MEDIUM() << "Number of categories: " << num_obs << ", number of years: " << years_.size() << ", number of observation columns: " << obs_data.size();
-
-  unsigned year      = 0;
-  double   obs_value = 0;
-  double   err_value = 0;
-  for (vector<string>& obs_data_line : obs_data) {
-    if (obs_data_line.size() != vals_expected) {
-      LOG_ERROR_P(PARAM_OBS) << " has " << obs_data_line.size() << " values defined, but does not match " << vals_expected;
-    }
-
-    if (!utilities::To<unsigned>(obs_data_line.front(), year))
-      LOG_ERROR_P(PARAM_OBS) << " value " << obs_data_line.front() << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_OBS) << " year " << year << " is not a valid year for this observation";
-
-    for (unsigned i = 1; i <= num_obs; ++i) {
-      if (!utilities::To<double>(obs_data_line[i], obs_value))
-        LOG_ERROR_P(PARAM_OBS) << " value " << obs_data_line[i] << " could not be converted to a Double. It should be the observation value for this line";
-      if (obs_value <= 0.0)
-        LOG_ERROR_P(PARAM_OBS) << ": observation value " << obs_value << " for year " << year << " cannot be less than or equal to 0.0";
-      proportions_by_year_[year].push_back(obs_value);
-    }
-
-    if (!utilities::To<double>(obs_data_line.back(), err_value))
-      LOG_ERROR_P(PARAM_OBS) << " value " << obs_data_line.back() << " could not be converted to a Double. It should be the error value for this line";
-    if (err_value <= 0.0)
-      LOG_ERROR_P(PARAM_OBS) << ": error value " << err_value << " for year " << year << " cannot be less than or equal to 0.0";
-    error_values_by_year_[year] = err_value;
-  }
+  proportions_by_year_  = obs_table_->MapColumnsToYear<double>(0u, 1u, category_labels_.size());
+  error_values_by_year_ = obs_table_->MapColumnToYear<double>(0u, category_labels_.size() + 1u);
+  if (proportions_by_year_.empty())
+    LOG_CODE_ERROR() << "proportions_by_year_ is empty, this should not happen";
+  if (error_values_by_year_.empty())
+    LOG_CODE_ERROR() << "error_values_by_year_ is empty, this should not happen";
 }
 
 /**

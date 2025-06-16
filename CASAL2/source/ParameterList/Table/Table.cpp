@@ -168,4 +168,81 @@ void Table::Populate(shared_ptr<Model> model) {
   }  // if (year_index != columns_.size()) {
 }
 
+/**
+ * This method will map the columns in a table to a year and category.
+ * It will return a map of the year to a map of category labels to a vector of values.
+ * If we had values like:
+ * | Year | Cat1_A | Cat1_B | Cat2_A | Cat2_B |
+ * | 2000 | 1.0    | 2.0    | 3.0    | 4.0    |
+ * would return a map with the first key being 2000, and the second key being a map with 1.0 and 2.0,
+ * and a second value for 3.0 and 4.0, so the result would look like:
+ * * {
+ * *   2000: {
+ * *     "Cat1": [1.0, 2.0],
+ * *     "Cat2": [3.0, 4.0]
+ * *   }
+ *
+ * @param category_labels The labels for the categories to map
+ * @param year_column_label The label for the column containing the year values
+ * @param data_index_start_label The label for the starting index of the data columns to map
+ * @param data_index_end_label The label for the ending index of the data columns to map
+ * @return A map of year to a map of category labels to a vector of values
+ */
+std::map<unsigned, std::map<string, std::vector<double>>> Table::MapColumnsToYearAndCategory(const vector<string>& category_labels, unsigned year_column_index,
+                                                                                             unsigned data_index_start, unsigned data_column_count) const {
+  std::map<unsigned, std::map<std::string, std::vector<double>>> result;
+  if (data_column_count % category_labels.size() != 0)
+    LOG_ERROR() << location() << "The number of data columns (" << data_column_count << ") is not evenly divisible by the number of category labels (" << category_labels.size()
+                << "). This will result in an incorrect mapping of categories to data values.";
+
+  for (const auto& row : data_) {
+    if (year_column_index >= row.size())
+      LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << year_column_index << ". We expected it to contain year values.";
+
+    unsigned year;
+    if (!utilities::To<string, unsigned>(row[year_column_index], year))
+      LOG_ERROR() << location() << "The value" << row[year_column_index] << " in column at index " << year_column_index << " could not be converted to type "
+                  << utilities::demangle(typeid(year).name());
+
+    unsigned                              category_index = 0;
+    std::map<string, std::vector<double>> values;
+    for (unsigned i = 0; i < data_column_count; ++i) {
+      unsigned i_index = data_index_start + i;
+      if (i_index >= row.size())
+        LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << i_index << ". We expected it to contain data values for the year.";
+
+      double value;
+      if (!utilities::To<string, double>(row[i_index], value))
+        LOG_ERROR() << location() << "The value" << row[i_index] << " in column at index " << i_index << " could not be converted to type "
+                    << utilities::demangle(typeid(value).name());
+
+      values[category_labels[category_index]].push_back(value);
+      if (i != 0 && i % (data_column_count / category_labels.size()) == 0) {
+        category_index++;
+      }
+    }
+
+    result[year] = values;
+  }
+
+  if (result.size() != data_.size()) {
+    LOG_CODE_ERROR() << "MapColumnsToYearAndCategory: The number of years in the result does not match the number of rows in the data. "
+                     << "Expected: " << data_.size() << ", Actual: " << result.size();
+  }
+  for (const auto& category_map : result) {
+    if (category_map.second.size() != category_labels.size()) {
+      LOG_CODE_ERROR() << "MapColumnsToYearAndCategory: The number of categories in the result does not match the number of category labels. "
+                       << "Expected: " << category_labels.size() << ", Actual: " << category_map.second.size();
+    }
+    for (const auto& category : category_map.second) {
+      if (category.second.size() != data_column_count / category_labels.size()) {
+        LOG_CODE_ERROR() << "MapColumnsToYearAndCategory: The number of values in the category '" << category.first
+                         << "' does not match the expected number of values. Expected: " << data_column_count / category_labels.size() << ", Actual: " << category.second.size();
+      }
+    }
+  }
+
+  return result;
+}
+
 }  // namespace niwa::parameters::table

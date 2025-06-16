@@ -15,6 +15,7 @@
 
 // headers
 #include <map>
+#include <numeric>
 #include <set>
 #include <string>
 #include <vector>
@@ -22,8 +23,7 @@
 #include "../Utilities/Types.h"
 
 // namespaces
-namespace niwa {
-namespace utilities {
+namespace niwa::utilities {
 using std::pair;
 using std::vector;
 
@@ -115,14 +115,15 @@ public:
    * @return a Map of keys and values
    */
   static std::map<unsigned, Double> create(const std::vector<unsigned>& key, const std::vector<Double>& value) {
-    std::map<unsigned, Double> result;
-
     if (key.size() != value.size()) {
       LOG_FATAL() << "Map::create: key and value vectors must be of the same size. Key size: " << key.size() << ", Value size: " << value.size();
-      return result;  // return empty map
+      return {};
     }
 
-    for (unsigned i = 0; i < key.size(); ++i) result[key[i]] = value[i];
+    std::map<unsigned, Double> result;
+    for (size_t i = 0; i < key.size(); ++i) {
+      result.emplace(key[i], value[i]);
+    }
 
     return result;
   }
@@ -136,15 +137,14 @@ public:
    * @return a Map of keys and values
    */
   static std::map<std::string, Double> create(const std::vector<std::string>& key, const std::vector<Double>& value) {
-    std::map<std::string, Double> result;
-
     if (key.size() != value.size()) {
       LOG_FATAL() << "Map::create: key and value vectors must be of the same size. Key size: " << key.size() << ", Value size: " << value.size();
-      return result;  // return empty map
+      return {};
     }
-
-    for (unsigned i = 0; i < key.size(); ++i) result[key[i]] = value[i];
-
+    std::map<std::string, Double> result;
+    for (size_t i = 0; i < key.size(); ++i) {
+      result.emplace(key[i], value[i]);
+    }
     return result;
   }
 
@@ -158,21 +158,32 @@ public:
    */
   static std::map<unsigned, Double> create(const std::vector<unsigned>& key, const Double& value) {
     std::map<unsigned, Double> result;
-
-    for (unsigned i = 0; i < key.size(); ++i) result[key[i]] = value;
+    for (auto& k : key) {
+      result[k] = value;
+    }
 
     return result;
   }
 
 };  // class
 
-template <class A, class B, class C>
-using map2D = std::map<A, std::map<B, C>>;
+} /* namespace niwa::utilities */
 
-template <class A, class B, class C, class D>
-using map3D = std::map<A, std::map<B, std::map<C, D>>>;
+namespace niwa::utilities::map {
 
-} /* namespace utilities */
-} /* namespace niwa */
+template <typename T>
+void scale_to_one(std::map<T, std::vector<Double>>& cat_map) {
+  Double total = 0.0;
+  for (const auto& cat_pair : cat_map) {
+    total += std::accumulate(cat_pair.second.begin(), cat_pair.second.end(), 0.0);
+  }
+  if (total > 0.0) {
+    for (auto& cat_pair : cat_map) {
+      for (auto& v : cat_pair.second) v /= total;
+    }
+  }
+}
+
+}  // namespace niwa::utilities::map
 
 #endif /* MAP_H_ */

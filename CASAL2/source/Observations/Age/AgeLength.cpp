@@ -58,13 +58,8 @@ AgeLength::AgeLength(shared_ptr<Model> model) : Observation(model) {
 }
 
 /**
- * Destructor
- */
-AgeLength::~AgeLength() {}
-/**
  * Validate configuration file parameters
  */
-
 void AgeLength::DoValidate() {
   LOG_TRACE();
 
