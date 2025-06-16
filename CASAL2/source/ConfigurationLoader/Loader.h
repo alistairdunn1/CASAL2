@@ -26,7 +26,7 @@
 #include "../BaseClasses/Object.h"
 #include "../GlobalConfiguration/GlobalConfiguration.h"
 #include "../Model/Model.h"
-#include "../ParameterList/Table.h"
+#include "../ParameterList/Table/Table.h"
 
 // Namespaces
 namespace niwa {
@@ -84,12 +84,12 @@ protected:
   void FindActiveMinimiserType();
 
   // Members
-  vector<FileLine>         file_lines_;
-  vector<vector<FileLine>> blocks_;
-  parameters::Table*       current_table_ = nullptr;
-  map<string, unsigned>    inline_count_;
-  string                   model_type_     = "";
-  string                   minimiser_type_ = "";
+  vector<FileLine>          file_lines_;
+  vector<vector<FileLine>>  blocks_;
+  parameters::table::Table* current_table_ = nullptr;
+  map<string, unsigned>     inline_count_;
+  string                    model_type_     = "";
+  string                    minimiser_type_ = "";
 };
 
 } /* namespace configuration */

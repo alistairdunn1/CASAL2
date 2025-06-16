@@ -38,10 +38,10 @@ namespace age {
  * Default constructor
  */
 ProportionsMatureByAge::ProportionsMatureByAge(shared_ptr<Model> model) : Observation(model) {
-  obs_table_          = new parameters::Table(PARAM_OBS);
-  error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of proportions at age mature ", "", false);
-  parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note the units depend on the likelihood)", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of proportions at age mature");
+  obs_table_->set_requires_columns(false);
+  error_values_table_ = parameters_.BindTable(PARAM_ERROR_VALUES, "The table of error values of the observed values (note the units depend on the likelihood)");
+  error_values_table_->set_requires_columns(false);
 
   // clang-format off
   parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
@@ -60,14 +60,6 @@ ProportionsMatureByAge::ProportionsMatureByAge(shared_ptr<Model> model) : Observ
   mean_proportion_method_ = false;
 
   allowed_likelihood_types_.push_back(PARAM_BINOMIAL);
-}
-
-/**
- * Destructor
- */
-ProportionsMatureByAge::~ProportionsMatureByAge() {
-  delete obs_table_;
-  delete error_values_table_;
 }
 
 /**

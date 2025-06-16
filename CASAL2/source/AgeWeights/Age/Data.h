@@ -17,43 +17,38 @@
 #include "../../AgeWeights/AgeWeight.h"
 
 // namespaces
-namespace niwa {
-
-namespace ageweights {
+namespace niwa::ageweights {
 
 // classes
 class Data : public AgeWeight {
 public:
   // methods
   explicit Data(shared_ptr<Model> model);
-  virtual ~Data();
+  virtual ~Data() {};
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final {};
   void DoRebuildCache() override final {};  // This should never happen. i.e time vary data type.
 
+  // accessors
   Double mean_weight_at_age_by_year(unsigned year, unsigned age) override final;
 
-protected:
-  // methods
 private:
-  // methods
   // members
-  parameters::Table*                   data_table_ = nullptr;
-  map<unsigned, vector<Double>>        data_by_year_;               // To initially store inputs
-  map<unsigned, map<unsigned, Double>> mean_data_by_year_and_age_;  // during execute and projection
-  map<unsigned, Double>                initial_;                    // For initial state
-  vector<unsigned>                     steps_to_figure_;
-  unsigned                             number_time_steps_;
-  unsigned                             final_year_;
-  vector<unsigned>                     years_;
-  vector<unsigned>                     age_;
-  string                               units_;
-  string                               equilibrium_method_;
-  Double                               unit_multipier_ = 1.0;
+  parameters::table::Table*            data_table_                = nullptr;
+  map<unsigned, vector<Double>>        data_by_year_              = {};
+  map<unsigned, map<unsigned, Double>> mean_data_by_year_and_age_ = {};
+  map<unsigned, Double>                initial_                   = {};
+  vector<unsigned>                     steps_to_figure_           = {};
+  unsigned                             number_time_steps_         = 0;
+  unsigned                             final_year_                = 0;
+  vector<unsigned>                     years_                     = {};
+  vector<unsigned>                     age_                       = {};
+  string                               units_                     = "";
+  string                               equilibrium_method_        = "";
+  Double                               unit_multipier_            = 1.0;
 };
 
-} /* namespace ageweights */
-} /* namespace niwa */
+}  // namespace niwa::ageweights
 
 #endif /* AGEWEIGHT_DATA_H_ */

@@ -15,15 +15,14 @@
 
 #include <algorithm>
 
-#include "../Categories/Categories.h"
-#include "../Model/Model.h"
-#include "../Translations/Translations.h"
-#include "../Utilities/String.h"
-#include "../Utilities/To.h"
+#include "Categories/Categories.h"
+#include "Model/Model.h"
+#include "Translations/Translations.h"
+#include "Utilities/String.h"
+#include "Utilities/To.h"
 
 // Namespaces
-namespace niwa {
-namespace parameters {
+namespace niwa::parameters::table {
 
 /**
  * Default constructor
@@ -169,5 +168,4 @@ void Table::Populate(shared_ptr<Model> model) {
   }  // if (year_index != columns_.size()) {
 }
 
-} /* namespace parameters */
-} /* namespace niwa */
+}  // namespace niwa::parameters::table

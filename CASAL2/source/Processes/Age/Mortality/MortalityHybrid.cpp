@@ -53,9 +53,9 @@ MortalityHybrid::MortalityHybrid(shared_ptr<Model> model) : Mortality(model), pa
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
-  catches_table_ = new parameters::Table(PARAM_CATCHES);
-  method_table_  = new parameters::Table(PARAM_METHOD);
+  catches_table_ = parameters_.BindTable(PARAM_CATCHES, "The table of removals (catch) data");
   catches_table_->set_required_columns({PARAM_YEAR}, true);
+  method_table_ = parameters_.BindTable(PARAM_METHOD, "The table of method of removal data");
   method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_PENALTY, PARAM_ANNUAL_DURATION}, true);
   method_table_->set_optional_columns({PARAM_AGE_WEIGHT_LABEL});
 
@@ -68,18 +68,7 @@ MortalityHybrid::MortalityHybrid(shared_ptr<Model> model) : Mortality(model), pa
   parameters_.Bind<Double>(PARAM_MAX_F, &max_F_, "The maximum F applied in a time-step")->set_default_value(4.0);
   parameters_.Bind<unsigned>(PARAM_F_ITERATIONS, &F_iterations_, "The number of iterations to tune the F coefficients")->set_default_value(4u);
 
-  parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
-  parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
-
   RegisterAsAddressable(PARAM_M, &m_);
-}
-
-/**
- * Destructor
- */
-MortalityHybrid::~MortalityHybrid() {
-  delete catches_table_;
-  delete method_table_;
 }
 
 /**

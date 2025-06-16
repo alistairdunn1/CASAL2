@@ -34,10 +34,10 @@ class TransitionCategoryByAge : public niwa::Process {
 public:
   // methods
   explicit TransitionCategoryByAge(shared_ptr<Model> model);
-  virtual ~TransitionCategoryByAge();
+  virtual ~TransitionCategoryByAge() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoExecute() override final;
 
 private:
@@ -52,7 +52,7 @@ private:
   string                        penalty_label_;
   Penalty*                      penalty_ = nullptr;
   Double                        u_max_;
-  parameters::Table*            n_table_ = nullptr;
+  parameters::table::Table*     n_table_ = nullptr;
   map<unsigned, vector<Double>> n_;
   accessor::Categories          to_partition_;
   accessor::Categories          from_partition_;

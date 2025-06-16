@@ -36,7 +36,7 @@ class ProportionsCategoryByLength : public niwa::Observation {
 public:
   // Methods
   explicit ProportionsCategoryByLength(shared_ptr<Model> model);
-  virtual ~ProportionsCategoryByLength();
+  virtual ~ProportionsCategoryByLength() = default;
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final {};
@@ -53,10 +53,10 @@ protected:
   unsigned                      number_bins_                                 = 0;
   bool                          using_model_length_bins                      = true;
   vector<int>                   map_local_length_bins_to_global_length_bins_ = {};
-  parameters::Table*            obs_table_                                   = nullptr;
+  parameters::table::Table*     obs_table_                                   = nullptr;
   vector<Double>                process_error_values_                        = {};
   map<unsigned, Double>         process_errors_by_year_                      = {};
-  parameters::Table*            error_values_table_                          = nullptr;
+  parameters::table::Table*     error_values_table_                          = nullptr;
   CachedCombinedCategoriesPtr   cached_partition_                            = nullptr;
   CombinedCategoriesPtr         partition_                                   = nullptr;
   vector<string>                total_category_labels_                       = {};

@@ -38,10 +38,10 @@ class ProcessRemovalsByLengthRetainedTotal : public niwa::Observation {
 public:
   // Methods
   explicit ProcessRemovalsByLengthRetainedTotal(shared_ptr<Model> model);
-  virtual ~ProcessRemovalsByLengthRetainedTotal();
+  virtual ~ProcessRemovalsByLengthRetainedTotal() {};
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void PreExecute() override final;
   void Execute() override final;
   void CalculateScore() override final;
@@ -49,16 +49,16 @@ public:
 
 protected:
   // Members
-  vector<unsigned>                years_;
-  vector<double>                  length_bins_;
-  bool                            length_plus_     = false;  
+  vector<unsigned> years_;
+  vector<double>   length_bins_;
+  bool             length_plus_ = false;
   // have to be assigned a value to be optional, note in the constructpr the default is model_->length_plus()
   unsigned                        number_bins_ = 0;
-  parameters::Table*              obs_table_   = nullptr;
+  parameters::table::Table*       obs_table_   = nullptr;
   vector<Double>                  process_error_values_;
   map<unsigned, Double>           process_errors_by_year_;
   string                          method_;
-  parameters::Table*              error_values_table_ = nullptr;
+  parameters::table::Table*       error_values_table_ = nullptr;
   CachedCombinedCategoriesPtr     cached_partition_;
   CombinedCategoriesPtr           partition_;
   vector<Double>                  length_results_;
@@ -67,17 +67,16 @@ protected:
   string                          process_label_;
   bool                            using_model_length_bins = true;
   vector<int>                     map_local_length_bins_to_global_length_bins_;
-  bool                            simulated_data_sum_to_one_ ;
+  bool                            simulated_data_sum_to_one_;
   bool                            sum_to_one_;
 
-  vector<Double>                  numbers_at_age_;
-  vector<Double>                  numbers_at_length_;
-  vector<Double>                  expected_values_;
+  vector<Double>                             numbers_at_age_;
+  vector<Double>                             numbers_at_length_;
+  vector<Double>                             expected_values_;
   map<unsigned, map<string, vector<double>>> proportions_;
   map<unsigned, map<string, vector<double>>> error_values_;
 
-  vector<string>          allowed_mortality_types_;
-
+  vector<string> allowed_mortality_types_;
 };
 
 } /* namespace age */

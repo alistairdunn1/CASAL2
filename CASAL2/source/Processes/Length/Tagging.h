@@ -39,17 +39,17 @@ class Tagging : public niwa::Process {
 public:
   // Methods
   explicit Tagging(shared_ptr<Model> model);
-  virtual ~Tagging();
+  virtual ~Tagging() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoExecute() override final;
 
   // accessor
 
 private:
   // Members
-  parameters::Table*            proportions_table_ = nullptr;
+  parameters::table::Table* proportions_table_ = nullptr;
   // members
   vector<string>                from_category_labels_;
   vector<string>                to_category_labels_;
@@ -65,10 +65,9 @@ private:
   string                        initial_mortality_selectivity_label_ = "";
   Selectivity*                  initial_mortality_selectivity_       = nullptr;
   vector<Double>                n_;
-  unsigned                      first_year_        = 0;
+  unsigned                      first_year_ = 0;
   map<unsigned, vector<Double>> numbers_;
-  double                        tolerance_                           = 0;
-
+  double                        tolerance_ = 0;
 };
 
 } /* namespace length */

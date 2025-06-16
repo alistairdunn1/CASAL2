@@ -48,8 +48,8 @@ MortalityInstantaneousRetained::MortalityInstantaneousRetained(shared_ptr<Model>
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
-  catches_table_ = new parameters::Table(PARAM_CATCHES);
-  method_table_  = new parameters::Table(PARAM_METHOD);
+  catches_table_ = parameters_.BindTable(PARAM_CATCHES, "The table of removals (catch) data");
+  method_table_  = parameters_.BindTable(PARAM_METHOD, "The table of method of removal data");
   catches_table_->set_required_columns({PARAM_YEAR}, true);
   method_table_->set_required_columns(
       {PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_U_MAX, PARAM_PENALTY, PARAM_RETAINED_SELECTIVITY, PARAM_DISCARD_MORTALITY_SELECTIVITY}, true);
@@ -61,18 +61,7 @@ MortalityInstantaneousRetained::MortalityInstantaneousRetained(shared_ptr<Model>
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The M-by-age ogives to apply on the categories for natural mortality")
       ->set_alias_labels({PARAM_RELATIVE_M_BY_AGE});
 
-  parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
-  parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
-
   RegisterAsAddressable(PARAM_M, &m_);
-}
-
-/**
- * Destructor
- */
-MortalityInstantaneousRetained::~MortalityInstantaneousRetained() {
-  delete catches_table_;
-  delete method_table_;
 }
 
 /**

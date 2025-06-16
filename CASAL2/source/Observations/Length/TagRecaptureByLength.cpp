@@ -34,10 +34,10 @@ namespace length {
  * Default constructor
  */
 TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observation(model) {
-  recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
-  scanned_table_    = new parameters::Table(PARAM_SCANNED);
-  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
-  parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each age class", "", false);
+  recaptures_table_ = parameters_.BindTable(PARAM_RECAPTURED, "The table of observed recaptured individuals in each age class");
+  recaptures_table_->set_requires_columns(false);
+  scanned_table_ = parameters_.BindTable(PARAM_SCANNED, "The table of observed scanned individuals in each age class");
+  scanned_table_->set_requires_columns(false);
 
   parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);
   parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group? (defaults to @model value)")->set_is_optional(true);

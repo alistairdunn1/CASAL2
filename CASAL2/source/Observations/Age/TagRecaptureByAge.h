@@ -54,9 +54,9 @@ protected:
   Double                      detection_  = 0.0;
   vector<string>              tagged_category_labels_;
   vector<string>              tagged_selectivity_labels_;
-  parameters::Table*          recaptures_table_   = nullptr;
+  parameters::table::Table*   recaptures_table_   = nullptr;
   string                      ageing_error_label_ = "";
-  parameters::Table*          scanned_table_      = nullptr;
+  parameters::table::Table*   scanned_table_      = nullptr;
   CachedCombinedCategoriesPtr cached_partition_;
   CombinedCategoriesPtr       partition_;
   CachedCombinedCategoriesPtr tagged_cached_partition_;

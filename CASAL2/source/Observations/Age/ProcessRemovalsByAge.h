@@ -38,7 +38,7 @@ class ProcessRemovalsByAge : public niwa::Observation {
 public:
   // Methods
   explicit ProcessRemovalsByAge(shared_ptr<Model> model);
-  virtual ~ProcessRemovalsByAge();
+  virtual ~ProcessRemovalsByAge() {};
   void DoValidate() override;
   void DoBuild() override final;
   void DoReset() override final {};
@@ -54,12 +54,12 @@ protected:
   unsigned                                   max_age_    = 0;
   bool                                       plus_group_ = false;
   unsigned                                   age_spread_ = 0;
-  parameters::Table*                         obs_table_  = nullptr;
+  parameters::table::Table*                  obs_table_  = nullptr;
   vector<Double>                             process_error_values_;
   map<unsigned, Double>                      process_errors_by_year_;
   string                                     ageing_error_label_ = "";
   vector<string>                             method_;
-  parameters::Table*                         error_values_table_ = nullptr;
+  parameters::table::Table*                  error_values_table_ = nullptr;
   CombinedCategoriesPtr                      partition_;
   AgeingError*                               ageing_error_ = nullptr;
   vector<Double>                             age_results_;

@@ -31,19 +31,10 @@ namespace agelengths {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Data::Data(shared_ptr<Model> model) : AgeLength(model) {
-  data_table_ = new parameters::Table(PARAM_DATA);
-
-  parameters_.BindTable(PARAM_DATA, data_table_, "", "");
+  data_table_ = parameters_.BindTable(PARAM_DATA, "");
   parameters_.Bind<string>(PARAM_EXTERNAL_GAPS, &external_gaps_, "The method to use for external data gaps")->set_default_value(PARAM_MEAN);
   parameters_.Bind<string>(PARAM_INTERNAL_GAPS, &internal_gaps_, "The method to use for internal data gaps")->set_default_value(PARAM_MEAN);
   parameters_.Bind<string>(PARAM_TIME_STEP_MEASUREMENTS_WERE_MADE, &step_data_supplied_, "The time step label for which size-at-age data are provided");
-}
-
-/**
- * Destructor
- */
-Data::~Data() {
-  delete data_table_;
 }
 
 /**

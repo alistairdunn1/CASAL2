@@ -63,24 +63,25 @@
 #include <variant>
 #include <vector>
 
-#include "../ParameterList/Table.h"
-#include "../Utilities/NoCopy.h"
-#include "../Utilities/Types.h"
 #include "Parameter.h"
 #include "Parameters/Bindable.h"
 #include "Parameters/BindableVector.h"
 #include "Parameters/Validator.h"
 #include "Parameters/ValidatorVector.h"
+#include "Table/Table.h"
+#include "Table/ValidatorTable.h"
+#include "Utilities/NoCopy.h"
+#include "Utilities/Types.h"
 
 // Namespaces
 namespace niwa {
-
+namespace table = niwa::parameters::table;
 using niwa::parameterlist::Parameter;
 using niwa::parameters::Bindable;
 using niwa::parameters::BindableVector;
-using niwa::parameters::Table;
 using niwa::parameters::Validator;
 using niwa::parameters::ValidatorVector;
+using niwa::parameters::table::ValidatorTable;
 using niwa::utilities::Double;
 using std::map;
 using std::shared_ptr;
@@ -100,9 +101,10 @@ public:
   bool                        Add(const string& label, const string& value, const string& file_name, const unsigned& line_number);
   bool                        Add(const string& label, const vector<string>& values, const string& file_name, const unsigned& line_number);
   Parameter*                  Get(const string& label);
-  parameters::Table*          GetTable(const string& label);
+  table::Table*               GetTable(const string& label);
   shared_ptr<Validator>       Validate(const string& label);
   shared_ptr<ValidatorVector> ValidateVector(const string& label);
+  shared_ptr<ValidatorTable>  ValidateTable(const string& label);
   void                        CopyFrom(const ParameterList& source, string parameter_label);
   void                        CopyFrom(const ParameterList& source, string parameter_label, const unsigned& value_index);
   void                        Clear();
@@ -120,7 +122,10 @@ public:
   template <typename T>
   BindableVector<T>* Bind(const string& label, vector<T>* target, const string& description);
 
-  void BindTable(const string& label, parameters::Table* table, const string& description, const string& values, bool requires_columns = true, bool optional = false);
+  // void BindTable(const string& label, table::Table* table, const string& description, const string& values, bool requires_columns = true, bool optional = false);
+
+  table::Table* BindTable(const string& label, const string& description);
+
   void Populate(shared_ptr<Model> model);
 
   // accessors
@@ -138,14 +143,14 @@ public:
 
 private:
   // members
-  shared_ptr<Model>       model_;
-  bool                    already_populated_   = false;
-  string                  parent_block_type_   = "<unknown>";
-  string                  defined_file_name_   = "<unknown>";
-  unsigned                defined_line_number_ = 0;
-  map<string, Parameter*> parameters_;
-  map<string, Table*>     tables_;
-  bool                    ignore_all_parameters_ = false;
+  shared_ptr<Model>          model_;
+  bool                       already_populated_   = false;
+  string                     parent_block_type_   = "<unknown>";
+  string                     defined_file_name_   = "<unknown>";
+  unsigned                   defined_line_number_ = 0;
+  map<string, Parameter*>    parameters_;
+  map<string, table::Table*> tables_;
+  bool                       ignore_all_parameters_ = false;
 
   DISALLOW_COPY_MOVE_AND_ASSIGN(ParameterList);
 };

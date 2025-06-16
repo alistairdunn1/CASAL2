@@ -34,7 +34,7 @@ TransitionCategoryByAge::TransitionCategoryByAge(shared_ptr<Model> model) : Proc
   process_type_        = ProcessType::kTransition;
   partition_structure_ = PartitionType::kAge;
 
-  n_table_ = new parameters::Table(PARAM_N);
+  n_table_ = parameters_.BindTable(PARAM_N, "The table of N data");
   n_table_->set_required_columns({PARAM_YEAR}, true);
 
   // clang-format off
@@ -46,15 +46,7 @@ TransitionCategoryByAge::TransitionCategoryByAge(shared_ptr<Model> model) : Proc
   parameters_.Bind<Double>(PARAM_U_MAX, &u_max_, "The maximum exploitation rate ($U_{max}$)")->set_default_value(0.99); // 
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years to execute the transition in");
 
-  parameters_.BindTable(PARAM_N, n_table_, "The table of N data", "");
   // clang-format on
-}
-
-/**
- * Destructor
- */
-TransitionCategoryByAge::~TransitionCategoryByAge() {
-  delete n_table_;
 }
 
 /**

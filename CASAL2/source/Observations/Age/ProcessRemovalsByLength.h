@@ -38,7 +38,7 @@ class ProcessRemovalsByLength : public niwa::Observation {
 public:
   // Methods
   explicit ProcessRemovalsByLength(shared_ptr<Model> model);
-  virtual ~ProcessRemovalsByLength();
+  virtual ~ProcessRemovalsByLength() {};
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final {};
@@ -53,26 +53,26 @@ protected:
   vector<double>   length_bins_;
   bool             length_plus_ = false;
   // have to be assigned a value to be optional, note in the constructpr the default is model_->length_plus()
-  unsigned              number_bins_ = 0;
-  parameters::Table*    obs_table_   = nullptr;
-  vector<Double>        process_error_values_;
-  map<unsigned, Double> process_errors_by_year_;
-  string                method_;
-  parameters::Table*    error_values_table_ = nullptr;
-  CombinedCategoriesPtr partition_;
-  age::Mortality*       mortality_process_ = nullptr;
-  vector<string>        time_step_label_;
-  string                process_label_;
-  vector<Double>        numbers_at_age_;
-  vector<Double>        numbers_at_length_;
-  vector<Double>        expected_values_;
-  bool                  using_model_length_bins = true;
-  vector<int>           map_local_length_bins_to_global_length_bins_;
-  vector<unsigned>      fishery_ndx_to_get_catch_at_info_;
-  vector<unsigned>      year_ndx_to_get_catch_at_info_;
-  map<string, unsigned> category_lookup_for_ndx_to_get_catch_at_info_;
-  bool                  simulated_data_sum_to_one_;
-  bool                  sum_to_one_;
+  unsigned                  number_bins_ = 0;
+  parameters::table::Table* obs_table_   = nullptr;
+  vector<Double>            process_error_values_;
+  map<unsigned, Double>     process_errors_by_year_;
+  string                    method_;
+  parameters::table::Table* error_values_table_ = nullptr;
+  CombinedCategoriesPtr     partition_;
+  age::Mortality*           mortality_process_ = nullptr;
+  vector<string>            time_step_label_;
+  string                    process_label_;
+  vector<Double>            numbers_at_age_;
+  vector<Double>            numbers_at_length_;
+  vector<Double>            expected_values_;
+  bool                      using_model_length_bins = true;
+  vector<int>               map_local_length_bins_to_global_length_bins_;
+  vector<unsigned>          fishery_ndx_to_get_catch_at_info_;
+  vector<unsigned>          year_ndx_to_get_catch_at_info_;
+  map<string, unsigned>     category_lookup_for_ndx_to_get_catch_at_info_;
+  bool                      simulated_data_sum_to_one_;
+  bool                      sum_to_one_;
 
   map<unsigned, map<string, vector<double>>> proportions_;
   map<unsigned, map<string, vector<double>>> error_values_;

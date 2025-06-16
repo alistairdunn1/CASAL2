@@ -27,7 +27,7 @@ class Data : public AgeLength {
 public:
   // methods
   explicit Data(shared_ptr<Model> model);
-  virtual ~Data();
+  virtual ~Data() {};
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final {};
@@ -44,7 +44,7 @@ private:
   void InterpolateTimeStepsForAllYears();
 
   // members
-  parameters::Table*                                  data_table_ = nullptr;
+  parameters::table::Table*                           data_table_ = nullptr;
   string                                              external_gaps_;
   string                                              internal_gaps_;
   map<unsigned, vector<Double>>                       data_by_year_;

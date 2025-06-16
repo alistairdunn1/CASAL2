@@ -35,7 +35,7 @@ class ProcessRemovalsByLength : public niwa::Observation {
 public:
   // Methods
   explicit ProcessRemovalsByLength(shared_ptr<Model> model);
-  virtual ~ProcessRemovalsByLength();
+  virtual ~ProcessRemovalsByLength() = default;
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
@@ -50,11 +50,11 @@ protected:
   vector<double>                             length_bins_                                  = {};
   bool                                       length_plus_                                  = false;  // Is the last length bin a plus group?
   unsigned                                   number_bins_                                  = 0;
-  parameters::Table*                         obs_table_                                    = nullptr;
+  parameters::table::Table*                  obs_table_                                    = nullptr;
   vector<Double>                             process_error_values_                         = {};
   map<unsigned, Double>                      process_errors_by_year_                       = {};
   string                                     method_                                       = "";
-  parameters::Table*                         error_values_table_                           = nullptr;
+  parameters::table::Table*                  error_values_table_                           = nullptr;
   CombinedCategoriesPtr                      partition_                                    = nullptr;
   length::MortalityInstantaneous*            mortality_instantaneous_                      = nullptr;
   string                                     time_step_label_                              = "";

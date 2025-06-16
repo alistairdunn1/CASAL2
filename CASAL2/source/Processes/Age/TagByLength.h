@@ -34,10 +34,10 @@ class TagByLength : public Process {
 public:
   // method
   explicit TagByLength(shared_ptr<Model> model);
-  virtual ~TagByLength();
+  virtual ~TagByLength() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoExecute() override final;
   void FillReportCache(ostringstream& cache) override final;
 
@@ -59,8 +59,8 @@ private:
   string                         initial_mortality_selectivity_label_ = "";
   Selectivity*                   initial_mortality_selectivity_       = nullptr;
   vector<Double>                 n_;
-  parameters::Table*             numbers_table_     = nullptr;
-  parameters::Table*             proportions_table_ = nullptr;
+  parameters::table::Table*      numbers_table_     = nullptr;
+  parameters::table::Table*      proportions_table_ = nullptr;
   unsigned                       first_year_        = 0;
   unsigned                       n_length_bins_;
   map<unsigned, vector<Double>>  numbers_;
@@ -77,7 +77,7 @@ private:
   vector<Double>                 tag_to_fish_by_age_;           //  age bins
   vector<vector<Double>>         tag_to_fish_by_category_age_;  //  category x age bins
 
-  vector<Double> vulnerable_fish_by_age_;                       //  age bins
+  vector<Double> vulnerable_fish_by_age_;  //  age bins
 
   unsigned min_age_;
   unsigned max_age_;

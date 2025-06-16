@@ -36,13 +36,14 @@ class Cinitial : public niwa::InitialisationPhase {
 public:
   // methods
   explicit Cinitial(shared_ptr<Model> model);
-  virtual ~Cinitial();
+  virtual ~Cinitial() = default;
 
 protected:
   // methods
   void DoValidate() override final;
   void DoBuild() override final;
   void DoExecute() override final;
+
 private:
   // members
   CombinedCategoriesPtr       partition_;
@@ -51,7 +52,7 @@ private:
   unsigned                    min_age_      = 0;
   unsigned                    max_age_      = 0;
   unsigned                    column_count_ = 0;
-  parameters::Table*          n_table_      = nullptr;
+  parameters::table::Table*   n_table_      = nullptr;
   map<string, vector<Double>> n_;
   vector<Double>              binitial_;
   vector<Double>              rinitial_;

@@ -37,10 +37,10 @@ namespace age {
  * Default constructor
  */
 TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observation(model) {
-  recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
-  scanned_table_    = new parameters::Table(PARAM_SCANNED);
-  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each length bin", "", false);
-  parameters_.BindTable(PARAM_SCANNED, scanned_table_, "The table of observed scanned individuals in each length bin", "", false);
+  recaptures_table_ = parameters_.BindTable(PARAM_RECAPTURED, "The table of observed recaptured individuals in each length bin");
+  recaptures_table_->set_requires_columns(false);
+  scanned_table_ = parameters_.BindTable(PARAM_SCANNED, "The table of observed scanned individuals in each length bin");
+  scanned_table_->set_requires_columns(false);
 
   // clang-format off
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);

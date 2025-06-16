@@ -21,19 +21,8 @@ namespace projects {
  * Default constructor
  */
 MultipleConstants::MultipleConstants(shared_ptr<Model> model) : Project(model) {
-  data_table_ = new parameters::Table(PARAM_VALUES);
-  parameters_.BindTable(PARAM_VALUES, data_table_, "Table of values for each -i input. Rows are -i value columns are for each year to project for.", "");
+  data_table_ = parameters_.BindTable(PARAM_VALUES, "Table of values for each -i input. Rows are -i value columns are for each year to project for.");
 }
-/**
- * Destructor
- */
-MultipleConstants::~MultipleConstants() {
-  delete data_table_;
-}
-/**
- * Validate
- */
-void MultipleConstants::DoValidate() {}
 
 /**
  * Build

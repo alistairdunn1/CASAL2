@@ -35,11 +35,16 @@ namespace age {
  * There is mortality in this process, so does make sense*
  */
 TagByLength::TagByLength(shared_ptr<Model> model) : Process(model), to_partition_(model), from_partition_(model) {
-  process_type_ = ProcessType::kMortality;
-
+  process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
-  numbers_table_       = new parameters::Table(PARAM_NUMBERS);
-  proportions_table_   = new parameters::Table(PARAM_PROPORTIONS);
+
+  numbers_table_ = parameters_.BindTable(PARAM_NUMBERS, "The data table of numbers to tag");
+  numbers_table_->set_requires_columns(false);
+  numbers_table_->set_is_optional(true);
+  proportions_table_ = parameters_.BindTable(PARAM_PROPORTIONS, "The data table of proportions to tag");
+  proportions_table_->set_requires_columns(false);
+  proportions_table_->set_is_optional(true);
+
   // clang-format off
   parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories that are selected for tagging (i.e., transition from)")
     ->flag_is_category(true);
@@ -61,18 +66,7 @@ TagByLength::TagByLength(shared_ptr<Model> model) : Process(model), to_partition
     ->set_default_value(1e-5); 
   parameters_.Bind<string>(PARAM_COMPATIBILITY, &compatibility_, "Backwards compatibility option: either casal2 (the default) or casal: effects penalty and age-length calculation")
     ->set_default_value(PARAM_CASAL2);
-  
-  parameters_.BindTable(PARAM_NUMBERS, numbers_table_, "The data table of numbers to tag", "", false, true);
-  parameters_.BindTable(PARAM_PROPORTIONS, proportions_table_, "The data table of proportions to tag", "", false, true);
   // clang-format on
-}
-
-/**
- * Destructor
- */
-TagByLength::~TagByLength() {
-  delete numbers_table_;
-  delete proportions_table_;
 }
 
 /**

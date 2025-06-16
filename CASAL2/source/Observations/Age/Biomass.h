@@ -38,7 +38,7 @@ class Biomass : public niwa::Observation {
 public:
   // methods
   Biomass(shared_ptr<Model> model);
-  virtual ~Biomass();
+  virtual ~Biomass() {};
   void         DoValidate() override final;
   virtual void DoBuild() override;
   void         DoReset() override final;
@@ -55,7 +55,7 @@ protected:
   Double                      process_error_value_ = 0;
   CachedCombinedCategoriesPtr cached_partition_;
   CombinedCategoriesPtr       partition_;
-  parameters::Table*          obs_table_ = nullptr;
+  parameters::table::Table*   obs_table_ = nullptr;
   vector<string>              selectivity_labels_;
   vector<Selectivity*>        selectivities_;
   string                      time_step_label_       = "";

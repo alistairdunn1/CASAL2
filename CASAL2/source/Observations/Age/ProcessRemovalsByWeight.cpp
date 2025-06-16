@@ -36,10 +36,10 @@ namespace age {
  * Default constructor
  */
 ProcessRemovalsByWeight::ProcessRemovalsByWeight(shared_ptr<Model> model) : Observation(model) {
-  obs_table_          = new parameters::Table(PARAM_OBS);
-  error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "Table of observed values", "", false);
-  parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "Table of observed values");
+  obs_table_->set_requires_columns(false);
+  error_values_table_ = parameters_.BindTable(PARAM_ERROR_VALUES, "The table of error values of the observed values (note that the units depend on the likelihood)");
+  error_values_table_->set_requires_columns(false);
 
   // clang-format off
   parameters_.Bind<string>(PARAM_MORTALITY_PROCESS, &process_label_, "The label of the mortality instantaneous process for the observation");
@@ -64,14 +64,6 @@ ProcessRemovalsByWeight::ProcessRemovalsByWeight(shared_ptr<Model> model) : Obse
 
   allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL};
   allowed_mortality_types_  = {PARAM_MORTALITY_INSTANTANEOUS};
-}
-
-/**
- * Destructor
- */
-ProcessRemovalsByWeight::~ProcessRemovalsByWeight() {
-  delete obs_table_;
-  delete error_values_table_;
 }
 
 /**

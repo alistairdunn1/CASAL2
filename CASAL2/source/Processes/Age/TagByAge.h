@@ -34,10 +34,10 @@ class TagByAge : public niwa::Process {
 public:
   // methods
   explicit TagByAge(shared_ptr<Model> model);
-  virtual ~TagByAge();
+  virtual ~TagByAge() = default;
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final{};
+  void DoReset() override final {};
   void DoExecute() override final;
   void FillReportCache(ostringstream& cache) override final;
 
@@ -63,8 +63,8 @@ private:
   string                        initial_mortality_selectivity_label_ = "";
   Selectivity*                  initial_mortality_selectivity_       = nullptr;
   vector<Double>                n_;
-  parameters::Table*            numbers_table_     = nullptr;
-  parameters::Table*            proportions_table_ = nullptr;
+  parameters::table::Table*     numbers_table_     = nullptr;
+  parameters::table::Table*     proportions_table_ = nullptr;
   unsigned                      first_year_        = 0;
   map<unsigned, vector<Double>> numbers_;
   map<unsigned, Double>         n_by_year_;
@@ -78,8 +78,8 @@ private:
   vector<Double>                tag_to_fish_by_age_;           // age bins
   vector<vector<Double>>        tag_to_fish_by_category_age_;  // category x age bins
 
-  vector<Double>                vulnerable_fish_by_age_;                      // age bins
-  unsigned                      min_age_offset_ = 0;
+  vector<Double> vulnerable_fish_by_age_;  // age bins
+  unsigned       min_age_offset_ = 0;
   // Containers for reporting
   vector<vector<vector<Double>>> tagged_fish_after_init_mort_;  // n_years x n_from_categories x n_ages
   vector<vector<vector<Double>>> actual_tagged_fish_to_;        // n_years x n_to_categories x n_ages

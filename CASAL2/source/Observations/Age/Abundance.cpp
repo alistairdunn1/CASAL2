@@ -31,7 +31,8 @@ namespace utils = niwa::utilities;
  * Default constructor
  */
 Abundance::Abundance(shared_ptr<Model> model) : Observation(model) {
-  obs_table_ = new parameters::Table(PARAM_OBS);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of observed values and error values");
+  obs_table_->set_requires_columns(false);
 
   // Process parameters
   parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The label of the process for the observation")->set_is_optional(true);
@@ -41,25 +42,18 @@ Abundance::Abundance(shared_ptr<Model> model) : Observation(model) {
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
       ->set_default_value(0.5);
 
+  // Generic parameters
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
   parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities", "", true);
-  parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error", "", Double(0.0))->set_lower_bound(0.0);
-  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations", "");
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values and error values", "", false);
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
+  parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error")->set_default_value(0.0);
+  parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations");
 
   RegisterAsAddressable(PARAM_PROCESS_ERROR, &process_error_value_);
 
   allowed_likelihood_types_.push_back(PARAM_NORMAL);
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
   allowed_likelihood_types_.push_back(PARAM_PSEUDO);
-}
-
-/**
- * Destructor
- */
-Abundance::~Abundance() {
-  delete obs_table_;
 }
 
 /**
@@ -74,6 +68,18 @@ void Abundance::DoValidate() {
   parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.Validate(PARAM_DELTA)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
+
+  // parameters_.ValidateTable(PARAM_OBS)
+  // ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
+  // ->Columns(1 + category_labels_.size() + 1, "Number of columns in the observation table must match the number of categories plus two (year and error value)");
+  //     ->ColumnIndex(PARAM_YEAR, 0, "The first column of the observation table must be the year")
+  //     ->ColumnIndex(PARAM_ERROR, category_labels_.size() + 1, "The last column of the observation table must be the error value for the observation")
+  //     ->ColumnIsModelYear(0, "First column of the observation table must be a model year")
+  //     ->ColumnIsDataRange(1, -1, "All columns except the first and last must be data values for the observation")
+  //     ->ColumnIsDouble(category_labels_.size() + 1, "The last column of the observation table must be a double representing the error value for the observation");
+
+  // proportions_by_year_  = obs_table_->map_proportions_to_year<unsigned, vector<double>>();
+  // error_values_by_year_ = obs_table_->map_error_values_to_year<unsigned, double>();
 
   // Obs
   unsigned                num_obs       = category_labels_.size();

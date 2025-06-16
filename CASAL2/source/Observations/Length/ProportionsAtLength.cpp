@@ -30,10 +30,10 @@ namespace length {
  * Default constructor
  */
 ProportionsAtLength::ProportionsAtLength(shared_ptr<Model> model) : Observation(model) {
-  obs_table_          = new parameters::Table(PARAM_OBS);
-  error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
-  parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of observed values");
+  obs_table_->set_requires_columns(false);
+  error_values_table_ = parameters_.BindTable(PARAM_ERROR_VALUES, "The table of error values of the observed values (note that the units depend on the likelihood)");
+  error_values_table_->set_requires_columns(false);
 
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations");
@@ -46,14 +46,6 @@ ProportionsAtLength::ProportionsAtLength(shared_ptr<Model> model) : Observation(
   parameters_.Bind<bool>(PARAM_SUM_TO_ONE, &sum_to_one_, "Scale year (row) observed values by the total, so they sum = 1")->set_default_value(true);
 
   allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL, PARAM_DIRICHLET, PARAM_DIRICHLET_MULTINOMIAL, PARAM_LOGISTIC_NORMAL};
-}
-
-/**
- * Destructor
- */
-ProportionsAtLength::~ProportionsAtLength() {
-  delete obs_table_;
-  delete error_values_table_;
 }
 
 /**

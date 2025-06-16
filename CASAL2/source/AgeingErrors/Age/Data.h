@@ -16,18 +16,17 @@
 #define AGEINGERRORS_DATA_H_
 
 // headers
-#include "../../AgeingErrors/AgeingError.h"
+#include "../AgeingError.h"
 
 // namespaces
-namespace niwa {
-namespace ageingerrors {
+namespace niwa::ageingerrors {
 
 // classes
 class Data : public niwa::AgeingError {
 public:
   // methods
   Data(shared_ptr<Model> model);
-  virtual ~Data();
+  virtual ~Data() {};
 
 protected:
   // methods
@@ -37,10 +36,9 @@ protected:
 
 private:
   // members
-  parameters::Table* data_table_ = nullptr;
-  Double             tol_        = 1e-5;
+  parameters::table::Table* data_table_ = nullptr;
+  Double                    tol_        = 1e-5;
 };
 
-} /* namespace ageingerrors */
-} /* namespace niwa */
+}  // namespace niwa::ageingerrors
 #endif /* AGEINGERRORS_DATA_H_ */

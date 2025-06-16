@@ -35,19 +35,12 @@ namespace age {
  * @param model Pointer to our core model object
  */
 Cinitial::Cinitial(shared_ptr<Model> model) : InitialisationPhase(model) {
-  n_table_ = new parameters::Table(PARAM_N);
+  n_table_ = parameters_.BindTable(PARAM_N, "The table of values for the Cinitial initialisation");
+  n_table_->set_requires_columns(false);
 
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories for the Cinitial initialisation");
-  parameters_.BindTable(PARAM_N, n_table_, "The table of values for the Cinitial initialisation", "", false, false);
 
   RegisterAsAddressable(&n_);
-}
-
-/**
- * Destructor
- */
-Cinitial::~Cinitial() {
-  delete n_table_;
 }
 
 /**

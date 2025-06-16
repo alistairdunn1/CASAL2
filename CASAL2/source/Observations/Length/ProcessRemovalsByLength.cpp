@@ -38,10 +38,10 @@ namespace length {
  * Default constructor
  */
 ProcessRemovalsByLength::ProcessRemovalsByLength(shared_ptr<Model> model) : Observation(model) {
-  obs_table_          = new parameters::Table(PARAM_OBS);
-  error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "Table of observed values", "", false);
-  parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "Table of observed values");
+  obs_table_->set_requires_columns(false);
+  error_values_table_ = parameters_.BindTable(PARAM_ERROR_VALUES, "The table of error values of the observed values (note that the units depend on the likelihood)");
+  error_values_table_->set_requires_columns(false);
 
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The time step to execute in");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations");
@@ -59,14 +59,6 @@ ProcessRemovalsByLength::ProcessRemovalsByLength(shared_ptr<Model> model) : Obse
   RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
 
   allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL, PARAM_DIRICHLET, PARAM_DIRICHLET_MULTINOMIAL, PARAM_LOGISTIC_NORMAL};
-}
-
-/**
- * Destructor
- */
-ProcessRemovalsByLength::~ProcessRemovalsByLength() {
-  delete obs_table_;
-  delete error_values_table_;
 }
 
 /**

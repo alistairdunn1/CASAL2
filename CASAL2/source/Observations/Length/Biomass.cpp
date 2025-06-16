@@ -30,8 +30,8 @@ namespace utils = niwa::utilities;
  * Default constructor
  */
 Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
-  obs_table_ = new parameters::Table(PARAM_OBS);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values and error values", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of observed values and error values");
+  obs_table_->set_requires_columns(false);
 
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
   parameters_.Bind<string>(PARAM_CATCHABILITY, &catchability_label_, "The label of the catchability coefficient (q)");
@@ -42,13 +42,6 @@ Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
   RegisterAsAddressable(PARAM_PROCESS_ERROR, &process_error_value_);
 
   allowed_likelihood_types_ = {PARAM_NORMAL, PARAM_LOGNORMAL, PARAM_PSEUDO};
-}
-
-/**
- * Destructor
- */
-Biomass::~Biomass() {
-  delete obs_table_;
 }
 
 /**

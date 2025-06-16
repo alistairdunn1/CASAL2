@@ -11,20 +11,20 @@
 #ifdef TESTMODE
 
 // Headers
-#include <iostream>
-
-#include "../Categories/Categories.h"
-#include "../Model/Factory.h"
-#include "../Partition/Partition.h"
-#include "../TestResources/MockClasses/Managers.h"
-#include "../TestResources/MockClasses/Model.h"
-#include "../TestResources/TestFixtures/BasicModel.h"
-#include "../TimeSteps/Manager.h"
 #include "Table.h"
 
+#include <iostream>
+
+#include "Categories/Categories.h"
+#include "Model/Factory.h"
+#include "Partition/Partition.h"
+#include "TestResources/MockClasses/Managers.h"
+#include "TestResources/MockClasses/Model.h"
+#include "TestResources/TestFixtures/BasicModel.h"
+#include "TimeSteps/Manager.h"
+
 // Namespaces
-namespace niwa {
-namespace parameters {
+namespace niwa::parameters::table {
 
 using std::cout;
 using std::endl;
@@ -43,7 +43,7 @@ public:
     vector<string> age_length_lab;
     for (string sex : sexes) {
       for (string stage : stages) {
-        for (string tag : tags)  {
+        for (string tag : tags) {
           names.push_back(sex + "." + stage + "." + tag);
           age_length_lab.push_back("no_age_length");
         }
@@ -54,7 +54,6 @@ public:
     parameters().Add(PARAM_FORMAT, "sex.stage.tag", __FILE__, __LINE__);
     parameters().Add(PARAM_NAMES, names, __FILE__, __LINE__);
     parameters().Add(PARAM_AGE_LENGTHS, age_length_lab, __FILE__, __LINE__);
-
   };
 
   map<string, string> GetCategoryLabelsAndValues(const string& lookup, const string& parameter_location) override final {
@@ -651,7 +650,6 @@ TEST(Parameters, Table_GetColumnValuesAs_Unsigned_Double) {
   EXPECT_NO_THROW(vector<string> z = table.GetColumnValuesAs<string>("category"));
 }
 
-} /* namespace parameters */
-} /* namespace niwa */
+}  // namespace niwa::parameters::table
 
 #endif /* TESTMODE */

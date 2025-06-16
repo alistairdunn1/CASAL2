@@ -38,7 +38,7 @@ public:
   virtual ~TagRecaptureByLength() = default;
   void         DoValidate() override final;
   virtual void DoBuild() override;
-  void         DoReset() override final{};
+  void         DoReset() override final {};
   void         PreExecute() override final;
   void         Execute() override final;
   void         CalculateScore() override final;
@@ -46,18 +46,18 @@ public:
 
 protected:
   // Members
-  vector<unsigned>   years_;
-  string             time_step_label_ = "";
-  Double             detection_;
-  vector<double>     length_bins_;
-  bool               length_plus_ = false;
-  string             ageing_error_label_;
-  parameters::Table* recaptures_table_ = nullptr;
-  parameters::Table* scanned_table_    = nullptr;
-  Double             time_step_proportion_;
-  unsigned           number_bins_;
-  bool               using_model_length_bins = true;
-  vector<int>        map_local_length_bins_to_global_length_bins_;
+  vector<unsigned>          years_;
+  string                    time_step_label_ = "";
+  Double                    detection_;
+  vector<double>            length_bins_;
+  bool                      length_plus_ = false;
+  string                    ageing_error_label_;
+  parameters::table::Table* recaptures_table_ = nullptr;
+  parameters::table::Table* scanned_table_    = nullptr;
+  Double                    time_step_proportion_;
+  unsigned                  number_bins_;
+  bool                      using_model_length_bins = true;
+  vector<int>               map_local_length_bins_to_global_length_bins_;
 
   // Category members
   vector<string>         tagged_category_labels_;

@@ -8,17 +8,16 @@
  * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2018 - www.niwa.co.nz
  *
  */
-#ifndef SOURCE_PARAMETERLIST_TABLE_INL_H_
-#define SOURCE_PARAMETERLIST_TABLE_INL_H_
+#ifndef SOURCE_PARAMETERS_TABLE_TABLE_INL_H_
+#define SOURCE_PARAMETERS_TABLE_TABLE_INL_H_
 
 #include <vector>
 
-#include "../Utilities/To.h"
-#include "../Utilities/Types.h"
+#include "Utilities/To.h"
+#include "Utilities/Types.h"
 
 // namespaces
-namespace niwa {
-namespace parameters {
+namespace niwa::parameters::table {
 
 using std::vector;
 
@@ -102,7 +101,6 @@ inline vector<string> Table::GetColumnValuesAs(const string& column) {
   return result;
 }
 
-} /* namespace parameters */
-} /* namespace niwa */
+}  // namespace niwa::parameters::table
 
-#endif /* SOURCE_PARAMETERLIST_TABLE_INL_H_ */
+#endif /* SOURCE_PARAMETERS_TABLE_TABLE_INL_H_ */

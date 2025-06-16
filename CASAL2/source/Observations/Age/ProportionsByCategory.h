@@ -35,7 +35,7 @@ class ProportionsByCategory : public niwa::Observation {
 public:
   // methods
   ProportionsByCategory(shared_ptr<Model> model);
-  virtual ~ProportionsByCategory();
+  virtual ~ProportionsByCategory() {};
   void         DoValidate() override;
   virtual void DoBuild() override;
   void         DoReset() override final {};
@@ -53,11 +53,11 @@ protected:
   unsigned                    age_spread_ = 0;
   vector<string>              target_category_labels_;
   vector<string>              target_selectivity_labels_;
-  parameters::Table*          obs_table_ = nullptr;
+  parameters::table::Table*   obs_table_ = nullptr;
   vector<Double>              process_error_values_;
   map<unsigned, Double>       process_errors_by_year_;
   string                      ageing_error_label_;
-  parameters::Table*          error_values_table_ = nullptr;
+  parameters::table::Table*   error_values_table_ = nullptr;
   CachedCombinedCategoriesPtr cached_partition_;
   CombinedCategoriesPtr       partition_;
   CachedCombinedCategoriesPtr target_cached_partition_;

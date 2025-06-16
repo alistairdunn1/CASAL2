@@ -32,7 +32,9 @@ Tagging::Tagging(shared_ptr<Model> model) : Process(model), to_partition_(model)
   // There is mortality in this process, so does make sense
   partition_structure_ = PartitionType::kLength;
 
-  proportions_table_ = new parameters::Table(PARAM_PROPORTIONS);
+  proportions_table_ = parameters_.BindTable(PARAM_PROPORTIONS, "The table of proportions to move");
+  proportions_table_->set_is_optional(true);
+
   parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories to transition from", "");
   parameters_.Bind<string>(PARAM_TO, &to_category_labels_, "The categories to transition to");
   parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The penalty label")->set_default_value("");
@@ -43,15 +45,6 @@ Tagging::Tagging(shared_ptr<Model> model) : Process(model), to_partition_(model)
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The selectivity labels");
   parameters_.Bind<Double>(PARAM_N, &n_, "Number of tags (N)");
   parameters_.Bind<double>(PARAM_TOLERANCE, &tolerance_, "Tolerance for checking the specificed proportions sum to one")->set_default_value(1e-5);
-
-  parameters_.BindTable(PARAM_PROPORTIONS, proportions_table_, "The table of proportions to move", "", true, true);
-}
-
-/**
- * Destructor
- */
-Tagging::~Tagging() {
-  delete proportions_table_;
 }
 
 /**

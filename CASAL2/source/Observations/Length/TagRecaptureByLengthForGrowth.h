@@ -47,7 +47,7 @@ public:
 protected:
   // Members
   vector<unsigned>              years_                                       = {};
-  parameters::Table*            recaptures_table_                            = nullptr;
+  parameters::table::Table*     recaptures_table_                            = nullptr;
   vector<Double>                process_error_values_                        = {};
   map<unsigned, Double>         process_errors_by_year_                      = {};
   CachedCombinedCategoriesPtr   cached_partition_                            = nullptr;

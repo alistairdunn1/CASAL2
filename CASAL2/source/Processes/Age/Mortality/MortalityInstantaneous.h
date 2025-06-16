@@ -87,7 +87,7 @@ class MortalityInstantaneous : public Mortality {
 public:
   // methods
   explicit MortalityInstantaneous(shared_ptr<Model> model);
-  virtual ~MortalityInstantaneous();
+  virtual ~MortalityInstantaneous() = default;
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
@@ -105,8 +105,8 @@ private:
   // members
   vector<FisheryCategoryData> fishery_categories_;
   map<string, FisheryData>    fisheries_;
-  parameters::Table*          catches_table_ = nullptr;
-  parameters::Table*          method_table_  = nullptr;
+  parameters::table::Table*   catches_table_ = nullptr;
+  parameters::table::Table*   method_table_  = nullptr;
   accessor::Categories        partition_;
   Double                      current_m_        = 0.0;
   bool                        is_catch_biomass_ = true;

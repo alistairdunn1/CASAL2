@@ -51,7 +51,6 @@ class MortalityInstantaneous : public Process {
     map<unsigned, Double> exploitation_by_year_;
     map<unsigned, Double> uobs_by_year_;
 
-
     Double  vulnerability_;
     Double  uobs_fishery_;
     Double  exploitation_;
@@ -74,7 +73,7 @@ class MortalityInstantaneous : public Process {
    * FisheryCategoryData is used to store 1 Fishery x Category x Selectivity
    */
   struct FisheryCategoryData {
-    FisheryCategoryData(FisheryData& x, CategoryData& y) : fishery_(x), category_(y){};
+    FisheryCategoryData(FisheryData& x, CategoryData& y) : fishery_(x), category_(y) {};
     FisheryData&   fishery_;
     CategoryData&  category_;
     string         fishery_label_;
@@ -87,7 +86,7 @@ class MortalityInstantaneous : public Process {
 public:
   // methods
   explicit MortalityInstantaneous(shared_ptr<Model> model);
-  virtual ~MortalityInstantaneous();
+  virtual ~MortalityInstantaneous() = default;
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
@@ -120,8 +119,8 @@ private:
   vector<string>              category_labels_;
   vector<FisheryCategoryData> fishery_categories_;
   map<string, FisheryData>    fisheries_;
-  parameters::Table*          catches_table_ = nullptr;
-  parameters::Table*          method_table_  = nullptr;
+  parameters::table::Table*   catches_table_ = nullptr;
+  parameters::table::Table*   method_table_  = nullptr;
   accessor::Categories        partition_;
   Double                      current_m_ = 0.0;
   vector<unsigned>            process_years_;  // Can we get @project classes to modify this?
@@ -147,11 +146,11 @@ private:
   // map<unsigned, map<string, map<string, vector<Double>>>> removals_by_year_fishery_category_;  // Year,  fishery, category
 
   // Members for reporting
-  vector<unsigned>               time_steps_to_skip_applying_F_mortality_;
-  vector<string>                 fishery_labels_;
+  vector<unsigned> time_steps_to_skip_applying_F_mortality_;
+  vector<string>   fishery_labels_;
 };
 
-} /* namespace age */
+}  // namespace length
 } /* namespace processes */
 } /* namespace niwa */
 

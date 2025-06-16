@@ -34,8 +34,8 @@ namespace length {
  * Default constructor
  */
 TagRecaptureByLengthForGrowth::TagRecaptureByLengthForGrowth(shared_ptr<Model> model) : Observation(model) {
-  recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
-  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
+  recaptures_table_ = parameters_.BindTable(PARAM_RECAPTURED, "The table of observed recaptured individuals in each age class");
+  recaptures_table_->set_requires_columns(false);
 
   // clang-format off
   parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);

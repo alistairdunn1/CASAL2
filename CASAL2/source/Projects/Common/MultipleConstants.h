@@ -26,17 +26,17 @@ namespace projects {
 class MultipleConstants : public niwa::Project {
 public:
   explicit MultipleConstants(shared_ptr<Model> model);
-  virtual ~MultipleConstants();
-  void DoValidate() override final;
+  virtual ~MultipleConstants() = default;
+  void DoValidate() override final {};
   void DoBuild() override final;
   void DoReset() override final;
   void DoUpdate() override final;
 
 protected:
   // members
-  parameters::Table*                                  data_table_ = nullptr;
-  vector<map<unsigned, Double>>                       projection_values_; // dash_i x n_years
-  Double                                              value_;
+  parameters::table::Table*     data_table_ = nullptr;
+  vector<map<unsigned, Double>> projection_values_;  // dash_i x n_years
+  Double                        value_;
 };
 
 } /* namespace projects */

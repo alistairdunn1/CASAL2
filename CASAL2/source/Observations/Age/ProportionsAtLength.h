@@ -37,7 +37,7 @@ class ProportionsAtLength : public niwa::Observation {
 public:
   // Methods
   explicit ProportionsAtLength(shared_ptr<Model> model);
-  virtual ~ProportionsAtLength();
+  virtual ~ProportionsAtLength() {};
   void         DoValidate() override;
   virtual void DoBuild() override;
   void         DoReset() override final {};
@@ -49,10 +49,10 @@ public:
 protected:
   // Members
   vector<unsigned>            years_;
-  parameters::Table*          obs_table_ = nullptr;
+  parameters::table::Table*   obs_table_ = nullptr;
   vector<Double>              process_error_values_;
   map<unsigned, Double>       process_errors_by_year_;
-  parameters::Table*          error_values_table_ = nullptr;
+  parameters::table::Table*   error_values_table_ = nullptr;
   CachedCombinedCategoriesPtr cached_partition_;
   CombinedCategoriesPtr       partition_;
   vector<string>              selectivity_labels_;

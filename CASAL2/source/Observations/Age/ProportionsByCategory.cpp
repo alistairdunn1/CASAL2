@@ -32,10 +32,10 @@ namespace age {
  * Default constructor
  */
 ProportionsByCategory::ProportionsByCategory(shared_ptr<Model> model) : Observation(model) {
-  obs_table_          = new parameters::Table(PARAM_OBS);
-  error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
-  parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "The table of error values of the observed values (note that the units depend on the likelihood)", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of observed values");
+  obs_table_->set_requires_columns(false);
+  error_values_table_ = parameters_.BindTable(PARAM_ERROR_VALUES, "The table of error values of the observed values (note that the units depend on the likelihood)");
+  error_values_table_->set_requires_columns(false);
 
   parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
   parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age");
@@ -48,14 +48,6 @@ ProportionsByCategory::ProportionsByCategory(shared_ptr<Model> model) : Observat
   parameters_.Bind<Double>(PARAM_PROCESS_ERRORS, &process_error_values_, "The process error")->set_is_optional(true);
 
   allowed_likelihood_types_ = {PARAM_BINOMIAL};
-}
-
-/**
- * Destructor
- */
-ProportionsByCategory::~ProportionsByCategory() {
-  delete obs_table_;
-  delete error_values_table_;
 }
 
 /**

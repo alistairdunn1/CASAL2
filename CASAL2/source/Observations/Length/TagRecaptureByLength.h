@@ -49,10 +49,10 @@ protected:
   vector<unsigned>                           years_{};
   double                                     detection_ = 0.0;
   vector<string>                             tagged_selectivity_labels_{};
-  parameters::Table*                         recaptures_table_ = nullptr;
+  parameters::table::Table*                  recaptures_table_ = nullptr;
   vector<Double>                             process_error_values_{};
   map<unsigned, Double>                      process_errors_by_year_{};
-  parameters::Table*                         scanned_table_           = nullptr;
+  parameters::table::Table*                  scanned_table_           = nullptr;
   CachedCombinedCategoriesPtr                cached_partition_        = nullptr;
   CombinedCategoriesPtr                      partition_               = nullptr;
   CachedCombinedCategoriesPtr                tagged_cached_partition_ = nullptr;

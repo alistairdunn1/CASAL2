@@ -33,7 +33,7 @@ class StateCategoryByAge : public niwa::InitialisationPhase {
 public:
   // methods
   explicit StateCategoryByAge(shared_ptr<Model> model);
-  virtual ~StateCategoryByAge();
+  virtual ~StateCategoryByAge() {};
 
 protected:
   // methods
@@ -49,7 +49,7 @@ private:
   unsigned                     min_age_      = 0;
   unsigned                     max_age_      = 0;
   unsigned                     column_count_ = 0;
-  parameters::Table*           n_table_      = nullptr;
+  parameters::table::Table*    n_table_      = nullptr;
   map<string, vector<Double>>  n_;
 };
 

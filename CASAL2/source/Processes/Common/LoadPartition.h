@@ -23,14 +23,14 @@ class LoadPartition : public Process {
 public:
   // methods
   explicit LoadPartition(shared_ptr<Model> model);
-  virtual ~LoadPartition();
+  virtual ~LoadPartition() = default;
   void DoValidate() final;
   void DoBuild() final;
-  void DoReset() final{};
-  void DoExecute() final{};
+  void DoReset() final {};
+  void DoExecute() final {};
 
 private:
-  parameters::Table* data_table_ = nullptr;
+  parameters::table::Table* data_table_ = nullptr;
 };
 
 }  // namespace niwa::processes

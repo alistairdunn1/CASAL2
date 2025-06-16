@@ -39,8 +39,12 @@ namespace age {
 TagByAge::TagByAge(shared_ptr<Model> model) : Process(model), to_partition_(model), from_partition_(model) {
   process_type_ = ProcessType::kMortality;
 
-  numbers_table_     = new parameters::Table(PARAM_NUMBERS);
-  proportions_table_ = new parameters::Table(PARAM_PROPORTIONS);
+  numbers_table_ = parameters_.BindTable(PARAM_NUMBERS, "The data table of numbers to tag");
+  numbers_table_->set_requires_columns(false);
+  numbers_table_->set_is_optional(true);
+  proportions_table_ = parameters_.BindTable(PARAM_PROPORTIONS, "The data table of proportions to tag");
+  proportions_table_->set_requires_columns(false);
+  proportions_table_->set_is_optional(true);
 
   // clang-format off
   parameters_.Bind<string>(PARAM_FROM, &from_category_labels_, "The categories that are selected for tagging (i.e., transition from)")
@@ -62,19 +66,9 @@ TagByAge::TagByAge(shared_ptr<Model> model) : Process(model), to_partition_(mode
   parameters_.Bind<Double>(PARAM_N, &n_, "The number of individuals tagged")
     ->set_is_optional(true);
   parameters_.Bind<double>(PARAM_TOLERANCE, &tolerance_, "Tolerance for checking the specificed proportions sum to one")
-    ->set_default_value(1e-5); 
+    ->set_default_value(1e-5);
 
-  parameters_.BindTable(PARAM_NUMBERS, numbers_table_, "The data table of numbers to tag", "", false, true);
-  parameters_.BindTable(PARAM_PROPORTIONS, proportions_table_, "The data table of proportions to tag", "", false, true);
   // clang-format on
-}
-
-/**
- * Destructor
- */
-TagByAge::~TagByAge() {
-  delete numbers_table_;
-  delete proportions_table_;
 }
 
 /**

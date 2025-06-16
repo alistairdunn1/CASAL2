@@ -38,7 +38,7 @@ class Abundance : public niwa::Observation {
 public:
   // Methods
   Abundance(shared_ptr<Model> model);
-  virtual ~Abundance();
+  virtual ~Abundance() {};
   void         DoValidate() override final;
   virtual void DoBuild() override;
   void         DoReset() override final;
@@ -56,7 +56,7 @@ protected:
   CachedCombinedCategoriesPtr cached_partition_;
   CombinedCategoriesPtr       partition_;
   Double                      proportion_of_time_ = 0;
-  parameters::Table*          obs_table_          = nullptr;
+  parameters::table::Table*   obs_table_          = nullptr;
   vector<string>              selectivity_labels_;
   vector<Selectivity*>        selectivities_;
   string                      time_step_label_       = "";

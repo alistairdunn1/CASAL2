@@ -50,9 +50,9 @@ MortalityInstantaneous::MortalityInstantaneous(shared_ptr<Model> model) : Proces
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kLength;
 
-  catches_table_ = new parameters::Table(PARAM_CATCHES);
-  method_table_  = new parameters::Table(PARAM_METHOD);
+  catches_table_ = parameters_.BindTable(PARAM_CATCHES, "The table of removals (catch) data");
   catches_table_->set_required_columns({PARAM_YEAR}, true);
+  method_table_ = parameters_.BindTable(PARAM_METHOD, "The table of method of removal data");
   method_table_->set_required_columns({PARAM_METHOD, PARAM_CATEGORY, PARAM_SELECTIVITY, PARAM_TIME_STEP, PARAM_U_MAX, PARAM_PENALTY});
 
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The categories for instantaneous mortality")->flag_is_category();
@@ -62,18 +62,7 @@ MortalityInstantaneous::MortalityInstantaneous(shared_ptr<Model> model) : Proces
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The M-by-length bin ogives to apply to each category for natural mortality")
       ->set_alias_labels({PARAM_RELATIVE_M_BY_LENGTH});
 
-  parameters_.BindTable(PARAM_METHOD, method_table_, "The table of method of removal data", "", true, false);
-  parameters_.BindTable(PARAM_CATCHES, catches_table_, "The table of removals (catch) data", "", true, false);
-
   RegisterAsAddressable(PARAM_M, &m_);
-}
-
-/**
- * Destructor
- */
-MortalityInstantaneous::~MortalityInstantaneous() {
-  delete catches_table_;
-  delete method_table_;
 }
 
 /**

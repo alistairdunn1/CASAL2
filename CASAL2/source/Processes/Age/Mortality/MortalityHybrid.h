@@ -9,7 +9,7 @@
  *
  * @section DESCRIPTION
  *
- * This mortality process is taken from Stock Synthesis see the hybrid approach 
+ * This mortality process is taken from Stock Synthesis see the hybrid approach
  * found at
  * https://github.com/nmfs-stock-synthesis/stock-synthesis/blob/main/SS_popdyn.tpl
  */
@@ -21,10 +21,10 @@
 #include "Model/Model.h"
 #include "Partition/Accessors/Categories.h"
 #include "Penalties/Common/Process.h"
+#include "Processes/Age/Mortality.h"
 #include "Processes/Process.h"
 #include "Selectivities/Selectivity.h"
 #include "Utilities/Map.h"
-#include "Processes/Age/Mortality.h"
 
 // namespaces
 namespace niwa {
@@ -44,10 +44,10 @@ class MortalityHybrid : public Mortality {
     string           label_;
     string           time_step_label_;
     unsigned         time_step_index_;
-    Double           init_popes_rate_; //robust A.1.22 of SS appendix
-    Double           steep_jointer_; //steep logistic joiner at harvest rate of 0.95
-    Double           popes_rate_; // = join1 * temp + (Type(1) - join1) * 0.95;
-    Double           init_F_; // current_F = -log(Type(1) - temp1); // initial estimate of F
+    Double           init_popes_rate_;  // robust A.1.22 of SS appendix
+    Double           steep_jointer_;    // steep logistic joiner at harvest rate of 0.95
+    Double           popes_rate_;       // = join1 * temp + (Type(1) - join1) * 0.95;
+    Double           init_F_;           // current_F = -log(Type(1) - temp1); // initial estimate of F
     Double           final_F_;
     Double           annual_duration_;
     Double           vulnerability_;
@@ -79,7 +79,7 @@ class MortalityHybrid : public Mortality {
    * FisheryCategoryData is used to store 1 Fishery x Category x Selectivity
    */
   struct FisheryCategoryData {
-    FisheryCategoryData(FisheryData& x, CategoryData& y) : fishery_(x), category_(y){};
+    FisheryCategoryData(FisheryData& x, CategoryData& y) : fishery_(x), category_(y) {};
     FisheryData&   fishery_;
     CategoryData&  category_;
     string         fishery_label_;
@@ -92,7 +92,7 @@ class MortalityHybrid : public Mortality {
 public:
   // methods
   explicit MortalityHybrid(shared_ptr<Model> model);
-  virtual ~MortalityHybrid();
+  virtual ~MortalityHybrid() = default;
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
@@ -101,7 +101,6 @@ public:
   void FillReportCache(ostringstream& cache) override final;
   void FillTabularReportCache(ostringstream& cache, bool first_run) override final;
 
-
 private:
   map<string, CategoryData*> category_data_;
   vector<CategoryData>       categories_;
@@ -109,15 +108,15 @@ private:
   // members
   vector<FisheryCategoryData> fishery_categories_;
   map<string, FisheryData>    fisheries_;
-  parameters::Table*          catches_table_ = nullptr;
-  parameters::Table*          method_table_  = nullptr;
+  parameters::table::Table*   catches_table_ = nullptr;
+  parameters::table::Table*   method_table_  = nullptr;
   accessor::Categories        partition_;
-  Double                      current_m_ = 0.0;
+  Double                      current_m_        = 0.0;
   bool                        is_catch_biomass_ = true;
   vector<vector<Double>>      total_catch_by_year_timestep_;
   // members from mortality event
-  string              unit_;
-  unsigned            F_iterations_;
+  string   unit_;
+  unsigned F_iterations_;
   // members from natural mortality
   vector<Double>             m_input_;
   OrderedMap<string, Double> m_;
@@ -127,9 +126,9 @@ private:
   vector<string>             selectivity_labels_;
   vector<Selectivity*>       selectivities_;
   // Members for reporting
-  vector<unsigned>               time_steps_to_skip_applying_F_mortality_;
-  bool                           use_age_weight_ = true;
-  vector<Double>                 annual_duration_by_timestep_;
+  vector<unsigned> time_steps_to_skip_applying_F_mortality_;
+  bool             use_age_weight_ = true;
+  vector<Double>   annual_duration_by_timestep_;
 };
 
 } /* namespace age */

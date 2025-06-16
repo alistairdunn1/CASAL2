@@ -98,7 +98,7 @@ class MortalityInstantaneousRetained : public Mortality {
 public:
   // methods
   explicit MortalityInstantaneousRetained(shared_ptr<Model> model);
-  virtual ~MortalityInstantaneousRetained();
+  virtual ~MortalityInstantaneousRetained() = default;
   void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
@@ -119,8 +119,8 @@ private:
   // members
   vector<FisheryCategoryData> fishery_categories_;
   map<string, FisheryData>    fisheries_;
-  parameters::Table*          catches_table_ = nullptr;
-  parameters::Table*          method_table_  = nullptr;
+  parameters::table::Table*   catches_table_ = nullptr;
+  parameters::table::Table*   method_table_  = nullptr;
 
   accessor::Categories partition_;
   Double               current_m_ = 0.0;

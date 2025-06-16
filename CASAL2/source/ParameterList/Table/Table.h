@@ -14,8 +14,8 @@
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
-#ifndef TABLE_H_
-#define TABLE_H_
+#ifndef PARAMETERS_TABLE_TABLE_H_
+#define PARAMETERS_TABLE_TABLE_H_
 
 // Headers
 #include <map>
@@ -23,13 +23,13 @@
 #include <string>
 #include <vector>
 
-#include "../Utilities/Types.h"
+#include "Utilities/Types.h"
 
 // Namespaces
 namespace niwa {
 class Model;
 
-namespace parameters {
+namespace parameters::table {
 
 using niwa::utilities::Double;
 using std::map;
@@ -71,6 +71,7 @@ public:
   vector<T> GetColumnValuesAs(const string& column);
 
   // accessors
+  const string&           label() const { return label_; }
   void                    set_file_name(const string& file_name) { file_name_ = file_name; }
   string                  file_name() const { return file_name_; }
   void                    set_line_number(const unsigned& line_number) { line_number_ = line_number; }
@@ -105,10 +106,10 @@ private:
   vector<string>         optional_columns_;
   bool                   allow_other_columns_ = false;
 };
-} /* namespace parameters */
+}  // namespace parameters::table
 } /* namespace niwa */
 
 // headers
 #include "Table-inl.h"
 
-#endif /* TABLE_H_ */
+#endif /* PARAMETERS_TABLE_TABLE_H_ */

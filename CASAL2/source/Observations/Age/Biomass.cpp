@@ -31,7 +31,8 @@ namespace utils = niwa::utilities;
  * Default constructor
  */
 Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
-  obs_table_ = new parameters::Table(PARAM_OBS);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of observed values and error values");
+  obs_table_->set_requires_columns(false);
 
   // clang-format off
   // Process parameters
@@ -51,8 +52,6 @@ Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
   parameters_.Bind<string>(PARAM_AGE_WEIGHT_LABELS, &age_weight_labels_, "The labels for the age_weights block which corresponds to each category, to use the weight calculation method")
     ->set_is_optional(true);
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years of the observed values");
-
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values and error values", "", false);
   // clang-format on
 
   RegisterAsAddressable(PARAM_PROCESS_ERROR, &process_error_value_);
@@ -60,13 +59,6 @@ Biomass::Biomass(shared_ptr<Model> model) : Observation(model) {
   allowed_likelihood_types_.push_back(PARAM_NORMAL);
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);
   allowed_likelihood_types_.push_back(PARAM_PSEUDO);
-}
-
-/**
- * Destructor
- */
-Biomass::~Biomass() {
-  delete obs_table_;
 }
 
 /**

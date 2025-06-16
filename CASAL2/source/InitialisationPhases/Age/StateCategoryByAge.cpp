@@ -27,21 +27,14 @@ namespace age {
  * @param model A pointer to our core model object
  */
 StateCategoryByAge::StateCategoryByAge(shared_ptr<Model> model) : InitialisationPhase(model), partition_(model), cached_partition_(model) {
-  n_table_ = new parameters::Table(PARAM_N);
+  n_table_ = parameters_.BindTable(PARAM_N, "Table of data from minimum age to maximum age for each category");
+  n_table_->set_requires_columns(false);
 
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of categories for the category state initialisation");
   parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age of values supplied in the definition of the category state");
   parameters_.Bind<unsigned>(PARAM_MAX_AGE, &max_age_, "The maximum age of values supplied in the definition of the category state");
-  parameters_.BindTable(PARAM_N, n_table_, "Table of data from minimum age to maximum age for each category", "", false, false);
 
   RegisterAsAddressable(&n_);
-}
-
-/**
- * Destructor
- */
-StateCategoryByAge::~StateCategoryByAge() {
-  delete n_table_;
 }
 
 /**

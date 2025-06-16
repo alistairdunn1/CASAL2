@@ -37,8 +37,8 @@ namespace age {
  * Default constructor
  */
 TagRecaptureByFishery::TagRecaptureByFishery(shared_ptr<Model> model) : Observation(model) {
-  recaptures_table_ = new parameters::Table(PARAM_RECAPTURED);
-  parameters_.BindTable(PARAM_RECAPTURED, recaptures_table_, "The table of observed recaptured individuals in each age class", "", false);
+  recaptures_table_ = parameters_.BindTable(PARAM_RECAPTURED, "The table of observed recaptured individuals in each age class");
+  recaptures_table_->set_requires_columns(false);
 
   parameters_.Unbind(PARAM_CATEGORIES);  // we don't use categories in this observation
 

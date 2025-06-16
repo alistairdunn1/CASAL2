@@ -48,6 +48,10 @@ ParameterList::~ParameterList() {
     if (parameter.second != nullptr)
       delete parameter.second;
   }
+  for (auto table : tables_) {
+    if (table.second != nullptr)
+      delete table.second;
+  }
   // DO NOT CLEAN UP TABLE MEMORY. IT'S HANDLE BY THE OWNER
 }
 
@@ -142,6 +146,7 @@ void ParameterList::Populate(shared_ptr<Model> model) {
                     << " are required but have not been defined: " << missing_parameters;
       }
     }
+    LOG_FATAL() << "STOP NOW";
     return;
   }
 
@@ -301,10 +306,11 @@ Parameter* ParameterList::Get(const string& label) {
  * @param label The label of the table to return
  * @return The parameter reference
  */
-parameters::Table* ParameterList::GetTable(const string& label) {
+table::Table* ParameterList::GetTable(const string& label) {
   auto iter = tables_.find(label);
-  if (iter == tables_.end())
+  if (iter == tables_.end()) {
     return nullptr;
+  }
 
   return iter->second;
 }
@@ -420,10 +426,25 @@ string ParameterList::quiet_location(const string& label) {
  * @param description Information used for documentation, ignored
  * @param values Information used for documentation, ignored
  */
-void ParameterList::BindTable(const string& label, parameters::Table* table, const string& description, const string& values, bool requires_columns, bool optional) {
-  table->set_requires_columns(requires_columns);
-  table->set_is_optional(optional);
+// void ParameterList::BindTable(const string& label, table::Table* table, const string& description, const string& values, bool requires_columns, bool optional) {
+//   table->set_requires_columns(requires_columns);
+//   table->set_is_optional(optional);
+//   unmanaged_tables_[label] = table;
+// }
+
+/**
+ * Bind a table pointer to the map so it can be recognised and retrieved by the configuration loader
+ * @param label The label of the table to bind
+ * @param description Information used for documentation, ignored
+ * @return A pointer to the table object
+ */
+table::Table* ParameterList::BindTable(const string& label, const string& description) {
+  if (tables_.find(label) != tables_.end()) {
+    LOG_CODE_ERROR() << "The table " << label << " has already been bound with the description " << description;
+  }
+  auto* table    = new parameters::table::Table(label);
   tables_[label] = table;
+  return table;
 }
 
 shared_ptr<Validator> ParameterList::Validate(const string& label) {
@@ -440,6 +461,19 @@ shared_ptr<ValidatorVector> ParameterList::ValidateVector(const string& label) {
     LOG_CODE_ERROR() << "The parameter " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
   }
   return std::make_shared<ValidatorVector>(model_, this, it);
+}
+
+shared_ptr<ValidatorTable> ParameterList::ValidateTable(const string& label) {
+  auto iter = tables_.find(label);
+  if (iter == tables_.end()) {
+    LOG_CODE_ERROR() << "The table " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
+  }
+
+  auto it = iter->second;
+  if (it == nullptr) {
+    LOG_CODE_ERROR() << "The table " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
+  }
+  return std::make_shared<ValidatorTable>(model_, this, it);
 }
 
 /**

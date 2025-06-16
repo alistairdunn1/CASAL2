@@ -47,8 +47,10 @@ MortalityHollingRate::MortalityHollingRate(shared_ptr<Model> model) : Mortality(
   process_type_        = ProcessType::kMortality;
   partition_structure_ = PartitionType::kAge;
 
-  predator_selectivities_table_ = new parameters::Table(PARAM_PREDATOR_SELECTIVITIES);
-  prey_selectivities_table_     = new parameters::Table(PARAM_PREY_SELECTIVITIES);
+  predator_selectivities_table_ = parameters_.BindTable(PARAM_PREY_SELECTIVITIES_BY_YEAR, "The table of prey selectivities by year and age");
+  predator_selectivities_table_->set_is_optional(true);
+  prey_selectivities_table_ = parameters_.BindTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR, "The table of predator selectivities by year and age");
+  prey_selectivities_table_->set_is_optional(true);
 
   parameters_.Bind<string>(PARAM_PREY_CATEGORIES, &prey_category_labels_, "The prey categories labels")->flag_is_category();
   parameters_.Bind<string>(PARAM_PREDATOR_CATEGORIES, &predator_category_labels_, "The predator categories labels")->flag_is_category();
@@ -61,9 +63,6 @@ MortalityHollingRate::MortalityHollingRate(shared_ptr<Model> model) : Mortality(
   parameters_.Bind<string>(PARAM_PREDATOR_SELECTIVITIES, &predator_selectivity_labels_, "The selectivities for predator categories")->set_is_optional(true);
   parameters_.Bind<string>(PARAM_PENALTY, &penalty_label_, "The label of penalty")->set_default_value("");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years in which to apply the mortality process");
-
-  parameters_.BindTable(PARAM_PREY_SELECTIVITIES_BY_YEAR, prey_selectivities_table_, "The table of prey selectivities by year and age", "", true, true);
-  parameters_.BindTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR, predator_selectivities_table_, "The table of predator selectivities by year and age", "", true, true);
 
   RegisterAsAddressable(PARAM_A, &a_);
   RegisterAsAddressable(PARAM_B, &b_);

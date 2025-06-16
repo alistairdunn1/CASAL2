@@ -30,22 +30,14 @@ namespace ageweights {
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
 Data::Data(shared_ptr<Model> model) : AgeWeight(model) {
-  data_table_ = new parameters::Table(PARAM_DATA);
+  data_table_ = parameters_.BindTable(PARAM_DATA, "");
 
   // clang-format off
-  parameters_.BindTable(PARAM_DATA, data_table_, "", "");
   parameters_.Bind<string>(PARAM_EQUILIBRIUM_METHOD, &equilibrium_method_, "If used in an SSB calculation, what is the method to calculate equilibrium SSB")
     ->set_default_value(PARAM_TERMINAL_YEAR);
   parameters_.Bind<string>(PARAM_UNITS, &units_, "The units of measure (grams, kilograms (kgs), or tonnes)")
     ->set_default_value(PARAM_KGS);
   // clang-format on
-}
-
-/**
- * Destructor
- */
-Data::~Data() {
-  delete data_table_;
 }
 
 /**

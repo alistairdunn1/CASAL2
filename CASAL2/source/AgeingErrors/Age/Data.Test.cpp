@@ -37,12 +37,12 @@ TEST(AgeingErrors, Data_MisMatrixGeneration) {
   data.parameters().Add(PARAM_TYPE, "data", __FILE__, __LINE__);
 
   // Create and add the data table
-  parameters::Table*     table     = data.parameters().GetTable(PARAM_DATA);
-  vector<vector<string>> test_data = {{"0.9", "0.1", "0.0", "0.0", "0.0"},
-                                      {"0.1", "0.8", "0.1", "0.0", "0.0"},
-                                      {"0.0", "0.1", "0.8", "0.1", "0.0"},
-                                      {"0.0", "0.0", "0.1", "0.8", "0.1"},
-                                      {"0.0", "0.0", "0.0", "0.1", "0.9"}};
+  parameters::table::Table* table     = data.parameters().GetTable(PARAM_DATA);
+  vector<vector<string>>    test_data = {{"0.9", "0.1", "0.0", "0.0", "0.0"},
+                                         {"0.1", "0.8", "0.1", "0.0", "0.0"},
+                                         {"0.0", "0.1", "0.8", "0.1", "0.0"},
+                                         {"0.0", "0.0", "0.1", "0.8", "0.1"},
+                                         {"0.0", "0.0", "0.0", "0.1", "0.9"}};
   table->set_data(test_data);
   data.Validate();
   data.Build();
@@ -78,12 +78,12 @@ TEST(AgeingErrors, Data_RowSumValidation) {
   valid_data_object.parameters().Add(PARAM_LABEL, "test_valid_data", __FILE__, __LINE__);
   valid_data_object.parameters().Add(PARAM_TYPE, "data", __FILE__, __LINE__);
 
-  parameters::Table*     valid_table = valid_data_object.parameters().GetTable(PARAM_DATA);
-  vector<vector<string>> valid_data  = {{"0.9", "0.1", "0.0", "0.0", "0.0"},
-                                        {"0.1", "0.8", "0.1", "0.0", "0.0"},
-                                        {"0.0", "0.1", "0.8", "0.1", "0.0"},
-                                        {"0.0", "0.0", "0.1", "0.8", "0.1"},
-                                        {"0.0", "0.0", "0.0", "0.1", "0.9"}};
+  parameters::table::Table* valid_table = valid_data_object.parameters().GetTable(PARAM_DATA);
+  vector<vector<string>>    valid_data  = {{"0.9", "0.1", "0.0", "0.0", "0.0"},
+                                           {"0.1", "0.8", "0.1", "0.0", "0.0"},
+                                           {"0.0", "0.1", "0.8", "0.1", "0.0"},
+                                           {"0.0", "0.0", "0.1", "0.8", "0.1"},
+                                           {"0.0", "0.0", "0.0", "0.1", "0.9"}};
   valid_table->set_data(valid_data);
   valid_data_object.Validate();
   valid_data_object.Build();
@@ -99,12 +99,12 @@ TEST(AgeingErrors, Data_RowSumValidation) {
   invalid_data_object.parameters().Add(PARAM_TOLERANCE, "0.001", __FILE__, __LINE__);
 
   // Create test data with invalid row sums (row doesn't sum to 1.0)
-  parameters::Table*     invalid_table = invalid_data_object.parameters().GetTable(PARAM_DATA);
-  vector<vector<string>> invalid_data  = {{"0.9", "0.1", "0.0", "0.0", "0.0"},
-                                          {"0.2", "0.8", "0.1", "0.0", "0.0"},  // This row sums to 1.1
-                                          {"0.0", "0.1", "0.8", "0.1", "0.0"},
-                                          {"0.0", "0.0", "0.1", "0.8", "0.1"},
-                                          {"0.0", "0.0", "0.0", "0.1", "0.9"}};
+  parameters::table::Table* invalid_table = invalid_data_object.parameters().GetTable(PARAM_DATA);
+  vector<vector<string>>    invalid_data  = {{"0.9", "0.1", "0.0", "0.0", "0.0"},
+                                             {"0.2", "0.8", "0.1", "0.0", "0.0"},  // This row sums to 1.1
+                                             {"0.0", "0.1", "0.8", "0.1", "0.0"},
+                                             {"0.0", "0.0", "0.1", "0.8", "0.1"},
+                                             {"0.0", "0.0", "0.0", "0.1", "0.9"}};
   invalid_table->set_data(invalid_data);
   // The Build should detect the row sum error, but since we can't check LOG_ERROR in tests,
   // we'll just validate and build it without asserting on the error
@@ -128,8 +128,8 @@ TEST(AgeingErrors, Data_DifferentMatrixSize) {
   data.parameters().Add(PARAM_TYPE, "data", __FILE__, __LINE__);
 
   // Create and add a smaller data table (3x3)
-  parameters::Table*     table     = data.parameters().GetTable(PARAM_DATA);
-  vector<vector<string>> test_data = {{"0.9", "0.1", "0.0"}, {"0.1", "0.8", "0.1"}, {"0.0", "0.1", "0.9"}};
+  parameters::table::Table* table     = data.parameters().GetTable(PARAM_DATA);
+  vector<vector<string>>    test_data = {{"0.9", "0.1", "0.0"}, {"0.1", "0.8", "0.1"}, {"0.0", "0.1", "0.9"}};
   table->set_data(test_data);
 
   data.Validate();
@@ -166,8 +166,8 @@ TEST(AgeingErrors, Data_NoPlusGroup) {
   data.parameters().Add(PARAM_TYPE, "data", __FILE__, __LINE__);
 
   // Create and add the data table where rows don't all sum to 1.0 (valid for no plus group)
-  parameters::Table*     table     = data.parameters().GetTable(PARAM_DATA);
-  vector<vector<string>> test_data = {
+  parameters::table::Table* table     = data.parameters().GetTable(PARAM_DATA);
+  vector<vector<string>>    test_data = {
       {"0.9", "0.1", "0.0", "0.0", "0.0"},
       {"0.1", "0.8", "0.1", "0.0", "0.0"},
       {"0.0", "0.1", "0.7", "0.1", "0.0"},  // Row sum < 1.0 is okay with no plus group

@@ -34,10 +34,10 @@ namespace age {
  * Default constructor
  */
 ProportionsAtAge::ProportionsAtAge(shared_ptr<Model> model) : Observation(model) {
-  obs_table_          = new parameters::Table(PARAM_OBS);
-  error_values_table_ = new parameters::Table(PARAM_ERROR_VALUES);
-  parameters_.BindTable(PARAM_OBS, obs_table_, "The table of observed values", "", false);
-  parameters_.BindTable(PARAM_ERROR_VALUES, error_values_table_, "", "", false);
+  obs_table_ = parameters_.BindTable(PARAM_OBS, "The table of observed values");
+  obs_table_->set_requires_columns(false);
+  error_values_table_ = parameters_.BindTable(PARAM_ERROR_VALUES, "");
+  error_values_table_->set_requires_columns(false);
 
   // clang-format off
   parameters_.Bind<unsigned>(PARAM_MIN_AGE, &min_age_, "The minimum age");
@@ -54,14 +54,6 @@ ProportionsAtAge::ProportionsAtAge(shared_ptr<Model> model) : Observation(model)
   // clang-format on
 
   allowed_likelihood_types_ = {PARAM_LOGNORMAL, PARAM_MULTINOMIAL, PARAM_DIRICHLET, PARAM_DIRICHLET_MULTINOMIAL, PARAM_LOGISTIC_NORMAL};
-}
-
-/**
- * Destructor
- */
-ProportionsAtAge::~ProportionsAtAge() {
-  delete obs_table_;
-  delete error_values_table_;
 }
 
 /**
