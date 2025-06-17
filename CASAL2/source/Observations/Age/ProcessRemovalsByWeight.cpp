@@ -53,7 +53,6 @@ ProcessRemovalsByWeight::ProcessRemovalsByWeight(shared_ptr<Model> model) : Obse
   parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);
   parameters_.Bind<double>(PARAM_LENGTH_BINS_N, &length_bins_n_, "The average number in each length bin");
   parameters_.Bind<string>(PARAM_UNITS, &units_, "The units for the weight bins (grams, kilograms (kgs), or tonnes)")->set_default_value(PARAM_KGS);
-      // ->set_allowed_values({PARAM_GRAMS, PARAM_TONNES, PARAM_KGS, PARAM_KILOGRAMS});
   parameters_.Bind<Double>(PARAM_FISHBOX_WEIGHT, &fishbox_weight_, "The target weight of each box")->set_default_value(20.0); 
   parameters_.Bind<double>(PARAM_WEIGHT_BINS, &weight_bins_, "The weight bins");
   // clang-format on
@@ -70,6 +69,10 @@ ProcessRemovalsByWeight::ProcessRemovalsByWeight(shared_ptr<Model> model) : Obse
  * Validate configuration file parameters
  */
 void ProcessRemovalsByWeight::DoValidate() {
+  number_length_bins_            = length_bins_.size();
+  number_weight_bins_            = weight_bins_.size();
+  unsigned expected_column_count = number_weight_bins_ * category_labels_.size() + 1;  // +1 for the year column
+
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.Validate(PARAM_LENGTH_WEIGHT_CV)->GreaterThan(0.0);
   parameters_.Validate(PARAM_LENGTH_WEIGHT_DISTRIBUTION)->IsInList({PARAM_NORMAL, PARAM_LOGNORMAL});
@@ -85,9 +88,6 @@ void ProcessRemovalsByWeight::DoValidate() {
   parameters_.ValidateVector(PARAM_WEIGHT_BINS)->GreaterThan(0.0)->IsInIncreasingOrder();
 
   // How many elements are expected in our observed table;
-  number_length_bins_ = length_bins_.size();
-  number_weight_bins_ = weight_bins_.size();
-
   if (length_weight_distribution_label_ == PARAM_NORMAL)
     length_weight_distribution_ = Distribution::kNormal;
   else if (length_weight_distribution_label_ == PARAM_LOGNORMAL)
@@ -95,112 +95,28 @@ void ProcessRemovalsByWeight::DoValidate() {
   else
     LOG_CODE_ERROR() << "The length-weight distribution '" << length_weight_distribution_label_ << "' is not valid.";
 
+  parameters_.ValidateTable(PARAM_OBS)
+      ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
+      ->Columns(expected_column_count, "Expected year, observation values, and error value columns in the observation table")
+      ->ColumnIsYear(0, "First column of the observation table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (data + error value) for the observation")
+      ->GreaterThan(expected_column_count - 1, 0.0);
+
+  parameters_.ValidateTable(PARAM_ERROR_VALUES)
+      ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
+      ->ExpandColumnsTo(category_labels_.size(), 1u)
+      ->Columns(category_labels_.size() + 1, "Expected year and error value columns in the error values table")
+      ->ColumnIsYear(0, "First column of the error values table must be a model year")
+      ->DoubleDataRange(1, category_labels_.size(), "All columns except the first must be a double value (error values) for the observation")
+      ->GreaterThanForRange(1, category_labels_.size(), 0.0);
+
+  if (length_plus_ & !model_->length_plus())
+    LOG_ERROR_P(PARAM_LENGTH_PLUS)
+        << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
+
   process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-
-  map<unsigned, vector<double>> error_values_by_year;
-  map<unsigned, vector<double>> obs_by_year;
-
-  /**
-   * Validate the number of obs provided matches age spread * category_labels * years
-   * This is because we'll have 1 set of obs per category collection provided.
-   * categories male+female male = 2 collections
-   */
-  unsigned                obs_expected = number_weight_bins_ * category_labels_.size() + 1;
-  vector<vector<string>>& obs_data     = obs_table_->data();
-  if (obs_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
-
-  for (vector<string>& obs_data_line : obs_data) {
-    if (obs_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_OBS) << "has " << obs_data_line.size() << " values defined, but " << obs_expected << " should match the number bins * categories + 1 (for year)";
-    }
-
-    unsigned year = 0;
-    if (!utilities::To<unsigned>(obs_data_line[0], year))
-      LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_OBS) << "value " << year << " is not a valid year for this observation";
-
-    for (unsigned i = 1; i < obs_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(obs_data_line[i], value))
-        LOG_ERROR_P(PARAM_OBS) << "value (" << obs_data_line[i] << ") could not be converted to a Double";
-      obs_by_year[year].push_back(value);
-    }
-    if (obs_by_year[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_OBS) << " " << obs_by_year[year].size() << " weights were provided, but " << obs_expected - 1 << "weights are required";
-  }
-
-  /**
-   * Build our error value map
-   */
-  vector<vector<string>>& error_values_data = error_values_table_->data();
-  if (error_values_data.size() != years_.size()) {
-    LOG_FATAL_P(PARAM_ERROR_VALUES) << "has " << error_values_data.size() << " rows defined, but " << years_.size() << " to match the number of years provided";
-  }
-
-  for (vector<string>& error_values_data_line : error_values_data) {
-    if (error_values_data_line.size() != 2 && error_values_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_ERROR_VALUES) << "has " << error_values_data_line.size() << " values defined, but " << obs_expected
-                                      << " to match the number bins * categories + 1 (for year)";
-    }
-
-    unsigned year = 0;
-
-    if (!utilities::To<unsigned>(error_values_data_line[0], year))
-      LOG_FATAL_P(PARAM_ERROR_VALUES) << "value " << error_values_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_FATAL_P(PARAM_ERROR_VALUES) << "value " << year << " is not a valid year for this observation";
-
-    for (unsigned i = 1; i < error_values_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(error_values_data_line[i], value))
-        LOG_FATAL_P(PARAM_ERROR_VALUES) << "value (" << error_values_data_line[i] << ") could not be converted to a Double";
-      if (likelihood_type_ == PARAM_LOGNORMAL && value <= 0.0) {
-        LOG_ERROR_P(PARAM_ERROR_VALUES) << ": error_value (" << value << ") cannot be equal to or less than 0.0";
-      } else if (likelihood_type_ == PARAM_MULTINOMIAL && value < 0.0) {
-        LOG_ERROR_P(PARAM_ERROR_VALUES) << ": error_value (" << value << ") cannot be less than 0.0";
-      }
-
-      error_values_by_year[year].push_back(value);
-    }
-
-    if (error_values_by_year[year].size() == 1) {
-      auto val_e = error_values_by_year[year][0];
-      error_values_by_year[year].assign(obs_expected - 1, val_e);
-    }
-
-    if (error_values_by_year[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_ERROR_VALUES) << " " << error_values_by_year[year].size() << " error values by year were provided, but " << obs_expected - 1
-                                      << " values are required based on the obs table";
-  }
-
-  /**
-   * Build our proportions and error values for use in the observation
-   * If the proportions for a given observation do not sum to 1.0
-   * and is off by more than the tolerance rescale them.
-   */
-  double value = 0.0;
-  for (auto iter = obs_by_year.begin(); iter != obs_by_year.end(); ++iter) {
-    double total = 0.0;
-
-    for (unsigned i = 0; i < category_labels_.size(); ++i) {
-      for (unsigned j = 0; j < number_weight_bins_; ++j) {
-        auto e_f = error_values_by_year.find(iter->first);
-        if (e_f != error_values_by_year.end()) {
-          unsigned obs_index = i * number_weight_bins_ + j;
-          value              = iter->second[obs_index];
-          error_values_[iter->first][category_labels_[i]].push_back(e_f->second[obs_index]);
-          proportions_[iter->first][category_labels_[i]].push_back(value);
-          total += value;
-        }
-      }
-    }
-    if (!utilities::math::IsOne(total)) {
-      LOG_WARNING() << "obs sum total (" << total << ") for year (" << iter->first << ") doesn't sum to 1.0";
-    }
-  }
+  proportions_            = obs_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
+  error_values_           = error_values_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, category_labels_.size());
 }
 
 /**
@@ -497,7 +413,7 @@ void ProcessRemovalsByWeight::Execute() {
 
     for (unsigned i = 0; i < expected_values_weight.size(); ++i) {
       SaveComparison(category_labels_[category_offset], 0, weight_bins_[i], expected_values_weight[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
+                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
     }
   }
 }

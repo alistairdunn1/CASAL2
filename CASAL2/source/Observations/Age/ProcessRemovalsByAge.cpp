@@ -66,6 +66,7 @@ ProcessRemovalsByAge::ProcessRemovalsByAge(shared_ptr<Model> model) : Observatio
  * Validate configuration file parameters
  */
 void ProcessRemovalsByAge::DoValidate() {
+  LOG_TRACE();
   // set up some variables we'll need
   age_spread_                    = (max_age_ - min_age_) + 1;
   unsigned expected_column_count = age_spread_ * category_labels_.size() + 1;  // +1 for the year column
@@ -90,6 +91,7 @@ void ProcessRemovalsByAge::DoValidate() {
 
   parameters_.ValidateTable(PARAM_ERROR_VALUES)
       ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
+      ->ExpandColumnsTo(category_labels_.size(), 1u)
       ->Columns(category_labels_.size() + 1, "Expected year and error value columns in the error values table")
       ->ColumnIsYear(0, "First column of the error values table must be a model year")
       ->DoubleDataRange(1, category_labels_.size(), "All columns except the first must be a double value (error values) for the observation")
@@ -99,7 +101,6 @@ void ProcessRemovalsByAge::DoValidate() {
 
   proportions_  = obs_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
   error_values_ = error_values_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, category_labels_.size());
-
   if (sum_to_one_) {
     for (auto& year_pair : proportions_) {
       niwa::utilities::map::scale_to_one<string>(year_pair.second);

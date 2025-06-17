@@ -37,7 +37,6 @@ Abundance::Abundance(shared_ptr<Model> model) : Observation(model) {
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
   parameters_.Bind<Double>(PARAM_PROCESS_ERROR, &process_error_value_, "The process error")->set_default_value(0.0);
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
-  ;
 
   RegisterAsAddressable(PARAM_PROCESS_ERROR, &process_error_value_);
 

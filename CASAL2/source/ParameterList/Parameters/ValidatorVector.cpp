@@ -430,7 +430,7 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
                      << ". Please define length bins in the model.";
   }
 
-  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+  if (auto* param = dynamic_cast<BindableVector<double>*>(parameter_)) {
     if (param->target() != nullptr || param->target()->size() == 0) {
       (*param->target()).assign(model_->length_bins().begin(), model_->length_bins().end());
     }
@@ -485,6 +485,8 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
   if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
     if (split_combined_categories && target_string->is_categories()) {
       expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
+      LOG_FINEST() << "Parameter::Validator::SameNumberOfElementsAs " << label
+                   << " is a categories parameter, expanding to total categories defined. Expected count: " << expected_count;
     }
   }
 
@@ -506,8 +508,19 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
 
   // Do our final check and now
   if (actual_target_size != expected_count) {
+    std::ostringstream param_values_stream;
+    for (const auto& val : parameter_->values()) {
+      param_values_stream << val << " ";
+    }
+    std::ostringstream expected_values_stream;
+    for (const auto& val : expected_parameter->values()) {
+      expected_values_stream << val << " ";
+    }
+    LOG_FINEST() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " values: " << param_values_stream.str();
+    LOG_FINEST() << "Parameter::Validator::SameNumberOfElementsAs " << label << " values: " << expected_values_stream.str();
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << actual_target_size << " elements, but " << label << " has " << expected_count
                 << " elements";
+    LOG_CODE_ERROR() << "Check";
   }
 
   return shared_from_this();
@@ -517,6 +530,7 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
  *
  */
 shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(const string& label) {
+  LOG_TRACE();
   if (!parameter_->has_been_defined() && parameter_->is_optional()) {
     return shared_from_this();
   }
@@ -534,6 +548,8 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
   if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
     if (target_string->is_categories()) {
       expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
+      LOG_FINEST() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label
+                   << " is a categories parameter, expanding to total categories defined. Expected count: " << expected_count;
     }
   }
 

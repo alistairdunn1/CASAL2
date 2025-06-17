@@ -60,6 +60,11 @@ ProportionsAtAge::ProportionsAtAge(shared_ptr<Model> model) : Observation(model)
  * Validate configuration file parameters
  */
 void ProportionsAtAge::DoValidate() {
+  LOG_TRACE();
+  // set up some variables we'll need
+  age_spread_                    = (max_age_ - min_age_) + 1;
+  unsigned expected_column_count = age_spread_ * category_labels_.size() + 1;  // +1 for the year column
+
   parameters_.Validate(PARAM_MIN_AGE)->IsAge()->LessThanOrEqualToParameter(PARAM_MAX_AGE);
   parameters_.Validate(PARAM_MAX_AGE)->IsAge();
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
@@ -70,121 +75,28 @@ void ProportionsAtAge::DoValidate() {
       ->SameNumberOfElementsAs(PARAM_YEARS)
       ->DefaultValue(0.0, years_.size());
 
+  parameters_.ValidateTable(PARAM_OBS)
+      ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
+      ->Columns(expected_column_count, "Expected year, observation values, and error value columns in the observation table")
+      ->ColumnIsYear(0, "First column of the observation table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (data + error value) for the observation")
+      ->GreaterThan(expected_column_count - 1, 0.0);
+
+  parameters_.ValidateTable(PARAM_ERROR_VALUES)
+      ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
+      ->ExpandColumnsTo(expected_column_count - 1, 1u)
+      ->Columns(expected_column_count, "Expected year and error value columns in the error values table")
+      ->ColumnIsYear(0, "First column of the error values table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (error values) for the observation")
+      ->GreaterThanForRange(1, expected_column_count - 1, 0.0);
+
   process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  age_spread_             = (max_age_ - min_age_) + 1;
 
-  /**
-   * Validate the number of obs provided matches age spread * category_labels * years
-   * This is because we'll have 1 set of obs per category collection provided.
-   * categories male+female male = 2 collections
-   */
-  map<unsigned, vector<double>> obs_by_year;
-  map<unsigned, vector<double>> error_values_by_year;
-  unsigned                      obs_expected = age_spread_ * category_labels_.size() + 1;
-  vector<vector<string>>&       obs_data     = obs_table_->data();
-  if (obs_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
-
-  for (vector<string>& obs_data_line : obs_data) {
-    if (obs_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_OBS) << "has " << obs_data_line.size() << " values defined, but " << obs_expected << " should match the age spread * categories + 1 (for year)";
-    }
-
-    unsigned year = 0;
-    if (!utilities::To<unsigned>(obs_data_line[0], year))
-      LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_OBS) << "value " << year << " is not a valid year for this observation";
-
-    for (unsigned i = 1; i < obs_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(obs_data_line[i], value))
-        LOG_ERROR_P(PARAM_OBS) << "value (" << obs_data_line[i] << ") could not be converted to a Double";
-      obs_by_year[year].push_back(value);
-    }
-    if (obs_by_year[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_OBS) << " " << obs_by_year[year].size() << " ages were supplied, but " << obs_expected - 1 << " ages are required";
-  }
-
-  /**
-   * Build our error value map
-   */
-  vector<vector<string>>& error_values_data = error_values_table_->data();
-  if (error_values_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_ERROR_VALUES) << "has " << error_values_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
-
-  for (vector<string>& error_values_data_line : error_values_data) {
-    if (error_values_data_line.size() != 2 && error_values_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_ERROR_VALUES) << "has " << error_values_data_line.size() << " values defined, but " << obs_expected
-                                      << " should match the age spread * categories + 1 (for year)";
-    }
-
-    unsigned year = 0;
-    if (!utilities::To<unsigned>(error_values_data_line[0], year))
-      LOG_ERROR_P(PARAM_ERROR_VALUES) << "value " << error_values_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_ERROR_VALUES) << "value " << year << " is not a valid year for this observation";
-    for (unsigned i = 1; i < error_values_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(error_values_data_line[i], value))
-        LOG_ERROR_P(PARAM_ERROR_VALUES) << "value (" << error_values_data_line[i] << ") could not be converted to a Double";
-      if (likelihood_type_ == PARAM_LOGNORMAL && value <= 0.0) {
-        LOG_ERROR_P(PARAM_ERROR_VALUES) << ": error_value (" << value << ") cannot be equal to or less than 0.0";
-      } else if ((likelihood_type_ == PARAM_MULTINOMIAL && value < 0.0) || (likelihood_type_ == PARAM_DIRICHLET && value < 0.0)) {
-        LOG_ERROR_P(PARAM_ERROR_VALUES) << ": error_value (" << value << ") cannot be less than 0.0";
-      }
-
-      error_values_by_year[year].push_back(value);
-    }
-
-    if (error_values_by_year[year].size() == 1) {
-      auto val_e = error_values_by_year[year][0];
-      error_values_by_year[year].assign(obs_expected - 1, val_e);
-    }
-
-    if (error_values_by_year[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_ERROR_VALUES) << " " << error_values_by_year[year].size() << " error values by year were provided, but " << obs_expected - 1
-                                      << " values are required based on the obs table";
-  }
-
-  /**
-   * Build our proportions and error values for use in the observation
-   * If the proportions for a given observation do not sum to 1.0
-   * and is off by more than the tolerance rescale them.
-   */
-  double value = 0.0;
-  for (auto iter = obs_by_year.begin(); iter != obs_by_year.end(); ++iter) {
-    double total = 0.0;
-
-    for (unsigned i = 0; i < category_labels_.size(); ++i) {
-      for (unsigned j = 0; j < age_spread_; ++j) {
-        auto e_f = error_values_by_year.find(iter->first);
-        if (e_f != error_values_by_year.end()) {
-          unsigned obs_index = i * age_spread_ + j;
-          value              = iter->second[obs_index];
-          error_values_[iter->first][category_labels_[i]].push_back(e_f->second[obs_index]);
-          // if not rescaling add the data
-          if (!sum_to_one_)
-            proportions_[iter->first][category_labels_[i]].push_back(value);
-          total += value;
-        }
-      }
-    }
-    // rescale the year obs so sum = 1
-    if (sum_to_one_) {
-      for (unsigned i = 0; i < category_labels_.size(); ++i) {
-        for (unsigned j = 0; j < age_spread_; ++j) {
-          unsigned obs_index = i * age_spread_ + j;
-          value              = iter->second[obs_index];
-          proportions_[iter->first][category_labels_[i]].push_back(value / total);
-        }
-      }
-    } else {
-      if (!utilities::math::IsOne(total)) {
-        LOG_WARNING_P(PARAM_OBS) << ": The sum of the values for year " << iter->first << " was " << total << " and do not sum to 1.0";
-      }
+  proportions_  = obs_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
+  error_values_ = error_values_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
+  if (sum_to_one_) {
+    for (auto& year_pair : proportions_) {
+      niwa::utilities::map::scale_to_one<string>(year_pair.second);
     }
   }
 }

@@ -49,7 +49,7 @@ ProportionsCategoryByLength::ProportionsCategoryByLength(shared_ptr<Model> model
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of time-step that the observation occurs in");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
   parameters_.Bind<string>(PARAM_TOTAL_CATEGORIES, &total_category_labels_,
-        "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)");
+        "All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)")->flag_is_category(true);
   parameters_.Bind<string>(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES, &total_selectivity_labels_, "The labels of the selectivities for total categories");
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
     ->set_default_value(0.5);
@@ -64,14 +64,15 @@ ProportionsCategoryByLength::ProportionsCategoryByLength(shared_ptr<Model> model
  * Validate total_categories command
  */
 void ProportionsCategoryByLength::DoValidate() {
+  LOG_TRACE();
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->DefaultToAllModelLengthBins();
   parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.ValidateVector(PARAM_TOTAL_CATEGORIES);
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.ValidateVector(PARAM_TOTAL_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
-  parameters_.ValidateVector(PARAM_SELECTIVITIES)->SameNumberOfElementsAs(PARAM_CATEGORIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES);
-  parameters_.ValidateVector(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES)->SameNumberOfElementsAs(PARAM_TOTAL_CATEGORIES)->ExpandToSameNumberOfElementsAs(PARAM_TOTAL_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES)->ExpandToSameNumberOfElementsAs(PARAM_TOTAL_CATEGORIES)->SameNumberOfElementsAs(PARAM_TOTAL_CATEGORIES);
   parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
       ->GreaterThanOrEqualTo(0.0)
       ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)

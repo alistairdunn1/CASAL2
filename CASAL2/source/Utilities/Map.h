@@ -172,8 +172,8 @@ public:
 namespace niwa::utilities::map {
 
 template <typename T>
-void scale_to_one(std::map<T, std::vector<Double>>& cat_map) {
-  Double total = 0.0;
+void scale_to_one(std::map<T, std::vector<double>>& cat_map) {
+  double total = 0.0;
   for (const auto& cat_pair : cat_map) {
     total += std::accumulate(cat_pair.second.begin(), cat_pair.second.end(), 0.0);
   }

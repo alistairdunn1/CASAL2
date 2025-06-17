@@ -45,6 +45,60 @@ shared_ptr<ValidatorTable> ValidatorTable::Rows(unsigned count, const string& er
 }
 
 /**
+ * This method will grow a table's columns to a specified number (grow_to + 1) if there are no more
+ * columns than at base_index. That is if the table only has one data column, it will grow until
+ * there are grow_to columns, duplicating the value in the base_index column.addressable
+ *
+ * For example
+ * @table error_values
+ * 2000 0.1
+ * 2002 0.2
+ * @end_table
+ *
+ * With grow_to = 3 and base_index = 1, the table will be expanded to: 2000 0.1 0.1 0.1, 2002 0.2 0.2 0.2.
+ *
+ * @param grow_to The number of data columns to grow the table to
+ * @param base_index The index of the column to duplicate values from
+ * @return A shared pointer to the ValidatorTable object for method chaining
+ */
+shared_ptr<ValidatorTable> ValidatorTable::ExpandColumnsTo(unsigned grow_to, unsigned base_index) {
+  LOG_FINEST() << "Expanding columns to " << grow_to << " with base index " << base_index;
+
+  if (table_ == nullptr)
+    LOG_CODE_ERROR() << "table_ is nullptr";
+
+  auto& data = table_->data();
+  if (data.empty()) {
+    LOG_ERROR() << table_->location() << "The table " << table_->label() << " has no data rows, but expected to expand columns to " << grow_to;
+    return shared_from_this();
+  }
+
+  // Check if the table has enough columns to expand
+  if (base_index >= data[0].size()) {
+    LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have a column at index " << base_index
+                << ". We expected it to contain values to expand columns to " << grow_to;
+    return shared_from_this();
+  }
+
+  // Do nothing if we already have more columns than 1 data column
+  if (data[0].size() > 2) {
+    LOG_FINEST() << "The table " << table_->label() << " already has more than 2 columns, no expansion possible. Has " << data[0].size() << " columns.";
+    return shared_from_this();
+  }
+
+  // Expand the columns
+  for (auto& row : data) {
+    auto duplicate_value = row[base_index];
+    LOG_FINEST() << "Expanding row from " << row.size() << " to " << (grow_to + 1) << " columns, duplicating value '" << duplicate_value << "' from base index " << base_index;
+    while (row.size() < grow_to + 1) {
+      row.push_back(duplicate_value);
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
  * This method will validate that the table has the specified number of columns.
  *  If the table does not have the specified number of columns it will throw an error.
  *
@@ -59,15 +113,14 @@ shared_ptr<ValidatorTable> ValidatorTable::Columns(unsigned count, const string&
 
   auto data = table_->data();
   if (data.empty()) {
-    LOG_ERROR() << table_->location() << "The table " << table_->label() << " has no data rows, but expected " << count << ". " << error_message;
+    LOG_ERROR() << table_->location() << "has no data rows, but expected " << count << ". " << error_message;
     return shared_from_this();
   }
 
-  // Check if the table has the expected number of columns
-  // If the table has no columns, we assume it is empty and return an error
+  // Check if the table has the expected number of columns If the table has no columns, we assume it is empty and return an error
   for (const auto& row : data) {
     if (row.size() != count) {
-      LOG_ERROR() << table_->location() << "The table " << table_->label() << " has " << row.size() << " columns, but expected " << count << ". " << error_message;
+      LOG_ERROR() << table_->location() << "has " << row.size() << " columns, but expected " << count << ". " << error_message;
       return shared_from_this();
     }
   }
@@ -117,28 +170,29 @@ shared_ptr<ValidatorTable> ValidatorTable::ColumnIsYear(unsigned column_index, c
  * If the columns do not contain double values it will throw an error.
  *
  * @param start_index The starting index of the range of columns to validate
- * @param end_index The ending index of the range of columns to validate
+ * @param number_of_columns The number of columns in the range to validate
  * @param error_message An optional error message to include in the log if validation fails
  *                      This can be used to provide additional context for the error.
  * @return A shared pointer to the ValidatorTable object for method chaining
  */
-shared_ptr<ValidatorTable> ValidatorTable::DoubleDataRange(unsigned start_index, unsigned end_index, const string& error_message) {
+shared_ptr<ValidatorTable> ValidatorTable::DoubleDataRange(unsigned start_index, unsigned number_of_columns, const string& error_message) {
   if (table_ == nullptr)
     LOG_CODE_ERROR() << "table_ is nullptr";
 
   auto data = table_->data();
   for (const auto& row : data) {
-    if (start_index >= row.size() || end_index > row.size()) {
-      LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have columns in the range [" << start_index << ", " << end_index
-                  << "). We expected it to contain double values. " << error_message;
+    if (start_index >= row.size() || (start_index + number_of_columns - 1) >= row.size()) {
+      LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have columns in the range [" << start_index << ", "
+                  << (start_index + number_of_columns - 1) << "). We expected it to contain double values. " << error_message;
       return shared_from_this();
     }
 
-    for (unsigned i = start_index; i < end_index; ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(row[i], value)) {
-        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << i << " does not contain a valid double value: '" << row[i] << "'. "
-                    << error_message;
+    for (unsigned i = 0; i < number_of_columns; ++i) {
+      unsigned i_index = start_index + i;
+      double   value   = 0.0;
+      if (!utilities::To<double>(row[i_index], value)) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << i_index << " does not contain a valid double value: '" << row[i_index]
+                    << "'. " << error_message;
         return shared_from_this();
       }
     }

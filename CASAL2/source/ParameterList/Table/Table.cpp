@@ -190,6 +190,11 @@ void Table::Populate(shared_ptr<Model> model) {
  */
 std::map<unsigned, std::map<string, std::vector<double>>> Table::MapColumnsToYearAndCategory(const vector<string>& category_labels, unsigned year_column_index,
                                                                                              unsigned data_index_start, unsigned data_column_count) const {
+  LOG_TRACE();
+
+  unsigned elements_per_category = data_column_count / category_labels.size();
+  LOG_FINE() << "elements_per_category: " << elements_per_category;
+
   std::map<unsigned, std::map<std::string, std::vector<double>>> result;
   if (data_column_count % category_labels.size() != 0)
     LOG_ERROR() << location() << "The number of data columns (" << data_column_count << ") is not evenly divisible by the number of category labels (" << category_labels.size()
@@ -199,31 +204,37 @@ std::map<unsigned, std::map<string, std::vector<double>>> Table::MapColumnsToYea
     if (year_column_index >= row.size())
       LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << year_column_index << ". We expected it to contain year values.";
 
-    unsigned year;
+    unsigned year = 0;
     if (!utilities::To<string, unsigned>(row[year_column_index], year))
       LOG_ERROR() << location() << "The value" << row[year_column_index] << " in column at index " << year_column_index << " could not be converted to type "
                   << utilities::demangle(typeid(year).name());
 
-    unsigned                              category_index = 0;
-    std::map<string, std::vector<double>> values;
-    for (unsigned i = 0; i < data_column_count; ++i) {
-      unsigned i_index = data_index_start + i;
-      if (i_index >= row.size())
-        LOG_ERROR() << location() << "The table " << label_ << " does not have a column at index " << i_index << ". We expected it to contain data values for the year.";
+    vector<string>::const_iterator it = row.begin() + data_index_start;
+    for (unsigned category_index = 0; category_index < category_labels.size(); ++category_index) {
+      if (it + elements_per_category > row.end())
+        LOG_ERROR() << location() << "The table " << label_ << " does not have enough data columns for category " << category_labels[category_index]
+                    << ". We expected it to contain " << elements_per_category << " values for this category.";
 
-      double value;
-      if (!utilities::To<string, double>(row[i_index], value))
-        LOG_ERROR() << location() << "The value" << row[i_index] << " in column at index " << i_index << " could not be converted to type "
-                    << utilities::demangle(typeid(value).name());
+      std::vector<string> values_for_category(it, it + elements_per_category);
+      if (values_for_category.size() != elements_per_category)
+        LOG_ERROR() << location() << "The table " << label_ << " does not have enough data columns for category " << category_labels[category_index]
+                    << ". We expected it to contain " << elements_per_category << " values for this category, but found " << values_for_category.size() << ".";
 
-      values[category_labels[category_index]].push_back(value);
-      if (i != 0 && i % (data_column_count / category_labels.size()) == 0) {
-        category_index++;
+      std::vector<double> values;
+      for (const auto& value : values_for_category) {
+        double double_value = 0.0;
+        if (!utilities::To<string, double>(value, double_value))
+          LOG_ERROR() << location() << "The value '" << value << "' in column at index " << (data_index_start + category_index * elements_per_category)
+                      << " could not be converted to type " << utilities::demangle(typeid(double_value).name());
+
+        values.push_back(double_value);
       }
-    }
 
-    result[year] = values;
-  }
+      result[year][category_labels[category_index]] = values;
+
+      it += elements_per_category;
+    }
+  }  // for (const auto& row : data_) {
 
   if (result.size() != data_.size()) {
     LOG_CODE_ERROR() << "MapColumnsToYearAndCategory: The number of years in the result does not match the number of rows in the data. "
@@ -235,9 +246,9 @@ std::map<unsigned, std::map<string, std::vector<double>>> Table::MapColumnsToYea
                        << "Expected: " << category_labels.size() << ", Actual: " << category_map.second.size();
     }
     for (const auto& category : category_map.second) {
-      if (category.second.size() != data_column_count / category_labels.size()) {
+      if (category.second.size() != elements_per_category) {
         LOG_CODE_ERROR() << "MapColumnsToYearAndCategory: The number of values in the category '" << category.first
-                         << "' does not match the expected number of values. Expected: " << data_column_count / category_labels.size() << ", Actual: " << category.second.size();
+                         << "' does not match the expected number of values. Expected: " << elements_per_category << ", Actual: " << category.second.size();
       }
     }
   }
