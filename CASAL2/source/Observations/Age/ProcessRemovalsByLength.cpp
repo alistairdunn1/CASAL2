@@ -70,7 +70,7 @@ ProcessRemovalsByLength::ProcessRemovalsByLength(shared_ptr<Model> model) : Obse
  */
 void ProcessRemovalsByLength::DoValidate() {
   number_bins_                   = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
-  unsigned expected_column_count = (length_bins_.size() - 1) * category_labels_.size() + 1;  // +1 for the year column
+  unsigned expected_column_count = number_bins_ * category_labels_.size() + 1;  // +1 for the year column
 
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
