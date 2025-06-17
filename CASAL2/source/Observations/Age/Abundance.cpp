@@ -13,6 +13,8 @@
 // Headers
 #include "Abundance.h"
 
+#include <set>
+
 #include "Catchabilities/Manager.h"
 #include "Model/Managers.h"
 #include "Selectivities/Manager.h"
@@ -125,11 +127,6 @@ void Abundance::DoBuild() {
     selectivities_.push_back(selectivity);
   }
 
-  if (selectivities_.size() == 1 && category_labels_.size() != 1) {
-    auto val_sel = selectivities_[0];
-    selectivities_.assign(category_labels_.size(), val_sel);
-  }
-
   if (partition_->category_count() != selectivities_.size())
     LOG_ERROR_P(PARAM_SELECTIVITIES) << ": number of selectivities provided (" << selectivities_.size() << ") does not match the number "
                                      << "of categories provided (" << partition_->category_count() << ")";
@@ -159,13 +156,14 @@ void Abundance::PreExecute() {
 void Abundance::Execute() {
   LOG_FINEST() << "Entering observation " << label_;
 
-  Double         expected_total = 0.0;  // value in the model
-  vector<string> keys;
-  vector<Double> expecteds;
-  vector<double> observeds;
-  vector<double> error_values;
-  vector<Double> process_errors;
-  vector<Double> scores;
+  Double                   expected_total = 0.0;  // value in the model
+  vector<string>           keys;
+  vector<Double>           expecteds;
+  vector<double>           observeds;
+  vector<double>           error_values;
+  vector<Double>           process_errors;
+  vector<Double>           scores;
+  vector<std::set<string>> selectivity_labels;
 
   Double   selectivity_result = 0.0;
   Double   start_value        = 0.0;
@@ -187,16 +185,22 @@ void Abundance::Execute() {
   if (partition_->Size() != proportions_by_year_[current_year].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_by_year_[current_year].size()";
 
+  unsigned selectivity_index = 0;
   for (unsigned proportions_index = 0; proportions_index < proportions_by_year_[current_year].size(); ++proportions_index, ++partition_iter, ++cached_partition_iter) {
+    std::set<string> selectivity_labels_set;
     expected_total = 0.0;
 
     auto category_iter        = partition_iter->begin();
     auto cached_category_iter = cached_partition_iter->begin();
-    for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter) {
+
+    for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter, ++selectivity_index) {
+      assert(selectivity_index < selectivities_.size());
+
       for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
         age = (*category_iter)->min_age_ + data_offset;
 
-        selectivity_result = selectivities_[category_offset]->GetAgeResult(age, (*category_iter)->age_length_);
+        selectivity_labels_set.insert(selectivities_[selectivity_index]->label());
+        selectivity_result = selectivities_[selectivity_index]->GetAgeResult(age, (*category_iter)->age_length_);
         start_value        = (*cached_category_iter)->cached_data_[data_offset];
         end_value          = (*category_iter)->data_[data_offset];
         final_value        = 0.0;
@@ -231,10 +235,12 @@ void Abundance::Execute() {
     observeds.push_back(proportions_by_year_[current_year][proportions_index]);
     error_values.push_back(error_value);
     process_errors.push_back(process_error_value_);
+    selectivity_labels.push_back(selectivity_labels_set);
   }
 
-  for (unsigned index = 0; index < observeds.size(); ++index)
-    SaveComparison(keys[index], expecteds[index], observeds[index], process_errors[index], error_values[index], 0.0, delta_, 0.0);
+  for (unsigned index = 0; index < observeds.size(); ++index) {
+    SaveComparison(keys[index], selectivity_labels[index], expecteds[index], observeds[index], process_errors[index], error_values[index], 0.0, delta_, 0.0);
+  }
 }
 
 /**

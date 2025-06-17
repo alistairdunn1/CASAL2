@@ -186,14 +186,15 @@ void Abundance::Execute() {
   if (partition_->Size() != proportions_by_year_[current_year].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_by_year_[current_year].size()";
 
+  unsigned selectivity_offset = 0;
   for (unsigned proportions_index = 0; proportions_index < proportions_by_year_[current_year].size(); ++proportions_index, ++partition_iter, ++cached_partition_iter) {
     expected_total = 0.0;
 
     auto category_iter        = partition_iter->begin();
     auto cached_category_iter = cached_partition_iter->begin();
-    for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter) {
+    for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter, ++selectivity_offset) {
       for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
-        selectivity_result = selectivities_[category_offset]->GetLengthResult(data_offset);
+        selectivity_result = selectivities_[selectivity_offset]->GetLengthResult(data_offset);
         start_value        = (*cached_category_iter)->cached_data_[data_offset];
         end_value          = (*category_iter)->data_[data_offset];
         final_value        = 0.0;

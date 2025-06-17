@@ -310,6 +310,8 @@ void ProportionsCategoryByLength::Execute() {
    * compare it to the observations.
    */
   LOG_FINEST() << "Number of categories " << category_labels_.size();
+  unsigned selectivity_offset       = 0;
+  unsigned total_selectivity_offset = 0;
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
     category_length_offset = category_offset * number_bins_;
     // clear these temporay vectors
@@ -322,15 +324,15 @@ void ProportionsCategoryByLength::Execute() {
      * Loop through the total categories building up numbers at age.
      */
     auto total_category_iter = total_partition_iter->begin();
-    for (; total_category_iter != total_partition_iter->end(); ++total_category_iter) {
+    for (; total_category_iter != total_partition_iter->end(); ++total_category_iter, ++total_selectivity_offset) {
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
         for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_total_numbers_at_length_[model_length_offset]
-              += (*total_category_iter)->cached_data_[model_length_offset] * total_selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              += (*total_category_iter)->cached_data_[model_length_offset] * total_selectivities_[total_selectivity_offset]->GetLengthResult(model_length_offset);
           total_numbers_at_length_[model_length_offset]
-              += (*total_category_iter)->data_[model_length_offset] * total_selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              += (*total_category_iter)->data_[model_length_offset] * total_selectivities_[total_selectivity_offset]->GetLengthResult(model_length_offset);
         }
       } else {
         LOG_FINE() << "using bespoke length bins length " << map_local_length_bins_to_global_length_bins_.size() << " " << cached_total_numbers_at_length_.size() << " "
@@ -342,9 +344,9 @@ void ProportionsCategoryByLength::Execute() {
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
             // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
             cached_total_numbers_at_length_[map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*total_category_iter)->cached_data_[model_length_offset] * total_selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*total_category_iter)->cached_data_[model_length_offset] * total_selectivities_[total_selectivity_offset]->GetLengthResult(model_length_offset);
             total_numbers_at_length_[map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*total_category_iter)->data_[model_length_offset] * total_selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*total_category_iter)->data_[model_length_offset] * total_selectivities_[total_selectivity_offset]->GetLengthResult(model_length_offset);
           }
         }
       }
@@ -353,14 +355,14 @@ void ProportionsCategoryByLength::Execute() {
      * Loop through the categories building up numbers at age for the mature, but also adding them onto the total .
      */
     auto category_iter = partition_iter->begin();
-    for (; category_iter != partition_iter->end(); ++category_iter) {
+    for (; category_iter != partition_iter->end(); ++category_iter, ++selectivity_offset) {
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
         for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_numbers_at_length_[model_length_offset]
-              += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
-          numbers_at_length_[model_length_offset] += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
+          numbers_at_length_[model_length_offset] += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
         }
       } else {
         LOG_FINE() << "using bespoke length bins";
@@ -370,9 +372,9 @@ void ProportionsCategoryByLength::Execute() {
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
             // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
             cached_numbers_at_length_[map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
             numbers_at_length_[map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
           }
         }
       }

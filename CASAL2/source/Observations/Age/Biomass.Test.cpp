@@ -18,12 +18,95 @@
 
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Observations/Manager.h"
+#include "TestResources/Models/TwoSexComplex.h"
 #include "TestResources/TestFixtures/InternalEmptyModel.h"
 
 namespace niwa::observations::age {
 using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
 using std::endl;
+
+/**
+ * This unit test is specifically for ensuring we have the right values
+ * being populated in the comparison object. Very carefully we're concerned
+ * about the selectivities and the categories they're associated with.
+ */
+TEST_F(InternalEmptyModel, Observation_Biomass_TwoSexComplex) {
+  const std::string observation_definition =
+      R"(
+        @observation observation
+        type process_biomass
+        catchability catchability_one
+        time_step step_one
+        process halfM
+        categories immature.male+immature.female immature.female
+        selectivities logistic_one logistic_two logistic_three
+        likelihood lognormal
+        years 1994:2003
+        delta 1e-10
+        table obs
+        1994    1.50   1.45   0.35 
+        1995    1.10   1.05   0.35
+        1996    0.93   0.90   0.35
+        1997    1.33   1.27   0.35
+        1998    1.53   1.45   0.35
+        1999    0.90   0.89   0.35
+        2000    0.68   0.65   0.35
+        2001    0.75   0.72   0.35
+        2002    0.57   0.55   0.35
+        2003    1.23   1.15   0.35
+        end_table
+    )";
+
+  AddConfigurationLine(testresources::models::two_sex_complex, "TwoSexComplex.h", 23);
+  AddConfigurationLine(observation_definition, __FILE__, 32);
+  LoadConfiguration();
+
+  model_->Start(RunMode::kTesting);
+  model_->FullIteration();
+
+  auto observation_ptr = model_->managers()->observation()->GetObservation("observation");
+  ASSERT_NE(nullptr, observation_ptr);
+
+  map<unsigned, vector<obs::Comparison> >& comparisons = observation_ptr->comparisons();
+  ASSERT_EQ(10u, comparisons.size());
+
+  // Check first comparison
+  unsigned year  = 1994;
+  unsigned index = 0;
+  ASSERT_FALSE(comparisons.find(year) == comparisons.end());
+  ASSERT_EQ(2u, comparisons[year].size());
+  EXPECT_EQ("immature.male+immature.female", comparisons[year][index].category_);
+  ASSERT_EQ(2u, comparisons[year][index].selectivities_.size());
+  auto sel_it = comparisons[year][index].selectivities_.begin();
+  EXPECT_EQ("logistic_one", *sel_it);
+  ++sel_it;
+  EXPECT_EQ("logistic_two", *sel_it);
+  EXPECT_EQ(0u, comparisons[year][index].age_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][index].length_);
+  EXPECT_DOUBLE_EQ(-1.4908944284221839, comparisons[year][index].expected_);
+  EXPECT_DOUBLE_EQ(1.5, comparisons[year][index].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][index].process_error_);
+  EXPECT_DOUBLE_EQ(0.35, comparisons[year][index].error_value_);
+  EXPECT_DOUBLE_EQ(0.35, comparisons[year][index].adjusted_error_);
+  EXPECT_DOUBLE_EQ(1e-10, comparisons[year][index].delta_);
+  EXPECT_DOUBLE_EQ(9522.0485964286709, comparisons[year][index].score_);
+
+  // // Check second comparison
+  ++index;
+  EXPECT_EQ("immature.female", comparisons[year][index].category_);
+  ASSERT_EQ(1u, comparisons[year][index].selectivities_.size());
+  EXPECT_EQ("logistic_three", *comparisons[year][index].selectivities_.begin());
+  EXPECT_EQ(0u, comparisons[year][index].age_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][index].length_);
+  EXPECT_DOUBLE_EQ(-1.0340977302112651, comparisons[year][index].expected_);
+  EXPECT_DOUBLE_EQ(1.45, comparisons[year][index].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[year][index].process_error_);
+  EXPECT_DOUBLE_EQ(0.35, comparisons[year][index].error_value_);
+  EXPECT_DOUBLE_EQ(0.35, comparisons[year][index].adjusted_error_);
+  EXPECT_DOUBLE_EQ(1e-10, comparisons[year][index].delta_);
+  EXPECT_DOUBLE_EQ(9360.4503073791784, comparisons[year][index].score_);
+}
 
 const std::string test_cases_observation_process_biomass =
     R"(

@@ -64,10 +64,14 @@ public:
 
 protected:
   // methods
+  void SaveComparison(string category, std::set<string> selectivities, unsigned age, Double length, Double expected, double observed, Double process_error, double error_value,
+                      Double adjusted_error, Double delta, Double score);
   void SaveComparison(string category, unsigned age, Double length, Double expected, double observed, Double process_error, double error_value, Double adjusted_error, Double delta,
                       Double score);
 
   void SaveComparison(string category, Double expected, double observed, Double process_error, double error_value, Double adjusted_error, Double delta, Double score);
+  void SaveComparison(string category, std::set<string> selectivities, Double expected, double observed, Double process_error, double error_value, Double adjusted_error,
+                      Double delta, Double score);
 
   // members
   shared_ptr<Model>                       model_                       = nullptr;

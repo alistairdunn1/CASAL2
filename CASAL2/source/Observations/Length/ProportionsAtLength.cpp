@@ -268,6 +268,7 @@ void ProportionsAtLength::Execute() {
    * with it. We need to build a vector of proportions for each length using that combination and then
    * compare it to the observations.
    */
+  unsigned selectivity_offset = 0;
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
     LOG_FINEST() << "category: " << category_labels_[category_offset];
     std::fill(expected_values_.begin(), expected_values_.end(), 0.0);
@@ -282,9 +283,9 @@ void ProportionsAtLength::Execute() {
     // clear these temporay vectors
     std::fill(cached_numbers_at_length_.begin(), cached_numbers_at_length_.end(), 0.0);
     std::fill(numbers_at_length_.begin(), numbers_at_length_.end(), 0.0);
-    for (; category_iter != partition_iter->end(); ++category_iter) {
+    for (; category_iter != partition_iter->end(); ++category_iter, ++selectivity_offset) {
       LOG_FINE() << "this category = " << (*category_iter)->name_;
-      LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[category_offset]->label();
+      LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[selectivity_offset]->label();
 
       // Now convert numbers at age to numbers at length using the categories age-length transition matrix
       if (using_model_length_bins) {
@@ -292,29 +293,29 @@ void ProportionsAtLength::Execute() {
         for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_numbers_at_length_[model_length_offset]
-              += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
-          numbers_at_length_[model_length_offset] += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
-          denominator_[year_ndx] += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
-          cached_denominator_[year_ndx] += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
+          numbers_at_length_[model_length_offset] += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
+          denominator_[year_ndx] += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
+          cached_denominator_[year_ndx] += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
         }
       } else {
         LOG_FINE() << "using bespoke length bins";
         for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
           if (!sum_to_one_) {
             // denominator is over entire population if not sum = 1
-            denominator_[year_ndx] += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
-            cached_denominator_[year_ndx] += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+            denominator_[year_ndx] += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
+            cached_denominator_[year_ndx] += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
           }
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
             // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
             cached_numbers_at_length_[map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
             numbers_at_length_[map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
             if (sum_to_one_) {
               // denominator just over observation range
-              denominator_[year_ndx] += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
-              cached_denominator_[year_ndx] += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              denominator_[year_ndx] += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
+              cached_denominator_[year_ndx] += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
             }
           }
         }

@@ -128,11 +128,6 @@ void Biomass::DoBuild() {
     selectivities_.push_back(selectivity);
   }
 
-  if (selectivities_.size() == 1 && category_labels_.size() != 1) {
-    auto val_sel = selectivities_[0];
-    selectivities_.assign(category_labels_.size(), val_sel);
-  }
-
   if (parameters_.Get(PARAM_AGE_WEIGHT_LABELS)->has_been_defined()) {
     for (string label : age_weight_labels_) {
       AgeWeight* age_weight = model_->managers()->age_weight()->FindAgeWeight(label);
@@ -190,19 +185,23 @@ void Biomass::Execute() {
   if (partition_->Size() != proportions_by_year_[current_year].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_by_year_[current_year].size()";
 
+  unsigned selectivity_index = 0;
   for (unsigned proportions_index = 0; proportions_index < proportions_by_year_[current_year].size(); ++proportions_index, ++partition_iter, ++cached_partition_iter) {
+    std::set<string> selectivity_labels_set;
     expected_total = 0.0;
 
     auto category_iter        = partition_iter->begin();
     auto cached_category_iter = cached_partition_iter->begin();
-    for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter) {
-      //(*category_iter)->UpdateMeanWeightData();
+    for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter, ++selectivity_index) {
+      assert(selectivity_index < selectivities_.size());
+
       if (!parameters_.Get(PARAM_AGE_WEIGHT_LABELS)->has_been_defined()) {
         // Use the age->length->weight calculation for weight
         for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
           age = (*category_iter)->min_age_ + data_offset;
 
-          selectivity_result = selectivities_[category_offset]->GetAgeResult(age, (*category_iter)->age_length_);
+          selectivity_labels_set.insert(selectivities_[selectivity_index]->label());
+          selectivity_result = selectivities_[selectivity_index]->GetAgeResult(age, (*category_iter)->age_length_);
           start_value        = (*cached_category_iter)->cached_data_[data_offset];
           end_value          = (*category_iter)->data_[data_offset];
           final_value        = 0.0;
@@ -222,7 +221,8 @@ void Biomass::Execute() {
         for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
           age = (*category_iter)->min_age_ + data_offset;
 
-          selectivity_result = selectivities_[category_offset]->GetAgeResult(age, (*category_iter)->age_length_);
+          selectivity_labels_set.insert(selectivities_[selectivity_index]->label());
+          selectivity_result = selectivities_[selectivity_index]->GetAgeResult(age, (*category_iter)->age_length_);
           start_value        = (*cached_category_iter)->cached_data_[data_offset];
           end_value          = (*category_iter)->data_[data_offset];
           final_value        = 0.0;
@@ -252,8 +252,9 @@ void Biomass::Execute() {
     error_value = error_values_by_year_[current_year];
 
     // Store the values
-    SaveComparison(category_labels_[proportions_index], expected_total, proportions_by_year_[current_year][proportions_index], process_error_value_, error_value, 0.0, delta_, 0.0);
-  }
+    SaveComparison(category_labels_[proportions_index], selectivity_labels_set, expected_total, proportions_by_year_[current_year][proportions_index], process_error_value_,
+                   error_value, 0.0, delta_, 0.0);
+  }  // end of for loop through categories
 }
 
 /**

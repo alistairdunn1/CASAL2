@@ -14,6 +14,7 @@
 #define OBSERVATIONS_COMPARISON_H_
 
 // headers
+#include <set>
 #include <string>
 
 #include "../Utilities/Types.h"
@@ -22,20 +23,22 @@
 namespace niwa {
 namespace observations {
 
+using std::set;
 using std::string;
 using utilities::Double;
 
 struct Comparison {
-  string   category_       = "";
-  unsigned age_            = 0;
-  Double   length_         = 0;
-  Double   expected_       = 0;
-  double   observed_       = 0;
-  Double   process_error_  = 0;
-  double   error_value_    = 0;
-  Double   adjusted_error_ = 0;
-  Double   delta_          = 0;
-  Double   score_          = 0;
+  string      category_       = "";
+  set<string> selectivities_  = {};
+  unsigned    age_            = 0;
+  Double      length_         = 0;
+  Double      expected_       = 0;
+  double      observed_       = 0;
+  Double      process_error_  = 0;
+  double      error_value_    = 0;
+  Double      adjusted_error_ = 0;
+  Double      delta_          = 0;
+  Double      score_          = 0;
 };
 
 } /* namespace observations */
