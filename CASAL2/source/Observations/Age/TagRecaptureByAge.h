@@ -46,30 +46,29 @@ public:
 
 protected:
   // Members
-  vector<unsigned>            years_;
-  unsigned                    min_age_    = 0;
-  unsigned                    max_age_    = 0;
-  bool                        plus_group_ = false;
-  unsigned                    age_spread_ = 0;
-  Double                      detection_  = 0.0;
-  vector<string>              tagged_category_labels_;
-  vector<string>              tagged_selectivity_labels_;
-  parameters::table::Table*   recaptures_table_   = nullptr;
-  string                      ageing_error_label_ = "";
-  parameters::table::Table*   scanned_table_      = nullptr;
-  CachedCombinedCategoriesPtr cached_partition_;
-  CombinedCategoriesPtr       partition_;
-  CachedCombinedCategoriesPtr tagged_cached_partition_;
-  CombinedCategoriesPtr       tagged_partition_;
-  vector<Double>              age_results_;
-  vector<Selectivity*>        tagged_selectivities_;
-  vector<string>              selectivity_labels_;
-  vector<Selectivity*>        selectivities_;
-  string                      time_step_label_      = "";
-  Double                      time_step_proportion_ = 0.0;
-
-  map<unsigned, map<string, vector<double>>> recaptures_;
-  map<unsigned, map<string, vector<double>>> scanned_;
+  vector<unsigned>                           years_                     = {};
+  unsigned                                   min_age_                   = 0;
+  unsigned                                   max_age_                   = 0;
+  bool                                       plus_group_                = false;
+  unsigned                                   age_spread_                = 0;
+  Double                                     detection_                 = 0.0;
+  vector<string>                             tagged_category_labels_    = {};
+  vector<string>                             tagged_selectivity_labels_ = {};
+  parameters::table::Table*                  recaptures_table_          = nullptr;
+  string                                     ageing_error_label_        = "";
+  parameters::table::Table*                  scanned_table_             = nullptr;
+  CachedCombinedCategoriesPtr                cached_partition_          = nullptr;
+  CombinedCategoriesPtr                      partition_                 = nullptr;
+  CachedCombinedCategoriesPtr                tagged_cached_partition_   = nullptr;
+  CombinedCategoriesPtr                      tagged_partition_          = nullptr;
+  vector<Double>                             age_results_               = {};
+  vector<Selectivity*>                       tagged_selectivities_      = {};
+  vector<string>                             selectivity_labels_        = {};
+  vector<Selectivity*>                       selectivities_             = {};
+  string                                     time_step_label_           = "";
+  Double                                     time_step_proportion_      = 0.0;
+  map<unsigned, map<string, vector<double>>> recaptures_                = {};
+  map<unsigned, map<string, vector<double>>> scanned_                   = {};
 };
 
 } /* namespace age */
