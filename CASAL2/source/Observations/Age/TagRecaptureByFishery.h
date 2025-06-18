@@ -46,31 +46,28 @@ public:
 
 protected:
   // Members
-  vector<unsigned>              years_;
-  unsigned                      min_age_    = 0;
-  unsigned                      max_age_    = 0;
-  bool                          plus_group_ = false;
-  unsigned                      age_spread_ = 0;
-  Double                        reporting_rate_;
-  vector<string>                tagged_category_labels_;
-  parameters::table::Table*     recaptures_table_ = nullptr;
-  CombinedCategoriesPtr         partition_;
-  vector<string>                time_step_label_;
-  vector<Double>                expected_values_;
-  vector<Double>                accumulated_expected_values_;
-  map<unsigned, vector<double>> observed_recaptures_;  // year x category x ages
-  map<unsigned, vector<Double>> expected_recaptures_;  // year x category x ages
-
-  age::Mortality* mortality_process_ = nullptr;
-  vector<string>  method_;
-  string          process_label_;
-  unsigned        time_step_to_execute_;
-
-  vector<unsigned>      fishery_ndx_to_get_catch_at_info_;
-  vector<unsigned>      year_ndx_to_get_catch_at_info_;
-  map<string, unsigned> category_lookup_for_ndx_to_get_catch_at_info_;
-
-  vector<string> allowed_mortality_types_;
+  vector<unsigned>              years_                                        = {};
+  unsigned                      min_age_                                      = 0;
+  unsigned                      max_age_                                      = 0;
+  bool                          plus_group_                                   = false;
+  unsigned                      age_spread_                                   = 0;
+  Double                        reporting_rate_                               = 0.0;
+  vector<string>                tagged_category_labels_                       = {};
+  parameters::table::Table*     recaptures_table_                             = nullptr;
+  CombinedCategoriesPtr         partition_                                    = nullptr;
+  vector<string>                time_step_label_                              = {};
+  vector<Double>                expected_values_                              = {};
+  vector<Double>                accumulated_expected_values_                  = {};
+  map<unsigned, vector<double>> observed_recaptures_                          = {};
+  map<unsigned, vector<Double>> expected_recaptures_                          = {};
+  age::Mortality*               mortality_process_                            = nullptr;
+  vector<string>                method_                                       = {};
+  string                        process_label_                                = "";
+  unsigned                      time_step_to_execute_                         = 0;
+  vector<unsigned>              fishery_ndx_to_get_catch_at_info_             = {};
+  vector<unsigned>              year_ndx_to_get_catch_at_info_                = {};
+  map<string, unsigned>         category_lookup_for_ndx_to_get_catch_at_info_ = {};
+  vector<string>                allowed_mortality_types_                      = {};
 };
 
 } /* namespace age */

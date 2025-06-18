@@ -135,6 +135,11 @@ type logistic
 a50 7
 ato95 4
 
+@selectivity logistic_six
+type logistic
+a50 9
+ato95 1
+
 @selectivity logistic_producing_one
 type logistic_producing
 L 5
@@ -165,6 +170,12 @@ q 0.000176921
 @catchability catchability_three
 type free
 q 0.000254921
+
+@ageing_error ageing_error_one
+type off_by_one
+p1 0.15
+p2 0.25
+k 5
 )";
 
 }  // namespace niwa::testresources::models

@@ -63,38 +63,22 @@ void TagRecaptureByFishery::DoValidate() {
   parameters_.ValidateVector(PARAM_TIME_STEP)->SameNumberOfElementsAs(PARAM_METHOD_OF_REMOVAL);
   parameters_.Validate(PARAM_REPORTING_RATE)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
-  /**
-   * Validate the number of obs provided matches age spread * tagged_category_labels_ * years
-   * This is because we'll have 1 set of obs per category collection provided.
-   * categories male+female male = 2 collections
-   */
-  unsigned                obs_expected = 2;
-  vector<vector<string>>& obs_data     = recaptures_table_->data();
-  if (obs_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_RECAPTURED) << " has " << obs_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
+  age_spread_                    = (max_age_ - min_age_) + 1;
+  unsigned expected_column_count = 2;
 
-  for (vector<string>& obs_data_line : obs_data) {
-    if (obs_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << " has " << obs_data_line.size() << " values defined, but " << obs_expected
-                                    << " should match 2 one year and the other for recaptures among all tagged categories";
-    }
+  parameters_.ValidateTable(PARAM_RECAPTURED)
+      ->Rows(years_.size(), "Number of rows in the recaptured table must match the number of years provided")
+      ->Columns(expected_column_count, "Expected year and recaptured values columns in the recaptured table")
+      ->ColumnIsYear(0, "First column of the recaptured table must be a model year")
+      ->DoubleDataRange(1, 1, "All recaptured except the first must be a double value for the observation")
+      ->GreaterThan(1, 0.0);
 
-    unsigned year = 0;
-    if (!utilities::To<unsigned>(obs_data_line[0], year))
-      LOG_ERROR_P(PARAM_RECAPTURED) << " value " << obs_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_RECAPTURED) << " value " << year << " is not a valid year for this observation";
+  observed_recaptures_ = recaptures_table_->MapColumnsToYear<double>(0, 1, 1);
+  if (observed_recaptures_.empty())
+    LOG_CODE_ERROR() << "observed_recaptures_ is empty, this should not happen";
 
-    for (unsigned i = 1; i < obs_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(obs_data_line[i], value))
-        LOG_ERROR_P(PARAM_RECAPTURED) << " value (" << obs_data_line[i] << ") could not be converted to a Double";
-      observed_recaptures_[year].push_back(value);
-    }
+  for (unsigned year : years_) {
     expected_recaptures_[year].resize(1, 0.0);
-    if (observed_recaptures_[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_RECAPTURED) << " " << observed_recaptures_[year].size() << " ages were supplied, but " << obs_expected - 1 << " ages are required";
   }
 }
 

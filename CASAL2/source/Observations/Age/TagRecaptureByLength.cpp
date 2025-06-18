@@ -81,6 +81,27 @@ void TagRecaptureByLength::DoValidate() {
   parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
 
+  number_bins_                   = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
+  unsigned expected_column_count = number_bins_ * tagged_category_labels_.size() + 1;
+
+  parameters_.ValidateTable(PARAM_RECAPTURED)
+      ->Rows(years_.size(), "Number of rows in the recaptured table must match the number of years provided")
+      ->Columns(expected_column_count, "Expected year and recaptured values columns in the recaptured table")
+      ->ColumnIsYear(0, "First column of the recaptured table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All recaptured except the first must be a double value for the observation")
+      ->GreaterThan(expected_column_count - 1, 0.0);
+
+  parameters_.ValidateTable(PARAM_SCANNED)
+      ->Rows(years_.size(), "Number of rows in the scanned table must match the number of years provided")
+      ->ExpandColumnsTo(expected_column_count - 1, 1u)
+      ->Columns(expected_column_count, "Expected year and scanned value columns in the scanned table")
+      ->ColumnIsYear(0, "First column of the scanned table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value for the observation")
+      ->GreaterThanForRange(1, expected_column_count - 1, 0.0);
+
+  recaptures_ = recaptures_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
+  scanned_    = scanned_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
+
   // Do some checks if we're not using all of the model length bins
   using_model_length_bins = length_bins_.size() == model_->length_bins().size();
   if (!using_model_length_bins)
@@ -92,8 +113,6 @@ void TagRecaptureByLength::DoValidate() {
 
   dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
 
-  number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
-
   category_split_labels_        = model_->categories()->total_categories(category_labels_);
   tagged_category_split_labels_ = model_->categories()->total_categories(tagged_category_labels_);
 
@@ -104,113 +123,6 @@ void TagRecaptureByLength::DoValidate() {
       if (find(category_split_labels_[i].begin(), category_split_labels_[i].end(), tagged_category_split_labels_[i][j]) == category_split_labels_[i].end()) {
         LOG_ERROR_P(PARAM_TAGGED_CATEGORIES) << "The category " << tagged_category_split_labels_[i][j] << " is not in the " << PARAM_CATEGORIES << " at element " << i + 1
                                              << ". All tagged individuals should be in the categories";
-      }
-    }
-  }
-
-  /**
-   * Validate the number of recaptures provided matches age spread * category_labels * years
-   * This is because we'll have 1 set of recaptures per category collection provided.
-   * categories male+female male = 2 collections
-   */
-  map<unsigned, vector<double>> recaptures_by_year;
-  map<unsigned, vector<double>> scanned_by_year;
-  unsigned                      obs_expected = number_bins_ * tagged_category_labels_.size() + 1;
-  LOG_FINE() << "expected obs = " << obs_expected << " number of bins = " << number_bins_ << " tagged categories = " << tagged_category_labels_.size();
-  vector<vector<string>>& recaptures_data = recaptures_table_->data();
-  if (recaptures_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_RECAPTURED) << "has " << recaptures_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
-
-  for (vector<string>& recaptures_data_line : recaptures_data) {
-    unsigned year = 0;
-
-    if (recaptures_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << "has " << recaptures_data_line.size() << " values defined, but " << obs_expected
-                                    << " should match the age spread * categories + 1 (for year)";
-      return;
-    }
-
-    if (!utilities::To<unsigned>(recaptures_data_line[0], year)) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << "value " << recaptures_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-      return;
-    }
-
-    if (std::find(years_.begin(), years_.end(), year) == years_.end()) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << "value " << year << " is not a valid year for this observation";
-      return;
-    }
-
-    for (unsigned i = 1; i < recaptures_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(recaptures_data_line[i], value))
-        LOG_ERROR_P(PARAM_RECAPTURED) << "value (" << recaptures_data_line[i] << ") could not be converted to a Double";
-      recaptures_by_year[year].push_back(value);
-    }
-    if (recaptures_by_year[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_RECAPTURED) << recaptures_by_year[year].size() << " columns but " << obs_expected - 1 << " required. Check that the table is specified correctly";
-  }
-
-  /**
-   * Build our scanned map
-   */
-  vector<vector<string>>& scanned_values_data = scanned_table_->data();
-  if (scanned_values_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_SCANNED) << "has " << scanned_values_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
-
-  for (vector<string>& scanned_values_data_line : scanned_values_data) {
-    unsigned year = 0;
-
-    if (scanned_values_data_line.size() != 2 && scanned_values_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_SCANNED) << "has " << scanned_values_data_line.size() << " values defined, but " << obs_expected
-                                 << " should match the age spread * categories + 1 (for year)";
-    } else if (!utilities::To<unsigned>(scanned_values_data_line[0], year)) {
-      LOG_ERROR_P(PARAM_SCANNED) << "value " << scanned_values_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-    } else if (std::find(years_.begin(), years_.end(), year) == years_.end()) {
-      LOG_ERROR_P(PARAM_SCANNED) << "value " << year << " is not a valid year for this observation";
-    } else {
-      for (unsigned i = 1; i < scanned_values_data_line.size(); ++i) {
-        double value = 0.0;
-        if (!utilities::To<double>(scanned_values_data_line[i], value)) {
-          LOG_ERROR_P(PARAM_SCANNED) << "value (" << scanned_values_data_line[i] << ") could not be converted to a Double";
-        } else if (likelihood_type_ == PARAM_MULTINOMIAL && value < 0.0) {
-          LOG_ERROR_P(PARAM_ERROR_VALUES) << ": error_value (" << value << ") cannot be less than 0.0";
-        }
-
-        scanned_by_year[year].push_back(value);
-      }
-      if (scanned_by_year[year].size() == 1) {
-        auto val_s = scanned_by_year[year][0];
-        scanned_by_year[year].assign(obs_expected - 1, val_s);
-      }
-      if (scanned_by_year[year].size() != obs_expected - 1) {
-        LOG_FATAL_P(PARAM_SCANNED) << scanned_by_year[year].size() << " columns but " << obs_expected - 1 << " required. Check that the table is specified correctly";
-      }
-    }
-  }
-
-  /**
-   * Build our Recaptured and scanned maps for use in the DoExecute() section
-   */
-  double value = 0.0;
-  for (auto iter = recaptures_by_year.begin(); iter != recaptures_by_year.end(); ++iter) {
-    double total = 0.0;
-
-    for (unsigned i = 0; i < category_labels_.size(); ++i) {
-      for (unsigned j = 0; j < number_bins_; ++j) {
-        unsigned obs_index = i * number_bins_ + j;
-        if (!utilities::To<double>(iter->second[obs_index], value)) {
-          LOG_ERROR_P(PARAM_OBS) << ": obs_ value (" << iter->second[obs_index] << ") at index " << obs_index + 1 << " in the definition could not be converted to a Double";
-        }
-
-        auto s_f = scanned_by_year.find(iter->first);
-        if (s_f != scanned_by_year.end()) {
-          auto error_value = s_f->second[obs_index];
-          scanned_[iter->first][category_labels_[i]].push_back(error_value);
-          recaptures_[iter->first][category_labels_[i]].push_back(value);
-          total += error_value;
-        }
       }
     }
   }
@@ -303,10 +215,12 @@ void TagRecaptureByLength::PreExecute() {
   tagged_cached_partition_->BuildCache();
 
   if (cached_partition_->Size() != scanned_[model_->current_year()].size()) {
-    LOG_CODE_ERROR() << "cached_partition_->Size() != scanned_[model->current_year()].size()";
+    LOG_CODE_ERROR() << "cached_partition_->Size() != scanned_[model->current_year()].size() for " << label_ << " " << cached_partition_->Size()
+                     << " != " << scanned_[model_->current_year()].size();
   }
   if (partition_->Size() != scanned_[model_->current_year()].size()) {
-    LOG_CODE_ERROR() << "partition_->Size() != scanned_[model->current_year()].size()";
+    LOG_CODE_ERROR() << "partition_->Size() != scanned_[model->current_year()].size() for " << label_ << " " << partition_->Size()
+                     << " != " << scanned_[model_->current_year()].size();
   }
 }
 
@@ -323,8 +237,9 @@ void TagRecaptureByLength::Execute() {
    */
   auto partition_iter        = partition_->Begin();         // vector<vector<partition::Category> >
   auto tagged_partition_iter = tagged_partition_->Begin();  // vector<vector<partition::Category> >
-  // Reset some containers
 
+  unsigned selectivity_index        = 0;
+  unsigned tagged_selectivity_index = 0;
   /**
    * Loop through the provided categories. Each provided category (combination) will have a list of observations
    * with it.
@@ -342,22 +257,27 @@ void TagRecaptureByLength::Execute() {
     std::fill(tagged_numbers_at_length_[category_offset].begin(), tagged_numbers_at_length_[category_offset].end(), 0.0);
     std::fill(length_results_.begin(), length_results_.end(), 0.0);
     std::fill(tagged_length_results_.begin(), tagged_length_results_.end(), 0.0);
+
+    std::set<string> selectivity_labels_set;
     /**
      * Loop through the  combined categories if they are supplied, building up the
      * numbers at length
      */
     auto category_iter = partition_iter->begin();
-    for (; category_iter != partition_iter->end(); ++category_iter) {
+    for (; category_iter != partition_iter->end(); ++category_iter, ++selectivity_index) {
+      assert(selectivity_index < selectivities_.size());
+
+      selectivity_labels_set.insert(selectivities_[selectivity_index]->label());
       // get numbers at length
       if (using_model_length_bins) {
-        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_[category_offset], selectivities_[category_offset]);
-        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_[category_offset], selectivities_[category_offset]);
+        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_[category_offset], selectivities_[selectivity_index]);
+        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_[category_offset], selectivities_[selectivity_index]);
       } else {
         (*category_iter)
-            ->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_[category_offset], selectivities_[category_offset],
+            ->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_[category_offset], selectivities_[selectivity_index],
                                                       map_local_length_bins_to_global_length_bins_);
         (*category_iter)
-            ->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_[category_offset], selectivities_[category_offset],
+            ->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_[category_offset], selectivities_[selectivity_index],
                                                       map_local_length_bins_to_global_length_bins_);
       }
     }
@@ -366,21 +286,24 @@ void TagRecaptureByLength::Execute() {
      * numbers at length
      */
     auto tagged_category_iter = tagged_partition_iter->begin();
-    for (; tagged_category_iter != tagged_partition_iter->end(); ++tagged_category_iter) {
+    for (; tagged_category_iter != tagged_partition_iter->end(); ++tagged_category_iter, ++tagged_selectivity_index) {
+      assert(tagged_selectivity_index < tagged_selectivities_.size());
+      selectivity_labels_set.insert(tagged_selectivities_[tagged_selectivity_index]->label());
+
       // get numbers at length
       if (using_model_length_bins) {
         (*tagged_category_iter)
-            ->age_length_->populate_numbers_at_length((*tagged_category_iter)->data_, tagged_numbers_at_length_[category_offset], tagged_selectivities_[category_offset]);
+            ->age_length_->populate_numbers_at_length((*tagged_category_iter)->data_, tagged_numbers_at_length_[category_offset], tagged_selectivities_[tagged_selectivity_index]);
         (*tagged_category_iter)
             ->age_length_->populate_numbers_at_length((*tagged_category_iter)->cached_data_, tagged_cached_numbers_at_length_[category_offset],
-                                                      tagged_selectivities_[category_offset]);
+                                                      tagged_selectivities_[tagged_selectivity_index]);
       } else {
         (*tagged_category_iter)
-            ->age_length_->populate_numbers_at_length((*tagged_category_iter)->data_, tagged_numbers_at_length_[category_offset], tagged_selectivities_[category_offset],
+            ->age_length_->populate_numbers_at_length((*tagged_category_iter)->data_, tagged_numbers_at_length_[category_offset], tagged_selectivities_[tagged_selectivity_index],
                                                       map_local_length_bins_to_global_length_bins_);
         (*tagged_category_iter)
             ->age_length_->populate_numbers_at_length((*tagged_category_iter)->cached_data_, tagged_cached_numbers_at_length_[category_offset],
-                                                      tagged_selectivities_[category_offset], map_local_length_bins_to_global_length_bins_);
+                                                      tagged_selectivities_[tagged_selectivity_index], map_local_length_bins_to_global_length_bins_);
       }
     }
     // Interpolate between the cached and current values for both the tagged and untagged
@@ -428,8 +351,8 @@ void TagRecaptureByLength::Execute() {
         observed = (recaptures_[model_->current_year()][category_labels_[category_offset]][i]) / scanned_[model_->current_year()][category_labels_[category_offset]][i];
 
       // process_error is not used here, and the dispersion is applied to the final likelihood value below
-      SaveComparison(tagged_category_labels_[category_offset], 0, length_bins_[i], expected, observed, 0.0, scanned_[model_->current_year()][category_labels_[category_offset]][i],
-                     0.0, delta_, 0.0);
+      SaveComparison(tagged_category_labels_[category_offset], selectivity_labels_set, 0, length_bins_[i], expected, observed, 0.0,
+                     scanned_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
     }
   }
 }
