@@ -68,11 +68,21 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
       ->DefaultValue(1.0, years_.size());
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
+  number_bins_                   = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
+  unsigned expected_column_count = number_bins_ * category_labels_.size() + 1;
+
+  parameters_.ValidateTable(PARAM_RECAPTURED)
+      ->Rows(years_.size(), "Number of rows in the recaptured table must match the number of years provided")
+      ->Columns(expected_column_count, "Expected year and recaptured values columns in the recaptured table")
+      ->ColumnIsYear(0, "First column of the recaptured table must be a model year")
+      ->DoubleDataRange(1, expected_column_count - 1, "All recaptured except the first must be a double value for the observation")
+      ->GreaterThan(expected_column_count - 1, 0.0);
+
+  recaptures_ = recaptures_table_->MapColumnsToYear<double>(0u, 1u, expected_column_count - 1);
+
   if (length_plus_ & !model_->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
-
-  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
 
   // Do some checks if we're not using all of the model length bins
   using_model_length_bins = length_bins_.size() == model_->length_bins().size();
@@ -83,70 +93,11 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
-  number_bins_ = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
+  process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
+  category_split_labels_  = model_->categories()->total_categories(category_labels_);
 
-  category_split_labels_ = model_->categories()->total_categories(category_labels_);
-
-  /**
-   * Validate the number of recaptures provided matches age spread * category_labels * years
-   * This is because we'll have 1 set of recaptures per category collection provided.
-   * categories male+female male = 2 collections
-   */
-  map<unsigned, vector<double>> recaptures_by_year;
-  unsigned                      obs_expected = number_bins_ * category_labels_.size() + 1;
-  LOG_FINE() << "expected obs = " << obs_expected << " number of bins = " << number_bins_ << " tagged categories = " << category_labels_.size();
-  vector<vector<string>>& recaptures_data = recaptures_table_->data();
-  if (recaptures_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_RECAPTURED) << "has" << recaptures_data.size() << " rows defined, but " << years_.size() << " should match the number of years provided";
-  }
-
-  for (vector<string>& recaptures_data_line : recaptures_data) {
-    unsigned year = 0;
-
-    if (recaptures_data_line.size() != obs_expected) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << "has " << recaptures_data_line.size() << " values defined, but " << obs_expected
-                                    << " should match the age spread * categories + 1 (for year)";
-      return;
-    }
-
-    if (!utilities::To<unsigned>(recaptures_data_line[0], year)) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << "value " << recaptures_data_line[0] << " could not be converted to an unsigned integer. It should be the year for this line";
-      return;
-    }
-
-    if (std::find(years_.begin(), years_.end(), year) == years_.end()) {
-      LOG_ERROR_P(PARAM_RECAPTURED) << "value " << year << " is not a valid year for this observation";
-      return;
-    }
-
-    for (unsigned i = 1; i < recaptures_data_line.size(); ++i) {
-      double value = 0.0;
-      if (!utilities::To<double>(recaptures_data_line[i], value))
-        LOG_ERROR_P(PARAM_RECAPTURED) << "value (" << recaptures_data_line[i] << ") could not be converted to a Double";
-      recaptures_by_year[year].push_back(value);
-    }
-    if (recaptures_by_year[year].size() != obs_expected - 1)
-      LOG_FATAL_P(PARAM_RECAPTURED) << " " << recaptures_by_year[year].size() << " columns but " << obs_expected - 1 << " required. Check that the table is specified correctly";
-  }
-  /**
-   * Build our Recaptured  maps for use in the DoExecute() section
-   */
-  double value = 0.0;
-  for (auto iter = recaptures_by_year.begin(); iter != recaptures_by_year.end(); ++iter) {
-    double total = 0.0;
-
-    for (unsigned i = 0; i < category_labels_.size(); ++i) {
-      for (unsigned j = 0; j < number_bins_; ++j) {
-        unsigned obs_index = i * number_bins_ + j;
-        if (!utilities::To<double>(iter->second[obs_index], value)) {
-          LOG_ERROR_P(PARAM_OBS) << ": obs_ value (" << iter->second[obs_index] << ") at index " << obs_index + 1 << " in the definition could not be converted to a Double";
-        }
-        recaptures_[iter->first].push_back(value);
-        total += value;
-      }
-    }
-    n_[iter->first] = total;
-    LOG_FINE() << "total_recaptures in year = " << iter->first << " = " << n_[iter->first];
+  for (auto& year_pair : recaptures_) {
+    n_[year_pair.first] = std::accumulate(year_pair.second.begin(), year_pair.second.end(), 0.0);
   }
 }
 
@@ -163,11 +114,6 @@ void TagRecaptureByLengthForGrowth::DoBuild() {
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity " << label << " does not exist.";
     selectivities_.push_back(selectivity);
-  }
-
-  if (selectivities_.size() == 1 && category_labels_.size() != 1) {
-    auto val_sel = selectivities_[0];
-    selectivities_.assign(category_labels_.size(), val_sel);
   }
 
   proportion_of_time_ = time_step_proportion_;
@@ -214,9 +160,11 @@ void TagRecaptureByLengthForGrowth::Execute() {
   /**
    * Verify our cached partition and partition sizes are correct
    */
-  auto     partition_iter         = partition_->Begin();  // vector<vector<partition::Category> >
-  unsigned category_length_offset = 0;
-  Double   total_expected         = 0.0;
+  auto                     partition_iter         = partition_->Begin();  // vector<vector<partition::Category> >
+  unsigned                 category_length_offset = 0;
+  Double                   total_expected         = 0.0;
+  unsigned                 selectivity_index      = 0;
+  vector<std::set<string>> selectivity_labels_for_comparison;
   /**
    * Loop through the provided categories. Each provided category (combination) will have a list of observations
    * with it. We need to build a vector of proportions for each age using that combination and then
@@ -227,9 +175,10 @@ void TagRecaptureByLengthForGrowth::Execute() {
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
     category_length_offset = category_offset * number_bins_;
     LOG_FINEST() << "Observing collection of categories " << category_labels_[category_offset];
-    Double start_value = 0.0;
-    Double end_value   = 0.0;
-    Double final_value = 0.0;
+    Double           start_value = 0.0;
+    Double           end_value   = 0.0;
+    Double           final_value = 0.0;
+    std::set<string> selectivities_for_comparison;
     // reset some category specific containers
     std::fill(numbers_at_length_[category_offset].begin(), numbers_at_length_[category_offset].end(), 0.0);
     std::fill(cached_numbers_at_length_[category_offset].begin(), cached_numbers_at_length_[category_offset].end(), 0.0);
@@ -238,18 +187,20 @@ void TagRecaptureByLengthForGrowth::Execute() {
      * numbers at length
      */
     auto category_iter = partition_iter->begin();
-    for (; category_iter != partition_iter->end(); ++category_iter) {
+    for (; category_iter != partition_iter->end(); ++category_iter, ++selectivity_index) {
+      assert(selectivity_index < selectivities_.size());
+      selectivities_for_comparison.insert(selectivities_[selectivity_index]->label());
       LOG_FINE() << "this category = " << (*category_iter)->name_;
-      LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[category_offset]->label();
+      LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[selectivity_index]->label();
       // Now convert numbers at age to numbers at length using the categories age-length transition matrix
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
         for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_numbers_at_length_[category_offset][model_length_offset]
-              += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_index]->GetLengthResult(model_length_offset);
           numbers_at_length_[category_offset][model_length_offset]
-              += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+              += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_index]->GetLengthResult(model_length_offset);
         }
       } else {
         LOG_FINE() << "using bespoke length bins";
@@ -257,9 +208,9 @@ void TagRecaptureByLengthForGrowth::Execute() {
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
             // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
             cached_numbers_at_length_[category_offset][map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*category_iter)->cached_data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_index]->GetLengthResult(model_length_offset);
             numbers_at_length_[category_offset][map_local_length_bins_to_global_length_bins_[model_length_offset]]
-                += (*category_iter)->data_[model_length_offset] * selectivities_[category_offset]->GetLengthResult(model_length_offset);
+                += (*category_iter)->data_[model_length_offset] * selectivities_[selectivity_index]->GetLengthResult(model_length_offset);
           }
         }
       }
@@ -281,8 +232,11 @@ void TagRecaptureByLengthForGrowth::Execute() {
       length_bins_for_comparison_[category_length_offset + length_offset] = length_bins_[length_offset];
       LOG_FINEST() << "length bin = " << length_bins_[length_offset] << " expected = " << final_value;
       total_expected += final_value;
+
+      selectivity_labels_for_comparison.push_back(selectivities_for_comparison);
     }
   }
+
   Double expected = 0.0;
   double observed = 0.0;
   // save our comparisons so we can use them to generate the score from the likelihoods later
@@ -293,8 +247,10 @@ void TagRecaptureByLengthForGrowth::Execute() {
                  << " category = " << categories_for_comparison_[i];
     observed = recaptures_[model_->current_year()][i] / n_[model_->current_year()];
 
-    SaveComparison(categories_for_comparison_[i], 0, length_bins_for_comparison_[i], expected, observed, process_errors_by_year_[model_->current_year()],
-                   n_[model_->current_year()], 0.0, delta_, 0.0);
+    assert(i <= selectivity_labels_for_comparison.size());
+
+    SaveComparison(categories_for_comparison_[i], selectivity_labels_for_comparison[i], 0, length_bins_for_comparison_[i], expected, observed,
+                   process_errors_by_year_[model_->current_year()], n_[model_->current_year()], 0.0, delta_, 0.0);
   }
 }
 

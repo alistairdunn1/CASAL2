@@ -56,44 +56,19 @@ void Abundance::DoValidate() {
   parameters_.Validate(PARAM_PROCESS_ERROR)->GreaterThanOrEqualTo(0.0);
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
 
-  // Obs
-  unsigned                num_obs       = category_labels_.size();
-  unsigned                vals_expected = 1 + num_obs + 1;  // year, observation value(s), error value
-  vector<vector<string>>& obs_data      = obs_table_->data();
-  if (obs_data.size() != years_.size()) {
-    LOG_ERROR_P(PARAM_OBS) << "has " << obs_data.size() << " rows defined, but "
-                           << "does not match the number of years provided " << years_.size();
-  }
+  parameters_.ValidateTable(PARAM_OBS)
+      ->Rows(years_.size(), "Number of rows in the observation table must match the number of years provided")
+      ->Columns(1 + category_labels_.size() + 1, "Expected year, observation values, and error value columns in the observation table")
+      ->ColumnIsYear(0, "First column of the observation table must be a model year")
+      ->DoubleDataRange(1, category_labels_.size() + 1, "All columns except the first must be a double value (data + error value) for the observation")
+      ->GreaterThan(category_labels_.size() + 1, 0.0);
 
-  LOG_MEDIUM() << "Number of categories: " << num_obs << ", number of years: " << years_.size() << ", number of observation columns: " << obs_data.size();
-
-  unsigned year      = 0;
-  double   obs_value = 0;
-  double   err_value = 0;
-  for (vector<string>& obs_data_line : obs_data) {
-    if (obs_data_line.size() != vals_expected) {
-      LOG_ERROR_P(PARAM_OBS) << "has " << obs_data_line.size() << " values defined, but does not match " << vals_expected;
-    }
-
-    if (!utilities::To<unsigned>(obs_data_line.front(), year))
-      LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line.front() << " could not be converted to an unsigned integer. It should be the year for this line";
-    if (std::find(years_.begin(), years_.end(), year) == years_.end())
-      LOG_ERROR_P(PARAM_OBS) << "year " << year << " is not a valid year for this observation";
-
-    for (unsigned i = 1; i <= num_obs; ++i) {
-      if (!utilities::To<double>(obs_data_line[i], obs_value))
-        LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line[i] << " could not be converted to a Double. It should be the observation value for this line";
-      if (obs_value <= 0.0)
-        LOG_ERROR_P(PARAM_OBS) << ": observation value " << obs_value << " for year " << year << " cannot be less than or equal to 0.0";
-      proportions_by_year_[year].push_back(obs_value);
-    }
-
-    if (!utilities::To<double>(obs_data_line.back(), err_value))
-      LOG_ERROR_P(PARAM_OBS) << "value " << obs_data_line.back() << " could not be converted to a Double. It should be the error value for this line";
-    if (err_value <= 0.0)
-      LOG_ERROR_P(PARAM_OBS) << ": error value " << err_value << " for year " << year << " cannot be less than or equal to 0.0";
-    error_values_by_year_[year] = err_value;
-  }
+  proportions_by_year_  = obs_table_->MapColumnsToYear<double>(0u, 1u, category_labels_.size());
+  error_values_by_year_ = obs_table_->MapColumnToYear<double>(0u, category_labels_.size() + 1u);
+  if (proportions_by_year_.empty())
+    LOG_CODE_ERROR() << "proportions_by_year_ is empty, this should not happen";
+  if (error_values_by_year_.empty())
+    LOG_CODE_ERROR() << "error_values_by_year_ is empty, this should not happen";
 }
 
 /**
@@ -159,13 +134,14 @@ void Abundance::PreExecute() {
 void Abundance::Execute() {
   LOG_FINEST() << "Entering observation " << label_;
 
-  Double         expected_total = 0.0;  // value in the model
-  vector<string> keys;
-  vector<Double> expecteds;
-  vector<double> observeds;
-  vector<double> error_values;
-  vector<Double> process_errors;
-  vector<Double> scores;
+  Double                   expected_total = 0.0;  // value in the model
+  vector<string>           keys;
+  vector<Double>           expecteds;
+  vector<double>           observeds;
+  vector<double>           error_values;
+  vector<Double>           process_errors;
+  vector<Double>           scores;
+  vector<std::set<string>> selectivity_labels;  // labels for each selectivity
 
   Double selectivity_result = 0.0;
   Double start_value        = 0.0;
@@ -189,11 +165,15 @@ void Abundance::Execute() {
   unsigned selectivity_offset = 0;
   for (unsigned proportions_index = 0; proportions_index < proportions_by_year_[current_year].size(); ++proportions_index, ++partition_iter, ++cached_partition_iter) {
     expected_total = 0.0;
+    std::set<string> selectivity_labels_set;
 
     auto category_iter        = partition_iter->begin();
     auto cached_category_iter = cached_partition_iter->begin();
     for (unsigned category_offset = 0; category_iter != partition_iter->end(); ++category_offset, ++cached_category_iter, ++category_iter, ++selectivity_offset) {
+      assert(selectivity_offset < selectivities_.size());
+
       for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
+        selectivity_labels_set.insert(selectivities_[selectivity_offset]->label());
         selectivity_result = selectivities_[selectivity_offset]->GetLengthResult(data_offset);
         start_value        = (*cached_category_iter)->cached_data_[data_offset];
         end_value          = (*category_iter)->data_[data_offset];
@@ -229,10 +209,11 @@ void Abundance::Execute() {
     observeds.push_back(proportions_by_year_[current_year][proportions_index]);
     error_values.push_back(error_value);
     process_errors.push_back(process_error_value_);
+    selectivity_labels.push_back(selectivity_labels_set);
   }
 
   for (unsigned index = 0; index < observeds.size(); ++index)
-    SaveComparison(keys[index], expecteds[index], observeds[index], process_errors[index], error_values[index], 0.0, delta_, 0.0);
+    SaveComparison(keys[index], selectivity_labels[index], expecteds[index], observeds[index], process_errors[index], error_values[index], 0.0, delta_, 0.0);
 }
 
 /**

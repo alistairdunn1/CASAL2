@@ -82,7 +82,7 @@ void ProcessRemovalsByLengthRetainedTotal::DoValidate() {
       ->Columns(expected_column_count, "Expected year, observation values, and error value columns in the observation table")
       ->ColumnIsYear(0, "First column of the observation table must be a model year")
       ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (data + error value) for the observation")
-      ->GreaterThan(expected_column_count - 1, 0.0);
+      ->GreaterThanOrEqualToForRange(1u, expected_column_count - 1, 0.0);
 
   parameters_.ValidateTable(PARAM_ERROR_VALUES)
       ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
@@ -90,7 +90,7 @@ void ProcessRemovalsByLengthRetainedTotal::DoValidate() {
       ->Columns(category_labels_.size() + 1, "Expected year and error value columns in the error values table")
       ->ColumnIsYear(0, "First column of the error values table must be a model year")
       ->DoubleDataRange(1, category_labels_.size(), "All columns except the first must be a double value (error values) for the observation")
-      ->GreaterThanForRange(1, category_labels_.size(), 0.0);
+      ->GreaterThanOrEqualToForRange(1, category_labels_.size(), 0.0);
 
   // Do some checks if we're not using all of the model length bins
   using_model_length_bins = length_bins_.size() == model_->length_bins().size();

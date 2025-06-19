@@ -228,6 +228,12 @@ shared_ptr<ValidatorTable> ValidatorTable::GreaterThan(unsigned column_index, do
                   << row[column_index] << "'. It should be greater than " << value << ". " << error_message;
       return shared_from_this();
     }
+
+    if (column_value <= value) {
+      LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " contains a value '" << column_value
+                  << "' that is less than or equal to the specified value '" << value << "'. It should be greater than " << value << ". " << error_message;
+      return shared_from_this();
+    }
   }
 
   return shared_from_this();
@@ -266,6 +272,106 @@ shared_ptr<ValidatorTable> ValidatorTable::GreaterThanForRange(unsigned start_co
       if (!utilities::To<double>(row[column_index], column_value)) {
         LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " does not contain a valid double value: '"
                     << row[column_index] << "'. It should be greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+
+      if (column_value <= value) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " contains a value '" << column_value
+                    << "' that is less than or equal to the specified value '" << value << "'. It should be greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will validate that the specified range of columns contains values greater than a specified value.
+ * If the columns do not contain values greater than the specified value it will throw an error.
+ * @param start_column_index The starting index of the range of columns to validate
+ * @param number_of_columns The number of columns in the range to validate
+ * @param value The value to compare against
+ * @param error_message An optional error message to include in the log if validation fails
+ *                     This can be used to provide additional context for the error.
+ * @return A shared pointer to the ValidatorTable object for method chaining
+ */
+shared_ptr<ValidatorTable> ValidatorTable::GreaterThanOrEqualToForRange(unsigned start_column_index, unsigned number_of_columns, double value, const string& error_message) {
+  if (table_ == nullptr)
+    LOG_CODE_ERROR() << "table_ is nullptr";
+
+  auto data = table_->data();
+  for (const auto& row : data) {
+    if (start_column_index >= row.size() || (start_column_index + number_of_columns - 1) >= row.size()) {
+      LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have columns in the range [" << start_column_index << ", "
+                  << (start_column_index + number_of_columns - 1) << "). Actual row size was " << row.size() << ". " << error_message;
+      return shared_from_this();
+    }
+
+    for (unsigned i = 0; i < number_of_columns; ++i) {
+      unsigned column_index = start_column_index + i;
+      if (column_index >= row.size()) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have a column at index " << column_index
+                    << ". We expected it to contain values greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+      double column_value = 0.0;
+      if (!utilities::To<double>(row[column_index], column_value)) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " does not contain a valid double value: '"
+                    << row[column_index] << "'. It should be greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+
+      if (column_value < value) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " contains a value '" << column_value
+                    << "' that is less than or equal to the specified value '" << value << "'. It should be greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
+ *  This method will validate that the specified column index contains values less than or equal to a specified value.
+ *  If the column does not contain values less than or equal to than the specified value it will throw an error.
+ * @param start_column_index The starting index of the range of columns to validate
+ * @param number_of_columns The number of columns in the range to validate
+ * @param value The value to compare against
+ * @param error_message An optional error message to include in the log if validation fails
+ *                     This can be used to provide additional context for the error.
+ * @return A shared pointer to the ValidatorTable object for method chaining
+ */
+shared_ptr<ValidatorTable> ValidatorTable::LessThanOrEqualToForRange(unsigned start_column_index, unsigned number_of_columns, double value, const string& error_message) {
+  if (table_ == nullptr)
+    LOG_CODE_ERROR() << "table_ is nullptr";
+
+  auto data = table_->data();
+  for (const auto& row : data) {
+    if (start_column_index >= row.size() || (start_column_index + number_of_columns - 1) >= row.size()) {
+      LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have columns in the range [" << start_column_index << ", "
+                  << (start_column_index + number_of_columns - 1) << "). Actual row size was " << row.size() << ". " << error_message;
+      return shared_from_this();
+    }
+
+    for (unsigned i = 0; i < number_of_columns; ++i) {
+      unsigned column_index = start_column_index + i;
+      if (column_index >= row.size()) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have a column at index " << column_index
+                    << ". We expected it to contain values greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+      double column_value = 0.0;
+      if (!utilities::To<double>(row[column_index], column_value)) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " does not contain a valid double value: '"
+                    << row[column_index] << "'. It should be greater than " << value << ". " << error_message;
+        return shared_from_this();
+      }
+
+      if (column_value > value) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " contains a value '" << column_value
+                    << "' that is greater than the specified value '" << value << "'. It should be less than or equal to " << value << ". " << error_message;
         return shared_from_this();
       }
     }

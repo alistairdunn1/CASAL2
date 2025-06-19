@@ -44,6 +44,8 @@ public:
   shared_ptr<ValidatorTable> DoubleDataRange(unsigned start_index, unsigned number_of_columns, const string& error_message = "");
   shared_ptr<ValidatorTable> GreaterThan(unsigned column_index, double value, const string& error_message = "");
   shared_ptr<ValidatorTable> GreaterThanForRange(unsigned start_column_index, unsigned number_of_columns, double value, const string& error_message = "");
+  shared_ptr<ValidatorTable> GreaterThanOrEqualToForRange(unsigned start_column_index, unsigned number_of_columns, double value, const string& error_message = "");
+  shared_ptr<ValidatorTable> LessThanOrEqualToForRange(unsigned column_index, unsigned number_of_columns, double value, const string& error_message = "");
 
   // shared_ptr<ValidatorVector> GreaterThan(double value);
   // shared_ptr<ValidatorVector> GreaterThan(unsigned value);

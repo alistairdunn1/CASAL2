@@ -117,7 +117,6 @@ void TagRecaptureByLength::DoValidate() {
   tagged_category_split_labels_ = model_->categories()->total_categories(tagged_category_labels_);
 
   // Do a check so that every Tagged category must be in the categories as well
-  // TBH. I don't know why this is necessary when we could just define categories and copy it ta tagged?
   for (unsigned i = 0; i < tagged_category_split_labels_.size(); ++i) {
     for (unsigned j = 0; j < tagged_category_split_labels_[i].size(); ++j) {
       if (find(category_split_labels_[i].begin(), category_split_labels_[i].end(), tagged_category_split_labels_[i][j]) == category_split_labels_[i].end()) {

@@ -17,6 +17,7 @@
 
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Observations/Manager.h"
+#include "TestResources/Models/TwoSexLengthComplex.h"
 #include "TestResources/TestFixtures/InternalEmptyLengthModel.h"
 
 // Namespaces
@@ -25,6 +26,91 @@ namespace length {
 using niwa::testfixtures::InternalEmptyLengthModel;
 using std::cout;
 using std::endl;
+
+/**
+ * This unit test is specifically for ensuring we have the right values
+ * being populated in the comparison object. Very carefully we're concerned
+ * about the selectivities and the categories they're associated with.
+ */
+TEST_F(InternalEmptyLengthModel, Observation_Length_ProportionsCategoryByLength_TwoSexComplex) {
+  const std::string observation_definition =
+      R"(
+        @observation observation
+        type proportions_by_category        
+        time_step step_one
+        categories immature.male+immature.female immature.female
+        selectivities logistic_one logistic_two logistic_three
+        total_categories mature.male immature.female+mature.male
+        selectivities_for_total_categories logistic_four logistic_five logistic_six
+        likelihood binomial
+        time_step_proportion 1.0
+        length_bins 5:9
+        delta 1e-5
+        plus_group true
+        years 2007 2008
+        table obs
+        2007 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1
+        2008 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.11
+        end_table
+        table error_values
+        2007 0.1 
+        2008 0.1 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19
+        end_table
+    )";
+
+  AddConfigurationLine(testresources::models::two_sex_length_complex, "TwoSexLengthComplex.h", 23);
+  AddConfigurationLine(observation_definition, __FILE__, 37);
+  LoadConfiguration();
+
+  model_->Start(RunMode::kTesting);
+  model_->FullIteration();
+
+  auto observation_ptr = model_->managers()->observation()->GetObservation("observation");
+  ASSERT_NE(nullptr, observation_ptr);
+
+  const vector<obs::Comparison>& comparisons = observation_ptr->comparisons(2008);
+  ASSERT_EQ(10u, comparisons.size());
+
+  // Check first comparison
+  unsigned index = 0;
+  EXPECT_EQ("immature.male+immature.female", comparisons[index].category_);
+  ASSERT_EQ(3u, comparisons[index].selectivities_.size());
+  auto sel_it = comparisons[index].selectivities_.begin();
+  EXPECT_EQ("logistic_four", *sel_it);
+  ++sel_it;
+  EXPECT_EQ("logistic_one", *sel_it);
+  ++sel_it;
+  EXPECT_EQ("logistic_two", *sel_it);
+  EXPECT_EQ(0u, comparisons[index].age_);
+  EXPECT_DOUBLE_EQ(5.0, comparisons[index].length_);
+  EXPECT_DOUBLE_EQ(1.7758874054547531, comparisons[index].expected_);
+  EXPECT_DOUBLE_EQ(0.02, comparisons[index].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[index].process_error_);
+  EXPECT_DOUBLE_EQ(0.1, comparisons[index].error_value_);
+  EXPECT_DOUBLE_EQ(0.1, comparisons[index].adjusted_error_);
+  EXPECT_DOUBLE_EQ(1e-5, comparisons[index].delta_);
+  EXPECT_DOUBLE_EQ(2.2302192602449185, comparisons[index].score_);
+
+  // Check second comparison
+  index = 7;
+  EXPECT_EQ("immature.female", comparisons[index].category_);
+  ASSERT_EQ(3u, comparisons[index].selectivities_.size());
+  sel_it = comparisons[index].selectivities_.begin();
+  EXPECT_EQ("logistic_five", *sel_it);
+  ++sel_it;
+  EXPECT_EQ("logistic_six", *sel_it);
+  ++sel_it;
+  EXPECT_EQ("logistic_three", *sel_it);
+  EXPECT_EQ(0u, comparisons[index].age_);
+  EXPECT_DOUBLE_EQ(7.0, comparisons[index].length_);
+  EXPECT_DOUBLE_EQ(0.0090571759486253213, comparisons[index].expected_);
+  EXPECT_DOUBLE_EQ(0.09, comparisons[index].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[index].process_error_);
+  EXPECT_DOUBLE_EQ(0.17, comparisons[index].error_value_);
+  EXPECT_DOUBLE_EQ(0.17, comparisons[index].adjusted_error_);
+  EXPECT_DOUBLE_EQ(1e-5, comparisons[index].delta_);
+  EXPECT_DOUBLE_EQ(0.06991056784978654, comparisons[index].score_);
+}
 
 const std::string simple_single_sex_model =
     R"(

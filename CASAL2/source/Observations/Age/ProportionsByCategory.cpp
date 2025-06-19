@@ -73,7 +73,7 @@ void ProportionsByCategory::DoValidate() {
       ->Columns(expected_column_count, "Expected year, observation values, and error value columns in the observation table")
       ->ColumnIsYear(0, "First column of the observation table must be a model year")
       ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (data + error value) for the observation")
-      ->GreaterThan(expected_column_count - 1, 0.0);
+      ->GreaterThanOrEqualToForRange(1, expected_column_count - 1, 0.0);
 
   parameters_.ValidateTable(PARAM_ERROR_VALUES)
       ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
@@ -108,22 +108,12 @@ void ProportionsByCategory::DoBuild() {
     selectivities_.push_back(selectivity);
   }
 
-  if (selectivities_.size() == 1 && category_labels_.size() != 1) {
-    auto val_sel = selectivities_[0];
-    selectivities_.assign(category_labels_.size(), val_sel);
-  }
-
   for (string label : target_selectivity_labels_) {
     auto selectivity = model_->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity) {
       LOG_ERROR_P(PARAM_TARGET_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     } else
       target_selectivities_.push_back(selectivity);
-  }
-
-  if (target_selectivities_.size() == 1 && category_labels_.size() != 1) {
-    auto val_t = target_selectivities_[0];
-    target_selectivities_.assign(category_labels_.size(), val_t);
   }
 }
 

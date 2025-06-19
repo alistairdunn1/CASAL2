@@ -79,14 +79,15 @@ void ProportionsMatureByAge::DoValidate() {
       ->Columns(expected_column_count, "Expected year, observation values, and error value columns in the observation table")
       ->ColumnIsYear(0, "First column of the observation table must be a model year")
       ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (data + error value) for the observation")
-      ->GreaterThan(expected_column_count - 1, 0.0);
+      ->GreaterThanOrEqualToForRange(1u, expected_column_count - 1, 0.0)
+      ->LessThanOrEqualToForRange(1u, expected_column_count - 1, 1.0);
 
   parameters_.ValidateTable(PARAM_ERROR_VALUES)
       ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
       ->Columns(expected_column_count, "Expected year and error value columns in the error values table")
       ->ColumnIsYear(0, "First column of the error values table must be a model year")
       ->DoubleDataRange(1, expected_column_count - 1, "All columns except the first must be a double value (error values) for the observation")
-      ->GreaterThanForRange(1, expected_column_count - 1, 0.0);
+      ->GreaterThanOrEqualToForRange(1, expected_column_count - 1, 0.0);
 
   proportions_  = obs_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
   error_values_ = error_values_table_->MapColumnsToYearAndCategory(category_labels_, 0u, 1u, expected_column_count - 1);
