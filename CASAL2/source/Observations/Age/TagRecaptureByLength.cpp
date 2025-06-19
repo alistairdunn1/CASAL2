@@ -69,7 +69,7 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
 void TagRecaptureByLength::DoValidate() {
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
-  parameters_.ValidateVector(PARAM_TAGGED_CATEGORIES);  //->SameNumberOfElementsAs(PARAM_CATEGORIES);
+  parameters_.ValidateVector(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES, true);
   parameters_.ValidateVector(PARAM_TAGGED_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES);
   parameters_.Validate(PARAM_DETECTION_PARAMETER)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.ValidateVector(PARAM_DISPERSION)
