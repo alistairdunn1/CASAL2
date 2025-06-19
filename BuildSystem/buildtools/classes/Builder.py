@@ -53,6 +53,16 @@ class MainCode:
 
         print("--> Preparing CMake command")
         build_string = 'cmake ' + self.cmake_compiler_ + ' -D' + Globals.build_target_.upper() + '=1'
+        # Ensure our Asserts get handled correctly
+        if Globals.build_target_.upper() == "TESTMODE":
+            build_string += ' -DCMAKE_BUILD_TYPE=Debug'
+        elif Globals.build_target_.upper() == "DEBUG":
+            build_string += ' -DCMAKE_BUILD_TYPE=Debug'
+        elif Globals.build_target_.upper() == "RELEASE":
+            build_string += ' -DCMAKE_BUILD_TYPE=Release'
+        elif Globals.build_target_.upper() == "LIBRARY":
+            build_string += ' -DCMAKE_BUILD_TYPE=Release'
+
         if Globals.build_parameters_ != "":
             build_string += ' -D' + Globals.build_parameters_.upper() + '=1'
         build_string += ' ../../../../CASAL2/'
