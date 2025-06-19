@@ -39,7 +39,7 @@ TagRecaptureByLengthForGrowth::TagRecaptureByLengthForGrowth(shared_ptr<Model> m
 
   // clang-format off
   parameters_.Bind<double>(PARAM_LENGTH_BINS, &length_bins_, "The length bins")->set_is_optional(true);
-  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group?")->set_is_optional(true);
+  parameters_.Bind<bool>(PARAM_PLUS_GROUP, &length_plus_, "Is the last length bin a plus group?")->set_default_value(true);
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "The years for which there are observations")->set_is_optional(true);
   parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_labels_, "The labels of the selectivities");
   parameters_.Bind<string>(PARAM_TIME_STEP, &time_step_label_, "The label of the time step that the observation occurs in");
@@ -65,7 +65,7 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
       ->GreaterThanOrEqualTo(0.0)
       ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
       ->SameNumberOfElementsAs(PARAM_YEARS)
-      ->DefaultValue(1.0, years_.size());
+      ->DefaultValue(0.0, years_.size());
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
   number_bins_                   = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
@@ -88,10 +88,6 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
   using_model_length_bins = length_bins_.size() == model_->length_bins().size();
   if (!using_model_length_bins)
     map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
-
-  if (length_plus_ & !model_->length_plus())
-    LOG_ERROR_P(PARAM_LENGTH_PLUS)
-        << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
   process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
   category_split_labels_  = model_->categories()->total_categories(category_labels_);
@@ -193,6 +189,7 @@ void TagRecaptureByLengthForGrowth::Execute() {
       LOG_FINE() << "this category = " << (*category_iter)->name_;
       LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[selectivity_index]->label();
       // Now convert numbers at age to numbers at length using the categories age-length transition matrix
+
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
         for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
@@ -246,7 +243,6 @@ void TagRecaptureByLengthForGrowth::Execute() {
     LOG_FINEST() << " total numbers at length " << length_bins_for_comparison_[i] << " = " << length_results_[i] << ", denominator = " << total_expected
                  << " category = " << categories_for_comparison_[i];
     observed = recaptures_[model_->current_year()][i] / n_[model_->current_year()];
-
     assert(i <= selectivity_labels_for_comparison.size());
 
     SaveComparison(categories_for_comparison_[i], selectivity_labels_for_comparison[i], 0, length_bins_for_comparison_[i], expected, observed,

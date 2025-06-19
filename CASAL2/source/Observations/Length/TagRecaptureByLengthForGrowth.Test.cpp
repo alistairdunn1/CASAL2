@@ -45,6 +45,7 @@ TEST_F(InternalEmptyLengthModel, Observation_TagRecapture_By_Length_for_growth_T
       selectivities logistic_one logistic_two logistic_three logistic_four
       time_step step_two
       time_step_proportion 1.0
+      process_errors 1
       likelihood multinomial
       table recaptured
       2008 3 4 5 6 7 8 9 10 3 4 5 6 7 8 9 10
@@ -110,6 +111,7 @@ plus_group true
 years 2000
 categories uni
 selectivities maturity
+process_errors 1
 time_step Annual
 time_step_proportion 1.0
 likelihood multinomial
