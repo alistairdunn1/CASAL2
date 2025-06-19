@@ -84,6 +84,7 @@ void ProcessRemovalsByLength::DoValidate() {
 
   parameters_.ValidateTable(PARAM_ERROR_VALUES)
       ->Rows(years_.size(), "Number of rows in the error values table must match the number of years provided")
+      ->ShrinkColumnsTo(category_labels_.size() + 1, 1u)
       ->ExpandColumnsTo(category_labels_.size(), 1u)
       ->Columns(category_labels_.size() + 1, "Expected year and error value columns in the error values table")
       ->ColumnIsYear(0, "First column of the error values table must be a model year")

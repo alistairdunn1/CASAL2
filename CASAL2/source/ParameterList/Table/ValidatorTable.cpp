@@ -99,6 +99,65 @@ shared_ptr<ValidatorTable> ValidatorTable::ExpandColumnsTo(unsigned grow_to, uns
 }
 
 /**
+ * This method will shrink a table's columns to a specified number shrink_to. It will take
+ * the value at base index, then ensure there are shrink_to copies of it. Noting that it will
+ * ensure all values removed are identical.
+ *
+ * For example
+ * @table error_values
+ * 2000 0.1 0.1 0.1 0.1 0.1 0.1 0.1
+ * 2002 0.2 0.2 0.2 0.2 0.2 0.2 0.2
+ * @end_table
+ *
+ * With shrink_to = 3 and base_index = 1, the table will be expanded to: 2000 0.1 0.1 0.1, 2002 0.2 0.2 0.2.
+ *
+ * @param grow_to The number of data columns to grow the table to
+ * @param base_index The index of the column to duplicate values from
+ * @return A shared pointer to the ValidatorTable object for method chaining
+ */
+shared_ptr<ValidatorTable> ValidatorTable::ShrinkColumnsTo(unsigned shrink_to, unsigned base_index) {
+  LOG_FINEST() << "Shrinking columns to " << shrink_to << " with base index " << base_index;
+
+  if (table_ == nullptr)
+    LOG_CODE_ERROR() << "table_ is nullptr";
+
+  auto& data = table_->data();
+  if (data.empty()) {
+    LOG_ERROR() << table_->location() << "The table " << table_->label() << " has no data rows, but expected to shrink columns to " << shrink_to;
+    return shared_from_this();
+  }
+
+  // Check if the table has enough columns to expand
+  if (base_index >= data[0].size()) {
+    LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have a column at index " << base_index
+                << ". We expected it to contain values to shrink down to: " << shrink_to;
+    return shared_from_this();
+  }
+
+  // Do nothing if we already have more columns than 1 data column
+  if (data[0].size() == 2) {
+    LOG_FINEST() << "The table " << table_->label() << " already has 2 columns, no shrinking possible. Has " << data[0].size() << " columns.";
+    return shared_from_this();
+  }
+
+  // Shrink the columns
+  for (auto& row : data) {
+    string value = row[base_index];
+    for (unsigned i = base_index; i < row.size(); ++i) {
+      if (row[i] != value) {
+        LOG_ERROR() << table_->location() << "The table " << table_->label() << " has inconsistent values in row at index " << base_index
+                    << ". Expected all values to be the same as the base index value '" << value << "' but found '" << row[i] << "'";
+        return shared_from_this();
+      }
+    }
+
+    row.resize(shrink_to);  // Resize the row to shrink_to + 1 columns
+  }
+
+  return shared_from_this();
+}
+
+/**
  * This method will validate that the table has the specified number of columns.
  *  If the table does not have the specified number of columns it will throw an error.
  *

@@ -39,6 +39,7 @@ public:
 
   shared_ptr<ValidatorTable> Rows(unsigned count, const string& error_message = "");
   shared_ptr<ValidatorTable> ExpandColumnsTo(unsigned grow_to, unsigned base_index);
+  shared_ptr<ValidatorTable> ShrinkColumnsTo(unsigned shrink_to, unsigned base_index);
   shared_ptr<ValidatorTable> Columns(unsigned count, const string& error_message = "");
   shared_ptr<ValidatorTable> ColumnIsYear(unsigned column_index, const string& error_message = "");
   shared_ptr<ValidatorTable> DoubleDataRange(unsigned start_index, unsigned number_of_columns, const string& error_message = "");
