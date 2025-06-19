@@ -66,7 +66,7 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
 void TagRecaptureByLength::DoValidate() {
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
-  parameters_.ValidateVector(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES, false);
+  parameters_.ValidateVector(PARAM_TAGGED_CATEGORIES);  //->SameNumberOfElementsAs(PARAM_CATEGORIES, false);
   parameters_.ValidateVector(PARAM_TAGGED_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES);
   parameters_.Validate(PARAM_DETECTION_PARAMETER)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
@@ -81,7 +81,7 @@ void TagRecaptureByLength::DoValidate() {
       ->Columns(expected_column_count, "Expected year and recaptured values columns in the recaptured table")
       ->ColumnIsYear(0, "First column of the recaptured table must be a model year")
       ->DoubleDataRange(1, expected_column_count - 1, "All recaptured except the first must be a double value for the observation")
-      ->GreaterThan(expected_column_count - 1, 0.0);
+      ->GreaterThanOrEqualToForRange(1u, expected_column_count - 1, 0.0);
 
   parameters_.ValidateTable(PARAM_SCANNED)
       ->Rows(years_.size(), "Number of rows in the scanned table must match the number of years provided")

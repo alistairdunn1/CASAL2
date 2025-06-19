@@ -76,7 +76,7 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
       ->Columns(expected_column_count, "Expected year and recaptured values columns in the recaptured table")
       ->ColumnIsYear(0, "First column of the recaptured table must be a model year")
       ->DoubleDataRange(1, expected_column_count - 1, "All recaptured except the first must be a double value for the observation")
-      ->GreaterThan(expected_column_count - 1, 0.0);
+      ->GreaterThanOrEqualToForRange(1u, expected_column_count - 1, 0.0);
 
   recaptures_ = recaptures_table_->MapColumnsToYear<double>(0u, 1u, expected_column_count - 1);
 
