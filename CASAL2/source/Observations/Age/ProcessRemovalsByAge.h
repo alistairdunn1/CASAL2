@@ -47,8 +47,6 @@ public:
   void CalculateScore() override final;
   bool HasYear(unsigned year) const override final { return std::find(years_.begin(), years_.end(), year) != years_.end(); }
 
-  void old_code();
-
 protected:
   // Members
   vector<unsigned>                           years_;
