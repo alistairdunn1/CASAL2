@@ -1264,7 +1264,7 @@ Parameters that have time components associated with them can be sampled uniform
 
 Note that when projecting recruitment\_multipliers, the \emph{unstandardised} values are used. This may cause projections to be other than what was intended unless these average one (or some other chosen value). If not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty should be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is equal to one over some pre-defined range. 
 
-\paragraph[Lognormal]{Sampling from a Lognormal distribution, type  \argument{lognormal}}\index{Projections!Lognormal}\label{sec:Project-LogNormal} \STATUS{Untested}
+\paragraph[Lognormal]{Sampling from a Lognormal distribution, type  \argument{lognormal}}\index{Projections!Lognormal}\label{sec:Project-Lognormal} \STATUS{Untested}
 
 The parameters are drawn from a Gaussian (Normal) distribution in log space and exponentiated  to result in the Lognormal distribution
 
@@ -1286,7 +1286,7 @@ An example of applying this process to draw future year class parameters from a 
 		multiplier 1
 		\end{verbatim}}}
 
-\paragraph[Lognormal-Empirical]{Sampling from a Lognormal distribution where the  variance is estimated from values over a specified year range, type  \argument{lognormal\_empirical} }\index{Projections!Lognormal-Empirical}\label{sec:Project-LogNormalEmpirical} \STATUS{Untested}
+\paragraph[Lognormal-Empirical]{Sampling from a Lognormal distribution where the  variance is estimated from values over a specified year range, type  \argument{lognormal\_empirical} }\index{Projections!Lognormal-Empirical}\label{sec:Project-LognormalEmpirical} \STATUS{Untested}
 
 This method applies a Lognormal draw as in the \argument{Lognormal} method above and specifies a year range from which the standard deviation of the distribution is calculated. Then equation~\eqref{eq:lognormal} is used to generate future values with a specified $\mu$ and empirically calculated $\sigma$,
 
