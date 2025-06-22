@@ -161,8 +161,9 @@ void ProportionsAtLength::Execute() {
   /**
    * Verify our cached partition and partition sizes are correct
    */
-  auto cached_partition_iter = cached_partition_->Begin();
-  auto partition_iter        = partition_->Begin();  // vector<vector<partition::Category> >
+  auto     cached_partition_iter = cached_partition_->Begin();
+  auto     partition_iter        = partition_->Begin();  // vector<vector<partition::Category> >
+  unsigned selectivity_index     = 0;
   /**
    * Loop through the provided categories. Each provided category (combination) will have a list of observations
    * with it. We need to build a vector of proportions for each length using that combination and then
@@ -176,13 +177,17 @@ void ProportionsAtLength::Execute() {
     Double end_value   = 0.0;
     Double final_value = 0.0;
 
+    std::set<string> selectivity_labels;
+
     /**
      * Loop through the 2 combined categories building up the
      * expected proportions values.
      */
     auto category_iter        = partition_iter->begin();
     auto cached_category_iter = cached_partition_iter->begin();
-    for (; category_iter != partition_iter->end(); ++cached_category_iter, ++category_iter) {
+    for (; category_iter != partition_iter->end(); ++cached_category_iter, ++category_iter, ++selectivity_index) {
+      assert(selectivity_index < selectivities_.size());
+      selectivity_labels.insert(selectivities_[selectivity_index]->label());
       LOG_FINE() << "this category = " << (*category_iter)->name_;
       // Numbers at age
       LOG_FINE() << "numbers at age pre - post mortality";
@@ -190,19 +195,19 @@ void ProportionsAtLength::Execute() {
         LOG_FINE() << (*category_iter)->data_[age_ndx] << " " << (*category_iter)->cached_data_[age_ndx];
       }
 
-      LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[category_offset]->label();
+      LOG_FINEST() << "Selectivity for " << category_labels_[category_offset] << " selectivity " << selectivities_[selectivity_index]->label();
       // clear these temporay vectors
       std::fill(cached_numbers_at_length_.begin(), cached_numbers_at_length_.end(), 0.0);
       std::fill(numbers_at_length_.begin(), numbers_at_length_.end(), 0.0);
       // Now convert numbers at age to numbers at length using the categories age-length transition matrix
       if (using_model_length_bins) {
-        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_, selectivities_[category_offset]);
-        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_, selectivities_[category_offset]);
+        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_, selectivities_[selectivity_index]);
+        (*category_iter)->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_, selectivities_[selectivity_index]);
       } else {
         (*category_iter)
-            ->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_, selectivities_[category_offset], map_local_length_bins_to_global_length_bins_);
+            ->age_length_->populate_numbers_at_length((*category_iter)->data_, numbers_at_length_, selectivities_[selectivity_index], map_local_length_bins_to_global_length_bins_);
         (*category_iter)
-            ->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_, selectivities_[category_offset],
+            ->age_length_->populate_numbers_at_length((*category_iter)->cached_data_, cached_numbers_at_length_, selectivities_[selectivity_index],
                                                       map_local_length_bins_to_global_length_bins_);
       }
 
@@ -220,7 +225,7 @@ void ProportionsAtLength::Execute() {
 
         LOG_FINE() << "----------";
         LOG_FINE() << "Category: " << (*category_iter)->name_ << " at length " << length_bins_[length_offset];
-        LOG_FINE() << "Selectivity: " << selectivities_[category_offset]->label();
+        LOG_FINE() << "Selectivity: " << selectivities_[selectivity_index]->label();
         LOG_FINE() << "start_value: " << start_value << "; end_value: " << end_value << "; final_value: " << final_value;
         LOG_FINE() << "expected_value becomes: " << expected_values_[length_offset];
       }
@@ -234,10 +239,11 @@ void ProportionsAtLength::Execute() {
      * save our comparisons so we can use them to generate the score from the likelihoods later
      */
     for (unsigned i = 0; i < expected_values_.size(); ++i) {
-      SaveComparison(category_labels_[category_offset], 0, length_bins_[i], expected_values_[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
+      SaveComparison(category_labels_[category_offset], selectivity_labels, 0, length_bins_[i], expected_values_[i],
+                     proportions_[model_->current_year()][category_labels_[category_offset]][i], process_errors_by_year_[model_->current_year()],
+                     error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
     }
-  }
+  }  // end of category loop
 }
 
 /**

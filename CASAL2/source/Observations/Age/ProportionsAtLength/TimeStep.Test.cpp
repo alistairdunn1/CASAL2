@@ -16,15 +16,88 @@
 
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Observations/Manager.h"
+#include "TestResources/Models/TwoSexComplex.h"
 #include "TestResources/TestFixtures/InternalEmptyModel.h"
 
 // Namespaces
-namespace niwa {
-namespace age {
+namespace niwa::observations::age {
 
 using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
 using std::endl;
+
+/**
+ * This unit test is specifically for ensuring we have the right values
+ * being populated in the comparison object. Very carefully we're concerned
+ * about the selectivities and the categories they're associated with.
+ */
+TEST_F(InternalEmptyModel, Observation_ProportionsAtLength_TwoSexComplex) {
+  const std::string observation_definition =
+      R"(
+      @observation observation
+      type proportions_at_length
+      years 2008
+      likelihood multinomial
+      time_step step_one
+      categories immature.male+mature.male immature.female
+      selectivities logistic_one logistic_two logistic_three
+      delta 1e-5
+      length_bins 3:10
+      table obs
+      2008 0.12 0.25 0.28 0.25 0.1 0.1 0.2 0.3 0.12 0.25 0.28 0.25 0.1 0.1 0.2 0.3
+      end_table
+      table error_values
+      2008 22
+      end_table
+    )";
+
+  AddConfigurationLine(testresources::models::two_sex_complex, "TwoSexComplex.h", 23);
+  AddConfigurationLine(observation_definition, __FILE__, 36);
+  LoadConfiguration();
+
+  model_->Start(RunMode::kTesting);
+  model_->FullIteration();
+
+  auto observation_ptr = model_->managers()->observation()->GetObservation("observation");
+  ASSERT_NE(nullptr, observation_ptr);
+
+  const vector<obs::Comparison>& comparisons = observation_ptr->comparisons(2008);
+  ASSERT_EQ(16u, comparisons.size());
+
+  // Check first comparison
+  unsigned index = 0;
+  EXPECT_EQ("immature.male+mature.male", comparisons[index].category_);
+  ASSERT_EQ(2u, comparisons[index].selectivities_.size());
+  auto sel_it = comparisons[index].selectivities_.begin();
+  EXPECT_EQ("logistic_one", *sel_it);
+  ++sel_it;
+  EXPECT_EQ("logistic_two", *sel_it);
+  EXPECT_EQ(0u, comparisons[index].age_);
+  EXPECT_DOUBLE_EQ(3.0, comparisons[index].length_);
+  EXPECT_DOUBLE_EQ(0.0008986877634002869, comparisons[index].expected_);
+  EXPECT_DOUBLE_EQ(0.12, comparisons[index].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[index].process_error_);
+  EXPECT_DOUBLE_EQ(22.0, comparisons[index].error_value_);
+  EXPECT_DOUBLE_EQ(22.0, comparisons[index].adjusted_error_);
+  EXPECT_DOUBLE_EQ(1e-5, comparisons[index].delta_);
+  EXPECT_DOUBLE_EQ(19.877082382601607, comparisons[index].score_);
+
+  // Check second comparison
+  index = 10;
+  EXPECT_EQ("immature.female", comparisons[index].category_);
+  ASSERT_EQ(1u, comparisons[index].selectivities_.size());
+  sel_it = comparisons[index].selectivities_.begin();
+  EXPECT_EQ("logistic_three", *sel_it);
+  EXPECT_EQ(0u, comparisons[index].age_);
+  EXPECT_DOUBLE_EQ(5.0, comparisons[index].length_);
+  EXPECT_DOUBLE_EQ(0.00010413116716721378, comparisons[index].expected_);
+  EXPECT_DOUBLE_EQ(0.28, comparisons[index].observed_);
+  EXPECT_DOUBLE_EQ(0.0, comparisons[index].process_error_);
+  EXPECT_DOUBLE_EQ(22, comparisons[index].error_value_);
+  EXPECT_DOUBLE_EQ(22, comparisons[index].adjusted_error_);
+  EXPECT_DOUBLE_EQ(1e-5, comparisons[index].delta_);
+  EXPECT_DOUBLE_EQ(63.367179075483129, comparisons[index].score_);
+}
 
 const std::string test_cases_observation_proportions_at_length_single =
     R"(
@@ -238,7 +311,7 @@ TEST_F(InternalEmptyModel, Observation_Proportions_At_Length_Single) {
 }
 
 const std::string hak_like_model =
-R"(
+    R"(
 @model
 min_age 1
 max_age 30
@@ -440,9 +513,8 @@ log_scale True
 multiplier 1000
 )";
 
-
 const std::string prop_at_length_plus_group =
-R"(
+    R"(
 @observation subaTANageDEC_len
 type proportions_at_length
 time_step Jul_Jan
@@ -462,9 +534,8 @@ table error_values
 end_table
 )";
 
-
 const std::string prop_at_length_expect_fail_incorrect_bespoke_length_bins =
-R"(
+    R"(
 @observation subaTANageDEC_len
 type proportions_at_length
 time_step Jul_Jan
@@ -485,7 +556,7 @@ end_table
 )";
 
 const std::string prop_at_length_expect_fail_incorrect_proportions_supplied =
-R"(
+    R"(
 @observation subaTANageDEC_len
 type proportions_at_length
 time_step Jul_Jan
@@ -506,7 +577,7 @@ end_table
 )";
 
 const std::string prop_at_length_no_plus_group =
-R"(
+    R"(
 @observation subaTANageDEC_len
 type proportions_at_length
 time_step Jul_Jan
@@ -526,7 +597,6 @@ table error_values
 end_table
 )";
 
-
 /**
  * Test bespoke length bin functionality in this class
  */
@@ -535,16 +605,16 @@ TEST_F(InternalEmptyModel, Observation_Proportions_At_Length_bespoke_length_bins
   AddConfigurationLine(prop_at_length_plus_group, __FILE__, 31);
   LoadConfiguration();
   model_->Start(RunMode::kBasic);
-  Observation* observation = model_->managers()->observation()->GetObservation("subaTANageDEC_len");
+  Observation*                             observation = model_->managers()->observation()->GetObservation("subaTANageDEC_len");
   map<unsigned, vector<obs::Comparison> >& comparisons = observation->comparisons();
-  ASSERT_EQ(1u, comparisons.size()); // only one year of data
+  ASSERT_EQ(1u, comparisons.size());  // only one year of data
   // from CASAL model with same configuration
-  vector<Double> expected_vals = {0.0050132,	0.0107304,	0.0140647,	0.0388503,	0.129307,	0.259102,	0.258556,	0.167642,	0.0838241,	0.0329095};
-  unsigned year = 1990;
+  vector<Double> expected_vals = {0.0050132, 0.0107304, 0.0140647, 0.0388503, 0.129307, 0.259102, 0.258556, 0.167642, 0.0838241, 0.0329095};
+  unsigned       year          = 1990;
   ASSERT_FALSE(comparisons.find(year) == comparisons.end());
-  ASSERT_EQ(10, comparisons[year].size()); // 10 length bins
+  ASSERT_EQ(10, comparisons[year].size());  // 10 length bins
   EXPECT_EQ("male+female", comparisons[year][0].category_);
-  for(unsigned i = 0; i < expected_vals.size(); ++i) {
+  for (unsigned i = 0; i < expected_vals.size(); ++i) {
     EXPECT_NEAR(expected_vals[i], comparisons[year][i].expected_, 0.0001);
   }
 }
@@ -556,16 +626,16 @@ TEST_F(InternalEmptyModel, Observation_Proportions_At_Length_bespoke_length_bins
   AddConfigurationLine(prop_at_length_no_plus_group, __FILE__, 31);
   LoadConfiguration();
   model_->Start(RunMode::kBasic);
-  Observation* observation = model_->managers()->observation()->GetObservation("subaTANageDEC_len");
+  Observation*                             observation = model_->managers()->observation()->GetObservation("subaTANageDEC_len");
   map<unsigned, vector<obs::Comparison> >& comparisons = observation->comparisons();
-  ASSERT_EQ(1u, comparisons.size()); // only one year of data
+  ASSERT_EQ(1u, comparisons.size());  // only one year of data
   // from CASAL model with same configuration
-  vector<Double> expected_vals = {0.00518379,	0.0110955,	0.0145433,	0.0401723,	0.133707,	0.267919,	0.267355,	0.173347,	0.0866765};
-  unsigned year = 1990;
+  vector<Double> expected_vals = {0.00518379, 0.0110955, 0.0145433, 0.0401723, 0.133707, 0.267919, 0.267355, 0.173347, 0.0866765};
+  unsigned       year          = 1990;
   ASSERT_FALSE(comparisons.find(year) == comparisons.end());
-  ASSERT_EQ(9, comparisons[year].size()); // 9 length bins
+  ASSERT_EQ(9, comparisons[year].size());  // 9 length bins
   EXPECT_EQ("male+female", comparisons[year][0].category_);
-  for(unsigned i = 0; i < expected_vals.size(); ++i) {
+  for (unsigned i = 0; i < expected_vals.size(); ++i) {
     EXPECT_NEAR(expected_vals[i], comparisons[year][i].expected_, 0.0001);
   }
 }
@@ -589,7 +659,6 @@ TEST_F(InternalEmptyModel, Observation_Proportions_At_Length_bespoke_length_bins
   EXPECT_THROW(model_->Start(RunMode::kBasic), std::string);
 }
 
-}  // namespace age
-} /* namespace niwa */
+}  // namespace niwa::observations::age
 
 #endif /* TESTMODE */
