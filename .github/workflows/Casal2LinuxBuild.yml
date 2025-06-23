@@ -47,44 +47,44 @@ jobs:
           cd BuildSystem/bin/linux_gcc/test
           ./casal2          
 
-      # - name: Build release library
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh library release
+      - name: Build release library
+        run: |
+          cd BuildSystem
+          ./doBuild.sh library release
 
-      # - name: Build "Betadiff" library
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh library betadiff
+      - name: Build "Betadiff" library
+        run: |
+          cd BuildSystem
+          ./doBuild.sh library betadiff
 
-      # - name: Build "ADOL-C" library
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh library adolc
+      - name: Build "ADOL-C" library
+        run: |
+          cd BuildSystem
+          ./doBuild.sh library adolc
 
-      # - name: Build "Unit Test" library
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh library test
+      - name: Build "Unit Test" library
+        run: |
+          cd BuildSystem
+          ./doBuild.sh library test
 
-      # - name: Build Frontend
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh frontend
-      #   shell: bash
+      - name: Build Frontend
+        run: |
+          cd BuildSystem
+          ./doBuild.sh frontend
+        shell: bash
 
-      # - name: Build Linux Archive
-      #   continue-on-error: true
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh archive true
-      #   shell: bash
+      - name: Build Linux Archive
+        continue-on-error: true
+        run: |
+          cd BuildSystem
+          ./doBuild.sh archive true
+        shell: bash
 
-      # - name: Run Linux model runner
-      #   continue-on-error: true
-      #   run: |
-      #     cd BuildSystem
-      #     ./doBuild.sh modelrunner
+      - name: Run Linux model runner
+        continue-on-error: true
+        run: |
+          cd BuildSystem
+          ./doBuild.sh modelrunner
           
       # - name: Run Unit Tests from frontend build
       #   run: |
