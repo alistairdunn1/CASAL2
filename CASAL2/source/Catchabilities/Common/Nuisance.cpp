@@ -37,13 +37,20 @@ Nuisance::Nuisance(shared_ptr<Model> model) : Catchability(model) {
   parameters_.Bind<Double>(PARAM_LOWER_BOUND, &lower_bound_, "The upper bound for nuisance catchability");
   parameters_.Bind<Double>(PARAM_UPPER_BOUND, &upper_bound_, "The lower bound for nuisance catchability");
 
-  RegisterAsAddressable(PARAM_Q, &q_, addressable::kLookup);
+  RegisterAsAddressable(PARAM_Q, &q_, addressable::kAll);
 }
 
 /**
  * Validate the objects
  */
 void Nuisance::DoBuild() {
+  // TODO: Fix this. Building dynamic parameter feels horrible.
+  if (IsAddressableUsedFor(PARAM_Q, addressable::kEstimate))
+    LOG_ERROR_P(PARAM_Q) << "Has an @esimate block, this is not allowed. An @additional_prior must be specified for nuisance catchability parameters";
+
+  /**
+   *  Build the objects
+   */
   LOG_TRACE();
 
   // This was the first path that I went down, the second was going down an additional prior.
@@ -52,20 +59,20 @@ void Nuisance::DoBuild() {
   LOG_FINEST() << "Find an @additional_prior command for parameter " << parameter;
 
   bool has_prior = false;
-  has_prior      = model_->managers()->additional_prior()->HasAdditionalPriorExcludingRatioType(parameter);
+  has_prior      = model_->managers()->additional_prior()->HasAdditionalPriorExcludingType(parameter, PARAM_RATIO);
 
   LOG_FINE() << " has prior = " << has_prior;
   if (has_prior) {
     // Obtain a pointer to the estimate
-    AdditionalPrior* additional_prior = model_->managers()->additional_prior()->GetAdditionalPriorExcludingRatioType(parameter);
+    AdditionalPrior* additional_prior = model_->managers()->additional_prior()->GetAdditionalPriorExcludingType(parameter, PARAM_RATIO);
     if (!additional_prior)
       LOG_ERROR() << "Can not get additional prior with the parameter label " << parameter;
     // Find out the prior type
     prior_type_ = additional_prior->type();
     LOG_FINEST() << "Type of prior on Nuisance q = " << prior_type_;
 
-    if (prior_type_ != PARAM_LOGNORMAL && prior_type_ != PARAM_NONE && prior_type_ != PARAM_UNIFORM_LOG)
-      LOG_ERROR_P(PARAM_LABEL) << "the additional prior type needs to be either 'none', 'lognormal' or 'uniform_log'";
+    if (prior_type_ != PARAM_LOGNORMAL && prior_type_ != PARAM_UNIFORM && prior_type_ != PARAM_UNIFORM_LOG)
+      LOG_ERROR_P(PARAM_TYPE) << ": The type of additional_prior must be either uniform, lognormal, or uniform_log for a nuisance q. The type specified was " << prior_type_;
 
     // Perhaps set value to the mean of the bounds for now if the estimate system cannot handle an uninitialised estimate
     q_ = (upper_bound_ + lower_bound_) / 2.0;
@@ -78,7 +85,7 @@ void Nuisance::DoBuild() {
           Double mu = 0.0;
           for (string parameter_value : iter->second->values()) {
             if (!utils::To<Double>(parameter_value, mu))
-              LOG_ERROR() << "parameter mu = " << parameter_value << " could not be converted to a double";
+              LOG_ERROR_P(PARAM_MU) << "parameter mu = " << parameter_value << " could not be converted to a double";
           }
           mu_ = mu;
         }
@@ -86,15 +93,14 @@ void Nuisance::DoBuild() {
           Double cv = 0.0;
           for (string parameter_value : iter->second->values()) {
             if (!utils::To<Double>(parameter_value, cv))
-              LOG_ERROR() << "parameter CV = " << parameter_value << " could not be converted to a double";
+              LOG_ERROR_P(PARAM_CV) << "parameter CV = " << parameter_value << " could not be converted to a double";
           }
           cv_ = cv;
         }
       }
     }
   } else {
-    LOG_FINEST() << "solving for the nuisance q in a maximum likelihood context, i.e., with no prior";
-    q_ = 1.0;
+    LOG_ERROR_P(PARAM_LABEL) << ": An @additional_prior must be specified for nuisance catchability parameters";
   }
 }
 
@@ -111,11 +117,11 @@ void Nuisance::CalculateQ(map<unsigned, vector<observations::Comparison> >& comp
   LOG_FINEST() << "Converting nuisance q with prior = " << prior_type_ << " and likelihood = " << likelihood;
   if (likelihood != PARAM_NORMAL && likelihood != PARAM_LOGNORMAL) {
     LOG_FATAL() << "The nuisance q method can be applied only to observations with normal or lognormal likelihoods. "
-                << "Check the observation likelihood or use type = free";
+                << "Check the observation likelihood. Alternatively else use a catchability of type = free";
   }
 
   // The first set of conditions
-  if (likelihood == PARAM_NORMAL && (prior_type_ == PARAM_NONE)) {
+  if (likelihood == PARAM_NORMAL && (prior_type_ == PARAM_UNIFORM)) {
     // This syntax follows the manual
     Double s1 = 0, s2 = 0;
     double n = 0;
@@ -134,7 +140,7 @@ void Nuisance::CalculateQ(map<unsigned, vector<observations::Comparison> >& comp
     }
     q_ = (-s1 + sqrt(s1 * s1 + 4 * n * s2)) / (2 * n);
 
-  } else if (likelihood == PARAM_LOGNORMAL && (prior_type_ == PARAM_NONE)) {
+  } else if (likelihood == PARAM_LOGNORMAL && (prior_type_ == PARAM_UNIFORM)) {
     Double s3 = 0, s4 = 0;
     double n = 0;
     for (auto year_iterator = comparisons.begin(); year_iterator != comparisons.end(); ++year_iterator) {
@@ -221,7 +227,8 @@ void Nuisance::CalculateQ(map<unsigned, vector<observations::Comparison> >& comp
     LOG_FINE() << "mu = " << mu_ << " cv = " << cv_ << " s3 = " << s3 << " s4 = " << s4 << " n = " << n;
     q_ = exp((0.5 * n - 1.5 + log(mu_) / var_q + s3) / (s4 + 1 / var_q));
   } else {
-    LOG_ERROR() << "Unrecognised combination in CalculateQ : likelihood_type = " << likelihood << " prior_type = " << prior_type_;
+    LOG_ERROR_P(PARAM_LABEL) << ": The combination of the type of prior (" << prior_type_ << ") and type of observation (" << likelihood
+                             << ") is not supported. Valid types of prior are " << PARAM_UNIFORM ", " << PARAM_LOGNORMAL << ", and " << PARAM_UNIFORM_LOG ".";
   }
 
   LOG_FINE() << "Analytical q = " << q_;

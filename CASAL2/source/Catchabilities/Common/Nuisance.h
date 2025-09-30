@@ -5,7 +5,7 @@
  * @date 16/08/2016
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright NIWA Science �2016 - www.niwa.co.nz
  *
  * @section DESCRIPTION
  *
@@ -42,7 +42,7 @@ private:
   // members
   Double lower_bound_ = 0.0;
   Double upper_bound_ = 100.0;
-  string prior_type_  = PARAM_NONE;
+  string prior_type_  = PARAM_UNIFORM;
   Double mu_          = 0.0;
   Double cv_          = 1.0;
 };

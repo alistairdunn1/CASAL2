@@ -5,7 +5,7 @@
  * @date 18/08/2016
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright NIWA Science �2016 - www.niwa.co.nz
  *
  */
 #ifdef TESTMODE
@@ -463,9 +463,17 @@ type uniform_log
 parameter catchability[chatTANq].q
 )";
 
+const std::string uniform_q =
+    R"(
+@additional_prior chatTANq
+type uniform
+parameter catchability[chatTANq].q
+)";
+
 TEST_F(InternalEmptyModel, Catchabilities_nuisance_normal_prior_none) {
   AddConfigurationLine(base_model, __FILE__, 31);
   AddConfigurationLine(normal_biomass, __FILE__, 31);
+  AddConfigurationLine(uniform_q, __FILE__, 31);
   LoadConfiguration();
   model_->Start(RunMode::kBasic);
   Catchability* catchability = model_->managers()->catchability()->GetCatchability("chatTANq");
@@ -475,6 +483,7 @@ TEST_F(InternalEmptyModel, Catchabilities_nuisance_normal_prior_none) {
 TEST_F(InternalEmptyModel, Catchabilities_nuisance_normal_prior_none_estimation) {
   AddConfigurationLine(base_model, __FILE__, 31);
   AddConfigurationLine(normal_biomass, __FILE__, 31);
+  AddConfigurationLine(uniform_q, __FILE__, 31);
   LoadConfiguration();
   model_->Start(RunMode::kEstimation);
   Catchability* catchability = model_->managers()->catchability()->GetCatchability("chatTANq");
@@ -504,6 +513,7 @@ TEST_F(InternalEmptyModel, Catchabilities_nuisance_lognormal_prior_uniform_log) 
 TEST_F(InternalEmptyModel, Catchabilities_nuisance_lognormal_prior_none) {
   AddConfigurationLine(base_model, __FILE__, 31);
   AddConfigurationLine(lognormal_biomass, __FILE__, 31);
+  AddConfigurationLine(uniform_q, __FILE__, 31);
   LoadConfiguration();
   model_->Start(RunMode::kBasic);
   Catchability* catchability = model_->managers()->catchability()->GetCatchability("chatTANq");
