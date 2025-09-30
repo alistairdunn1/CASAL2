@@ -24,6 +24,7 @@ namespace additionalpriors {
  * Default constructor
  */
 Ratio::Ratio(shared_ptr<Model> model) : AdditionalPrior(model) {
+  parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter for the additional prior", "");
   parameters_.Bind<string>(PARAM_SECOND_PARAMETER, &second_parameter_, "The name of the parameter on the denominator", "");
   parameters_.Bind<Double>(PARAM_MU, &mu_, "The lognormal prior mean (mu) of the ratio");
   parameters_.Bind<Double>(PARAM_CV, &cv_, "The lognormal CV parameter for the ratio");

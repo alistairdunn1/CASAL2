@@ -15,10 +15,12 @@
 #include "../AdditionalPriors/Common/Beta.h"
 #include "../AdditionalPriors/Common/ElementDifference.h"
 #include "../AdditionalPriors/Common/LogNormal.h"
+#include "../AdditionalPriors/Common/Ratio.h"
+#include "../AdditionalPriors/Common/Sum.h"
+#include "../AdditionalPriors/Common/Uniform.h"
 #include "../AdditionalPriors/Common/UniformLog.h"
 #include "../AdditionalPriors/Common/VectorAverage.h"
 #include "../AdditionalPriors/Common/VectorSmoothing.h"
-#include "../AdditionalPriors/Common/Ratio.h"
 #include "../AdditionalPriors/Manager.h"
 #include "../Model/Managers.h"
 #include "../Model/Model.h"
@@ -48,10 +50,14 @@ AdditionalPrior* Factory::Create(shared_ptr<Model> model, const string& object_t
       object = new VectorAverage(model);
     else if (sub_type == PARAM_LOGNORMAL)
       object = new LogNormal(model);
+    else if (sub_type == PARAM_UNIFORM)
+      object = new Uniform(model);
     else if (sub_type == PARAM_UNIFORM_LOG)
       object = new UniformLog(model);
     else if (sub_type == PARAM_RATIO)
       object = new Ratio(model);
+    else if (sub_type == PARAM_SUM)
+      object = new Sum(model);
   }
 
   if (object)

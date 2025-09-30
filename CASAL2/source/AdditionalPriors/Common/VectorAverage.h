@@ -36,7 +36,7 @@ public:
 
 protected:
   // methods
-  void DoValidate() final{};
+  void DoValidate() final {};
   void DoBuild() final;
   // members
   string                 method_                 = "";

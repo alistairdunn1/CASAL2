@@ -36,12 +36,12 @@ protected:
   void DoValidate() final;
   void DoBuild() final;
   // members
-  Double*                addressable_                   = nullptr;
-  Double*                second_addressable_            = nullptr;
-  string                 second_parameter_;
-  Double                 mu_;
-  Double                 cv_;
-  Double                 sigma_;
+  Double* addressable_        = nullptr;
+  Double* second_addressable_ = nullptr;
+  string  second_parameter_;
+  Double  mu_;
+  Double  cv_;
+  Double  sigma_;
 };
 
 } /* namespace additionalpriors */

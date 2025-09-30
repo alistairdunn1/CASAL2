@@ -30,9 +30,8 @@ public:
   virtual ~Manager() = default;
   bool             HasAdditionalPrior(string_view parameter);
   AdditionalPrior* GetAdditionalPrior(string_view parameter);
-  AdditionalPrior* GetAdditionalPriorExcludingRatioType(string_view parameter);
-  bool             HasAdditionalPriorExcludingRatioType(string_view parameter);
-
+  AdditionalPrior* GetAdditionalPriorExcludingType(string_view parameter, string type);
+  bool             HasAdditionalPriorExcludingType(string_view parameter, string type);
 
 protected:
   // methods

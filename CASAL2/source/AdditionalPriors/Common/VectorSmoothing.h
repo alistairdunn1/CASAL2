@@ -38,7 +38,7 @@ public:
 
 protected:
   // methods
-  void DoValidate() final{};
+  void DoValidate() final {};
   void DoBuild() final;
   // members
   map<unsigned, Double>* addressable_map_    = nullptr;

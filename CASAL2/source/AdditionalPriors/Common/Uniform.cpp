@@ -1,16 +1,14 @@
 /**
- * @file UniformLog.cpp
+ * @file Uniform.cpp
  * @author C.Marsh
  * @github https://github.com/Zaita
  * @date 3/7/2017
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
- *
  */
 
 // headers
-#include "UniformLog.h"
+#include "Uniform.h"
 
 #include "../../Model/Model.h"
 #include "../../Model/Objects.h"
@@ -29,14 +27,14 @@ namespace additionalpriors {
  *
  * Note: The constructor is parsed to generate LaTeX for the documentation.
  */
-UniformLog::UniformLog(shared_ptr<Model> model) : AdditionalPrior(model) {
+Uniform::Uniform(shared_ptr<Model> model) : AdditionalPrior(model) {
   parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "The name of the parameter for the additional prior", "");
 }
 
 /**
  * Build the object
  */
-void UniformLog::DoBuild() {
+void Uniform::DoBuild() {
   string error = "";
   if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "could not be found. Error: " << error;
@@ -52,7 +50,7 @@ void UniformLog::DoBuild() {
       addressable_ = model_->objects().GetAddressable(parameter_);
       break;
     default:
-      LOG_ERROR() << "The addressable provided '" << parameter_ << "' has a type that is not supported for uniform-log additional priors";
+      LOG_ERROR() << "The addressable provided '" << parameter_ << "' has a type that is not supported for uniform additional priors";
       break;
   }
 }
@@ -61,9 +59,9 @@ void UniformLog::DoBuild() {
  * Get the score
  * @return The score
  */
-Double UniformLog::GetScore() {
+Double Uniform::GetScore() {
   Double value = (*addressable_);
-  score_       = log(value);
+  score_       = 0.0;
   LOG_FINEST() << "score = " << score_ << " value = " << value;
   return score_;
 }

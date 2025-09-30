@@ -1,18 +1,15 @@
 /**
- * @file Beta.h
+ * @file Uniform.h
  * @author Scott Rasmussen (scott.rasmussen@zaita.com)
  * @github https://github.com/Zaita
  * @date 21/10/2014
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
- *
  * @section DESCRIPTION
  *
- * TODO: Add documentation
  */
-#ifndef ADDITIONALPRIORS_UNIFORM_LOG_H_
-#define ADDITIONALPRIORS_UNIFORM_LOG_H_
+#ifndef ADDITIONALPRIORS_UNIFORM_H_
+#define ADDITIONALPRIORS_UNIFORM_H_
 
 // headers
 #include "../../AdditionalPriors/AdditionalPrior.h"
@@ -22,11 +19,11 @@ namespace niwa {
 namespace additionalpriors {
 
 // classes
-class UniformLog : public AdditionalPrior {
+class Uniform : public AdditionalPrior {
 public:
   // methods
-  UniformLog(shared_ptr<Model> model);
-  virtual ~UniformLog() = default;
+  Uniform(shared_ptr<Model> model);
+  virtual ~Uniform() = default;
   void   DoValidate() final {};
   void   DoBuild() final;
   Double GetScore() final;
@@ -40,4 +37,4 @@ protected:
 } /* namespace additionalpriors */
 } /* namespace niwa */
 
-#endif /* ADDITIONALPRIORS_UNIFORM_LOG_H_ */
+#endif /* ADDITIONALPRIORS_UNIFORM_H_ */
