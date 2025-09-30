@@ -187,7 +187,7 @@ int Runner::GoWithRunMode(RunMode::Type run_mode) {
   // create a new master model
   string model_type = config_loader_.model_type();
   LOG_FINE() << "Found model type = " << model_type;
-  master_model_     = Factory::Create(PARAM_MODEL, model_type);
+  master_model_ = Factory::Create(PARAM_MODEL, model_type);
   master_model_->flag_primary_thread_model();
   master_model_->set_global_configuration(&global_configuration_);
 
@@ -550,7 +550,7 @@ bool Runner::RunProfiling() {
       managers->estimate()->UnFlagIsEstimated(profile->parameter());
       LOG_FINE() << "First-Stepping profile";
       profile->FirstStep();
-      // Need to reset 
+      // Need to reset
       for (unsigned j = 0; j < profile->steps(); ++j) {
         LOG_FINE() << "Calling minimiser to begin the estimation (profiling)";
         LOG_INFO() << "Profiling with parameter at step " << j + 1 << " of " << profile->steps() << " steps value = " << AS_DOUBLE(profile->value());
@@ -562,7 +562,7 @@ bool Runner::RunProfiling() {
           managers->estimate()->SetActivePhase(k);
           minimiser->ExecuteThreaded(thread_pool_);
         }
-        //minimiser->ExecuteThreaded(thread_pool_);
+        // minimiser->ExecuteThreaded(thread_pool_);
         LOG_FINE() << "Finished estimation from " << j + 1 << " steps";
         master_model_->set_run_mode(RunMode::kBasic);
         master_model_->FullIteration();
@@ -570,7 +570,7 @@ bool Runner::RunProfiling() {
         LOG_FINE() << "Model: State change to Iteration Complete";
         managers->report()->Execute(master_model_, State::kIterationComplete);
         LOG_FINE() << "j = " << j << " steps = " << profile->steps();
-        if(j != (profile->steps() - 1)) // we don't estimate the last step!
+        if (j != (profile->steps() - 1))  // we don't estimate the last step!
           profile->NextStep();
         LOG_FINE() << "j = " << j << " steps = " << profile->steps();
       }
