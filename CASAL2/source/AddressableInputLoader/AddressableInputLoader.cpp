@@ -5,7 +5,7 @@
  * @date 20/01/2015
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright NIWA Science �2014 - www.niwa.co.nz
  *
  */
 
@@ -24,6 +24,8 @@ namespace niwa {
 void AddressableInputLoader::Validate() {
   if (model_->global_configuration().get_free_parameter_input_file() != "") {
     LOG_INFO() << "Estimable parameters were set from the free parameter file: " << model_->global_configuration().get_free_parameter_input_file();
+  } else {
+    LOG_INFO() << "Estimable parameters were set from the input configuration files";
   }
 }
 
@@ -109,10 +111,12 @@ void AddressableInputLoader::LoadValues(unsigned index) {
     vector<Estimate*> estimates = model_->managers()->estimate()->GetIsEstimated();
     for (auto estimate : estimates) {
       if (addressable_values_.find(estimate->parameter()) == addressable_values_.end())
-        LOG_FATAL() << "The estimate " << estimate->parameter() << " was not found in the input configuration file";
+        LOG_FATAL() << "The estimable parameter '" << estimate->parameter() << "' was not found in the free parameter file. "
+                    << "Please check that the free parameter file (e.g., the -i file) has been defined correctly.";
     }
     if (estimates.size() != addressable_values_.size())
-      LOG_FATAL() << "The free parameters file does not have the correct number of estimables defined. Expected " << estimates.size() << ", parsed " << addressable_values_.size();
+      LOG_FATAL() << "The free parameter file does not have the correct number of estimables defined. Expected " << estimates.size() << " estimables, but "
+                  << addressable_values_.size() << " were found in the free parameter file";
   }
 
   unsigned estimate_count = 0;
@@ -134,8 +138,8 @@ void AddressableInputLoader::LoadValues(unsigned index) {
 
   if (model_->global_configuration().force_overwrite_of_addressables()) {
     int AdditionalAddressables = addressable_values_.size() - estimate_count;
-    LOG_IMPORTANT() << AdditionalAddressables
-                    << " additional non-estimated addressable parameters were found in the free parameter file: " << model_->global_configuration().get_free_parameter_input_file();
+    LOG_IMPORTANT() << AdditionalAddressables << " additional non-estimated addressable parameters were found in the free parameter file '"
+                    << model_->global_configuration().get_free_parameter_input_file() << "'. These will overwrite the values in the input configuration file";
   }
 }
 
