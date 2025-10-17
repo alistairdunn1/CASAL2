@@ -11,6 +11,8 @@
 // headers
 #include "Manager.h"
 
+#include "Profiles/Verification/Verification.h"
+
 // namespaces
 namespace niwa {
 namespace profiles {
@@ -35,12 +37,16 @@ Profile* Manager::GetProfile() {
   return nullptr;
 }
 
+/**
+ * @brief Validate method should not be used for this manager
+ */
 void Manager::Validate() {
   LOG_CODE_ERROR() << "This method should not be used for this manager";
 }
 
 /**
- *
+ * @brief Validate our profiles
+ * @param model The model
  */
 void Manager::Validate(shared_ptr<Model> model) {
   if (model->run_mode() == RunMode::kProfiling && objects_.size() == 0) {
@@ -57,6 +63,16 @@ void Manager::Validate(shared_ptr<Model> model) {
   }
 
   for (auto profile : objects_) profile->Validate();
+}
+
+/**
+ * @brief Verify our profiles
+ * @param model The model
+ */
+void Manager::Verify(shared_ptr<Model> model) {
+  LOG_FINE() << "Verify profile";
+  verification::DoVerification(model);
+  for (auto profile : objects_) profile->Verify(model);
 }
 
 } /* namespace profiles */

@@ -31,6 +31,7 @@ public:
   virtual ~Manager() noexcept(true) {};
   void     Validate() override final;
   void     Validate(shared_ptr<Model> model);
+  void     Verify(shared_ptr<Model> model);
   Profile* GetProfile();  // should only be allowed one
 
 protected:
