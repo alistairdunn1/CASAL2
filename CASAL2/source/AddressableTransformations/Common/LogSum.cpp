@@ -5,7 +5,7 @@
  * @date Jul 8, 2017
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright NIWA Science �2017 - www.niwa.co.nz
  *
  */
 
@@ -58,9 +58,6 @@ void LogSum::DoValidate() {
     if (restored_values_[i] != init_values_[i])
       LOG_CODE_ERROR() << "restored_values_[i] !=  init_values_[i]";
   }
-  if (prior_applies_to_restored_parameters_)
-    LOG_FATAL_P(PARAM_PRIOR_APPLIES_TO_RESTORED_PARAMETERS)
-        << "There is no Jacobian calculated for this transformation. Statistically, this may not be appropriate, so you are not allowed to do it";
 }
 
 /**
@@ -99,8 +96,8 @@ void LogSum::RestoreForObjectiveFunction() {}
  */
 Double LogSum::GetScore() {
   LOG_TRACE()
-  // -ln(J) = NaN
-  jacobian_ = 0.0;
+  if (prior_applies_to_restored_parameters_)
+    jacobian_ = -log(2) + 2 * log(total_parameter_);
   return jacobian_;
 }
 

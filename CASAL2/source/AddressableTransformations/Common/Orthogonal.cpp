@@ -75,7 +75,16 @@ void Orthogonal::DoRestore() {
  * @return log(Jacobian) if transformed with Jacobian, otherwise 0.0
  */
 Double Orthogonal::GetScore() {
-  jacobian_ = 0.0;
+  LOG_TRACE()
+  if (prior_applies_to_restored_parameters_) {
+    // Calculate the Jacobian determinant
+    Double a = init_values_[0];
+    Double b = init_values_[1];
+    Double J = (1.0 / (2.0 * sqrt(a * b))) * (b / a) - (1.0 / (2.0 * sqrt(a * b))) * (a / b);
+    // Take the absolute value of the determinant
+    // Return the negative log of the Jacobian determinant
+    jacobian_ = -log(fabs(J));
+  }
   return jacobian_;
 }
 

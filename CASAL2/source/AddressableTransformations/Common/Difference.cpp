@@ -35,6 +35,11 @@ void Difference::DoValidate() {
     LOG_ERROR_P(PARAM_PARAMETERS) << "The difference transformation can only transform 2 parameters at a time. You supplied " << parameter_labels_.size() << " parmaters";
   }
   restored_values_.resize(2, 0.0);
+  // if -i use given values average_parameter_ and difference_parameter_ and restore.
+  restored_values_[0] = first_parameter_;
+  restored_values_[1] = first_parameter_ - difference_parameter_;
+
+  // else use config addressables and calculate first_parameter_ and difference_parameter_
   first_parameter_  = init_values_[0];
   second_parameter_ = first_parameter_ - init_values_[1];
   LOG_FINE() << "first parameter = " << first_parameter_;
@@ -74,8 +79,8 @@ void Difference::DoRestore() {
  */
 Double Difference::GetScore() {
   LOG_TRACE()
-  // -ln(J) = 0.0
-  jacobian_ = 0.0;
+  if (prior_applies_to_restored_parameters_)
+    jacobian_ = 0.0;
   return jacobian_;
 }
 

@@ -34,6 +34,11 @@ void AverageDifference::DoValidate() {
     LOG_ERROR_P(PARAM_PARAMETERS) << "The average difference transformation can only transform 2 parameters at a time. You supplied " << parameter_labels_.size() << " parmaters";
   }
   restored_values_.resize(2, 0.0);
+  // if -i use given values average_parameter_ and difference_parameter_ and restore.
+  restored_values_[0] = average_parameter_ + (difference_parameter_ / 2.0);
+  restored_values_[1] = average_parameter_ - (difference_parameter_ / 2.0);
+
+  // else use config addressables and calculate average_parameter_ and difference_parameter_
   Double total = 0;
   for (unsigned i = 0; i < parameter_labels_.size(); ++i) {
     LOG_FINE() << parameter_labels_[i] << " value = " << init_values_[i];
@@ -57,10 +62,6 @@ void AverageDifference::DoBuild() {
   for (unsigned i = 0; i < parameter_labels_.size(); ++i) {
     LOG_FINE() << " i  = " << i << " restored = " << restored_values_[i];
   }
-
-  if (prior_applies_to_restored_parameters_)
-    LOG_FATAL_P(PARAM_PRIOR_APPLIES_TO_RESTORED_PARAMETERS)
-        << "There is no Jacobian calculated for this transformation. Statistically, this may not be appropriate, so you are not allowed to do it";
 }
 /**
  * Restore objects
@@ -78,8 +79,8 @@ void AverageDifference::DoRestore() {
  */
 Double AverageDifference::GetScore() {
   LOG_TRACE()
-  // -ln(J) = NaN
-  jacobian_ = 0.0;
+  if (prior_applies_to_restored_parameters_)
+    jacobian_ = 0.0;
   return jacobian_;
 }
 
