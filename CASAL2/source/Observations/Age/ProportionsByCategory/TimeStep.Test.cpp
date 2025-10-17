@@ -33,13 +33,13 @@ const string proportions_by_category_twosex_basic =
 @observation simple
 type proportions_by_category
 categories immature.male+immature.female
-categories2 immature.male+immature.female+mature.male+mature.female
+target_categories immature.male+immature.female+mature.male+mature.female
 delta 1e-5
 years 1995 
 time_step step_one
 time_step_proportion 1.0 
 selectivities Maturation 
-selectivities2 One 
+target_selectivities One 
 plus_group true
 min_age 1
 max_age 50
