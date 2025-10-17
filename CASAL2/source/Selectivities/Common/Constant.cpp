@@ -19,6 +19,8 @@ namespace selectivities {
  * Default constructor
  */
 Constant::Constant(shared_ptr<Model> model) : Selectivity(model) {
+  parameters_.Bind<Double>(PARAM_A, &a_, "The constant value (default a = 0) in ax^b + c")->set_default_value(0.0);
+  parameters_.Bind<Double>(PARAM_B, &b_, "The constant value (default b = 0) in ax^b + c")->set_default_value(0.0);
   parameters_.Bind<Double>(PARAM_C, &c_, "The constant value");
   parameters_.Bind<Double>(PARAM_BETA, &beta_, "The minimum age for which the selectivity applies")->set_default_value(0.0);
 
@@ -27,45 +29,32 @@ Constant::Constant(shared_ptr<Model> model) : Selectivity(model) {
 }
 
 void Constant::DoValidate() {
+  parameters_.Validate(PARAM_A)->GreaterThanOrEqualTo(0.0);
+  parameters_.Validate(PARAM_B)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_C)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_BETA)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualToModelMaxAge();
 }
 
 /**
- * Return the constant result regardless of the
- * age or length specified
- *
- * @param age (unused in this selectivity)
- * @param age_or_length AgeLength pointer (unused in this selectivity)
- * @return the constant value
+ * @brief Get the selectivity value for a given age
+ * @param value The age
+ * @return The selectivity value
  */
-Double Constant::GetAgeResult(unsigned age, AgeLength* age_length) {
-  if (age < beta_)
-    return (0.0);
-  return c_;
-}
-
 Double Constant::get_value(Double value) {
   if (value < beta_)
     return (0.0);
-  return c_;
+  return (a_ * pow(value, b_) + c_);
 }
 
+/**
+ * @brief Get the selectivity value for a given age
+ * @param value The age
+ * @return The selectivity value
+ */
 Double Constant::get_value(unsigned value) {
   if (value < beta_)
     return (0.0);
-  return c_;
-}
-/**
- * GetLengthResult function
- *
- * @param length_bin_index
- * @return the constant value
- */
-Double Constant::GetLengthResult(unsigned length_bin_index) {
-  if (length_bin_index < beta_)
-    return (0.0);
-  return c_;
+  return (a_ * pow(value, b_) + c_);
 }
 
 } /* namespace selectivities */

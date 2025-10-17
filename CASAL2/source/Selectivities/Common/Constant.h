@@ -32,16 +32,16 @@ public:
   explicit Constant(shared_ptr<Model> model);
   virtual ~Constant() = default;
   void   DoValidate() override final;
-  Double GetAgeResult(unsigned age, AgeLength* age_length) override;
-  Double GetLengthResult(unsigned length_bin) override final;
-
   Double get_value(Double value) override final;
   Double get_value(unsigned value) override final;
 
 private:
   // Members
-  Double c_;
-  Double beta_;
+  Double a_     = 0.0;
+  Double b_     = 0.0;
+  Double c_     = 0.0;
+  Double beta_  = 0.0;
+  Double value_ = 0.0;
 };
 
 } /* namespace selectivities */
