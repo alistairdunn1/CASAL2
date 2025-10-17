@@ -41,6 +41,7 @@ public:
   Double GetValue(unsigned year);
   Double GetInitialisationValue(unsigned phase = 0, unsigned index = 0);
   Double GetLastValueFromInitialisation(unsigned phase);
+  Double GetBiasAdjustment() { return bias_adjustment_multiplier_; }
 
   // pure methods
   virtual void DoValidate() = 0;
@@ -65,7 +66,8 @@ protected:
   accessor::Categories   partition_;
   string                 proportion_method_;
   Double                 time_step_proportion_;
-  bool                   mean_proportion_method_ = true;
+  bool                   mean_proportion_method_;
+  Double                 bias_adjustment_multiplier_ = 1.0;
 };
 } /* namespace niwa */
 #endif /* DERIVEDQUANTITY_H_ */
