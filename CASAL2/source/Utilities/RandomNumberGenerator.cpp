@@ -6,7 +6,7 @@
  * @date 28/02/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright NIWA Science �2013 - www.niwa.co.nz
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
@@ -164,6 +164,7 @@ double RandomNumberGenerator::gamma(double shape) {
  * Generate a Poisson random number
  *
  * @param lambda
+ * @param sigma (default 1.0)
  * @return random number
  */
 double RandomNumberGenerator::poisson(double lambda) {

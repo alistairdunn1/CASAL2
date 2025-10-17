@@ -16,10 +16,10 @@
 #define UTILITIES_COMPATIBILITIES_H_
 
 // Enumerated Types
-enum class CompatibilityType { 
-  kCasal, 
-  kCasal2, 
+enum class CompatibilityType {
+  kCasal,
+  kCasal2,
   kUnknown,
-}; 
+};
 
 #endif /* UTILITIES_COMPATIBILITIES_H_ */

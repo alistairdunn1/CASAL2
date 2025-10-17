@@ -11,12 +11,12 @@
 #ifdef TESTMODE
 
 // headers
+#include "Math.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <iostream>
-
-#include "Math.h"
 
 // namespaces
 namespace niwa::utilities::math {
@@ -67,11 +67,10 @@ TEST(Math, Test_UnscalingValue_Math) {
  *
  */
 TEST(Math, Test_logit_invlogit) {
-  double value  = -3.1571787457745337235;
+  double value          = -3.1571787457745337235;
   double invlogit_value = invlogit(value);
-  EXPECT_NEAR(invlogit_value, 0.040809, 1e-4); //plogis( -3.1571787457745337235) // from R
-  EXPECT_NEAR(logit(invlogit_value), value, 1e-4); // back convert to check
-
+  EXPECT_NEAR(invlogit_value, 0.040809, 1e-4);      // plogis( -3.1571787457745337235) // from R
+  EXPECT_NEAR(logit(invlogit_value), value, 1e-4);  // back convert to check
 }
 
 /**
@@ -89,14 +88,11 @@ TEST(Math, pnorm) {
   EXPECT_NEAR(0.0001228664, pnorm(12, 23, 3), 0.001);
   EXPECT_NEAR(0.9995709, pnorm(33, 23, 3), 0.001);
 
-  
   // CASAL2's pnorm // look at the expected precision
   EXPECT_NEAR(0.5, pnorm2(23, 23, 3), 0.000001);
   EXPECT_NEAR(0.0001228664, pnorm2(12, 23, 3), 0.000001);
   EXPECT_NEAR(0.9995709, pnorm2(33, 23, 3), 0.000001);
-
 }
-
 
 /**
  * @brief
@@ -108,11 +104,10 @@ TEST(Math, pnorm) {
  * The near test shows expected precision, the old CASAL (pnorm) is not as accurate
  */
 TEST(Math, LnGamma) {
-
   EXPECT_NEAR(48.47118, LnGamma(23), 0.0001);
   EXPECT_NEAR(19.98721, LnGamma(13), 0.0001);
   EXPECT_NEAR(6.213457, LnGamma(0.002), 0.0001);
-  EXPECT_NEAR(15756.25, LnGamma(2333), 0.005); // not as precise for big values
+  EXPECT_NEAR(15756.25, LnGamma(2333), 0.005);  // not as precise for big values
 }
 
 /**
@@ -126,26 +121,26 @@ TEST(Math, LnGamma) {
   my_Sigma1 <- matrix(c(10, 5, 3, 7), ncol = 2)
   chol(my_Sigma1)
  */
- /*
+/*
 TEST(Math, chol_success) {
-  std::vector<std::vector<double>> covar(2);
-  std::vector<std::vector<double>> chol_covar(2);
-  covar[0].resize(2, 0.0);
-  covar[1].resize(2, 0.0);
-  chol_covar[0].resize(2, 0.0);
-  chol_covar[1].resize(2, 0.0);
-  covar[0][0] = 10;
-  covar[0][1] = 3;
-  covar[1][0] = 5;
-  covar[1][1] = 7;
-  
-  int result = chol(covar, chol_covar);
-  EXPECT_EQ(1, result);
-  // values of decompositon
-  EXPECT_NEAR(3.162278, chol_covar[0][0], 0.005) << " " << chol_covar[0][0];
-  EXPECT_NEAR(0.9486833, chol_covar[0][1], 0.005) << " " << chol_covar[0][1];
-  EXPECT_NEAR(0.0, chol_covar[1][0], 0.005) << " " << chol_covar[1][0];
-  EXPECT_NEAR(2.469817, chol_covar[1][1], 0.005) << " " << chol_covar[1][1];
+ std::vector<std::vector<double>> covar(2);
+ std::vector<std::vector<double>> chol_covar(2);
+ covar[0].resize(2, 0.0);
+ covar[1].resize(2, 0.0);
+ chol_covar[0].resize(2, 0.0);
+ chol_covar[1].resize(2, 0.0);
+ covar[0][0] = 10;
+ covar[0][1] = 3;
+ covar[1][0] = 5;
+ covar[1][1] = 7;
+
+ int result = chol(covar, chol_covar);
+ EXPECT_EQ(1, result);
+ // values of decompositon
+ EXPECT_NEAR(3.162278, chol_covar[0][0], 0.005) << " " << chol_covar[0][0];
+ EXPECT_NEAR(0.9486833, chol_covar[0][1], 0.005) << " " << chol_covar[0][1];
+ EXPECT_NEAR(0.0, chol_covar[1][0], 0.005) << " " << chol_covar[1][0];
+ EXPECT_NEAR(2.469817, chol_covar[1][1], 0.005) << " " << chol_covar[1][1];
 }
 */
 /**
@@ -159,23 +154,23 @@ TEST(Math, chol_success) {
   E <- matrix( c( 1, 2, 0, 2, 1, 2, 0, 2, 1 ), nrow=3, byrow=TRUE )
   chol(my_Sigma1)
  */
- /*
+/*
 TEST(Math, chol_fail) {
-  std::vector<std::vector<double>> covar(4);
-  std::vector<std::vector<double>> chol_covar(4);
+ std::vector<std::vector<double>> covar(4);
+ std::vector<std::vector<double>> chol_covar(4);
 
-  covar[0] = {18, 22, 54, 42};
-  covar[1] = {22, 70, 86, 62};
-  covar[2] = {54, 86, 174, 134};
-  covar[3] = {42, 62, 134, 106};
+ covar[0] = {18, 22, 54, 42};
+ covar[1] = {22, 70, 86, 62};
+ covar[2] = {54, 86, 174, 134};
+ covar[3] = {42, 62, 134, 106};
 
-  chol_covar[0].resize(4, 0.0);
-  chol_covar[1].resize(4, 0.0);
-  chol_covar[2].resize(4, 0.0);
-  chol_covar[3].resize(4, 0.0);
+ chol_covar[0].resize(4, 0.0);
+ chol_covar[1].resize(4, 0.0);
+ chol_covar[2].resize(4, 0.0);
+ chol_covar[3].resize(4, 0.0);
 
-  int result = chol(covar, chol_covar);
-  EXPECT_EQ(0, result);
+ int result = chol(covar, chol_covar);
+ EXPECT_EQ(0, result);
 
 }
 */

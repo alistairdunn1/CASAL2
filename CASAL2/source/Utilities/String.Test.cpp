@@ -13,10 +13,10 @@
 #ifdef TESTMODE
 
 // headers
+#include "String.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include "String.h"
 
 // namespaces
 namespace niwa {

@@ -42,7 +42,7 @@ public:
   double lognormal(double mean, double cv);  // Note the mean parameter is not the same as mu, from the lognormal distribution.
   double binomial(double p, double n);
   double chi_squared(unsigned df);
-  double gamma(double shape);  // assumes scale (theta) = 1
+  double gamma(double shape);     // assumes scale (theta) = 1
   double poisson(double lambda);  //
 
 private:
@@ -60,7 +60,6 @@ private:
   std::vector<double>   rng_chi_square_values_;
   std::vector<double>   rng_gamma_values_;
   std::vector<double>   rng_poisson_values_;
-
 };
 
 } /* namespace utilities */

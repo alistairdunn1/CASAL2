@@ -4,12 +4,12 @@
 #ifdef TESTMODE
 
 // headers
+#include "RandomNumberGenerator.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <iostream>
-
-#include "RandomNumberGenerator.h"
 
 // namespaces
 namespace niwa {
