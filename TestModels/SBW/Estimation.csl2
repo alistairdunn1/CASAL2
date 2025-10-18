@@ -130,4 +130,6 @@ parameter catchability[TangaroaMatureq].q
 mu 0.54
 cv 0.44		
 
-## don't need to add a uniform prior for the other q as- it's not a true estimate so has a null contribution.
+@additional_prior TangaroaImmatureq
+type uniform
+parameter catchability[TangaroaImmatureq].q
