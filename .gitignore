@@ -31,6 +31,14 @@ R-libraries/Casal2.Rcheck/
 /RemoteSystemsTempFiles
 /TestModels/**/estimate.log
 /TestModels/**/run.log
+/TestModels/**/objectives.*
+/TestModels/**/samples.*
+/TestModels/**/estimate_betadiff.log
+/TestModels/**/estimate_betadiff.err
+/TestModels/**/estimate_adolc.log
+/TestModels/**/estimate_adolc.err
+/TestModels/**/estimate_gammadiff.log
+/TestModels/**/estimate_gammadiff.err
 /ThirdParty/adolc/*.log
 /ThirdParty/adolc/msys/
 /ThirdParty/betadiff/*.log
