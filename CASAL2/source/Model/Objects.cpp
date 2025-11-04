@@ -18,6 +18,7 @@
 
 #include "../AddressableTransformations/Manager.h"
 #include "../AgeLengths/Manager.h"
+#include "../AgeingErrors/Manager.h"
 #include "../Catchabilities/Manager.h"
 #include "../DerivedQuantities/Manager.h"
 #include "../Estimates/Manager.h"
@@ -287,6 +288,9 @@ base::Object* Objects::FindObjectOrNull(const string& parameter_absolute_name) {
 
   } else if (type == PARAM_GROWTH_INCREMENT) {
     result = model_->managers()->growth_increment()->GetGrowthIncrement(label);
+
+  } else if (type == PARAM_AGEING_ERROR) {
+    result = model_->managers()->ageing_error()->GetAgeingError(label);
 
   } else {
     if (type.substr(0, 1) == "@") {
