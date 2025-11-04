@@ -47,7 +47,7 @@ public:
   // accessors
   string                 parameter() { return parameter_; };
   map<unsigned, Double>& projected_parameters() { return projected_values_; };
-  vector<unsigned> & years() { return years_; };
+  vector<unsigned>&      years() { return years_; };
 
 protected:
   // methods
@@ -67,7 +67,7 @@ protected:
 
   // members
   shared_ptr<Model>      model_;
-  Double                 multiplier_;
+  vector<Double>         multiplier_;
   string                 type_ = "";
   vector<unsigned>       years_;
   string                 parameter_;
@@ -77,6 +77,7 @@ protected:
   vector<Double>*        addressable_vector_ = nullptr;
   map<unsigned, Double>  projected_values_;
   map<unsigned, Double>  stored_values_;
+  map<unsigned, Double>  multiplier_by_year_;
   bool                   final_phase_ = false;
 
 private:

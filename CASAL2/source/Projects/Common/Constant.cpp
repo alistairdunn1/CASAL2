@@ -22,6 +22,7 @@ namespace projects {
  */
 Constant::Constant(shared_ptr<Model> model) : Project(model) {
   parameters_.Bind<Double>(PARAM_VALUES, &values_, "The values to assign to the addressable");
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value")->set_is_optional(true);
 }
 
 /**
@@ -29,7 +30,13 @@ Constant::Constant(shared_ptr<Model> model) : Project(model) {
  */
 void Constant::DoValidate() {
   parameters_.ValidateVector(PARAM_VALUES)->ExpandToSameNumberOfElementsAs(PARAM_YEARS)->SameNumberOfElementsAs(PARAM_YEARS);
-  year_values_ = utilities::Map::create(years_, values_);
+  parameters_.ValidateVector(PARAM_MULTIPLIER)
+      ->DefaultValue(1.0, years_.size())
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->GreaterThanOrEqualTo(0.0);
+  year_values_        = utilities::Map::create(years_, values_);
+  multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
 }
 
 /**
@@ -46,8 +53,8 @@ void Constant::DoReset() {}
  * Update
  */
 void Constant::DoUpdate() {
-  value_ = year_values_[model_->current_year()] * multiplier_;
-  LOG_FINE() << "Setting Value to: " << value_;
+  value_ = year_values_[model_->current_year()] * multiplier_by_year_[model_->current_year()];
+  LOG_FINE() << "Setting Value to: " << value_ << ", with multiplier: " << multiplier_by_year_[model_->current_year()];
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());
 }
 

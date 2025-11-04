@@ -27,7 +27,7 @@ class MultipleConstants : public niwa::Project {
 public:
   explicit MultipleConstants(shared_ptr<Model> model);
   virtual ~MultipleConstants() = default;
-  void DoValidate() override final {};
+  void DoValidate() override final;
   void DoBuild() override final;
   void DoReset() override final;
   void DoUpdate() override final;

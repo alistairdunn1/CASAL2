@@ -25,6 +25,7 @@ namespace projects {
 LogNormal::LogNormal(shared_ptr<Model> model) : Project(model) {
   parameters_.Bind<Double>(PARAM_MEAN, &mean_, "The mean of the lognormal process")->set_default_value(0.0);
   parameters_.Bind<Double>(PARAM_SIGMA, &sigma_, "The standard deviation (sigma) of the lognormal process");
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value")->set_is_optional(true);
 }
 
 /**
@@ -32,6 +33,12 @@ LogNormal::LogNormal(shared_ptr<Model> model) : Project(model) {
  */
 void LogNormal::DoValidate() {
   parameters_.Validate(PARAM_SIGMA)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_MULTIPLIER)
+      ->DefaultValue(1.0, years_.size())
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->GreaterThanOrEqualTo(0.0);
+  multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
 }
 
 /**
@@ -71,7 +78,7 @@ void LogNormal::DoUpdate() {
   value_ = exp(normal_draw_by_year_[model_->current_year()] - 0.5 * sigma_ * sigma_);
   // }
   // Store this value to be pulled out next projection year
-  value_ = value_ * multiplier_;
+  value_ = value_ * multiplier_by_year_[model_->current_year()];
 
   LOG_FINE() << "Setting Value to: " << value_;
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());

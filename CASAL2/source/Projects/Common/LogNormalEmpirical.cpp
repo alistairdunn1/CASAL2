@@ -26,6 +26,7 @@ LogNormalEmpirical::LogNormalEmpirical(shared_ptr<Model> model) : Project(model)
   parameters_.Bind<Double>(PARAM_MEAN, &mean_, "The mean of the Gaussian process")->set_default_value(0.0);
   parameters_.Bind<unsigned>(PARAM_START_YEAR, &start_year_, "The start year of sampling")->set_is_optional(true);
   parameters_.Bind<unsigned>(PARAM_FINAL_YEAR, &final_year_, "The final year of sampling")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value")->set_is_optional(true);
 }
 
 /**
@@ -35,6 +36,12 @@ void LogNormalEmpirical::DoValidate() {
   // if no values specified then set default as the model lifespan
   parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model_->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
   parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model_->projection_final_year());
+  parameters_.ValidateVector(PARAM_MULTIPLIER)
+      ->DefaultValue(1.0, years_.size())
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->GreaterThanOrEqualTo(0.0);
+  multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
 }
 
 /**
@@ -100,7 +107,7 @@ void LogNormalEmpirical::DoUpdate() {
   value_ = exp(normal_draw_by_year_[model_->current_year()] - 0.5 * sigma_ * sigma_);
 
   // Store this value to be pulled out next projection year
-  value_ = value_ * multiplier_;
+  value_ = value_ * multiplier_by_year_[model_->current_year()];
 
   LOG_FINE() << "Setting value to: " << value_;
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());

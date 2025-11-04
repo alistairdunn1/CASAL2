@@ -25,7 +25,6 @@ Project::Project(shared_ptr<Model> model) : model_(model) {
   parameters_.Bind<string>(PARAM_TYPE, &type_, "Type")->set_default_value("");
   parameters_.Bind<unsigned>(PARAM_YEARS, &years_, "Years to recalculate the values")->set_is_optional(true);
   parameters_.Bind<string>(PARAM_PARAMETER, &parameter_, "Parameter to project");
-  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value")->set_default_value(1.0);
 
   original_value_ = 0;
 }
@@ -35,9 +34,7 @@ Project::Project(shared_ptr<Model> model) : model_(model) {
  */
 void Project::Validate() {
   parameters_.Populate(model_);
-
-  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
-  parameters_.Validate(PARAM_MULTIPLIER)->GreaterThan(0.0);
+  parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
 
   DoValidate();
 }

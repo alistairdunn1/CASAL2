@@ -24,6 +24,7 @@ namespace projects {
 EmpiricalSampling::EmpiricalSampling(shared_ptr<Model> model) : Project(model) {
   parameters_.Bind<unsigned>(PARAM_START_YEAR, &start_year_, "The start year of sampling")->set_is_optional(true);
   parameters_.Bind<unsigned>(PARAM_FINAL_YEAR, &final_year_, "The final year of sampling")->set_is_optional(true);
+  parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value")->set_is_optional(true);
 }
 
 /**
@@ -32,6 +33,12 @@ EmpiricalSampling::EmpiricalSampling(shared_ptr<Model> model) : Project(model) {
 void EmpiricalSampling::DoValidate() {
   parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model_->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
   parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model_->projection_final_year());
+  parameters_.ValidateVector(PARAM_MULTIPLIER)
+      ->DefaultValue(1.0, years_.size())
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->GreaterThanOrEqualTo(0.0);
+  multiplier_by_year_ = utilities::Map::create(years_, multiplier_);
 }
 
 /**
@@ -62,8 +69,9 @@ void EmpiricalSampling::DoReset() {
  *  Update the parameter with a random resample of the parameter between start_year_ and final_year_
  */
 void EmpiricalSampling::DoUpdate() {
-  value_ = stored_values_[resampled_years_[model_->current_year()]] * multiplier_;
-  LOG_FINE() << "In year: " << model_->current_year() << " setting value to: " << value_ << " drawn from year: " << resampled_years_[model_->current_year()];
+  LOG_FINE() << "In year: " << model_->current_year() << " setting value to: " << value_ << " drawn from year: " << resampled_years_[model_->current_year()]
+             << ", with multiplier: " << multiplier_by_year_[model_->current_year()];
+  value_ = stored_values_[resampled_years_[model_->current_year()]] * multiplier_by_year_[model_->current_year()];
   (this->*DoUpdateFunc_)(value_, true, model_->current_year());
 }
 
