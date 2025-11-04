@@ -50,7 +50,7 @@ void Observation::DoValidate(shared_ptr<Model> model) {
  */
 void Observation::DoBuild(shared_ptr<Model> model) {
   LOG_TRACE();
-  vector<string> pearson_likelihoods    = {PARAM_BINOMIAL, PARAM_MULTINOMIAL, PARAM_LOGNORMAL, PARAM_NORMAL, PARAM_BINOMIAL_APPROX};
+  vector<string> pearson_likelihoods    = {PARAM_BINOMIAL, PARAM_DIRICHLET, PARAM_MULTINOMIAL, PARAM_LOGNORMAL, PARAM_NORMAL, PARAM_BINOMIAL_APPROX};
   vector<string> normalised_likelihoods = {PARAM_LOGNORMAL, PARAM_NORMAL};
 
   observation_ = model->managers()->observation()->GetObservation(observation_label_);
@@ -67,7 +67,7 @@ void Observation::DoBuild(shared_ptr<Model> model) {
     if (std::find(pearson_likelihoods.begin(), pearson_likelihoods.end(), observation_->likelihood()) == pearson_likelihoods.end()) {
       if (!default_report_)
         LOG_INFO() << "The likelihood for the observation '" << observation_label_ << "' is " << observation_->likelihood()
-                   << ". Pearsons residuals can only be calculated for the binomial, multinomial, lognormal, normal, and binomial_approx likelihoods";
+                   << ". Pearsons residuals can only be calculated for the binomial, dirichlet, multinomial, lognormal, normal, and binomial_approx likelihoods";
       pearson_resids_ = false;
     }
   }
@@ -95,11 +95,18 @@ void Observation::DoExecute(shared_ptr<Model> model) {
   cache_ << "likelihood_multiplier: " << observation_->likelihood_multiplier() << REPORT_EOL;
   if (observation_->type() == PARAM_TAG_RECAPTURE_BY_AGE || observation_->type() == PARAM_TAG_RECAPTURE_BY_LENGTH) {
     map<unsigned, Double> dispersion = observation_->dispersion();
-    cache_ << "dispersion:";
+    cache_ << PARAM_DISPERSION << ":";
     for (auto iter = dispersion.begin(); iter != dispersion.end(); ++iter) {
       cache_ << " " << iter->second;
     }
     cache_ << REPORT_EOL;
+    // TODO: Reimplement overlap scalar after Observation class supports it
+    // map<unsigned, Double> overlap_scalar = observation_->overlap_scalar();
+    // cache_ << PARAM_OVERLAP_SCALAR << ":";
+    // for (auto iter = overlap_scalar.begin(); iter != overlap_scalar.end(); ++iter) {
+    //   cache_ << " " << iter->second;
+    // }
+    // cache_ << REPORT_EOL;
   }
   cache_ << "categories:";
   for (auto category : observation_->categories()) cache_ << " " << category;
@@ -115,6 +122,9 @@ void Observation::DoExecute(shared_ptr<Model> model) {
     for (auto iter = comparisons.begin(); iter != comparisons.end(); ++iter) {
       for (obs::Comparison comparison : iter->second) {
         if (observation_->likelihood() == PARAM_BINOMIAL) {
+          resid = (comparison.observed_ - comparison.expected_)
+                  / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
+        } else if (observation_->likelihood() == PARAM_DIRICHLET) {
           resid = (comparison.observed_ - comparison.expected_)
                   / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
         } else if (observation_->likelihood() == PARAM_MULTINOMIAL) {
@@ -240,7 +250,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         } else {
           LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
         }
-        label = observation_label_ + ".fits" + "[" + year + "][" + bin + "]";
+        label = observation_label_ + ".fits" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
         cache_ << label << " ";
       }
     }
@@ -263,7 +273,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         } else {
           LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
         }
-        label = observation_label_ + ".observed" + "[" + year + "][" + bin + "]";
+        label = observation_label_ + ".observed" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
         cache_ << label << " ";
       }
     }
@@ -285,7 +295,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
         } else {
           LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
         }
-        label = observation_label_ + ".residuals" + "[" + year + "][" + bin + "]";
+        label = observation_label_ + ".residuals" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
         cache_ << label << " ";
       }
     }
@@ -309,7 +319,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
           } else {
             LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
           }
-          label = observation_label_ + ".pearson_residuals" + "[" + year + "][" + bin + "]";
+          label = observation_label_ + ".pearson_residuals" + +"[" + year + "][" + comparison.category_ + "][" + bin + "]";
           cache_ << label << " ";
         }
       }
@@ -334,7 +344,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
           } else {
             LOG_ERROR() << "There is no tabular report for an observation that has a structured comparison as in observation " << observation_label_;
           }
-          label = observation_label_ + ".normalised_residuals" + "[" + year + "][" + bin + "]";
+          label = observation_label_ + ".normalised_residuals" + "[" + year + "][" + comparison.category_ + "][" + bin + "]";
           cache_ << label << " ";
         }
       }
@@ -374,6 +384,9 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
     for (auto iter = comparisons.begin(); iter != comparisons.end(); ++iter) {
       for (obs::Comparison comparison : iter->second) {
         if (observation_->likelihood() == PARAM_BINOMIAL) {
+          resid = (comparison.observed_ - comparison.expected_)
+                  / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
+        } else if (observation_->likelihood() == PARAM_DIRICHLET) {
           resid = (comparison.observed_ - comparison.expected_)
                   / sqrt((math::ZeroFun(comparison.expected_, comparison.delta_) * (1 - math::ZeroFun(comparison.expected_, comparison.delta_))) / comparison.adjusted_error_);
         } else if (observation_->likelihood() == PARAM_MULTINOMIAL) {
