@@ -58,6 +58,7 @@ public:
   shared_ptr<Validator> IsInList(initializer_list<string> list);
   shared_ptr<Validator> DuplicateParameterIfNotAssigned(const string& label);
   shared_ptr<Validator> IsModelYear();
+  shared_ptr<Validator> IsProjectionYear();
   shared_ptr<Validator> DefaultValue(unsigned value);
   shared_ptr<Validator> DefaultValue(bool value);
   shared_ptr<Validator> RequiredIf(bool required);

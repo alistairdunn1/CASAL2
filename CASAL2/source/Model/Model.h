@@ -76,6 +76,7 @@ public:
   State::Type                   state() const { return state_; }
   virtual unsigned              start_year() const { return start_year_; }
   virtual unsigned              final_year() const { return final_year_; }
+  unsigned                      projection_start_year() const { return final_year_ + 1; }
   unsigned                      projection_final_year() const { return projection_final_year_; }
   bool                          b0_initialised(string derived_quantity_label) { return b0_initialised_[derived_quantity_label]; }
   void                          set_b0_initialised(string derived_quantity_label, bool new_b0_initialised) { b0_initialised_[derived_quantity_label] = new_b0_initialised; }

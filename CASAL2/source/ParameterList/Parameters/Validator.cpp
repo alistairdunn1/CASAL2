@@ -515,6 +515,29 @@ shared_ptr<Validator> Validator::IsModelYear() {
 }
 
 /**
+ * @brief This method will check that the value of the parameter is a valid projection year.
+ * If the parameter is optional and has not been defined, it will return without checking.
+ */
+shared_ptr<Validator> Validator::IsProjectionYear() {
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  auto     parameter_values      = ConvertValuesToUnsigned();
+  unsigned projection_start_year = model_->projection_start_year();
+  unsigned projection_final_year = model_->projection_final_year();
+
+  for (const auto& source : parameter_values) {
+    if (source < projection_start_year || source > projection_final_year) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model projection start year ("
+                  << projection_start_year << ") and end year (" << projection_final_year << ")";
+    }
+  }
+
+  return shared_from_this();
+}
+
+/**
  * This method will set the default value of the parameter to the value passed in.
  * If the parameter has already been defined, it will return without doing anything.
  *
