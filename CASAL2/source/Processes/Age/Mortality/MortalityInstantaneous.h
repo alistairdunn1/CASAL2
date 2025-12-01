@@ -54,6 +54,9 @@ class MortalityInstantaneous : public Mortality {
     Double vulnerability_ = 0.0;
     Double uobs_fishery_  = 0.0;
     Double exploitation_  = 0.0;
+
+    bool catch_as_biomass_ = false;
+    bool catch_as_u_       = false;
   };
 
   struct CategoryData {
@@ -62,9 +65,12 @@ class MortalityInstantaneous : public Mortality {
     Double*              m_                        = nullptr;
     vector<Double>       exploitation_             = {};
     vector<Double>       exp_values_half_m_        = {};
+    vector<Double>       m_at_age_                 = {};
     string               selectivity_label_        = "";
     Selectivity*         selectivity_              = nullptr;
     vector<Double>       selectivity_values_       = {};
+    bool                 catch_as_biomass_         = false;
+    bool                 catch_as_amount_          = false;
     AgeWeight*           age_weight_               = nullptr;
     string               age_weight_label_         = "";
     bool                 used_in_current_timestep_ = false;
@@ -127,7 +133,9 @@ private:
 
   // Members for reporting
   vector<unsigned>               time_steps_to_skip_applying_F_mortality_;
-  bool                           use_age_weight_ = true;
+  bool                           use_age_weight_    = true;
+  bool                           use_catch_biomass_ = true;
+  bool                           use_u_             = true;
   vector<vector<vector<Double>>> removals_by_year_category_age_;  // year[year_ndx][category_ndx][age_ndx]
 };
 
