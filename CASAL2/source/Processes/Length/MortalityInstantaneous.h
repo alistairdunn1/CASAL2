@@ -135,8 +135,8 @@ private:
   // members from natural mortality
   vector<Double>             m_input_;
   OrderedMap<string, Double> m_;
-  vector<double>             time_step_ratios_temp_;
-  map<unsigned, double>      time_step_ratios_;
+  vector<double>             time_step_proportions_temp_;
+  map<unsigned, double>      time_step_proportions_;
   vector<string>             selectivity_labels_;
   vector<Selectivity*>       selectivities_;
 
