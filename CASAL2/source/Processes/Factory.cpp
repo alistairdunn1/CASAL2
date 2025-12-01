@@ -5,7 +5,7 @@
  * @date 13/12/2012
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/
+ * Copyright NIWA Science �2012 - www.niwa.co.nz
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
@@ -89,11 +89,11 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
     LOG_FINE() << "Finished modification of object_type (" << object << ") and sub_type (" << sub << ")";
   }
 
-  if (model->partition_type() == PartitionType::kAge || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kAge)) {
+  if (model->partition_type() == PartitionType::kAge || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kAge))
     if (object == PARAM_PROCESS || object == PARAM_PROCESSES) {
       if (sub == PARAM_AGEING)
         result = new age::Ageing(model);
-      else if (sub == PARAM_LOAD_PARTITON)
+      else if (sub == PARAM_LOAD_PARTITION)
         result = new processes::LoadPartition(model);
       else if (sub == PARAM_RECRUITMENT_BEVERTON_HOLT)
         result = new age::RecruitmentBevertonHolt(model);
@@ -150,8 +150,6 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_TRANSITION_CATEGORY_BY_AGE)
         result = new age::TransitionCategoryByAge(model);
     }
-  }
-
   if (model->partition_type() == PartitionType::kLength || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kLength)) {
     if (object == PARAM_PROCESS || object == PARAM_PROCESSES) {
       if (sub == PARAM_GROWTH)
