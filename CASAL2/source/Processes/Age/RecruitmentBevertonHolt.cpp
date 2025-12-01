@@ -354,9 +354,16 @@ void RecruitmentBevertonHolt::DoExecute() {
     // note that the container recruitment_multipliers_by_year_ is changed by time_varying and projection classes
     // but the code wants to use standardised_recruitment_multipliers_by_year_ in the functions following here, so we might need to update this.
     if (model_->run_mode() == RunMode::kProjection) {
-      if (recruitment_multipliers_by_year_[current_year] == 0.0) {
-        LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
-                                                   << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+      if (project_standardised_ycs_) {
+        if (standardised_recruitment_multipliers_by_year_[current_year] <= 0.0) {
+          LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
+                                                     << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+        }
+      } else {
+        if (recruitment_multipliers_by_year_[current_year] <= 0.0) {
+          LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
+                                                     << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
+        }
       }
       // Projection classes will update this container automatically
       ycs = recruitment_multipliers_by_year_[current_year];
