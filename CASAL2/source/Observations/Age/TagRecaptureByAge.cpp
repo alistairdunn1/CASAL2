@@ -50,9 +50,12 @@ TagRecaptureByAge::TagRecaptureByAge(shared_ptr<Model> model) : Observation(mode
   parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)")->set_is_optional(true);
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
     ->set_default_value(0.5);
+  parameters_.Bind<Double>(PARAM_OVERLAP_SCALAR, &overlap_scalar_, "Scalar for the relative overlap of the tag recaptures ", "", 1.0)->set_lower_bound(0.0, true);
   // clang-format on
 
   RegisterAsAddressable(PARAM_DETECTION_PARAMETER, &detection_);
+  RegisterAsAddressable(PARAM_DISPERSION, &dispersion_);
+  RegisterAsAddressable(PARAM_OVERLAP_SCALAR, &overlap_scalar_);
 
   mean_proportion_method_ = true;
 
@@ -75,8 +78,14 @@ void TagRecaptureByAge::DoValidate() {
       ->SameNumberOfElementsAs(PARAM_YEARS)
       ->DefaultValue(1.0, years_.size());
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
+  parameters_.ValidateVector(PARAM_OVERLAP_SCALAR)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(1.0, years_.size());
 
-  dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
+  dispersion_by_year_     = utilities::Map::create(years_, dispersion_);
+  overlap_scalar_by_year_ = utilities::Map::create(years_, overlap_scalar_);
 
   age_spread_                    = (max_age_ - min_age_) + 1;
   unsigned expected_column_count = age_spread_ * category_labels_.size() + 1;
@@ -123,12 +132,22 @@ void TagRecaptureByAge::DoBuild() {
     selectivities_.push_back(selectivity);
   }
 
+  if (selectivities_.size() == 1 && category_labels_.size() != 1) {
+    auto val_sel = selectivities_[0];
+    selectivities_.assign(category_labels_.size(), val_sel);
+  }
+
   for (string label : tagged_selectivity_labels_) {
     auto selectivity = model_->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity) {
       LOG_ERROR_P(PARAM_TAGGED_SELECTIVITIES) << ": Selectivity label " << label << " does not exist.";
     } else
       tagged_selectivities_.push_back(selectivity);
+  }
+
+  if (tagged_selectivities_.size() == 1 && category_labels_.size() != 1) {
+    auto val_t = tagged_selectivities_[0];
+    tagged_selectivities_.assign(category_labels_.size(), val_t);
   }
 
   if (time_step_proportion_ < 0.0 || time_step_proportion_ > 1.0)
@@ -175,11 +194,6 @@ void TagRecaptureByAge::Execute() {
   auto partition_iter               = partition_->Begin();  // vector<vector<partition::Category> >
   auto tagged_cached_partition_iter = tagged_cached_partition_->Begin();
   auto tagged_partition_iter        = tagged_partition_->Begin();  // vector<vector<partition::Category> >
-
-  // std::cout << "cached_partition_->Size(): " << cached_partition_->Size() << std::endl;
-  // std::cout << "partition_->Size(): " << partition_->Size() << std::endl;
-  // std::cout << "tagged_cached_partition_->Size(): " << tagged_cached_partition_->Size() << std::endl;
-  // std::cout << "tagged_partition_->Size(): " << tagged_partition_->Size() << std::endl;
 
   vector<Double> age_results(age_spread_);
   vector<Double> tagged_age_results(age_spread_);
@@ -318,7 +332,7 @@ void TagRecaptureByAge::Execute() {
       Double expected = 0.0;
       double observed = 0.0;
       if (age_results[i] != 0.0)
-        expected = detection_ * tagged_age_results[i] / age_results[i];
+        expected = detection_ * tagged_age_results[i] / (age_results[i] * overlap_scalar_by_year_[model_->current_year()]);
       if (scanned_[model_->current_year()][category_labels_[category_offset]][i] == 0.0)
         observed = 0.0;
       else
@@ -328,11 +342,6 @@ void TagRecaptureByAge::Execute() {
                    << " error = " << scanned_[model_->current_year()][category_labels_[category_offset]][i]
                    << " recaptures = " << recaptures_[model_->current_year()][category_labels_[category_offset]][i];
 
-      // std::cout << "Saving comparison with following selectivity labels: ";
-      // for (const auto& label : selectivity_labels_set) {
-      //   std::cout << label << " ";
-      // }
-      // std::cout << std::endl;
       // process_error is not used here, and the dispersion is applied to the final likelihood value below
       SaveComparison(tagged_category_labels_[category_offset], selectivity_labels_set, min_age_ + i, 0, expected, observed, 0.0,
                      scanned_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);

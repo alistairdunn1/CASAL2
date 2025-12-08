@@ -61,6 +61,7 @@ protected:
   vector<double>              individual_lengths_                       = {};
   vector<string>              selectivity_labels_                       = {};
   vector<Selectivity*>        selectivities_                            = {};
+  unsigned                    n_quant_                                  = 0;
   string                      time_step_label_                          = {};
   bool                        plus_group_                               = false;
   unsigned                    age_spread_                               = 0;

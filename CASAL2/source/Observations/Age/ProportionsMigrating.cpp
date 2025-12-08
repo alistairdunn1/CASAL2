@@ -48,6 +48,8 @@ ProportionsMigrating::ProportionsMigrating(shared_ptr<Model> model) : Observatio
   parameters_.Bind<string>(PARAM_AGEING_ERROR, &ageing_error_label_, "The label of the ageing error to use")->set_default_value("");
   parameters_.Bind<string>(PARAM_PROCESS, &process_label_, "The process label");
 
+  RegisterAsAddressable(PARAM_PROCESS_ERRORS, &process_error_values_);
+
   mean_proportion_method_ = false;
 
   allowed_likelihood_types_.push_back(PARAM_LOGNORMAL);

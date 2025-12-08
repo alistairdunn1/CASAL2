@@ -91,6 +91,8 @@ protected:
   vector<string>                          category_labels_             = {};
   unsigned                                expected_selectivity_count_  = 0;
   map<unsigned, vector<obs::Comparison> > comparisons_                 = {};
+  vector<Double>                          overlap_scalar_              = {};
+  map<unsigned, Double>                   overlap_scalar_by_year_      = {};
 };
 } /* namespace niwa */
 #endif /* OBSERVATION_H_ */

@@ -147,8 +147,7 @@ TEST_F(InternalEmptyModel, Observation_TagRecapture_By_fishery) {
   EXPECT_DOUBLE_EQ(10120, comparisons[year][0].error_value_);
   EXPECT_DOUBLE_EQ(10120, comparisons[year][0].expected_);
   EXPECT_DOUBLE_EQ(10120, comparisons[year][0].observed_);
-  EXPECT_NEAR(5.53008, comparisons[year][0].score_, 0.001); // -1.0 * dpois(10120, 10120, log = T)
-
+  EXPECT_NEAR(5.53008, comparisons[year][0].score_, 0.001);  // -1.0 * dpois(10120, 10120, log = T)
 }
 
 }  // namespace age

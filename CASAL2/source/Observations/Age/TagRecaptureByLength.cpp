@@ -54,9 +54,12 @@ TagRecaptureByLength::TagRecaptureByLength(shared_ptr<Model> model) : Observatio
   parameters_.Bind<Double>(PARAM_DISPERSION, &dispersion_, "The overdispersion parameter (phi)")->set_is_optional(true);
   parameters_.Bind<Double>(PARAM_TIME_STEP_PROPORTION, &time_step_proportion_, "The proportion through the mortality block of the time step when the observation is evaluated")
     ->set_default_value(0.5);
+  parameters_.Bind<Double>(PARAM_OVERLAP_SCALAR, &overlap_scalar_, "Scalar for the relative overlap of the tag recaptures")->set_is_optional(true);
   // clang-format on
 
   RegisterAsAddressable(PARAM_DETECTION_PARAMETER, &detection_);
+  RegisterAsAddressable(PARAM_DISPERSION, &dispersion_);
+  RegisterAsAddressable(PARAM_OVERLAP_SCALAR, &overlap_scalar_);
 
   mean_proportion_method_ = true;
 
@@ -73,6 +76,11 @@ void TagRecaptureByLength::DoValidate() {
   parameters_.ValidateVector(PARAM_TAGGED_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES)->SameNumberOfElementsAs(PARAM_TAGGED_CATEGORIES);
   parameters_.Validate(PARAM_DETECTION_PARAMETER)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.ValidateVector(PARAM_DISPERSION)
+      ->GreaterThanOrEqualTo(0.0)
+      ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
+      ->SameNumberOfElementsAs(PARAM_YEARS)
+      ->DefaultValue(1.0, years_.size());
+  parameters_.ValidateVector(PARAM_OVERLAP_SCALAR)
       ->GreaterThanOrEqualTo(0.0)
       ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
       ->SameNumberOfElementsAs(PARAM_YEARS)
@@ -111,7 +119,8 @@ void TagRecaptureByLength::DoValidate() {
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
-  dispersion_by_year_ = utilities::Map::create(years_, dispersion_);
+  dispersion_by_year_     = utilities::Map::create(years_, dispersion_);
+  overlap_scalar_by_year_ = utilities::Map::create(years_, overlap_scalar_);
 
   category_split_labels_        = model_->categories()->total_categories(category_labels_);
   tagged_category_split_labels_ = model_->categories()->total_categories(tagged_category_labels_);
@@ -340,7 +349,7 @@ void TagRecaptureByLength::Execute() {
       Double expected = 0.0;
       double observed = 0.0;
       if (length_results_[i] != 0.0) {
-        expected = detection_ * tagged_length_results_[i] / length_results_[i];
+        expected = detection_ * tagged_length_results_[i] / (length_results_[i] * overlap_scalar_by_year_[model_->current_year()]);
         LOG_FINEST() << "total numbers at length " << length_bins_[i] << " = " << tagged_length_results_[i] << ", denominator = " << length_results_[i];
       }
 
