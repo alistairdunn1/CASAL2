@@ -3,12 +3,11 @@
 When a pull request is received, the Development Team will check the functionality of the code, the syntax, documentation, and any optimisation code required to ensure it runs reasonably. The automated build system test system will report any broken unit-tests or test models. 
 
 When making a pull request, please ensure that the submitted changes:
-
 \begin{enumerate}
-	\item Have documented code to explain the code
-	\item Use appropriate LOG messages to assist with debugging
-	\item Update the \CNAME\ User Manual(s), as required
-	\item Include a unit test for the changes or additional functionality
-	\item Include a test case model that demonstrates the changes or additional functionality
-	\item Pass all the unit tests and the test cases from \texttt{doBuild modelrunner}
+	\item Have linted the code to the standard format, and have commented the code to explain the functionality, algorithms, and equations used
+	\item Use appropriate LOG, WARNING, and ERROR messages to assist any future user and to help with debugging
+	\item Update the \CNAME\ User Manual(s), including description of the methods, new functionality and usage, command and subcommand syntax definitions, and adding any index entries as required
+	\item Include unit tests that validate the changes and additional functionality
+	\item Include test case models that demonstrate the changes or additional functionality in a simplified use case with a functioning model
+	\item Pass all of the existing unit tests and the test cases from \texttt{doBuild modelrunner}
 \end{enumerate}
