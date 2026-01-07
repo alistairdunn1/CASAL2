@@ -98,7 +98,7 @@ void RecruitmentBevertonHolt::DoValidate() {
       ->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model_->min_age());
   parameters_.Validate(PARAM_STEEPNESS)->GreaterThanOrEqualTo(0.2)->LessThanOrEqualTo(1.0);
-  parameters_.ValidateVector(PARAM_RECRUITMENT_MULTIPLIERS)->GreaterThanOrEqualTo(0.0)->NumberOfElements(years_.size());
+  parameters_.ValidateVector(PARAM_RECRUITMENT_MULTIPLIERS)->GreaterThanOrEqualTo(0.0)->ExpandToNumberOfElements(years_.size())->NumberOfElements(years_.size());
   parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year());
   parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
 
