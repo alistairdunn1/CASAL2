@@ -155,8 +155,9 @@ void HamiltonianMonteCarlo::DoExecute(shared_ptr<ThreadPool> thread_pool) {
      */
     vector<double> q0 = chain_.rbegin()->values_;
     GeneratedNewScaledCandidates();
-    vector<double> q = q0;
-    vector<double> p = candidates_;
+    vector<double> q         = q0;
+    vector<double> p         = candidates_;
+    vector<double> p_initial = p;  // Save initial momentum for Hamiltonian calculation
 
     for (unsigned i = 0; i < leapfrog_steps_; ++i) {
       //**********************************************************
@@ -181,16 +182,16 @@ void HamiltonianMonteCarlo::DoExecute(shared_ptr<ThreadPool> thread_pool) {
     }  // for (unsigned i = 0; i < leapfrog_steps_; ++i)
 
     // Determine if we're going to accept this jump or not
-    double ratio       = 1.0;
+    // Use full Hamiltonian H(q,p) = U(q) + K(p) where U = score (potential energy), K = 0.5 * p^T * p (kinetic energy)
     double q_score     = quick_run(q);
+    double H_old       = previous_score + 0.5 * norm2(p_initial);  // Initial Hamiltonian
+    double H_new       = q_score + 0.5 * norm2(p);                 // Final Hamiltonian
+    double ratio       = 1.0;
     double rng_uniform = rng.uniform();
-    if (q_score >= previous_score) {
-      ratio = exp(previous_score - q_score);
+    if (H_new >= H_old) {
+      ratio = exp(H_old - H_new);
     }
-#ifndef TESTMODE
-    // TODO: HMC: LOOKS  WRONG: The rejection should be saving the last chain value, not the last saved chain value. NEED TO CHECK
-    LOG_WARNING() << " HMC: LOOKS WRONG: The rejection should be saving the last chain value, not the last saved chain value. NEED TO CHECK";
-#endif
+
     // Check if we accept this jump
     if (math::IsEqual(ratio, 1.0) || rng_uniform < ratio) {
       LOG_MEDIUM() << "Accepting Jump (ratio: " << ratio << ", rng: " << rng_uniform << ")" << endl;
@@ -211,6 +212,8 @@ void HamiltonianMonteCarlo::DoExecute(shared_ptr<ThreadPool> thread_pool) {
       else
         new_link.mcmc_state_ = PARAM_BURN_IN;
       chain_.push_back(new_link);
+
+      previous_score = q_score;
     } else {
       LOG_MEDIUM() << "Rejecting Jump (ratio: " << ratio << ", rng: " << rng_uniform << ")" << endl;
       // Copy the last chain accepted link to the end of the vector
