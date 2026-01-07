@@ -57,6 +57,7 @@ public:
   shared_ptr<ValidatorVector> DefaultToAllModelLengthBins();
   shared_ptr<ValidatorVector> NumberOfElements(unsigned count);
   shared_ptr<ValidatorVector> SameNumberOfElementsAs(const string& label, bool split_combined_categories = true);
+  shared_ptr<ValidatorVector> ExpandToNumberOfElements(unsigned count);
   shared_ptr<ValidatorVector> ExpandToSameNumberOfElementsAs(const string& label);
   shared_ptr<ValidatorVector> DuplicateParameterIfNotAssigned(const string& label);
   shared_ptr<ValidatorVector> SameNumberOfElementsModelAgeSpread();
