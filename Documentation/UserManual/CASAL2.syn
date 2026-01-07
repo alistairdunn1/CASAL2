@@ -88,6 +88,7 @@ Deltadiff
 Derived
 Derived_Quantity
 Dirichlet
+Dirichlet_Multinomial
 Double_Exponential
 Double_Normal
 Double_Normal_Plateau
@@ -101,6 +102,7 @@ Estimation_Result
 Exogenous
 Free
 Hamiltonian
+Harvest_Strategy_Constant_U
 Hessian_Matrix
 Increasing
 Initialisation
@@ -155,7 +157,6 @@ Project
 Proportions_At_Age
 Proportions_At_Length
 Proportions_By_Category
-Proportions_Mature_By_Age
 Proportions_Migrating
 Random_Draw
 Random_Number_Seed
@@ -168,6 +169,7 @@ Schnute
 Selectivity
 Simulated_Observation
 State_Category_By_Age
+Sum
 Survival_Constant_Rate
 Tag_By_Age
 Tag_By_Length
@@ -188,6 +190,7 @@ age_length
 average_difference
 basic
 bernoulli
+biomass_index
 compound_all
 compound_left
 compound_middle
@@ -196,6 +199,8 @@ de_solver
 difference_parameter
 exponential
 growth_increment
+harvest_strategy_constant_catch
+harvest_strategy_ramp_u
 inverse
 log
 log_sum
@@ -213,6 +218,7 @@ parameter_transformation
 selectivity_by_year
 simplex
 sqrt
+students_t
 sum_to_one
 tag_recapture_by_fishery
 tag_recapture_by_length_for_growth
@@ -257,7 +263,12 @@ b0_initialisation_phase
 b_max
 base_weight_units
 beta
+bias
+bias_adjustment
 biomass
+biomass_index
+biomass_index_lag_years
+biomass_index_scalar
 burn_in
 by_length
 c
@@ -266,7 +277,6 @@ catchabilities
 catchability
 catches
 categories
-categories2
 category
 compatibility_option
 consumption_rate
@@ -275,6 +285,7 @@ correlation_adjustment_diff
 covariance
 covariance_adjustment_method
 crossover_probability
+current_catch
 cv
 cv_first
 cv_last
@@ -307,6 +318,7 @@ f_iterations
 file_name
 final_year
 first_recent_year_with_no_bias
+first_year
 first_year_with_bias
 fishbox_weight
 fishing_mortality
@@ -351,6 +363,7 @@ length_values
 length_weight
 length_weight_cv
 length_weight_distribution
+length_weights
 lengths
 likelihood
 likelihood_multiplier
@@ -361,6 +374,7 @@ lower_bound
 m
 max_age
 max_correlation
+max_delta
 max_f
 max_generations
 mcmc_fixed
@@ -368,6 +382,7 @@ mean
 method
 method_of_removal
 min_age
+min_delta
 min_sigma
 mortality_instantaneous_process
 mortality_process
@@ -379,6 +394,7 @@ normalised_residuals
 numerator_categories
 observation
 observations
+overlap_scalar
 p1
 p2
 parameter
@@ -410,6 +426,8 @@ r
 r0
 rates
 recruitment_multipliers
+reference_index
+reference_points
 relative_m_by_age
 relative_m_by_length
 relative_u_by_age
@@ -422,7 +440,6 @@ sample_type
 scaling_years
 second_parameter
 selectivities
-selectivities2
 selectivity
 selectivity_labels
 sigma
@@ -460,12 +477,13 @@ to
 to_right_mean
 tolerance
 total_categories
-total_categories2
 total_selectivities
+transformation
 type
 u
 u_max
 units
+update_frequency_years
 upper_bound
 v
 value
@@ -492,6 +510,7 @@ end_table
 table
 table catches
 table data
+table emph
 table error_values
 table method
 table n

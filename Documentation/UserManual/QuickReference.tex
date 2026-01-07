@@ -4,11 +4,11 @@
 \defComLab{additional\_prior}{Define an object of type \emph{Additional\_Prior}}
 
 \defSub{label}{The label for the additional prior}
-\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{type}{The additional prior type}
 
 \commandlabsubarg{additional\_prior}{type}{Beta}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{mu}{Beta distribution mean $\mu$ parameter}
 \defSub{sigma}{Beta distribution variance $\sigma$ parameter}
 \defSub{a}{Beta distribution lower bound, of the range $A$ parameter}
@@ -16,30 +16,46 @@
 
 \commandlabsubarg{additional\_prior}{type}{Element\_Difference}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{second\_parameter}{The name of the second parameter for comparing}
 \defSub{multiplier}{Multiply the penalty by this factor}
 
-\commandlabsubarg{additional\_prior}{type}{Lognormal}
+\commandlabsubarg{additional\_prior}{type}{Log\_Normal}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{mu}{The lognormal prior mean (mu) parameter}
 \defSub{cv}{The lognormal CV parameter}
 
+\commandlabsubarg{additional\_prior}{type}{Uniform}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+
 \commandlabsubarg{additional\_prior}{type}{Uniform\_Log}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 
 \commandlabsubarg{additional\_prior}{type}{Vector\_Average}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{method}{Which calculation method to use: k, l, or m}
 \defSub{k}{The k value to use in the calculation}
 \defSub{multiplier}{Multiplier for the penalty amount}
 
 \commandlabsubarg{additional\_prior}{type}{Vector\_Smoothing}
 
+\defSub{parameter}{The name of the parameter for the additional prior}
 \defSub{log\_scale}{Should the sums of squares be calculated on the log scale?}
 \defSub{multiplier}{Multiply the penalty by this factor}
 \defSub{lower\_bound}{The first element to apply the penalty to in the vector}
 \defSub{upper\_bound}{The last element to apply the penalty to in the vector}
 \defSub{r}{The rth difference that the penalty is applied to}
+
+\commandlabsubarg{additional\_prior}{type}{Sum}
+
+\defSub{parameters}{The names of the parameters for summing}
+\defSub{distribution}{The additional prior distribution to apply}
+\defSub{mu}{Mean of the distribution}
+\defSub{cv}{cv of the distribution}
 
 \defComLab{ageing\_error}{Define an object of type \emph{Ageing\_Error}}
 
@@ -184,6 +200,16 @@
 
 \defSub{age\_weight\_labels}{The labels for the age-weights that correspond to each category for the biomass calculation}
 
+\commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}
+
+\defSub{age\_weight\_labels}{The labels for the age-weights that correspond to each category for the biomass calculation}
+\defSub{length\_weights}{The labels for the length-weights that correspond to each category for the biomass calculation}
+\defSub{distribution}{The type of distribution for the biomass index}
+\defSub{cv}{The cv for the uncertainty for the distribution when generating the biomass index}
+\defSub{bias}{The bias (a positive or negative proportion) when generating the biomass index}
+\defSub{rho}{The autocorrelation in annual values when generating the biomass index}
+\defSub{catchability}{The catchability coefficient to use when generating the biomass index}
+
 \defComLab{estimate}{Define an object of type \emph{Estimate}}
 
 \defSub{label}{The label of the estimate}
@@ -195,17 +221,11 @@
 \defSub{estimation\_phase}{The first estimation phase to allow this to be estimated}
 \defSub{mcmc\_fixed}{Indicates if this parameter is estimated at the point estimate but fixed during MCMC estimation run}
 
-\commandlabsubarg{estimate}{type}{Beta}
+\commandlabsubarg{estimate}{type}{Uniform}
 
-\defSub{mu}{Beta prior  mean (mu) parameter}
-\defSub{sigma}{Beta prior standard deviation (sigma) parameter}
-\defSub{a}{Beta prior lower bound of the range (A) parameter}
-\defSub{b}{Beta prior upper bound of the range (B) parameter}
 
-\commandlabsubarg{estimate}{type}{Lognormal}
+\commandlabsubarg{estimate}{type}{Uniform\_Log}
 
-\defSub{mu}{The lognormal prior mean (mu) parameter}
-\defSub{cv}{The lognormal variance (cv) parameter}
 
 \commandlabsubarg{estimate}{type}{Normal}
 
@@ -218,16 +238,28 @@
 \defSub{sigma}{The normal standard deviation (sigma) parameter}
 \defSub{lognormal\_transformation}{Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information}
 
+\commandlabsubarg{estimate}{type}{Lognormal}
+
+\defSub{mu}{The lognormal prior mean (mu) parameter}
+\defSub{cv}{The lognormal variance (cv) parameter}
+
 \commandlabsubarg{estimate}{type}{Normal\_Log}
 
 \defSub{mu}{The normal-log prior mean (mu) parameter}
 \defSub{sigma}{The normal-log prior standard deviation (sigma) parameter}
 
-\commandlabsubarg{estimate}{type}{Uniform}
+\commandlabsubarg{estimate}{type}{Beta}
 
+\defSub{mu}{Beta prior  mean (mu) parameter}
+\defSub{sigma}{Beta prior standard deviation (sigma) parameter}
+\defSub{a}{Beta prior lower bound of the range (A) parameter}
+\defSub{b}{Beta prior upper bound of the range (B) parameter}
 
-\commandlabsubarg{estimate}{type}{Uniform\_Log}
+\commandlabsubarg{estimate}{type}{students\_t}
 
+\defSub{mu}{The Student's t prior location (mu) parameter}
+\defSub{sigma}{The Student's t scale (sigma) parameter}
+\defSub{df}{The Student's t degrees of freedom (df) parameter}
 
 \defComLab{growth\_increment}{Define an object of type \emph{growth\_increment}}
 
@@ -314,10 +346,13 @@
 \commandlabsubarg{likelihood}{type}{Dirichlet}
 
 
-\commandlabsubarg{likelihood}{type}{Lognormal}
+\commandlabsubarg{likelihood}{type}{Dirichlet\_Multinomial}
 
 
-\commandlabsubarg{likelihood}{type}{Lognormal\_With\_Q}
+\commandlabsubarg{likelihood}{type}{Log\_Normal}
+
+
+\commandlabsubarg{likelihood}{type}{Log\_Normal\_With\_Q}
 
 
 \commandlabsubarg{likelihood}{type}{Multinomial}
@@ -348,15 +383,15 @@
 \defSub{correlation\_adjustment\_diff}{The minimum non-zero variance times the range of the bounds in the covariance matrix of the proposal distribution}
 \defSub{proposal\_distribution}{The shape of the proposal distribution (either the t or the normal distribution)}
 \defSub{df}{The degrees of freedom of the multivariate t proposal distribution}
-\defSub{adapt\_stepsize\_at}{The iteration numbers in which to check and resize the MCMC stepsize}
-\defSub{adapt\_stepsize\_method}{The method to use to adapt the step size}
+\defSub{adapt\_stepsize\_at}{The iteration numbers in which to check and resize the MCMC step-size}
+\defSub{adapt\_stepsize\_method}{The method to use to adapt the step-size}
 \defSub{adapt\_covariance\_matrix\_at}{The iteration number in which to adapt the covariance matrix}
 
 \commandlabsubarg{mcmc}{type}{Hamiltonian}
 
 \defSub{leapfrog\_steps}{Number of leapfrog steps}
 \defSub{leapfrog\_delta}{Amount to leapfrog per step}
-\defSub{gradient\_step\_size}{Step size to use when calculating gradient}
+\defSub{gradient\_step\_size}{Step-size to use when calculating gradient}
 
 \commandlabsubarg{mcmc}{type}{Random\_Walk}
 
@@ -373,7 +408,7 @@
 \defSub{iterations}{The maximum number of iterations}
 \defSub{evaluations}{The maximum number of evaluations}
 \defSub{tolerance}{The tolerance of the gradient for convergence}
-\defSub{step\_size}{The minimum step size before minimisation fails}
+\defSub{step\_size}{The minimum step-size before minimisation fails}
 \defSub{parameter\_transformation}{The choice of parametrisation used to scale the parameters for ADOLC}
 
 \commandlabsubarg{minimiser}{type}{Betadiff}
@@ -402,7 +437,7 @@
 \defSub{iterations}{The maximum number of iterations}
 \defSub{evaluations}{The maximum number of evaluations}
 \defSub{tolerance}{The tolerance of the gradient for convergence}
-\defSub{step\_size}{The minimum step size before minimisation fails}
+\defSub{step\_size}{The minimum step-size before minimisation fails}
 
 \defComLab{model}{Define an object of type \emph{Model}}
 
@@ -434,8 +469,8 @@
 \defSub{simulation\_likelihood}{The simulation likelihood to use}
 \defSub{likelihood\_multiplier}{The likelihood multiplier}
 \defSub{error\_value\_multiplier}{The error value multiplier for likelihood}
-\defSub{table}{The table of data specifying the observed values}
-\defSub{table}{The table of data specifying the observed error values}
+\defSub{table \emph{obs}}{The table of data specifying the observed values}
+\defSub{table \emph{error\_values}}{The table of data specifying the observed error values}
 
 \commandlabsubarg{observation}{type}{Abundance}
 
@@ -596,20 +631,10 @@
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defSub{plus\_group}{Use the age plus group?}
 \defSub{years}{The years for which there are observations}
-\defSub{selectivities}{The labels of the selectivities}
-\defSub{categories2}{The target categories}
-\defSub{selectivities2}{The target selectivities}
-
-\commandlabsubarg{observation}{type}{Proportions\_Mature\_By\_Age}
-
-\defSub{min\_age}{The minimum age}
-\defSub{max\_age}{The maximum age}
-\defSub{time\_step}{The label of time-step that the observation occurs in}
-\defSub{plus\_group}{Use the age plus group?}
-\defSub{years}{The years for which there are observations}
-\defSub{ageing\_error}{The label of ageing error to use}
-\defSub{total\_categories}{All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)}
-\defSub{time\_step\_proportion}{The proportion through the mortality block of the time step when the observation is evaluated}
+\defSub{categories}{The categories in the numerator}
+\defSub{selectivities}{The labels of the selectivities for the categories}
+\defSub{total\_categories}{The total categories}
+\defSub{total\_selectivities}{The selectivities for the total categories}
 
 \commandlabsubarg{observation}{type}{Proportions\_Migrating}
 
@@ -644,6 +669,7 @@
 \defSub{tagged\_categories}{The  categories of tagged individuals}
 \defSub{detection}{The probability of detecting a recaptured individual}
 \defSub{dispersion}{The over-dispersion parameter, $\phi$}
+\defSub{overlap\_scalar}{The overlap\_scalar parameter, $k$}
 \defSub{time\_step\_proportion}{The proportion through the mortality block of the time step when the observation is evaluated}
 \defSub{table recaptured}{The table of data specifying the recaptures}
 \defSub{table scanned}{The table of data specifying the scanned fish}
@@ -658,6 +684,7 @@
 \defSub{tagged\_categories}{The  categories of tagged individuals}
 \defSub{detection}{The probability of detecting a recaptured individual}
 \defSub{dispersion}{The over-dispersion parameter, $\phi$}
+\defSub{overlap\_scalar}{The overlap\_scalar parameter, $k$}
 \defSub{time\_step\_proportion}{The proportion through the mortality block of the time step when the observation is evaluated}
 \defSub{table recaptured}{The table of data specifying the recaptures}
 \defSub{table scanned}{The table of data specifying the scanned fish}
@@ -672,6 +699,7 @@
 \defSub{ages}{vector of observed ages}
 \defSub{lengths}{vector of observed lengths}
 \defSub{ageing\_error}{The label of ageing error to use}
+\defSub{intervals}{The number of quantiles to evaluate the lengths in the age-length relationship}
 
 \defComLab{observation}{Define an object of type \emph{Observation}}
 
@@ -737,7 +765,7 @@
 \defSub{plus\_group}{Use the age plus group?}
 \defSub{years}{The years for which there are observations}
 \defSub{selectivities}{The labels of the selectivities}
-\defSub{total\_categories2}{Categories in the denominator}
+\defSub{total\_categories}{Categories in the denominator}
 \defSub{total\_selectivities}{Selectivities to apply to the total categories}
 
 \commandlabsubarg{observation}{type}{Tag\_Recapture\_By\_Length}
@@ -928,10 +956,9 @@
 \defSub{categories}{The categories for instantaneous mortality}
 \defSub{m}{The natural mortality rates for each category}
 \defSub{time\_step\_proportions}{The time step proportions for natural mortality}
-\defSub{biomass}{Switch to indicate if the catches are biomasses or abundances}
 \defSub{relative\_m\_by\_age}{The M-by-age selectivities to apply to each of the categories for natural mortality}
 \defSub{table catches}{The table of data specifying the catches for each fishery and year}
-\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, time-step, penalties and \(u_{max}\) for each fishery and year.}
+\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery. Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
 
 \commandlabsubarg{process}{type}{Mortality\_Instantaneous\_Retained}
 
@@ -1198,6 +1225,7 @@
 \defSub{upper\_bound}{The upper value of the range}
 \defSub{parameter}{The free parameter to profile}
 \defSub{same}{A free parameter that is constrained to have the same value as the parameter being profiled}
+\defSub{transformation}{The transformation to apply to the upper and lower bounds}
 
 \defComLab{project}{Define an object of type \emph{Project}}
 
@@ -1205,31 +1233,78 @@
 \defSub{type}{Type}
 \defSub{years}{Years to recalculate the values}
 \defSub{parameter}{Parameter to project}
-\defSub{multiplier}{Multiplier that is applied to the projected value}
 
 \commandlabsubarg{project}{type}{Constant}
 
 \defSub{values}{The values to assign to the addressable}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
 
 \commandlabsubarg{project}{type}{multiple\_values}
 
-\defSub{table values}{The table of data specifying the projected values to use for each row of the \texttt{-i} or \texttt{-I} file}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{table values}{The table of data specifying the projected values to use for each row of the supplied free parameter file (\texttt{-i} or \texttt{-I}) with one column of data for each projected year}
 
 \commandlabsubarg{project}{type}{Empirical\_Sampling}
 
 \defSub{start\_year}{The start year of sampling}
 \defSub{final\_year}{The final year of sampling}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
 
 \commandlabsubarg{project}{type}{Lognormal}
 
 \defSub{mean}{The mean of the lognormal process}
 \defSub{sigma}{The standard deviation (sigma) of the lognormal sampling}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
 
 \commandlabsubarg{project}{type}{Lognormal\_Empirical}
 
 \defSub{mean}{The mean of the Gaussian process}
 \defSub{start\_year}{The start year of sampling}
 \defSub{final\_year}{The final year of sampling}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+
+\commandlabsubarg{Project}{type}{harvest\_strategy\_constant\_catch}
+
+\defSub{catch}{The catch to apply}
+\defSub{alpha}{The multiplier on the proportional change in biomass applied to the catch}
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defSub{biomass\_index}{The biomass index for calculating the changes in catch}
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+
+\commandlabsubarg{Project}{type}{Harvest\_Strategy\_Constant\_U}
+
+\defSub{u}{The exploitation rate to apply ($U$)}
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defSub{biomass\_index}{The biomass index for calculating the changes in $U$}
+\defSub{biomass\_index\_scalar}{A multiplicative scalar on the biomass index used for calculating the changes in $U$}
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+
+\commandlabsubarg{Project}{type}{harvest\_strategy\_ramp\_u}
+
+\defSub{u}{The exploitation rates to apply}
+\defSub{reference\_points}{The reference points for each exploitation rate}
+\defSub{reference\_index}{The biomass index for reference points (i.e., the derived quantity label for the calculation of reference points)}
+\defSub{bias\_adjustment}{Whether to apply the bias adjustment for the lognormal derived quantity in the calculation of the ratio of the initial and current reference index}
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defSub{biomass\_index}{The biomass index for calculating the changes in $U$}
+\defSub{biomass\_index\_scalar}{A multiplicative scalar on the biomass index used for calculating the changes in $U$}
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+\defSub{b0\_initialisation\_phase}{The phase that defines the initial biomass (e.g., B0)}
 
 \defComLab{report}{Define an object of type \emph{Report}}
 
@@ -1364,6 +1439,7 @@
 \commandlabsubarg{report}{type}{Selectivity}
 
 \defSub{selectivity}{Selectivity name}
+\defSub{length\_values}{Length bins for reporting if a length-based selectivity in an age-based model}
 
 \commandlabsubarg{report}{type}{selectivity\_by\_year}
 
@@ -1400,7 +1476,9 @@
 
 \commandlabsubarg{selectivity}{type}{Constant}
 
-\defSub{c}{The constant value}
+\defSub{a}{The $a$ value in $ax^b + c$}
+\defSub{b}{The $b$ value in $ax^b + c$}
+\defSub{c}{The $c$ value in $ax^b + c$}
 \defSub{beta}{The minimum age/length for which the selectivity applies}
 
 \commandlabsubarg{selectivity}{type}{Double\_Exponential}

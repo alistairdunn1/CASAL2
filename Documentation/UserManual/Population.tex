@@ -1,16 +1,16 @@
 \section{\I{The population section: model structure and the population dynamics}}\label{sec:Population}
 
-The command and subcommand syntax for the estimation section is given in Section \ref{syntax:Population}.
+The command and subcommand syntax for the population section is given in Section \ref{syntax:Population}.
 
 \subsection{Introduction}
 
-This section\index{Population section} shows how to specify a model for the population dynamics. It describes the model time and \ifAgeBased age \else length \fi scope, the population processes used (e.g., recruitment, ageing or growth transition, migration, and mortality), the selectivity ogives, and how to set values for their associated parameters, or starting values if they are going to be estimated.
+This section\index{Population section} shows how to specify a model for the population dynamics. It describes the model time and \ifAgeBased age \else length \fi scope, the population processes used (e.g., recruitment, \ifAgeBased ageing \else growth transition \fi, migration, and mortality), the selectivity ogives, and how to set values for their associated parameters, or starting values if they are going to be estimated.
 
 The basic structure of the population is defined in terms of its partitions and the succession of processes that act on them throughout a year. \CNAME\ assumes an annual cycle, i.e., rates like natural mortality are assumed to be for a year. To place certain processes or observations (e.g., a research survey) into the right part of the year, the year can be divided into one or more time steps, and each time step needs  at least one process. Each time step can represent a specific period of the calendar year, or it can be an abstract sequence of events. Certain processes like natural mortality and growth can have a proportion of the effects of the process assigned to different time steps to crudely mimic seasonal effects, or fisheries that occur in short periods of the year, as well as place a survey within the year relative to the proportion of annual natural mortality that has occurred (see Section \ref{sec:DerivedQuantity}).
 
 The \emph{state} is the current status of the population at any given time and it can change one or more times during the year. The state object must contain sufficient information to determine how the population changes over time, given a model and a complete set of parameters. The partition is key to the state, but it has no "memory". Thus, other information must also be kept, such as the mature biomass from a previous year or time step to calculate the recruit numbers into the first \ifAgeBased age \else length \fi class via the spawner-recruitment relationship. Quantities like mature biomass are defined as \emph{derived variables} and are calculated for each year of the model. However, the \emph{derived variables} record only summary information from the partition at a specified time step and year.
 
-Processes can change the partition and, for example, include recruitment, natural mortality, fishing mortality, ageing (in age-based models) or a growth transition (in length-based models), migration, and maturation. These processes are repeated for each year of the model.
+Processes can change the partition and, for example, include recruitment, natural mortality, fishing mortality, \ifAgeBased ageing \else growth transition \fi, migration, and maturation. These processes are repeated for each year of the model.
 
 The specification and ordering of processes in multiple time steps can be used to represent complex dynamics, with the intermingling of multiple species and stocks, migration patterns occurring over multiple areas, and/or multiple sources of anthropogenic impacts using a range of methods which cover different areas and times.
 
@@ -114,7 +114,7 @@ Figure \ref{Fig:annual} shows an example of the annual cycle for an age-based mo
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.5]{Figures/annual_cycle.jpg}
-	\caption{A example sequence for an annual cycle for an age-based model.}\label{Fig:annual}
+	\caption{A example sequence for an annual cycle for an age-based model. In length based models, the ageing process would usually be replaced with a growth transition process}\label{Fig:annual}
 \end{figure}
 
 This would be specified using \command{time\_step} block:
@@ -202,7 +202,7 @@ insert_processes step1(recruitment)=initialFishing
 
 where \textit{Fishing} is the normal fishing process which defines natural mortality so when excluded, initialisation can use another value that incorporates some unrecorded fishing before the start of the assessment period by setting natural mortality to a higher value in the process \textit{initialFishing}. The place to insert \textit{initialFishing} is in the time-step labelled \textit{step1} before the process \textit{recruitment} which must be in that time-step (process label is enclosed in brackets). To insert at the end of the time-step use \textit{()}, e.g. \textit{step1()=initialFishing}.
 
-For most models the most common type of initialisation phase to define an initial equilibrium age structure is \subcommand{derived}, whereas for length-based models the only type available is \subcommand{iterative}. Additional initialisation phases can be included by sequencing other phases one after another
+For most age-based models, the most common type of initialisation phase to define the initial equilibrium age structure is \subcommand{derived}, but \subcommand{iterative} initialisation can also be used. For length-based models the only type available is \subcommand{iterative}. Additional initialisation phases can be included by sequencing other phases one after another.
 
 {\small{\begin{verbatim}
 @model
@@ -404,15 +404,17 @@ There are a range of mortality processes that can only be applied during initial
 
 \subsection{\I{Derived quantities}\label{sec:DerivedQuantity}}
 
-Some processes require a population value derived from the population state as an argument. These values are \texttt{derived quantities}. Derived quantities are values calculated in a specified time step in every year, and thus have a single value for each year of the model. The time within the time-step is at the end unless otherwise specified (using the \textit{proportion\_mortality} subcommand).
+Some processes require a population value derived from the population state as an argument. These values are \texttt{derived quantities}. Derived quantities are values calculated in a specified time step in every year, and thus have a single value for each year of the model. The time within the time-step is at the end unless otherwise specified (using the \texttt{proportion\_mortality} subcommand).
 
-Derived quantities can be calculated as either abundance or biomass. Abundance-derived quantities are the sum over the specified categories (after applying a selectivity)\label{sec:DerivedQuantity-Abundance}. Biomass-derived quantities are calculated similarly\label{sec:DerivedQuantity-Biomass}.
+Derived quantities can be calculated as either abundance or biomass. Abundance-derived quantities are the sum over the specified categories (after applying a selectivity)\label{sec:DerivedQuantity-Abundance}. Biomass-derived quantities are calculated similarly\label{sec:DerivedQuantity-Biomass}. 
 
-Derived quantities are also calculated during the initialisation phases. Therefore, the time step during each initialisation phase must be specified. If the initialisation time steps are not specified, the derived quantity will be calculated during the initialisation phases. \TODO{review}
+In addition, a derived quantity (e.g., of type \texttt{biomass\_index}) can have random error, autocorrelation, and bias added (however, these should never be used as quantities for determining recruitment or other parameters in estimation or MCMCs).\label{sec:DerivedQuantity-BiomassIndex} Additionally, a derived quantity of type \argument{biomass\_index} can be modified by a catchability ($q$) coefficient, for example, to reproduce a biomass index that may be obtained from a survey.
 
-A common use of an derived quantities is as input into a stock-recruit relationship  which requires an equilibrium biomass ($B_0$) and annual spawning stock biomass values ($SSB_y$) to calculate recruitment into the first \ifAgeBased age \else length \fi class. $SSB_y$ is an derived quantity based on the mature biomass, usually at spawning time.
+Derived quantities are also calculated during the initialisation phases. Therefore, the time step during each initialisation phase must be specified. If the initialisation time steps are not specified, the derived quantity will be calculated during the initialisation phases. 
 
-Derived quantities can be associated with a \textit{time evaluation interval}; see Section~\ref{sec:Process-Mortality} for more detail on mortality blocks. In this case, the point of calculation can be set to any point within the mortality block, e.g., when 75\% of the deaths from natural mortality plus catch has occurred, which is based on interpolating between the start and end of the block as the partition is known at those points.  Two  methods are available: \texttt{weighted\_sum} and \texttt{weighted\_product}, and are defined as
+A common use of an derived quantities is as input into a stock-recruit relationship  which requires an equilibrium biomass ($B_0$) and annual spawning stock biomass values ($SSB_y$) to calculate recruitment into the first \ifAgeBased age \else length \fi class. $SSB_y$ is an derived quantity based on the mature biomass, usually at spawning time. Additionally a derived quantity of type \argument{biomass\_index} could be used to inform a harvest strategy simulation.
+
+Derived quantities can be associated with a \textit{time evaluation interval}; see Section~\ref{sec:Process-Mortality} for more detail on mortality blocks. In this case, the point of calculation can be set to any point within the mortality block, e.g., when 75\% of the deaths from natural mortality plus catch has occurred, which is based on interpolating between the start and end of the block as the partition is known at those points. Two methods are available: \texttt{weighted\_sum} and \texttt{weighted\_product}, and are defined as
 
 \begin{itemize}
 	\item \texttt{weighted\_sum}: after proportion $p$ through the mortality block, the partition elements are given by $n_{p,j} = (1 - p)n_j + p'_j$
@@ -430,15 +432,31 @@ type          biomass
 time_step     step_one
 categories    mature.male mature.female
 selectivities One
-time_step_proportion        0.5
+time_step_proportion 0.5
 time_step_proportion_method weighted_sum
 \end{verbatim}}}
 
-\subsection{\I{Growth}\label{sec:Growth}}
+To generate a biomass index derived quantity for a harvest strategy calculation, generated at the end of the first time step (labelled \texttt{step\_one}), over all "mature" male and female categories and halfway through the mortality block using the \texttt{weighted\_sum} method with variance (normally distributed with CV = $cv$) and autocorrelation (rho) the syntax is
+
+{\small{\begin{verbatim}
+			@derived_quantity SSB_index
+			type          biomass_index
+			time_step     step_one
+			categories    mature.male mature.female
+			selectivities One
+			time_step_proportion 0.5
+			time_step_proportion_method weighted_sum
+			distribution normal
+			cv 0.2
+			rho 0.1
+			bias 0.0
+\end{verbatim}}}
 
 \ifAgeBased
+\subsection{\I{Growth}\label{sec:Growth}}
 \input{GrowthAge.tex}
 \else
+\subsection{\I{Growth Increments}\label{sec:GrowthIncrement}}
 \input{GrowthLength.tex}
 \fi % end if
 
@@ -485,7 +503,11 @@ Note: the scale of $a$ can be specified incorrectly. If the catch is in tonnes a
 \ifAgeBased
 \subsection{\I{Age-weight relationship}}\label{sec:AgeWeight} \STATUS{Untested}
 
-Either `none' \label{sec:AgeWeight-None} or an Empirical weight-at-age matrix. The empirical weight-at-age data can be input\label{sec:AgeWeight-Data}. This option is different from the method above as it uses empirical data for weight-at-age, rather than calculating it with the growth functions (age -> length -> weight). This bypasses the growth relationship which is expected to be present and so using weight-at-age data needs to be declared in blocks that use this method, i.e., biomass observation blocks, fishery mortality blocks, and biomass derived quantities e.g., $SSB$. The subcommand to use this is "\subcommand{age\_weight\_label} ageWeight.block.label" within the block, but in mortality fisheries blocks, \subcommand{age\_weight\_label} is a column in the \textit{table method} part with the corresponding \textit{ageWeight.block.label} in the body of the table. More than one \command{age\_weight} blocks can be used, and both weight-at-age data and the usual growth version can be used in the same model (but not in the same block).
+Either \texttt{none}\label{sec:AgeWeight-None} or an Empirical weight-at-age matrix. The empirical weight-at-age data can be input\label{sec:AgeWeight-Data}. This option is different from the method above as it uses empirical data for weight-at-age, rather than calculating it from the growth and length-weight relationships (age $\rightarrow$\ length $\rightarrow$\ weight). This bypasses the growth relationship and uses the direct weight-at-age data instead. This needs to be declared in blocks that use this method, i.e., biomass observation blocks, fishery mortality blocks, and biomass derived quantities (e.g., $SSB$). The subcommand to use this is \subcommand{age\_weight\_label} (i.e., with argument  \argument{ageWeight.block.label}). 
+
+In the instantaneous fisheries mortality command, \subcommand{age\_weight\_label} is a column in the \textit{table method} part with the corresponding \texttt{ageWeight.block.label} in the body of the table. 
+
+More than one \command{age\_weight} blocks can be used, and both weight-at-age data and the more common method of using the growth and length-weight relationship (i.e., age $\rightarrow$\ length $\rightarrow$\ weight) can be used in the same model (but not in the same command block).
 
 This option specifies the weight-at-age values for categories at a point in time.
 
@@ -515,7 +537,7 @@ names Stock
 
 \subsection{\I{Weightless model}\label{sec:weightless-model}}
 
-To model abundance (i.e., to model the population in numbers and not convert to biomass), the \command{length\_weight} argument is turned off by specifying the keyword \subcommand{none} in the \command{age\_length} block
+To model abundance (i.e., to model the population in numbers and not convert to biomass), use the argument \argument{none} for the subcommand \commandsub{age\_length}{length\_weight} of the relevant  \command{age\_length} command block.
 
 {\small{\begin{verbatim}
 	@age_length age_size
@@ -524,7 +546,7 @@ To model abundance (i.e., to model the population in numbers and not convert to 
 	length_weight none
 	\end{verbatim}}}
 
-In this case any "biomass" generated by \CNAME\ will actually be abundance, and care should be taken with interpretation of the output.
+In this case any "biomass" generated by \CNAME\ will actually be abundance. Care should be taken when interpreting the output.
 \fi % end if
 
 \subsection{\I{Maturity, in models without maturing in the partition}\label{sec:maturity-notinpartition}}
@@ -533,26 +555,30 @@ When maturity is not an attribute (explicit category) in the partition, processe
 
 \subsection{\I{Selectivities}\label{sec:Selectivity}}
 
-Selectivity is a term used in \CNAME\  to mean an ogive in both age and length based models. They can be used to specify the selection curve for a fishery or observation  (Section \ref{sec:Estimation}) or to modify the effects of processes on the partition, e.g., migration rates by age (Section \ref{sec:Population}). 
+Selectivity is a term used in \CNAME\ to mean an ogive in both age and length based models. They can be used to specify the selection curve for a fishery or observation  (Section \ref{sec:Estimation}) or to modify the effects of processes on the partition, e.g., migration rates by age (Section \ref{sec:Population}). 
+
+There are a number of different parametric forms, including logistic and double normal curves. Selectivities are defined in command block \commandlab{selectivity}, where the unique label of the selectivity is used by observations and processes to specify which selectivity to apply.
 
 \ifAgeBased
 % One column version
-For age-based models \CNAME\ will either use the age to calculate the selectivity or will use the age-length relationship to integrate over the length distribution for a given age to get length-based selectivity in an age-based model (use the subcommand "\textit{by\_length true}", \textit{false} is the default). Do not expect too much from length selectivities because in the next time-step or year, the length distribution for each age reverts to being as defined in the \textit{age\_length} blocks, e.g., normal, rather than being partially truncated because, e.g., larger fish in an age class have been preferentially caught.
+For age-based models \CNAME\ will either use the age to calculate the selectivity or will use the age-length relationship to integrate over the length distribution for a given age to get length-based selectivity in an age-based model (use the command \commandlabsubarg{selectivity}{length\_based}{true} --- the default is \argument{false}). 
 
-Length-based selectivities denoted by \(g(.)\) in an age-based models are evaluated by integrating over the length distribution for each age class (see Section~\ref{sec:AgeLength-length_at_age}). For age-class. Given age \(a\) with mean length \(\bar{l}_a\), standard deviation \(\sigma_a\) and length distribution denoted by \(f(l,\bar{l}_a, \sigma_a)\). The selectivity for age class \(a\) denoted by \(s_a\) should be calculated as
+Do not expect too much from length selectivities because in the next time-step or year, the length distribution for each age reverts to being as defined in the \command{age\_length} blocks, e.g., a normal distribution rather than being partially truncated because, for example, while larger fish in an age class have been preferentially caught the model does not account for this in this.
+
+Length-based selectivities denoted by \(g(.)\) in an age-based models are evaluated by integrating over the length distribution for each age class (see Section~\ref{sec:AgeLength-length_at_age}). For age-class. Given age \(a\) with mean length \(\bar{l}_a\), standard deviation \(\sigma_a\) and length distribution denoted by \(f(l,\bar{l}_a, \sigma_a)\). The selectivity for age class \(a\) denoted by \(s_a\) and is calculated as
 
 \begin{align*}
 	s_a = & \int\limits_l g(f(l,\bar{l}_a, \sigma_a)) \ .
 \end{align*}
 %
-An approximation for the above integral is made in \CNAME\ by calculating an average of a set of integration points on \(f(l,\bar{l}_a, \sigma_a)\). The number of integration points is dictated by the subcommand \texttt{intervals}.
+An approximation for the above integral is made in \CNAME\ by calculating an average of a set of integration points on \(f(l,\bar{l}_a, \sigma_a)\). The number of integration points is dictated by the subcommand \commandlabsub{selectivity}{intervals}.
 
 \else
 % Two column version
 In length-based models \CNAME\ will use length midpoints when calculating selectivities. 
 \fi % end if
 
-There are a number of different parametric forms, including logistic and double normal curves. Selectivities are defined in command block \command{selectivity <label>}, where the unique label of the selectivity is used by observations and processes to specify which selectivity to apply.
+There are a number of different parametric forms, including logistic and double normal curves. Selectivities are defined in command block \commandlab{selectivity}, where the unique label of the selectivity is used by observations and processes to specify which selectivity to apply.
 
 Many selectivities can be forced to apply to ages or lengths from a specified age (or length), i.e., a logistic selectivity 
  can be defined with
@@ -612,20 +638,26 @@ See Figure \ref{fig:select examples} for example plots of the selectivities (p. 
 
 \subsubsection[Constant]{{constant}}\label{sec:Selectivity-Constant}
 
-The constant selectivity is constant ($C$) for all age/lengths greater than $\beta$. For $x < \beta$, the selectivity is zero.
+The constant selectivity is constant power function ($ax^b+c$) for all age/lengths greater than $\beta$. For $x < \beta$, the selectivity is zero.
 
 \begin{equation}
 f(x)= \begin{cases}
 	0, & \text{if $x < \beta$} \\
-	C, & otherwise \\
+	ax^b + c, & otherwise \\
 \end{cases}
 \end{equation}
 
-The constant selectivity has the estimable parameter $C$.
+For a simple constant selectivity (i.e., where $f(x) = 1$ for all \ifAgeBased age/lengths \else length bins \fi set $a$ and $b = 0$ and $c = 1$). 
+
+To implement an inverse length selectivity (to use, for example, as a selectivity for natural mortality ($M$) where $M$ is inversely proportional to length --- see \cite{lorenzen_natural_2022}), use \ifAgeBased \commandlabsubarg{selectivity}{length\_based}{true} with \fi $a=1$, $b=-1$, and $c=0$).
+
+The constant selectivity has estimable parameters $a$, $b$, and $c$.
 
 Input fragment: {\small{\begin{verbatim}
 type constant
-c    0.5
+a    0.0
+b    0.0
+c    1.0
 beta 0.0 # the default is 0.0
 \end{verbatim}}}
 
@@ -1079,12 +1111,12 @@ This configuration will insure the random walk time-varying process will set the
 A random deviate drawn from a standard normal distribution used. This option has an estimable parameter $\sigma_p$ for each time-varying parameter $p$. For reproducible modelling when using stochastic functionality, set the random seed (see Section~\ref{sec:CommandLineArguments}).
 
 {\small{\begin{verbatim}
-			@time_varying q_time_var
-			type          random_draw
-			parameter     catchability[survey_q].q
-			distribution  normal
-			mean          0
-			sigma         3
+	@time_varying q_time_var
+	type          random_draw
+	parameter     catchability[survey_q].q
+	distribution  normal
+	mean          0
+	sigma         3
 \end{verbatim}}}
 
 If the \texttt{parameter} specified in the \command{time\_varying} block is associated with an \command{estimate} block, then the parameter is constrained to stay within the lower and upper bounds of the \command{estimate} block.
@@ -1094,11 +1126,11 @@ If the \texttt{parameter} specified in the \command{time\_varying} block is asso
 A constraint whilst using this functionality is that a parameter cannot be less than 0.0. If it is then \CNAME\ sets it equal to 0.01.
 
 {\small{\begin{verbatim}
-			@estimate survey_q_est
-			type      uniform
-			parameter catchability[survey_q].q
-			lower_bound 1e-6
-			upper_bound 10
+	@estimate survey_q_est
+	type      uniform
+	parameter catchability[survey_q].q
+	lower_bound 1e-6
+	upper_bound 10
 \end{verbatim}}}
 
 This configuration will insure the random draw time-varying process will set the any new candidate values within the lower and upper bound of the \command{estimate} block.
@@ -1110,42 +1142,42 @@ This configuration will insure the random draw time-varying process will set the
 Examples of syntax for implementing the equation parser are below. For more information on the parser, see \url{https://github.com/nickgammon/parser/blob/master/parser.cpp}
 
 {\small{\begin{verbatim}
-		equation process[Recruitment].r0 * 2 #double the recruitment
+	equation process[Recruitment].r0 * 2 #double the recruitment
 \end{verbatim}}}
 
 mathematical functions such as \texttt{sqrt()}, \texttt{log()},  \texttt{exp()},  \texttt{cos()}, \texttt{sin()}, and \texttt{tan()} can be used
 
 {\small{\begin{verbatim}
-		equation sqrt(process[Recruitment].r0)
+	equation sqrt(process[Recruitment].r0)
 \end{verbatim}}}
 
 exponents can be used with \texttt{pow()}
 
 {\small{\begin{verbatim}
-		equation pow(2, 3)
+	equation pow(2, 3)
 \end{verbatim}}}
 
 the absolute value of an equation using \texttt{abs()}
 
 {\small{\begin{verbatim}
-		equation abs(sqrt(process[Recruitment].r0) * 1.33)
+	equation abs(sqrt(process[Recruitment].r0) * 1.33)
 \end{verbatim}}}
 
 \texttt{if-else} statements can be used
 
 {\small{\begin{verbatim}
-		equation if(process[Recruitment].r0 > 23, 44, 55)
-		## if R0 is greater than 23 return 44 else return 55
+	equation if(process[Recruitment].r0 > 23, 44, 55)
+	## if R0 is greater than 23 return 44 else return 55
 \end{verbatim}}}
 
 \texttt{if-else} statements can also be linked, more complex syntax
 
 {\small{\begin{verbatim}
-# if R0 > 23 return 44
-# else if R0 < 23 & r0 > 10 return 55
-equation if(process[Recruitment].r0 > 23, 44,
-         if(process[Recruitment].r0 > 10, 55, 66))
-else R0 must be less than 10 return 66
+	# if R0 > 23 return 44
+	# else if R0 < 23 & r0 > 10 return 55
+	equation if(process[Recruitment].r0 > 23, 44,
+	         if(process[Recruitment].r0 > 10, 55, 66))
+	else R0 must be less than 10 return 66
 \end{verbatim}}}
 
 Only single values can be referenced, so an equation cannot be applied to a vector, e.g., \subcommand{process[Recruit].recruitment\_multipliers\{1974:1980\}} cannot be referenced. More information on which parameters can be included in the equation parser is available (Section~\ref{sec:syntax}). Any subcommand that has a \texttt{type estimable} could be referenced with the equation parser.
@@ -1155,31 +1187,43 @@ Only single values can be referenced, so an equation cannot be applied to a vect
 For example, the wrong year could be misspecified in the case of removals in year $y$ which is based on the state of the population in year $y-1$
 
 {\small{\begin{verbatim}
-		parameter process[removals].catch
-		year 2015
-		equation derived_quantity[percent_b0].values{2020}
+	parameter process[removals].catch
+	year 2015
+	equation derived_quantity[percent_b0].values{2020}
 \end{verbatim}}}
 
 This example is a valid equation but it will have nonsensical results, since a value for 2020 is to be calculated using values for 2015. Although the equation parser adds flexibility, it is easy to incorrectly specify equations.
 
-\subsection{\I{Specifying projections}}\label{sec:Project} \STATUS{Untested}
+\subsection{\I{Projections}} \label{sec:Project}\index{Projections}
 
-Given a set of estimated parameter values from a \textit{-e} or a MCMC run,
-the model can be projected. Projection years are after the model run years, and are defined in the \command{model} command block using the \subcommand{final\_projection\_year} subcommand, i.e., projection years are \subcommand{final\_year + 1} through to \subcommand{final\_projection\_year}.
+Projections are model runs, using a set of parameters, that are used to project the model forward in time to predict a future state. 
+
+\texttt{casal2 -f $n$} 
+
+to project each set of parameter values $n$ times into the future. 
+
+A set of parameter values from the file specified with the argument -i or -I must be supplied. Projections are repeated for each parameter set (i.e., each line of data in the free parameter file) $n$ times. Typically, the MCMC sample output will be used for projections using the output \texttt{samples} file with -i.
+
+\subsubsection{Specifying projections}
+
+Given a set of parameter values from a model in a form suitable as an input parameter file (i.e., in a format suitable for \texttt{-i}, typically generated from an  estimation (\textit{-e}) or a MCMC (\texttt{-m}) run), the model can be projected. Projection years are after the model run years, and are defined in the \command{model} command block using the \subcommand{final\_projection\_year} subcommand, i.e., projection years are \subcommand{final\_year + 1} through to \subcommand{final\_projection\_year}.
 
 Parameter values for the projected years can be specified in a stochastic way or fixed at some value (the default is the estimated value if the parameter is not time-varying) and these are specified in the \command{project} block,
 
 {\small{\begin{verbatim}
-
-@project Future_ycs  # label
-type       lognormal_empirical  # which method to use
-parameter  process[Recruitment].ycs_values
-years      2012:2016
-multiplier 1
-... # any other parameters
+	@project Future_ycs  # label
+	type       lognormal_empirical  # which method to use
+	parameter  process[Recruitment].ycs_values
+	years      2012:2016
+	multiplier 1
+	... # any other parameters
 \end{verbatim}}}
 
-The subcommands \subcommand{years} and \subcommand{parameter} are common to all projection methods. Subcommand \subcommand{years} specifies the years to apply the new values to for the parameter in \subcommand{parameter}. Note that the years can be before the \textit{final\_year}, e.g., it is normal to vary the last few recruitment multipliers (YCS) in a projection run because they are usually poorly estimated or they have been set to 1.  The argument \argument{multiplier} is a constant which is multiplied with the projected value after it has been generated. The \subcommand{type} subcommand gives the method to use to generate new parameter values.
+The subcommands \subcommand{years} and \subcommand{parameter} are common to all projection methods. Subcommand \subcommand{years} specifies the years to apply the new values to for the parameter in \subcommand{parameter}. Note that the years can be before the \textit{final\_year}, e.g., it is normal to vary the last few recruitment multipliers (YCS) in a projection run because they are usually poorly estimated or they have been set to 1.  
+
+The \subcommand{type} subcommand gives the method to use to generate new parameter values.
+
+The argument \argument{multiplier} is a constant (which may be set the same for all years or a value given for each year) which is multiplied with the projected value after it has been generated. 
 
 \CNAME\ allows any estimable parameter to be specified in a \command{project} block and then varied from the estimated value in a projection. The available projection types for these parameters include:
 
@@ -1188,85 +1232,92 @@ The subcommands \subcommand{years} and \subcommand{parameter} are common to all 
 	\item lognormal
 	\item empirical-lognormal
 	\item empirical re-sampling
-	\item user-defined
+	\item harvest strategy constant catch
+	\item harvest strategy constant U
+	\item harvest strategy ramp U
+%	\item user-defined
 \end{itemize}
 
-\CNAME\ has no default projection properties for parameters that are specified by year, e.g., recruitment multiplier parameters, time-varying parameters, and as a special case, future catches. For these, projections  must have a \command{project} command block. For example, \CNAME\ will produce errors if run in projection mode without a \command{project} block for the \subcommand{recruitment\_multipliers} parameter being specified.
+\CNAME\ has no default projection properties for parameters that are specified by year, e.g., recruitment multiplier parameters, time-varying parameters, or future catches. For these, projections  must have a \command{project} command block. For example, \CNAME\ will produce errors if run in projection mode without a \command{project} block for the \subcommand{recruitment\_multipliers} parameter being specified.
 
-DEPRECATED: \textbf{Note for the year class parameters:} the definition of year applies to the \argument{ycs\_years}, not the model years. As defined in Section \ifAgeBased \ref{sec:Process-RecruitmentBevertonHolt}\else \ref{sec:Process-RecruitmentBevertonHolt}\fi, \argument{ycs\_years} are offset between the time of spawning and when individuals are added to the partition.
+% DEPRECATED: \textbf{Note for the year class parameters:} the definition of year applies to the \argument{ycs\_years}, not the model years. As defined in Section \ifAgeBased \ref{sec:Process-RecruitmentBevertonHolt}\else \ref{sec:Process-RecruitmentBevertonHolt}\fi, \argument{ycs\_years} are offset between the time of spawning and when individuals are added to the partition.
 
-Future catches are also specified in a \command{project} block, one for each fishery (see \ref{sec:Project-Catch} for examples). Here, a fishery is reference in the \textit{parameter} subcommand with the \textit{method\_} fragment to identify it,
+Future catches are also specified in a \command{project} block, one for each fishery (see \ref{sec:Project-Catch} for examples). Here, a fishery is reference in the \subcommand{parameter} subcommand with the \textit{method\_} fragment to identify it,
 
- \textit{process[block label].method\_$[$fisheries label$]$},
+ \subcommand{process[block label].method\_$[$fisheries label$]$},
 
-For a process called \textit{Fishing} that has three fisheries defined, it would be \textit{process[Fishing].method\_pot} to specify the fishery labelled \textit{pot}.
+For a process called \subcommand{Fishing} that has three fisheries defined, it would be \subcommand{process[Fishing].method\_pot} to specify the fishery labelled \textit{pot}.
 
-The \CNAME\ command to run the model in projection mode is \texttt{Casal2 -f 1}. This functionality allows for the exploration of many scenarios with a single set of parameters. The number of projections should be greater than 1 only if applying a projection type that is stochastic.
+The \CNAME\ command to run the model in projection mode is \texttt{Casal2 -f 1}. This functionality allows for the exploration of many scenarios with a single set of parameters. The number of projections should be greater than 1 only if applying a projection type that is stochastic. For projections, a free parameter file must be supplied using \texttt{-i/-I}
 
 The \texttt{-{}-tabular} flag should be used when running projections after a Bayesian analysis. This option will output a tabular report (see Section~\ref{sec:Tabular}) which can then be analysed in \R.
 
 An example of the command line evocation is
 
-\textit{casal2 -f 1 -i mcmc.txt --tabular $>$ projection.out.txt}
+\texttt{casal2 -f 1 -i samples.1 --tabular $>$ projection.log}
 
-where \textit{mcmc.txt} is output from a MCMC run, one parameter set per row, which will give one projection per row, and \textit{projection.out.txt} will contain one row for each MCMC run in each of the reports specified in (usually) the \textit{Report.csl2} file (quantities as specified in the \textit{Report.csl2} file).
+where \texttt{samples.1} is output from a MCMC run, one parameter set per row, which will give one projection per row, and \texttt{projection.log} will contain one row for each MCMC run in each of the reports specified.
 
 For a projection run in \CNAME, the model is initialised and run through the model years from \argument{start\_year} to \argument{final\_year}. During this run mode \CNAME\ stores all parameter values so that projection classes can allow parameters before \subcommand{final\_year} to be projected. The model then is re-run from \argument{start\_year} to \argument{projection\_final\_year}, where any parameter can either be fixed or drawn from a stochastic distribution or process.
 
+\label{sec:ProjectionMethods}
 
-\subsubsection{\I{Projection methods}\label{sec:ProjectionMethods}}
+\subsubsection{\I{Projection method of type Constant}}
+\index{Projections!Constant}\label{sec:Project-Constant}
 
-This section lists all the projections classes available, their functionality, and an example of the syntax.
-
-\paragraph[Constant]{The constant projection type, \argument{constant}}\index{Projections!Constant}\label{sec:Project-Constant}
-
-A parameter can either be fixed during all projection years or specified individually for each projection year. This is a deterministic assumption, where the parameter is assumed to be known without error during projection years.
+A parameter can either be fixed during all projection years or specified individually for each projection year using \subcommand{constant} projection command. This is a deterministic assumption, where the parameter is assumed to be known without error during projection years.
 
 {\small{\begin{verbatim}
-		@project Future_ycs
-		type      constant
-		parameter process[Recruitment].recruitment_multipliers
-		years     2012:2016
-		values    1 2 1 2 0.5  # "values 3" means all years use 3
-		multiplier 1
-		\end{verbatim}}}
-
-
-\paragraph[Multiple Values]{The multiple values projection type, \argument{multiple\_values}}\index{Project-MultipleValues}\label{sec:Project-MultipleValues}
-
-Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection class. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this class.
-
-{\small{\begin{verbatim}
-@project future_disease_rates
-type multiple_values
-parameter process[dtransition].proportions{disease}  
-years 2024:2026
-table values
-2024 2025 2026
-0.1 0.2 0.3
-0.3 0.4 0.5
-end_table
+	@project Future_ycs
+	type constant
+	parameter process[Recruitment].recruitment_multipliers
+	years 2012:2016
+	values 1.0 2.0 1.0 2.0 0.5 # one value per year. Alternatively, a single value means 
+	                             that all years use the same value
 \end{verbatim}}}
 
-\paragraph[Empirical sampling]{Sampling from a range of years, type  \argument{empirical\_sampling}}\index{Projections!Empirical sampling}\label{sec:Project-EmpiricalSampling}
+\subsubsection{\I{Projection method of type Multiple Values}}
+\index{Projections!Multiple Values}\label{sec:Project-MultipleValues}
 
-Parameters that have time components associated with them can be sampled uniformly with replacement over a range of years and used as values for the projected years. The year range to sample from is between \argument{start\_year} and \argument{final\_year}:
+Users can specify a set of values for each projection year for each row in the \texttt{-i} or \texttt{-I} file using the \subcommand{multiple\_values} projection command. This gives users flexibility in specifying a range of bespoke values during projections and including uncertainty in the projected values. See below for an example on how to configure this.
 
 {\small{\begin{verbatim}
-		@project   Future_ycs
-		type       empirical_sampling
-		parameter  process[Recruitment].standardised_recruitment_multipliers
-		years     2012:2016
-		start_year 1988     # re-sample from estimated values
-		final_year 2008     # from 1988 to 2008 inclusive
-		multiplier 1
-		\end{verbatim}}}
+	@project future_disease_rates
+	type multiple_values
+	parameter process[dtransition].proportions{disease}  
+	years 2024:2026
+	table values
+	# 2024 2025 2026
+	  0.1  0.2  0.3
+	  0.3  0.4  0.5
+	end_table
+\end{verbatim}}}
 
-Note that when projecting recruitment\_multipliers, the \emph{unstandardised} values are used. This may cause projections to be other than what was intended unless these average one (or some other chosen value). If not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty should be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is equal to one over some pre-defined range. 
+\subsubsection{\I{Projection method of type Empirical Sampling}}
+\index{Projections!Empirical sampling}\label{sec:Project-EmpiricalSampling}
 
-\paragraph[Lognormal]{Sampling from a Lognormal distribution, type  \argument{lognormal}}\index{Projections!Lognormal}\label{sec:Project-Lognormal} \STATUS{Untested}
+Parameters that have time components associated with them can be sampled uniformly with replacement over a range of years and used as values for the projected years with the \command{empirical\_sampling} projection command. The year range to sample from is between \argument{start\_year} and \argument{final\_year}:
 
-The parameters are drawn from a Gaussian (Normal) distribution in log space and exponentiated  to result in the Lognormal distribution
+{\small{\begin{verbatim}
+	@project Future_ycs
+	type empirical_sampling
+	parameter process[Recruitment].standardised_recruitment_multipliers
+	years 2012:2016
+	start_year 1988 # re-sample from estimated values
+	final_year 2008 # from 1988 to 2008 inclusive
+	multiplier 1
+\end{verbatim}}}
+
+Note that if projecting \argument{recruitment\_multipliers} with the Haist parameterisation of recruitment multipliers, the \emph{unstandardised} values will be used. This may cause projections to be other than what was intended unless these (by chance) have a mean of one. Note that \CNAME\ will not warn nor report an error if this is done. \index{Projections!Haist parameterisation}
+
+In this specific case, project the \argument{standardised\_recruitment\_multipliers} instead, as these will have a mean of one (by definition). If using \argument{standardised\_recruitment\_multipliers}, note that \CNAME\ versions before v24.01 may not implement this correctly and a more recent version is recommended. \index{Projections! standardised\_recruitment\_multipliers}
+
+Additionally, if not using a transformation (e.g., the simplex transformation for recruitments), a vector average penalty could be applied (and the resulting recruitment multipliers checked) to ensure the average recruitment multiplier is close to one over some pre-defined range. Note that this is recommended in any case, as the prior on recruitments is applied to the unstandardised values when the Haist parameterisation is used. 
+
+\subsubsection{\I{Projection method of type Lognormal}}
+\index{Projections!Lognormal}\label{sec:Project-LogNormal}
+
+The \command{lognormal} projection command draws parameters from a Gaussian (Normal) distribution in log space and exponentiated to result in the lognormal distribution
 
 \begin{equation}\label{eq:lognormal}
 X_p = exp(\epsilon_p - \sigma^2 / 2)
@@ -1274,32 +1325,33 @@ X_p = exp(\epsilon_p - \sigma^2 / 2)
 
 where $\epsilon_p\stackrel{iid}{\sim}N(\mu,\sigma)$ and $X_p$ is the projected value for parameter $X$, and $\mu$ and $\sigma$ are the mean and standard deviation on the log scale.
 
-An example of applying this process to draw future year class parameters from a Lognormal distribution with mean 1 and standard deviation 0.8
+An example of applying this process to draw future year class parameters from a lognormal distribution with mean 1 and standard deviation 0.8
 
 {\small{\begin{verbatim}
-		@project Future_ycs
-		type     lognormal
-		parameter process[Recruitment].recruitment_multipliers
-		years     2012:2016
-		mean      0     # mean 1 on un-transformed scale
-		sigma     0.8   # log scale
-		multiplier 1
-		\end{verbatim}}}
+	@project Future_ycs
+	type lognormal
+	parameter process[Recruitment].recruitment_multipliers
+	years 2012:2016
+	mean 0 # mean 1 on un-transformed scale
+	sigma 0.8 # log scale
+	multiplier 1
+\end{verbatim}}}
 
-\paragraph[Lognormal-Empirical]{Sampling from a Lognormal distribution where the  variance is estimated from values over a specified year range, type  \argument{lognormal\_empirical} }\index{Projections!Lognormal-Empirical}\label{sec:Project-LognormalEmpirical} \STATUS{Untested}
+\subsubsection{\I{Projection method of type Lognormal-Empirical}}
+\argument{lognormal\_empirical} \index{Projections!Lognormal-Empirical}\label{sec:Project-LogNormalEmpirical} 
 
-This method applies a Lognormal draw as in the \argument{Lognormal} method above and specifies a year range from which the standard deviation of the distribution is calculated. Then equation~\eqref{eq:lognormal} is used to generate future values with a specified $\mu$ and empirically calculated $\sigma$,
+The \command{lognormal\_empirical} command applies a lognormal draw as in the \argument{Lognormal} method above and specifies a year range from which the standard deviation of the distribution is calculated. Then equation~\eqref{eq:lognormal} is used to generate future values with a specified $\mu$ and empirically calculated $\sigma$,
 
 {\small{\begin{verbatim}
-		@project Future_ycs
-		type      lognormal_empirical
-		parameter process[Recruitment].recruitment_multipliers
-		years     2012:2016
-		mean      0
-		start_year 1988   # range of years to take the
-		final_year 2008   # values for \math{\sigma}
-		multiplier 1
-		\end{verbatim}}}
+	@project Future_ycs
+	type lognormal_empirical
+	parameter process[Recruitment].recruitment_multipliers
+	years 2012:2016
+	mean 0
+	start_year 1988 # range of years to take the
+	final_year 2008 # values for \math{\sigma}
+	multiplier 1
+\end{verbatim}}}
 
 %\paragraph[User Defined]{Sample from a user-defined function, \argument{user\_defined}}\index{Projections!User Defined}\label{sec:Project-UserDefined} \STATUS{Untested}
 
@@ -1329,38 +1381,130 @@ This method applies a Lognormal draw as in the \argument{Lognormal} method above
 
 %Care should be taken when writing user-defined equations. The above equation is: if $\%B_{2014} \leq 0.1$ then set next year's catch to 0.0, else if $\%B_{2014} > 0.1 \text{ } \& \text{ } \%B_{2014} \leq 0.2$ then set next year's catch equal to $\%B_{2014} \times SSB_{2014}$, else set next year's catch to $0.2 SSB_{2014}$.
 
-\paragraph[Catches]{Specifying catch for projections }\index{Projections!Catches}\label{sec:Project-Catch}
+\subsubsection{\I{Projecting Catches}}
+\index{Projections!Catches}\label{sec:Project-Catch}
 
-Catches are unique in that they are known inputs in a table format. For example, to project catches that are in a table
+Specifying catches in a projection may require a slightly different format from the options identified above, as catches are usually specified in a table format. Here the table name (i.e., method) needs to be appended to specify the parameter to project. This uses the syntax \texttt{block\_type[block\_label].method\_fishinglabel}. 
+
+For example, to project the \argument{fishingPot} catches that are in the following table
 
 {\small{\begin{verbatim}
-# fishing process
-@process Fishing
-type mortality_instantaneous_retained
-m 0.17*6
-time_step_proportions 1
-relative_m_by_age One*6   # For age based model. 
-                          # For length-based models use relative_m_by_length
-categories *
-table catches
-year\begin{center}
-	\begin{center}
-		
-	\end{center}
-\end{center}
-hingPot	Recreation
-1900	0	0	0
-1901	13.2	0	22.9
-1902	26.4	0	23.5
-1903	39.6	0	24
-end_table
-
-# projection block
-@project future_catch
-type      constant
-parameter process[Fishing].method_fishingpot
-years     2020:2029
-values    4000
+	# fishing process
+	@process Fishing
+	type mortality_instantaneous
+	m 0.17*6
+	time_step_proportions 1
+	relative_m_by_age One*6   # For age based model. 
+	                          # For length-based models use relative_m_by_length
+	categories *
+	table catches
+	year  fishingPot other Recreation
+	1900  0          0     0
+	1901  13.2       0     22.9
+	1902  26.4       0     23.5
+	1903  39.6       0     24
+	end_table
 \end{verbatim}}}
 
-This uses the syntax \texttt{block\_type[block\_label].method\_fishinglabel}. \textbf{Note:} the fishing label which is defined in the table needs to be lower case form in the \command{projection} block. Notice the use of \textit{method\_} syntax to identify the right fishery.
+use the parameter label	\argument{process[Fishing].method\_fishingPot}, i.e., 
+
+{\small{\begin{verbatim}
+	# projection block
+	@project future_catch
+	type      constant
+	parameter process[Fishing].method_fishingPot
+	years     2020:2029
+	values    4000
+\end{verbatim}}}
+
+\subsubsection{\I{Projection method of type Harvest Strategy Constant Catch}}
+\index{Projections!HarvestStrategyConstantCatch}\label{sec:Project-HarvestStrategyConstantCatch} 
+
+The \command{harvest\_strategy\_constant\_catch} command applies a harvest strategy from a biomass index (i.e., a derived quantity). The harvest strategy is a constant catch method where the catch is updated according to a proportional change in the biomass index. 
+
+The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
+
+The constant catch harvest strategy applies a catch equal to \argument{alpha} times the proportional change in the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+
+The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
+
+{\small{\begin{verbatim}
+			@project Future_ycs
+			type      harvest_strategy_constant_catch
+			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
+			years     2012:2016
+			biomass_index SSB
+			catch 963.9
+			alpha 1.0
+			min_delta 0.1
+			max_delta 0.3
+			update_frequency_years 3
+			biomass_index_lag_years 2
+			current_catch 963.9
+			first_year 2009
+			multiplier 1
+\end{verbatim}}}
+
+\subsubsection{\I{Projection method of type Harvest Strategy Constant U}}   
+\index{Projections!HarvestStrategyConstantU}\label{sec:Project-HarvestStrategyConstantU} 
+
+The \command{harvest\_strategy\_constant\_u} method applies a harvest strategy from a biomass index (i.e., a derived quantity) and an exploitation rate. The harvest strategy is a constant $U$ method where the catch is updated according to constant exploitation rate ($U$).
+
+The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
+
+The constant $U$ harvest strategy applies a catch equal to \argument{U} times the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+
+The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
+
+{\small{\begin{verbatim}
+			@project Future_ycs
+			type      harvest_strategy_constant_u
+			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
+			years     2012:2016
+			biomass_index SSB
+			u 0.15
+			min_delta 0.1
+			max_delta 0.3
+			update_frequency_years 3
+			biomass_index_lag_years 2
+			current_catch 963.9
+			first_year 2009
+			multiplier 1
+\end{verbatim}}}
+
+\subsubsection{\I{Projection method of type Harvest Strategy Ramp U}}  
+\index{Projections!HarvestStrategyRampU} \label{sec:Project-HarvestStrategyRampU} 
+
+The \command{harvest\_strategy\_ramp\_u} method applies a harvest strategy using a ramp rule. The harvest strategy is an exploitation rate $\hat{U}$ where the catch is updated according to a ramp rule using \argument{u} and the \argument{reference\_index} to calculate $\hat{U}$, with this then multiplied by the \argument{biomass\_index} to determine the catch to apply.
+
+The biomass index and reference index are derived quantities. Derived quantities of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate. The \argument{biomass\_index} and \argument{reference\_index} can be the same derived quantity.
+
+The ramp $U$ harvest strategy calculates the $\hat{U}$ to be applied from a ramp rule defined by a vector of \argument{u}'s and a equal length vector of \argument{reference\_points}. Here, the value of $\hat{U}$ is a linear interpolation of the values of \argument{u} at the inflection points defined by the \argument{reference\_points}. 
+
+Both the \argument{reference\_index} and \argument{biomass\_index} are derived quantities where their value is equal to the value of the current year less the \argument{biomass\_index\_lag\_years}. The \argument{reference\_index} is then divided by its value from the initialisation phase (i.e., is a proportion). Note that if a lognormal distribution is assumed for \argument{reference\_biomass}, the ratio of the initial to current biomass may need to be adjusted for the bias in the expectation. This can be applied using \argument{bias\_adjustment=true}. 
+
+The ramp rule harvest strategy applies a catch equal to $\hat{U}$ times the biomass index (scaled by \argument{multiplier}). It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+
+In addition, the value of $\hat{U}$ that is used is equal to the lowest value of \argument{u} when the reference index is less than the first value of \argument{reference\_points}, and equal to the highest value of \argument{u} when the reference index is greater than last value of \argument{reference\_points}. Otherwise, $\hat{U}$ is derived using linear interpolation between inflection points of the reference index.
+
+The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
+
+{\small{\begin{verbatim}
+			@project Future_ycs
+			type      harvest_strategy_ramp_u
+			parameter process[Instantaneous_Mortality].method_Sub_Ant_F
+			years     2012:2016
+			biomass_index SSB
+			reference_index SSB
+			u                0.00 0.00 0.10 0.25
+			reference_points 0.00 0.10 0.20 0.40 
+			min_delta 0.1
+			max_delta 0.3
+			update_frequency_years 3
+			biomass_index_lag_years 2
+			current_catch 963.9
+			first_year 2009
+			multiplier 1
+\end{verbatim}}}
+
+

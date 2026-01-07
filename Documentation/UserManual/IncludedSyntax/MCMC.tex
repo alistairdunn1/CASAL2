@@ -72,15 +72,16 @@
 \defDefault{4}
 \defLowerBound{1}
 
-\defSub{adapt\_stepsize\_at}{The iteration numbers in which to check and resize the MCMC stepsize}
+\defSub{adapt\_stepsize\_at}{The iteration numbers in which to check and resize the MCMC step-size}
 \defType{Vector of non-negative integers}
 \defDefault{true}
 \defLowerBound{0 (inclusive)}
-\defValue{If zero, then no step size adaption is applied. Otherwise must be a positive integer less than less than the burn\_in}
+\defValue{If zero, then no step-size adaption is applied. Otherwise must be a positive integer less than less than the burn\_in}
 
-\defSub{adapt\_stepsize\_method}{The method to use to adapt the step size}
+\defSub{adapt\_stepsize\_method}{The method to use to adapt the step-size}
 \defType{String}
 \defDefault{ratio}
+\defValue{Either \subcommand{double\_half} or \subcommand{ratio}}
 
 \defSub{adapt\_covariance\_matrix\_at}{The iteration number in which to adapt the covariance matrix}
 \defType{Non-negative integer}
@@ -102,7 +103,7 @@
 \defDefault{1e-7}
 \defLowerBound{0 (exclusive)}
 
-\defSub{gradient\_step\_size}{Step size to use when calculating gradient}
+\defSub{gradient\_step\_size}{Step-size to use when calculating gradient}
 \defType{Real number}
 \defDefault{1e-7}
 \defLowerBound{1e-13 (inclusive)}

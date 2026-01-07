@@ -20,7 +20,7 @@ In the recruitment processes, a number of individuals are added to a range of ca
 
 Recruitment can differ between a spawning event or the creation of a cohort/year class. One view for fisheries is that recruitment usually refers to individuals \enquote{recruiting} to a fishery. This definition is used because there is generally not a lot of observations for younger fish between the time of spawning and being vulnerable to a survey or fishery for data collection.
 
-The year offset for an age cohort between spawning and recruitment into the partition is required. The \CNAME\ parameter \subcommand{ssb\_offset} defines this offset year and is analogous to the CASAL parameter \subcommand{y\_enter}.
+The year offset \subcommand{ssb\_offset} between spawning and subsequent recruitment to the partition needs to be specified. 
 
 \begin{equation}
 N_{y,l,j} \leftarrow N_{y,l,j} + p_j(R_y) * f_j(l,\mu, \sigma)
@@ -39,7 +39,7 @@ In the constant recruitment process the total number of recruits added in each y
 
 Constant recruitment is equivalent to a Beverton-Holt recruitment process with steepness ($h$) set to 1.
 
-For example, to specify a constant recruitment process where individuals are added to the male and female immature categories at $age=1$ in equal proportion (\texttt{proportions} = 0.5), and the number to add is $R_0=5 \times 10^5$, the syntax is
+For example, to specify a constant recruitment process where individuals are added to the male and female immature categories in length bin 1 in equal proportion (\texttt{proportions} = 0.5), and the number to add is $R_0=5 \times 10^5$, the syntax is
 
 {\small{\begin{verbatim}
 			@process Recruitment
@@ -65,7 +65,7 @@ where
 spawn\_year = y - \texttt{ssb\_offset}
 \end{equation}
 
-Recruitment refers to an age cohort recruiting into the partition and may differ from the spawning year. See below on more information about \subcommand{ssb\_offset}.
+Recruitment refers to a cohort recruiting into the partition and may differ from the spawning year. See above for information about \subcommand{ssb\_offset}.
 
 $SR(SSB_y)$ is the Beverton-Holt stock-recruit relationship parametrised by the steepness $h$, and based on \cite{mace_doonan_88} parametrisation
 
@@ -94,11 +94,11 @@ The length apportionment of recruits into the partition are derived using the no
 		ssb SSB_derived_quantity
 		\end{verbatim}}}
 
-The property \subcommand{ssb\_offset} has to be manually specified.
+The subcommand \subcommand{ssb\_offset} has to be manually specified.
 
 \paragraph*{YCS ($YCS_y$)}
 
-The $YCS$ parameter is reference by the recruited year. The recruited year is the year when a year class or age-cohort enter the partition. The recruited year differs from the spawning event year defined in Equation~\eqref{eq:year_class}. This is a shift away from CASALs terminology which used \subcommand{ycs\_year} and is equivalent to the spawning event year. Standardisation years are are also now expressed as recruited years. This will differ from \CNAME\ versions before August 2022 and CASAL models. From August 2022 we deprecated the commands \subcommand{ycs\_values}, \subcommand{ycs\_years}, and \subcommand{standardised\_ycs\_years}. These were replaced with \subcommand{recruitment\_multipliers} and \subcommand{standardise\_years}.
+The $YCS$ parameter is reference by the recruited year. The recruited year is the year when a year class or age-cohort enter the partition. The recruited year differs from the spawning event year defined in Equation~\eqref{eq:year_class}. This is a shift away from CASALs terminology which used \subcommand{ycs\_year} and is equivalent to the spawning event year. Standardisation years are also now expressed as recruited years. This will differ from \CNAME\ versions from before August 2022 and for CASAL models. From August 2022 the commands \subcommand{ycs\_values}, \subcommand{ycs\_years}, and \subcommand{standardised\_ycs\_years} were deprecated. These were replaced with \subcommand{recruitment\_multipliers} and \subcommand{standardise\_years}.
 
 This year reference is important when defining \command{estimate}, \command{project}, and \command{time\_varying} blocks for the \subcommand{recruitment\_multipliers} parameter. An example is at the end of the section.
 
@@ -132,7 +132,7 @@ In the  example given above, $YCS$ are standardised to have mean one in the peri
 
 \subsubsection{\I{Mortality}\label{sec:Process-Mortality}}
 
-There are 4 types of mortality processes available in \CNAME length based models, plus the tag release processes that can also cause mortality (See Tagging Section~\ref{sec:Process-Tagging}):
+There are several types of mortality processes available in \CNAME length based models, plus the tag release processes that can also cause mortality (See Tagging Section~\ref{sec:Process-Tagging}):
 
 \begin{itemize}
 	\item constant rate,
@@ -231,7 +231,7 @@ This process allows for multiple removal events, e.g., a fisheries model with mu
 The equations for instantaneous mortality are based on Pope's discrete catch equation, which assumes catch is known without error. \CNAME\ will try and take the exact catch specified in the input.
 
 \begin{itemize}
-	\item An exploitation rate (actually a proportion) is calculated for each fishery, as the catch divided by the selected-and-retained abundance or biomass termed vulnerable biomass. Vulnerable biomass is calculated by accounting for half natural mortality (\(M_{l,c}\)) that occurs at time-step which is defined by the subcommand \subcommand{time\_step\_proportions} and denoted by \(p_t\),
+	\item An exploitation rate (a proportion) is calculated for each fishery, as the catch divided by the selected-and-retained abundance or biomass termed vulnerable biomass. Vulnerable biomass is calculated by accounting for half natural mortality (\(M_{l,c}\)) that occurs at time-step which is defined by the subcommand \subcommand{time\_step\_proportions} and denoted by \(p_t\),
 	$$U_{f} = \frac{C_f}{\sum\limits_{c}\sum\limits_l \bar{w}_{l,c} S_{f,l,c} n_{l,c} exp(-0.5 p_t M_{l,c})} \ ,$$
 	where \(S_{f,l,c}\) is the fishery selectivity for length bin \(l\) and category \(c\), \(\bar{w}_{l,c}\) is mean weight and \(n_{l,c}\) numbers at length before applying fishing. The categories \(c\) are user defined for each fishery \(f\), which are defined in the \subcommand{table method} (see below for an example).
 	\item The fishing pressure associated with method $f$ is defined as the maximum proportion of fish taken from any element of the partition in the area affected by the method $f$

@@ -45,7 +45,47 @@ The Abundance type has no additional subcommands.
 \defRef{sec:DerivedQuantity-Biomass}
 \label{syntax:DerivedQuantity-Biomass}
 
+\ifAgeBased
 \defSub{age\_weight\_labels}{The labels for the age-weights that correspond to each category for the biomass calculation}
 \defType{Vector of strings}
 \defDefault{No default}
+\defValue{If age-weights are not used, do not use the subcommand}
+\fi
+
+\subsubsection{Derived Quantity of type Biomass Index}
+\commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}.
+\defRef{sec:DerivedQuantity-BiomassIndex}
+\label{syntax:DerivedQuantity-BiomassIndex}
+
+\ifAgeBased
+\defSub{age\_weight\_labels}{The labels for the age-weights that correspond to each category for the biomass calculation}
+\defType{Vector of strings}
+\defDefault{No default}
+\defValue{If age-weights are not used, do not use the subcommand}
+\fi
+
+\defSub{distribution}{The type of distribution for the biomass index}
+\defType{String}
+\defDefault{lognormal}
+\defValue{Either \texttt{normal}, \texttt{lognormal}, or \texttt{none}}
+
+\defSub{cv}{The cv for the uncertainty for the distribution when generating the biomass index}
+\defType{Real number}
+\defDefault{0.2}
+\defLowerBound{0.0 (exclusive) for the \texttt{normal} or \texttt{lognormal}}
+
+\defSub{bias}{The bias (a positive or negative proportion) when generating the biomass index}
+\defType{Real number}
+\defDefault{0.0}
+
+\defSub{rho}{The autocorrelation in annual values when generating the biomass index}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0.0 (inclusive)}
+
+\defSub{catchability}{The catchability coefficient to use when generating the biomass index}
+\defType{String}
+\defDefault{None}
+\defValue{Either \texttt{none} or a valid catchability label. If none, then no catchability multiplier is applied}
+
 

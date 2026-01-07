@@ -396,6 +396,10 @@ The Random\_Number\_Seed type has no additional subcommands.
 \defDefault{No default}
 \defValue{If not specified, then the label of the report is assumed to be the selectivity label}
 
+\defSub{length\_values}{Length bins for reporting if a length-based selectivity in an age-based model}
+\defType{Vector of real numbers}
+\defDefault{If not specified and this is a length-based selectivity in an age-based model, then length bins specified for the model will be used}
+\defNote{It is a fatal error if this is a report for a length-based selectivity in an age-based model, but neither the length values or \command{model.length\_bins} were supplied}
 
 \subsubsection{Report of type Selectivity By Year}
 \commandlabsubarg{report}{type}{selectivity\_by\_year}.

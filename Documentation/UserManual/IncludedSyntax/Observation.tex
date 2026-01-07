@@ -37,19 +37,19 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (inclusive)}
 
-\defSub{table}{The table of data specifying the observed values}
-\defType{Data table with label = obs}
+\defSub{table \emph{obs}}{The table of data specifying the observed values}
+\defType{Data table with label = \subcommand{obs}}
 \defDefault{No default}
-\defValue{A $n*m$ matrix, where $n=$ the years and $m=$ either the number of ages, lengths, or abundance/biomass observation for each year defined in the model. Each row starts with the year. The table ends with `end\_table'}
+\defValue{A $n*m$ matrix, where $n=$ the years and $m=$ either the number of ages, lengths, or abundance/biomass observation for each year defined in the model. Each row starts with the year. The table ends with the subcommand \subcommand{end\_table}}
 \defNote{See \ref{sec:DataTable} for more details each observation may have custom table labels.}
 
-\defSub{table}{The table of data specifying the observed error values}
-\defType{Data table with label = error\_values}
+\defSub{table \emph{error\_values}}{The table of data specifying the observed error values}
+\defType{Data table with label = \subcommand{error\_values}}
 \defDefault{No default}
-\defValue{A $n*m$ matrix, where $n=$ the years and $m=$ either the number of ages, lengths, or abundance/biomass observation for each year defined in the model. Each row starts with the year. The table ends with `end\_table'}
-\defNote{See \ref{sec:DataTable} for more details on specifying data tables.  each observation may have custom table labels.}
+\defValue{A $n*m$ matrix, where $n=$ the years and $m=$ either the number of ages, lengths, or abundance/biomass observation for each year defined in the model. Each row starts with the year. The table ends with the subcommand \subcommand{end\_table}.}
+\defNote{See \ref{sec:DataTable} for more details on specifying data tables. Each observation may have custom table labels.}
 
-\subsubsection{Observation of type Abundance}
+\subsubsection{Observation of type abundance}
 \commandlabsubarg{observation}{type}{Abundance}.
 \defRef{sec:Observation-Abundance}
 \label{syntax:Observation-Abundance}
@@ -767,56 +767,24 @@ end_table
 \defType{Vector of non-negative integers}
 \defDefault{No default}
 
-\defSub{selectivities}{The labels of the selectivities}
+\defSub{categories}{The categories in the numerator}
+\defType{Vector of strings}
+\defDefault{No default}
+\defNote{The categories is the list of categories in the numerator but not in the denominator, where the categories in the denominator include the categories in both \subcommand{categories} and \subcommand{total\_categories}}.
+
+\defSub{selectivities}{The labels of the selectivities for the categories}
 \defType{Vector of strings}
 \defDefault{true}
 
-\defSub{categories2}{The target categories}
+\defSub{total\_categories}{The total categories}
 \defType{Vector of strings}
 \defDefault{No default}
+\defNote{The total categories is the list of categories in the denominator but not in the numerator, i.e., categories in the denominator include the categories in both \subcommand{categories} and \subcommand{total\_categories}. It is an error to specify a category in both \subcommand{categories} and \subcommand{total\_categories}}.
 
-\defSub{selectivities2}{The target selectivities}
+\defSub{total\_selectivities}{The selectivities for the total categories}
 \defType{Vector of strings}
 \defDefault{No default}
-
-\subsubsection{Observation of type Proportions Mature By Age}
-\commandlabsubarg{observation}{type}{Proportions\_Mature\_By\_Age}.
-%\defRef{sec:Observation-ProportionsMatureByAge}
-\label{syntax:Observation-ProportionsMatureByAge}
-
-\defSub{min\_age}{The minimum age}
-\defType{Non-negative integer}
-\defDefault{No default}
-
-\defSub{max\_age}{The maximum age}
-\defType{Non-negative integer}
-\defDefault{No default}
-
-\defSub{time\_step}{The label of time-step that the observation occurs in}
-\defType{String}
-\defDefault{No default}
-
-\defSub{plus\_group}{Use the age plus group?}
-\defType{Boolean}
-\defDefault{true}
-
-\defSub{years}{The years for which there are observations}
-\defType{Vector of non-negative integers}
-\defDefault{No default}
-
-\defSub{ageing\_error}{The label of ageing error to use}
-\defType{String}
-\defDefault{No default}
-
-\defSub{total\_categories}{All category labels that were vulnerable to sampling at the time of this observation (not including the categories already given)}
-\defType{Vector of strings}
-\defDefault{true}
-
-\defSub{time\_step\_proportion}{The proportion through the mortality block of the time step when the observation is evaluated}
-\defType{Real number (estimable)}
-\defDefault{0.5}
-\defLowerBound{0.0 (inclusive)}
-\defUpperBound{1.0 (inclusive)}
+\defNote{The total selectivities is the list of selectivities for those categories in \subcommand{total\_categories}}.
 
 \subsubsection{Observation of type Proportions Migrating}
 \commandlabsubarg{observation}{type}{Proportions\_Migrating}.
@@ -950,6 +918,12 @@ end_table
 \defDefault{No default}
 \defLowerBound{0.0}
 
+\defSub{overlap\_scalar}{The overlap\_scalar parameter, $k$}
+\defType{Vector of real numbers, one for each year of recaptures (if only one value is supplied, it is repeated for each year of recaptures)}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defNote{See Section \ref{sec:Observation-TagRecaptures} for more information}
+
 \defSub{time\_step\_proportion}{The proportion through the mortality block of the time step when the observation is evaluated}
 \defType{Real number (estimable)}
 \defDefault{0.5}
@@ -1020,6 +994,12 @@ end_table
 \defDefault{No default}
 \defLowerBound{0.0}
 
+\defSub{overlap\_scalar}{The overlap\_scalar parameter, $k$}
+\defType{Vector of real numbers, one for each year of recaptures (if only one value is supplied, it is repeated for each year of recaptures)}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defNote{See Section \ref{sec:Observation-TagRecaptures} for more information}
+
 \defSub{time\_step\_proportion}{The proportion through the mortality block of the time step when the observation is evaluated}
 \defType{Real number (estimable)}
 \defDefault{0.5}
@@ -1052,7 +1032,7 @@ end_table
 
 \subsubsection{Observation of type Age Length}
 \commandlabsubarg{observation}{type}{age\_length}.
-\defRef{sec:Observation-AgeSize}
+\defRef{sec:Observation-AgeLength}
 \label{syntax:Observation-AgeLength}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
@@ -1090,4 +1070,9 @@ end_table
 \defSub{ageing\_error}{The label of ageing error to use}
 \defType{String}
 \defDefault{No ageing error}
+
+\defSub{intervals}{The number of quantiles to evaluate the lengths in the age-length relationship}
+\defType{Non-negative integer}
+\defDefault{5}
+
 

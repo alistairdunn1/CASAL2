@@ -369,7 +369,6 @@
 \defDefault{No default}
 
 \defSub{max\_f}{Maximum \(F\) allowed}
-
 \defType{Real number}
 \defDefault{4.0}
 \defLowerBound{0.0 (inclusive)}
@@ -383,24 +382,24 @@
 \defDefault{No default}
 \defNote{See below for example}
 \begin{verbatim}
-table catches
-year Fishery1_label Fishery2_label
-1993 34 34 
-1994 23 34 
-end_table
+	table catches
+	year Fishery1_label Fishery2_label
+	1993 34 34 
+	1994 23 34 
+	end_table
 \end{verbatim}
 
 \defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, penalty, and time-step for each fishery and annual duration of the fishery.}
 \defDefault{No default}
-\defValue{}
 \defNote{See below for example}
 \begin{verbatim}
-table method
-method  		category selectivity 	annual_duration time_step 	penalty
-Fishery1_label  male   	 fish_sel 		1				step1 		none
-Fishery2_label  male   	 fish_sel 		1 				step1 		none
-end_table
+	table method
+	method         category selectivity annual_duration time_step penalty
+	Fishery1_label male     fish_sel    1               step1     none
+	Fishery2_label male     fish_sel    1               step1     none
+	end_table
 \end{verbatim}
+
 \subsubsection{Process of type Mortality Instantaneous}
 \commandlabsubarg{process}{type}{Mortality\_Instantaneous}.
 \defRef{sec:Process-MortalityInstantaneous}
@@ -422,36 +421,33 @@ end_table
 \defUpperBound{1.0 (inclusive)}
 \defValue{Proportions must sum to one}
 
-\defSub{biomass}{Switch to indicate if the catches are biomasses or abundances}
-\defType{Boolean}
-\defDefault{True}
-
 \defSub{relative\_m\_by\_age}{The M-by-age selectivities to apply to each of the categories for natural mortality}
 \defType{Vector of strings}
 \defDefault{No default}
 
 \defSub{table catches}{The table of data specifying the catches for each fishery and year}
 \defDefault{No default}
-\defValue{}
+\defValue{A column of catches as biomass or abundance; or a column of exploitation rates of biomass or abundance. Valid column names are \argument{year} and \argument{catches}}
+\defLowerBound{0 (inclusive)}
 \defNote{See below for example}
 \begin{verbatim}
-table catches
-year Fishery1_label Fishery2_label
-1993 34 34 
-1994 23 34 
-end_table
+	table catches
+	year Fishery1_label Fishery2_label
+	1993 34 34 
+	1994 23 34 
+	end_table
 \end{verbatim}
 
-\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, time-step, penalties and \(u_{max}\) for each fishery and year.}
+\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery. Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
 \defDefault{No default}
-\defValue{}
+\defValue{Valid column names are: \argument{method}, \argument{category}, \argument{selectivity}, \argument{u\_max}, \argument{time\_step}, and \argument{penalty}; and optionally \argument{biomass}, \argument{u}, and \argument{age\_weight\_label}}
 \defNote{See below for example}
 \begin{verbatim}
-table method
-method  		category selectivity 	u_max 	time_step 	penalty
-Fishery1_label  male   	 fish_sel 		0.9		step1 		CatchMustBeTaken
-Fishery2_label  male   	 fish_sel 		0.9 	step1 		CatchMustBeTaken
-end_table
+	table method
+	method category selectivity u_max time_step penalty biomass u
+	Fishery1_label male fish_sel 0.99 step1 CatchMustBeTaken true false
+	Fishery2_label male fish_sel 0.99 step1 CatchMustBeTaken true false
+	end_table
 \end{verbatim}
 
 \subsubsection{Process of type Mortality Instantaneous Retained}
@@ -587,6 +583,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -646,6 +645,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -727,6 +729,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
 \defDefault{No default}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -773,7 +778,10 @@ The null\_process  type has no additional subcommands. Note that this process do
 
 \defSub{proportions}{The proportion for each category}
 \defType{Real number (estimable)}
-\defDefault{true}
+\defDefault{An equal proportion in each category}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{age}{The age at recruitment}
 \defType{Non-negative integer}
@@ -802,9 +810,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{time\_step\_proportions}{The time step proportions for the survival rate $S$}
 \defType{Vector of real numbers}
 \defDefault{true}
-\defLowerBound{0.0 (exclusive)}
+\defLowerBound{0.0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
-\defValue{The proportions must sum to one}
+\defNote{The proportions must be specified to sum to 1.0. Proportions with value 0 will result in a warning}
 
 \defSub{selectivities}{The selectivity labels for each category}
 \defType{Vector of strings}

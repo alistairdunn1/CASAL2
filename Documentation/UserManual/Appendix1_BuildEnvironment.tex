@@ -1,4 +1,4 @@
-\section{Compiling \CNAME}\label{sec:build_environment}
+\section{\I{Compiling \CNAME}}\label{sec:build_environment}
 
 This section describes how to set up the environment on your local machine that will allow you to build and compile \CNAME. The build environment can be on either Microsoft Windows or Linux systems. At present the \CNAME\ build system supports Microsoft Windows 10+ and Linux (with GCC/G++ 4.9.0+). Apple OSX or other platforms are not currently supported.
 
@@ -80,7 +80,7 @@ For example:
 \path{CASAL2/BuildSystem/linux/library_release}
 
  The files \texttt{Casal2\_build.bat} for Windows and \texttt{Casal2\_build.sh} for Linux in the root folder contain all the calls in the correct order of \texttt{doBuild} required to successfully build \CNAME, the documentation, the Windows installer (Windows) or the Debian installer (Linux), the R-Libraries, and run all the test cases and unit tests.
-
+  
 \subsection{Building on Microsoft Windows}
 
 \subsubsection{Prerequisite software}
@@ -99,7 +99,7 @@ Note that a common error that can be made is having a different GCC compiler in 
 
 Source: Command line GIT from \url{https://www.git-scm.com/downloads}.
 
-\CNAME\ automatically adds a version details to its files and any output based on the GIT version of the latest commit to its repository. This includes the name of source repository that was used. The command line version of GIT is used  to generate the version details.
+Note that all of the \CNAME\ source files must be in a local GIT repository so the version and repository name can evaluated. \CNAME\ automatically adds the version details to its files based on the GIT version of the latest commit to the source repository. This includes the name of source repository that was used. The command line version of GIT is used  to generate the version details.
 
 \paragraph*{MiKTeX LaTeX Processor}
 
@@ -185,7 +185,7 @@ If gfortran is not installed, install this with: \texttt{sudo apt-get install gf
 
 Git may not be installed by default and it can be installed with \texttt{sudo apt-get install git}
 
-\CNAME\ automatically adds a version details to its files and any output based on the GIT version of the latest commit to its repository. This includes the name of source repository that was used. The command line version of GIT is used  to generate the version details.
+Note that all of the \CNAME\ source files must be in a local GIT repository so the version and repository name can evaluated. \CNAME\ automatically adds the version details to its files based on the GIT version of the latest commit to the source repository. This includes the name of source repository that was used. The command line version of GIT is used  to generate the version details.
 
 \paragraph*{CMake}
 
