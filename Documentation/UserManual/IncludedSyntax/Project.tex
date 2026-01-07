@@ -1,4 +1,4 @@
-\defComLab{project}{Define an object of type \emph{Project}}.
+\defComLab{project}{Define an object of type \emph{Project}}
 \defRef{sec:Project}
 \label{syntax:Project}
 
@@ -18,8 +18,8 @@
 \defType{String}
 \defDefault{No default}
 
-\subsubsection{Project of type Constant}
-\commandlabsubarg{project}{type}{Constant}.
+\subsubsection{Project of type constant}
+\commandlabsubarg{project}{type}{Constant}
 \defRef{sec:Project-Constant}
 \label{syntax:Project-Constant}
 
@@ -33,8 +33,8 @@
 \defLowerBound{0.0 (inclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
-\subsubsection{Project of type Multiple Values}
-\commandlabsubarg{project}{type}{multiple\_values}.
+\subsubsection{Project of type multiple values}
+\commandlabsubarg{project}{type}{multiple\_values}
 \defRef{sec:Project-MultipleValues}
 \label{syntax:Multiple-Values}
 
@@ -48,7 +48,6 @@
 \defType{table with label = values}
 \defDefault{No default}
 \defValue{A $n_i \times n_y$ matrix. Where \(n_i\) is the number of rows (parameter sets) in the free parameter file. And \(n_y\) is the number of projection years defined by the input \texttt{years}}
-\defNote{example below}
 \begin{verbatim}
 	@project future_disease_rates
 	type multiple_values
@@ -61,8 +60,8 @@
 	end_table
 \end{verbatim}
 
-\subsubsection{Project of type Empirical Sampling}
-\commandlabsubarg{project}{type}{Empirical\_Sampling}.
+\subsubsection{Project of type empirical sampling}
+\commandlabsubarg{project}{type}{Empirical\_Sampling}
 \defRef{sec:Project-EmpiricalSampling}
 \label{syntax:Project-EmpiricalSampling}
 
@@ -80,8 +79,8 @@
 \defLowerBound{0.0 (inclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
-\subsubsection{Project of type Lognormal}
-\commandlabsubarg{project}{type}{Lognormal}.
+\subsubsection{Project of type lognormal}
+\commandlabsubarg{project}{type}{lognormal}
 \defRef{sec:Project-LogNormal}
 \label{syntax:Project-LogNormal}
 
@@ -100,8 +99,8 @@
 \defLowerBound{0.0 (inclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
-\subsubsection{Project of type Lognormal Empirical}
-\commandlabsubarg{project}{type}{Lognormal\_Empirical}.
+\subsubsection{Project of type lognormal empirical}
+\commandlabsubarg{project}{type}{lognormal\_empirical}
 \defRef{sec:Project-LogNormalEmpirical}
 \label{syntax:Project-LogNormalEmpirical}
 
@@ -123,8 +122,8 @@
 \defLowerBound{0.0 (inclusive)}
 \defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
-\subsubsection{Project of type Harvest Strategy Constant Catch}
-\commandlabsubarg{Project}{type}{harvest\_strategy\_constant\_catch}.
+\subsubsection{Project of type harvest strategy constant catch}
+\commandlabsubarg{Project}{type}{harvest\_strategy\_constant\_catch}
 \defRef{sec:Project-HarvestStrategyConstantCatch}
 \label{syntax:Project-HarvestStrategyConstantCatch}
 
@@ -178,8 +177,8 @@
 \defType{Non-negative integer}
 \defDefault{0}
 
-\subsubsection{Project of type Harvest Strategy Constant U}
-\commandlabsubarg{Project}{type}{Harvest\_Strategy\_Constant\_U}.
+\subsubsection{Project of type harvest strategy constant U}
+\commandlabsubarg{Project}{type}{Harvest\_Strategy\_Constant\_U}
 \defRef{sec:Project-HarvestStrategyConstantU}
 \label{syntax:Project-HarvestStrategyConstantU}
 
@@ -234,8 +233,8 @@
 \defType{Non-negative integer}
 \defDefault{0}
 
-\subsubsection{Project of type Harvest Strategy Ramp U}
-\commandlabsubarg{Project}{type}{harvest\_strategy\_ramp\_u}.
+\subsubsection{Project of type harvest strategy ramp U}
+\commandlabsubarg{Project}{type}{harvest\_strategy\_ramp\_u}
 \defRef{sec:Project-HarvestStrategyRampU}
 \label{syntax:Project-HarvestStrategyRampU}
 
@@ -308,7 +307,7 @@
 \defDefault{The first initialisation phase}
 
 %\subsubsection{Project of type User Defined}
-%\commandlabsubarg{project}{type}{User\_Defined}.
+%\commandlabsubarg{project}{type}{User\_Defined}
 %\defRef{sec:Project-UserDefined}
 %\label{syntax:Project-UserDefined}
 %

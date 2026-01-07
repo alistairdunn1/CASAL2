@@ -1,4 +1,4 @@
-\defComLab{observation}{Define an object of type \emph{Observation}}.
+\defComLab{observation}{Define an object of type \emph{Observation}}
 \defRef{sec:Observation}
 \label{syntax:Observation}
 
@@ -25,7 +25,7 @@
 
 \defSub{simulation\_likelihood}{The simulation likelihood to use}
 \defType{String}
-\defDefault{No default}
+\defDefault{No default} 
 
 \defSub{likelihood\_multiplier}{The likelihood multiplier}
 \defType{Real number (estimable)}
@@ -37,26 +37,24 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (inclusive)}
 
-\defSub{table \emph{obs}}{The table of data specifying the observed values}
-\defType{Data table with label = \subcommand{obs}}
-\defDefault{No default}
-\defValue{A $n*m$ matrix, where $n=$ the years and $m=$ either the number of ages, lengths, or abundance/biomass observation for each year defined in the model. Each row starts with the year. The table ends with the subcommand \subcommand{end\_table}}
-\defNote{See \ref{sec:DataTable} for more details each observation may have custom table labels.}
-
-\defSub{table \emph{error\_values}}{The table of data specifying the observed error values}
-\defType{Data table with label = \subcommand{error\_values}}
-\defDefault{No default}
-\defValue{A $n*m$ matrix, where $n=$ the years and $m=$ either the number of ages, lengths, or abundance/biomass observation for each year defined in the model. Each row starts with the year. The table ends with the subcommand \subcommand{end\_table}.}
-\defNote{See \ref{sec:DataTable} for more details on specifying data tables. Each observation may have custom table labels.}
-
-\subsubsection{Observation of type abundance}
-\commandlabsubarg{observation}{type}{Abundance}.
-\defRef{sec:Observation-Abundance}
-\label{syntax:Observation-Abundance}
+\subsubsection{Observation of type abundance and type process\_abundance} \commandlabsubarg{observation}{type}{Abundance} \\ \commandlabsubarg{observation}{type}{Process\_Abundance} 
+\defRef{sec:Observation-Abundance} \label{syntax:Observation-Abundance}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{Use either \subcommand{time\_step\_proportion} for time step observations or \subcommand{process\_proportion} for process observations}
+
+\defSub{process}{The label of the process if this is a process observations}
+\defType{string}
+\defDefault{none}
+\defNote{Only valid if this is a process observation}
 
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defType{String}
@@ -78,8 +76,7 @@
 \defSub{table obs}{The table of data specifying the observed and error values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n*3$ matrix, where $n=$ the years and a column for year, observation and error value. See below for example.}
-\defNote{example below}
+\defValue{A $n*3$ matrix, where $n=$ the years and a column for year, observation and error value. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 # year observation error_value
@@ -90,14 +87,27 @@ table obs
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Biomass}
-\commandlabsubarg{observation}{type}{Biomass}.
+\subsubsection{Observation of type biomass or type processs\_biomass}
+\commandlabsubarg{observation}{type}{Biomass} \\ 
+\commandlabsubarg{observation}{type}{Process\_Biomass} 
 \defRef{sec:Observation-Biomass}
 \label{syntax:Observation-Biomass}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{Use either \subcommand{time\_step\_proportion} for time step observations or \subcommand{process\_proportion} for process observations}
+
+\defSub{process}{The label of the process if this is a process observations}
+\defType{string}
+\defDefault{none}
+\defNote{Only valid if this is a process observation}
 
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defType{String}
@@ -123,8 +133,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed and error values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n*3$ matrix, where $n=$ the years and a column for year, observation and error value. See below for example.}
-\defNote{example below}
+\defValue{A $n*3$ matrix, where $n=$ the years and a column for year, observation and error value. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 # year observation error_value
@@ -135,8 +144,8 @@ table obs
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Process Removals By Age}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Age}.
+\subsubsection{Observation of type process removals by age}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Age}
 \defRef{sec:Observation-ProcessRemovalsByAge}
 \label{syntax:Observation-ProcessRemovalsByAge}
 
@@ -156,7 +165,6 @@ end_table
 \defType{Boolean}
 \defDefault{true}
 
-
 \defSub{plus\_group}{Is the maximum age the age plus group}
 \defType{Boolean}
 \defDefault{true}
@@ -164,6 +172,12 @@ end_table
 \defSub{time\_step}{The label of time-step that the observation occurs in}
 \defType{Vector of strings}
 \defDefault{No default}
+
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
@@ -182,7 +196,6 @@ end_table
 \defType{Vector of strings}
 \defDefault{No default}
 
-
 \defSub{mortality\_process}{The label of the mortality instantaneous process for the observation}
 \defType{String}
 \defDefault{No default}
@@ -191,8 +204,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -202,16 +214,16 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
 1994 343
 end_table
 \end{verbatim}
-\subsubsection{Observation of type Process Removals By Age Retained}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Age\_Retained}.
+
+\subsubsection{Observation of type process removals by age retained}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Age\_Retained}
 \defRef{sec:Observation-ProcessRemovalsByAgeRetained}
 \label{syntax:Observation-ProcessRemovalsByAgeRetained}
 
@@ -231,6 +243,11 @@ end_table
 \defType{Vector of strings}
 \defDefault{No default}
 
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{sum\_to\_one}{Scale the year (row) observed values by the total, so they sum to 1}
 \defType{Boolean}
@@ -257,7 +274,6 @@ end_table
 \defType{Vector of strings}
 \defDefault{No default}
 
-
 \defSub{mortality\_process}{The label of the mortality instantaneous process for the observation}
 \defType{String}
 \defDefault{No default}
@@ -266,8 +282,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -277,16 +292,16 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
 1994 343
 end_table
 \end{verbatim}
-\subsubsection{Observation of type Process Removals By Age Retained Total}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Age\_Retained\_Total}.
+
+\subsubsection{Observation of type process removals by age retained total}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Age\_Retained\_Total}
 \defRef{sec:Observation-ProcessRemovalsByAgeRetainedTotal}
 \label{syntax:Observation-ProcessRemovalsByAgeRetainedTotal}
 
@@ -305,6 +320,12 @@ end_table
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{Vector of strings}
 \defDefault{No default}
+
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{sum\_to\_one}{Scale the year (row) observed values by the total, so they sum to 1}
 \defType{Boolean}
@@ -339,8 +360,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -350,22 +370,28 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
 1994 343
 end_table
 \end{verbatim}
-\subsubsection{Observation of type Process Removals By Length}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length}.
+
+\subsubsection{Observation of type process removals by length}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length}
 \defRef{sec:Observation-ProcessRemovalsByLength}
 \label{syntax:Observation-ProcessRemovalsByLength}
 
 \defSub{time\_step}{The time step to execute in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
@@ -404,8 +430,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -415,16 +440,16 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
 1994 343
 end_table
 \end{verbatim}
-\subsubsection{Observation of type Process Removals By Length Retained}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length\_Retained}.
+
+\subsubsection{Observation of type process removals by length retained}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length\_Retained}
 \defRef{sec:Observation-ProcessRemovalsByLengthRetained}
 \label{syntax:Observation-ProcessRemovalsByLengthRetained}
 
@@ -432,6 +457,12 @@ end_table
 \defType{String}
 \defDefault{No default}
 
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
 \defDefault{No default}
@@ -469,8 +500,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -480,8 +510,7 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
@@ -489,8 +518,8 @@ table error_values
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Process Removals By Length Retained Total}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length\_Retained\_Total}.
+\subsubsection{Observation of type process removals by length retained total}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length\_Retained\_Total}
 \defRef{sec:Observation-ProcessRemovalsByLengthRetainedTotal}
 \label{syntax:Observation-ProcessRemovalsByLengthRetainedTotal}
 
@@ -498,6 +527,12 @@ end_table
 \defType{String}
 \defDefault{No default}
 
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
 \defDefault{No default}
@@ -535,8 +570,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -546,8 +580,7 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
@@ -555,8 +588,8 @@ table error_values
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Process Removals By Weight}
-\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Weight}.
+\subsubsection{Observation of type process removals by weight}
+\commandlabsubarg{observation}{type}{Process\_Removals\_By\_Weight}
 %\defRef{sec:Observation-ProcessRemovalsByWeight}
 \label{syntax:Observation-ProcessRemovalsByWeight}
 
@@ -572,6 +605,12 @@ end_table
 \defSub{time\_step}{The time step to execute in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
@@ -612,8 +651,9 @@ end_table
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
 
-\subsubsection{Observation of type Proportions At Age}
-\commandlabsubarg{observation}{type}{Proportions\_At\_Age}.
+\subsubsection{Observation of type proportions at age}
+\commandlabsubarg{observation}{type}{Proportions\_At\_Age} \\
+\commandlabsubarg{observation}{type}{Process\_Proportions\_At\_Age} 
 \defRef{sec:Observation-ProportionsAtAge}
 \label{syntax:Observation-ProportionsAtAge}
 
@@ -632,6 +672,18 @@ end_table
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{Use either \subcommand{time\_step\_proportion} for time step observations or \subcommand{process\_proportion} for process observations}
+
+\defSub{process}{The label of the process if this is a process observations}
+\defType{string}
+\defDefault{none}
+\defNote{Only valid if this is a process observation}
 
 \defSub{years}{The years of the observed values}
 \defType{Vector of non-negative integers}
@@ -661,8 +713,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -672,8 +723,7 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
@@ -681,14 +731,27 @@ table error_values
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Proportions At Length}
-\commandlabsubarg{observation}{type}{Proportions\_At\_Length}.
+\subsubsection{Observation of type proportions at length}
+\commandlabsubarg{observation}{type}{Proportions\_At\_Length} \\
+\commandlabsubarg{observation}{type}{Process\_Proportions\_At\_Length} 
 \defRef{sec:Observation-ProportionsAtLength}
 \label{syntax:Observation-ProportionsAtLength}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{Use either \subcommand{time\_step\_proportion} for time step observations or \subcommand{process\_proportion} for process observations}
+
+\defSub{process}{The label of the process if this is a process observations}
+\defType{string}
+\defDefault{none}
+\defNote{Only valid if this is a process observation}
 
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
@@ -722,8 +785,7 @@ end_table
 \defSub{table obs}{The table of data specifying the observed values}
 \defType{Data table with label = obs}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table obs 
 1993 0.1 0.2 0.3
@@ -733,8 +795,7 @@ end_table
 \defSub{table error\_values}{The table of data specifying the error values}
 \defType{Data table with label = error\_values}
 \defDefault{No default}
-\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{Can be specified two ways either as a $n\times 1$ matrix with an error value for each year. Or a $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table error_values 
 1993 234
@@ -742,8 +803,9 @@ table error_values
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Proportions By Category}
-\commandlabsubarg{observation}{type}{Proportions\_By\_Category}.
+\subsubsection{Observation of type proportions by category}
+\commandlabsubarg{observation}{type}{Proportions\_By\_Category} \\
+\commandlabsubarg{observation}{type}{Process\_Proportions\_By\_Category} 
 \defRef{sec:Observation-ProportionsByCategory}
 \label{syntax:Observation-ProportionsByCategory}
 
@@ -759,6 +821,18 @@ end_table
 \defType{String}
 \defDefault{No default}
 
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+\defNote{Use either \subcommand{time\_step\_proportion} for time step observations or \subcommand{process\_proportion} for process observations}
+
+\defSub{process}{The label of the process if this is a process observations}
+\defType{string}
+\defDefault{none}
+\defNote{Only valid if this is a process observation}
+
 \defSub{plus\_group}{Use the age plus group?}
 \defType{Boolean}
 \defDefault{true}
@@ -770,7 +844,7 @@ end_table
 \defSub{categories}{The categories in the numerator}
 \defType{Vector of strings}
 \defDefault{No default}
-\defNote{The categories is the list of categories in the numerator but not in the denominator, where the categories in the denominator include the categories in both \subcommand{categories} and \subcommand{total\_categories}}.
+\defNote{The categories is the list of categories in the numerator but not in the denominator, where the categories in the denominator include the categories in both \subcommand{categories} and \subcommand{total\_categories}}
 
 \defSub{selectivities}{The labels of the selectivities for the categories}
 \defType{Vector of strings}
@@ -779,17 +853,20 @@ end_table
 \defSub{total\_categories}{The total categories}
 \defType{Vector of strings}
 \defDefault{No default}
-\defNote{The total categories is the list of categories in the denominator but not in the numerator, i.e., categories in the denominator include the categories in both \subcommand{categories} and \subcommand{total\_categories}. It is an error to specify a category in both \subcommand{categories} and \subcommand{total\_categories}}.
+\defNote{The total categories is the list of categories in the denominator but not in the numerator, i.e., categories in the denominator include the categories in both \subcommand{categories} and \subcommand{total\_categories} It is an error to specify a category in both \subcommand{categories} and \subcommand{total\_categories}}
 
 \defSub{total\_selectivities}{The selectivities for the total categories}
 \defType{Vector of strings}
 \defDefault{No default}
-\defNote{The total selectivities is the list of selectivities for those categories in \subcommand{total\_categories}}.
+\defNote{The total selectivities is the list of selectivities for those categories in \subcommand{total\_categories}}
 
-\subsubsection{Observation of type Proportions Migrating}
-\commandlabsubarg{observation}{type}{Proportions\_Migrating}.
+\subsubsection{Observation of type proportions migrating}
+\commandlabsubarg{observation}{type}{Proportions\_Migrating} 
+% \commandlabsubarg{observation}{type}{Process\_Proportions\_Migrating} \\
 \defRef{sec:Observation-ProportionsMigrating}
 \label{syntax:Observation-ProportionsMigrating}
+
+Note: This observation is exclusively associated with the process type \subcommand{transition\_category}, and will produce an error when associated with any other process type.
 
 \defSub{min\_age}{The minimum age}
 \defType{Non-negative integer}
@@ -802,6 +879,24 @@ end_table
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{String}
 \defDefault{No default}
+
+%\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+%\defType{Real number (estimable)}
+%\defDefault{0.5}
+%\defLowerBound{0.0 (inclusive)}
+%\defUpperBound{1.0 (inclusive)}
+%\defNote{Use either \subcommand{time\_step\_proportion} for time step observations or \subcommand{process\_proportion} for process observations}
+
+\defSub{process\_proportion}{The proportion through the transition category when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
+
+%\defSub{process}{The label of the process if this is a process observations}
+%\defType{string}
+%\defDefault{none}
+%\defNote{Only valid if this is a process observation}
 
 \defSub{plus\_group}{Is the maximum age the age plus group?}
 \defType{Boolean}
@@ -824,12 +919,12 @@ end_table
 \defType{String}
 \defDefault{No default}
 
-\subsubsection{Observation of type Tag Recapture by Fishery}
-\commandlabsubarg{observation}{type}{tag\_recapture\_by\_fishery}.
+\subsubsection{Observation of type tag recapture by fishery}
+\commandlabsubarg{observation}{type}{tag\_recapture\_by\_fishery}
 \defRef{sec:Observation-TagRecaptureByFishery}
 \label{syntax:Observation-TagRecaptureByFishery}
 
-\defSub{tagged\_categories}{The tagged categories that we want to generate recaptures for. Categories need to be space separated no use of the '+' category syntax.}
+\defSub{tagged\_categories}{The tagged categories that we want to generate recaptures for. Categories need to be space separated. Do not use the '+' category syntax.}
 \defType{Vector of strings}
 \defDefault{No default}
 
@@ -843,7 +938,6 @@ end_table
 \defLowerBound{0.0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
 
-
 \defSub{years}{The years for which there are observations}
 \defType{Vector of non-negative integers}
 \defDefault{No default}
@@ -851,7 +945,6 @@ end_table
 \defSub{method\_of\_removal}{The label of the observed method of removals}
 \defType{Vector of strings}
 \defDefault{No default}
-
 
 \defSub{mortality\_process}{The label of the mortality instantaneous process for the observation}
 \defType{String}
@@ -861,8 +954,7 @@ end_table
 \defSub{table recaptured}{The table of recaptures in each year}
 \defType{Data table with label = \subcommand{recaptured}}
 \defDefault{No default}
-\defValue{A $n\times 2$ matrix, where $n=$ the years and the first column specifies the year and the second column specifies the observed tag recaptures.}
-\defNote{example below}
+\defValue{A $n\times 2$ matrix, where $n=$ the years and the first column specifies the year and the second column specifies the observed tag recaptures.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table recaptured
 2000 10120
@@ -870,8 +962,8 @@ table recaptured
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Tag Recapture By Age}
-\commandlabsubarg{observation}{type}{Tag\_Recapture\_By\_Age}.
+\subsubsection{Observation of type tag recapture by age} 
+\commandlabsubarg{observation}{type}{Tag\_Recapture\_By\_Age} 
 \defRef{sec:Observation-TagRecaptureByAge}
 \label{syntax:Observation-TagRecaptureByAge}
 
@@ -894,6 +986,12 @@ end_table
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defType{String}
 \defDefault{No default}
+
+\defSub{time\_step\_proportion}{The proportion through the mortality block when the observation is evaluated}
+\defType{Real number (estimable)}
+\defDefault{0.5}
+\defLowerBound{0.0 (inclusive)}
+\defUpperBound{1.0 (inclusive)}
 
 \defSub{selectivities}{The labels of the selectivities used for untagged categories}
 \defType{Vector of strings}
@@ -933,8 +1031,7 @@ end_table
 \defSub{table recaptured}{The table of data specifying the recaptures}
 \defType{Data table with label = recaptured}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table recaptured 
 1993 1 32 25
@@ -945,8 +1042,7 @@ end_table
 \defSub{table scanned}{The table of data specifying the scanned fish}
 \defType{Data table with label = scanned}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table scanned 
 1993 1 32 25
@@ -954,8 +1050,8 @@ table scanned
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Tag Recapture By Length}
-\commandlabsubarg{observation}{type}{Tag\_Recapture\_By\_Length}.
+\subsubsection{Observation of type tag recapture by length}
+\commandlabsubarg{observation}{type}{Tag\_Recapture\_By\_Length}
 \defRef{sec:Observation-TagRecaptureByLength}
 \label{syntax:Observation-TagRecaptureByLength}
 
@@ -1009,8 +1105,7 @@ end_table
 \defSub{table recaptured}{The table of data specifying the recaptures}
 \defType{Data table with label = recaptured}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table recaptured 
 1993 1 32 25
@@ -1021,8 +1116,7 @@ end_table
 \defSub{table scanned}{The table of data specifying the scanned fish}
 \defType{Data table with label = scanned}
 \defDefault{No default}
-\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.}
-\defNote{example below}
+\defValue{A $n\times m$ matrix, where $n=$ the years and $m$ is categories \(\times\) length bins. See below for example.} \hfill\vspace{-\baselineskip}
 \begin{verbatim}
 table scanned 
 1993 1 32 25
@@ -1030,8 +1124,8 @@ table scanned
 end_table
 \end{verbatim}
 
-\subsubsection{Observation of type Age Length}
-\commandlabsubarg{observation}{type}{age\_length}.
+\subsubsection{Observation of type age length}
+\commandlabsubarg{observation}{type}{age\_length}
 \defRef{sec:Observation-AgeLength}
 \label{syntax:Observation-AgeLength}
 
@@ -1074,5 +1168,3 @@ end_table
 \defSub{intervals}{The number of quantiles to evaluate the lengths in the age-length relationship}
 \defType{Non-negative integer}
 \defDefault{5}
-
-

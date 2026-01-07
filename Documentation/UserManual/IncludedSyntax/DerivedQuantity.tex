@@ -1,4 +1,4 @@
-\defComLab{derived\_quantity}{Define an object of type \emph{Derived\_Quantity}}.
+\defComLab{derived\_quantity}{Define an object of type \emph{Derived\_Quantity}}
 \defRef{sec:DerivedQuantity}
 \label{syntax:DerivedQuantity}
 
@@ -33,15 +33,15 @@
 \defDefault{weighted\_sum}
 \defValue{weighted\_sum or weighted\_product. weighted\_sum is usually the most sensible if using instantaneous mortality}
 
-\subsubsection{Derived Quantity of type Abundance}
-\commandlabsubarg{derived\_quantity}{type}{Abundance}.
+\subsubsection{Derived quantity of type abundance}
+\commandlabsubarg{derived\_quantity}{type}{Abundance}
 \defRef{sec:DerivedQuantity-Abundance}
 \label{syntax:DerivedQuantity-Abundance}
 
 The Abundance type has no additional subcommands.
 
-\subsubsection{Derived Quantity of type Biomass}
-\commandlabsubarg{derived\_quantity}{type}{Biomass}.
+\subsubsection{Derived quantity of type biomass}
+\commandlabsubarg{derived\_quantity}{type}{Biomass}
 \defRef{sec:DerivedQuantity-Biomass}
 \label{syntax:DerivedQuantity-Biomass}
 
@@ -50,10 +50,12 @@ The Abundance type has no additional subcommands.
 \defType{Vector of strings}
 \defDefault{No default}
 \defValue{If age-weights are not used, do not use the subcommand}
+\else
+The Biomass type has no additional subcommands.
 \fi
 
-\subsubsection{Derived Quantity of type Biomass Index}
-\commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}.
+\subsubsection{Derived quantity of type biomass index}
+\commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}
 \defRef{sec:DerivedQuantity-BiomassIndex}
 \label{syntax:DerivedQuantity-BiomassIndex}
 
@@ -87,5 +89,3 @@ The Abundance type has no additional subcommands.
 \defType{String}
 \defDefault{None}
 \defValue{Either \texttt{none} or a valid catchability label. If none, then no catchability multiplier is applied}
-
-

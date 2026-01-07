@@ -1,4 +1,4 @@
-\defComLab{ageing\_error}{Define an object of type \emph{Ageing\_Error}}.
+\defComLab{ageing\_error}{Define an object of type \emph{Ageing\_Error}}
 \defRef{sec:AgeingError}
 
 \defSub{label}{The label of the ageing error}
@@ -9,8 +9,8 @@
 \defType{String}
 \defDefault{No default}
 
-\subsubsection{Ageing\_Error of type Data}
-\commandlabsubarg{ageing\_error}{type}{Data}.
+\subsubsection{Ageing error of type data}
+\commandlabsubarg{ageing\_error}{type}{Data}
 \label{syntax:AgeingError-Data}
 
 \defSub{data}{The table of data specifying the ageing misclassification matrix}
@@ -21,8 +21,7 @@
 \defSub{table data}{The table of data specifying the ageing misclassification matrix}
 \defType{Data table with label = data}
 \defDefault{No default}
-\defValue{An $n*n$ matrix, where $n=$ the number of ages in the model. See below for example.}
-\defNote{example below}
+\defValue{An $n*n$ matrix, where $n=$ the number of ages in the model. See below for example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	table data 
 	# example for a model with ages 1-3
@@ -32,15 +31,14 @@
 	end_table
 \end{verbatim}
 
-
-\subsubsection{Ageing\_Error of type None}
-\commandlabsubarg{ageing\_error}{type}{None}.
+\subsubsection{Ageing error of type none}
+\commandlabsubarg{ageing\_error}{type}{None}
 \label{syntax:AgeingError-None}
 
 The None type has no additional subcommands.
 
-\subsubsection{Ageing\_Error of type Normal}
-\commandlabsubarg{ageing\_error}{type}{Normal}.
+\subsubsection{Ageing error of type normal}
+\commandlabsubarg{ageing\_error}{type}{Normal}
 \label{syntax:AgeingError-Normal}
 
 \defSub{cv}{CV of the misclassification matrix}
@@ -53,8 +51,8 @@ The None type has no additional subcommands.
 \defDefault{0}
 \defLowerBound{0 (inclusive)}
 
-\subsubsection{Ageing\_Error of type Off By One}
-\commandlabsubarg{ageing\_error}{type}{Off\_By\_One}.
+\subsubsection{Ageing error of type off by one}
+\commandlabsubarg{ageing\_error}{type}{Off\_By\_One}
 \label{syntax:AgeingError-OffByOne}
 
 \defSub{p1}{The proportion misclassified as one year younger, e.g., the proportion of age k individuals that were misclassified as age (k-1)}

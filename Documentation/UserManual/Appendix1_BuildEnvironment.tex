@@ -1,29 +1,34 @@
 \section{\I{Compiling \CNAME}}\label{sec:build_environment}
 
-This section describes how to set up the environment on your local machine that will allow you to build and compile \CNAME. The build environment can be on either Microsoft Windows or Linux systems. At present the \CNAME\ build system supports Microsoft Windows 10+ and Linux (with GCC/G++ 4.9.0+). Apple OSX or other platforms are not currently supported.
+This section describes how to set up the environment on your local machine that will allow you to build and compile \CNAME. The build environment can be on either Microsoft Windows or Linux systems. At present the \CNAME\ build system supports Microsoft Windows 10+ and recent Linux systems. Apple OSX or other platforms are not currently supported.
 
 \subsection{Overview}
 
-The build system is made up of a collection of Python scripts that do the various tasks. These are located in \path{CASAL2/BuildSystem/buildtools/classes/}. Each Python script has its own set of functionality and undertakes one set of actions.
+The build system is made up of a collection of Python3 scripts that do the various tasks. These are located in \path{CASAL2/BuildSystem/buildtools/classes/}. Each Python script has its own set of functionality and undertakes one set of actions.
 
-The top level of the build system can be found at \path{CASAL2/BuildSystem/}. In this directory you can run \texttt{doBuild.bat help} from a command terminal in Microsoft Windows systems or \texttt{./doBuild.sh help} from a terminal in Linux systems.
+The top level of the build system can be found at \path{CASAL2/BuildSystem/}. In this directory you can run \texttt{doBuild.bat help} from a command window in Microsoft Windows systems or \texttt{./doBuild.sh help} from a terminal in Linux systems.
 
 The script will take one or two parameters depending on what style of build you want to undertake. These commands allow the building of various stand-alone binaries, shared libraries, and the documentation. Note that you will need additional software installed on your system in order to build \CNAME.  The software requirements are described below.
 
-A summary of all of the doBuild arguments can be found using the command \texttt{doBuild help} in the BuildSystem directory.
+A summary of all of the \texttt{doBuild} arguments can be found using the command \texttt{doBuild help} in the BuildSystem directory.
+
+Note that the files \texttt{Casal2\_build.bat} for Windows and \texttt{Casal2\_build.sh} for Linux in the root folder contain all the calls in the correct order of \texttt{doBuild} required to successfully build \CNAME, the documentation, the Windows installer (Windows) or the Debian installer (Linux), the R-Libraries, and run all the test cases and unit tests.
 
 The arguments to doBuild are:
 
 Usage: doBuild $<$build\_target$>$ $<$argument$>$
-\begin{description}
-  \item{\texttt{help}} Print out the doBuild help (this output)
-  \item{\texttt{check}} Do a check of the build system
-  \item{\texttt{clean}} Remove debug/release build files
-  \item{\texttt{clean\_all}} Remove all build files and ALL prebuilt binaries
-  \item{\texttt{version}} Build the current version files for C++, R, and LaTeX
-\end{description}
 
-Build required libraries (DLLs/shared objects for Casal2)
+\subsubsection*{Clean, check, and help}
+	
+\begin{tabular}{ll}
+	\texttt{help} & Print out the doBuild help (this output) \\
+	\texttt{check} & Do a check of the build system \\
+	\texttt{clean} & Remove debug/release build files \\
+	\texttt{clean\_all} & Remove all build files and ALL prebuilt binaries \\
+	\texttt{version} & Build the current version files for C++, R, and \LaTeX \\
+\end{tabular}
+
+\subsubsection*{Build required libraries (DLLs/shared objects for \CNAME)}
 \begin{description}
   \item{\texttt{thirdparty}} Build the third party libraries
   \begin{description}
@@ -31,7 +36,8 @@ Build required libraries (DLLs/shared objects for Casal2)
   \end{description}
 \end{description}
 
-Build development and test versions (for development builds only)
+\subsubsection*{Build development and test versions (for development builds only)}
+
 \begin{description}
 \item{\texttt{release}} Build stand-alone release executable
   \begin{description}
@@ -46,7 +52,8 @@ Build development and test versions (for development builds only)
   \item{\texttt{modelrunner}} Run the test case models
 \end{description}
 
-Build the Casal2 end-user application
+\subsubsection*{Build the \CNAME\ end-user application}
+
 \begin{description}
   \item{\texttt{library}} Build shared library for use by front end application
   \begin{description}
@@ -55,7 +62,8 @@ Build the Casal2 end-user application
   \item{\texttt{frontend}} Build \CNAME\ front end application
 \end{description}
 
-Create the archive, R Library, documentation, and the installers
+\subsubsection*{Create the archive, R library, documentation, and the \CNAME installers}
+
 \begin{description}
   \item{\texttt{documentation}} Build the \CNAME\ user manuals
   \item{\texttt{rlibrary}} Create the R library
@@ -66,6 +74,8 @@ Create the archive, R Library, documentation, and the installers
   \item{\texttt{installer}} Create the Microsoft Windows installer package
   \item{\texttt{deb}} Create Linux Debian installer
 \end{description}
+
+\subsubsection*{Build output directories}
 
 The outputs from the build system commands will be placed in sub-folders of \path{CASAL2/BuildSystem/bin/<operating system>/<build_type>}
 
@@ -78,54 +88,60 @@ For example:
 \path{CASAL2/BuildSystem/windows/thirdparty/}
 
 \path{CASAL2/BuildSystem/linux/library_release}
-
- The files \texttt{Casal2\_build.bat} for Windows and \texttt{Casal2\_build.sh} for Linux in the root folder contain all the calls in the correct order of \texttt{doBuild} required to successfully build \CNAME, the documentation, the Windows installer (Windows) or the Debian installer (Linux), the R-Libraries, and run all the test cases and unit tests.
   
 \subsection{Building on Microsoft Windows}
 
 \subsubsection{Prerequisite software}
 
-The building of \CNAME\ requires additional build tools and software, including Python, git version control, GCC compiler, LaTeX compiler, and a Windows package builder. \CNAME\ can require specific implementations of these packages and versions in order to build without modifying the build scripts.
+The building of \CNAME\ requires additional build tools and software, including Python3, git version control, C++ compiler, \LaTeX\ compiler, and a Windows package builder. \CNAME\ can require specific implementations of these packages and versions in order to build without modifying the build scripts.
 
-\paragraph*{C++ and Fortran compiler}
+\subsubsection*{C++ and Fortran compiler}
 
-Source: tdm-gcc (MinGW-w64) from \url{https://jmeubank.github.io/tdm-gcc/}.
+An up-to-date C++ and Fortran compiler is required. 
 
-\CNAME\ is designed to compile under GCC on Microsoft Windows and Linux. While it may be possible to build the package using different compilers, the \CNAME\ Development Team does provide any assistance or recommendations. We recommend using 64-bit TDM-GCC with a version of at least 10.3.0. Ensure you have the "fortran" and "openmp" options installed as a part of the "gcc" install option drop-down tick boxes as these are required. For example, from  \url{https://jmeubank.github.io/tdm-gcc/articles/2021-05/10.3.0-release}, select the 64+32-bit MinGW-w64 edition, then select the Custom install and tick all boxes. 
+We suggest the WinLibs version from \url{https://www.winlibs.com}. This can be installed using \texttt{curl} (if installed) and \texttt{python} with the following command from a command prompt in Windows:
+\begin{small}
+\begin{verbatim}
+curl -Ls https://github.com/bwoodsend/setup-winlibs-action/raw/v1/install.py |
+        python - --add-to-path
+\end{verbatim}
+\end{small}
 
-Note that a common error that can be made is having a different GCC compiler in your path when attempting to compile. For example, \texttt{rtools} includes a version of the GCC compiler. We recommend removing these from your path prior to compiling.
+\CNAME\ is designed to compile under GCC on Microsoft Windows and Linux. While it may be possible to build the package using different compilers, the \CNAME\ Development Team does provide any assistance or recommendations. We recommend using the 64-bit version 14.2.0.
 
-\paragraph*{GIT version control}
+Note that a common issue that is often encountered is having a different C++ compiler in your path when attempting to compile. For example, \texttt{rtools} includes a version of the GCC compiler. We recommend removing these from your path prior to compiling.
+
+\subsubsection*{GIT version control}
 
 Source: Command line GIT from \url{https://www.git-scm.com/downloads}.
 
 Note that all of the \CNAME\ source files must be in a local GIT repository so the version and repository name can evaluated. \CNAME\ automatically adds the version details to its files based on the GIT version of the latest commit to the source repository. This includes the name of source repository that was used. The command line version of GIT is used  to generate the version details.
 
-\paragraph*{MiKTeX LaTeX Processor}
+\subsubsection*{MiKTeX \LaTeX\ processor}
 
 Source: Portable version from \url{http://www.miktex.org/portable}.
 
-The main user documentation for \CNAME\ is a PDF document generated from LaTeX. The LaTeX syntax sections of the documentation are generated, in part, directly from the code. In order to generate the user documentation, you will need the MiKTeX LaTeX compiler.
+The main user documentation for \CNAME\ is a PDF document generated from \LaTeX. The \LaTeX\ syntax sections of the documentation are generated, in part, directly from the code. In order to generate the user documentation, you will need the MiKTeX \LaTeX\ compiler.
 
-A number of additional LaTeX styles are used --- these will usually be identified doing the doBuild process and can be installed as required. 
+A number of additional \LaTeX\ styles are used --- these will usually be identified doing the doBuild process and can be installed as required. 
 
-\paragraph*{7-Zip}
+\subsubsection*{7-Zip}
 
 Source: 7-Zip from \url{http://www.7-zip.org/download.html}.
 
 The build system calls \texttt{7zip.exe} to unzip files in the build system; it is advised to have this in the path.
 
-\paragraph*{Python}
+\subsubsection*{Python3}
 
-Source: Python3 from \url{https://www.python.org/downloads/windows/}
+Source: Python3 from \url{https://www.python.org/downloads/windows}
 
 Python is used to run the build scripts and set the required environment variables required to build \CNAME. 
 
-\paragraph*{Python modules}
+\subsubsection*{Python modules}
 
 There are a number of Python3 modules that are required to build \CNAME. These can be installed with \texttt{python -m pip install \emph{module-name}}. For example, You may need to install \texttt{datetime}, \texttt{re}, and \texttt{distutils} Python modules. 
 
-\paragraph*{Inno setup installer build (optional)}
+\subsubsection*{Inno setup installer build (optional)}
 
 Source: Inno Setup 5 from \url{http://www.jrsoftware.org/isdl.php}
 
@@ -177,41 +193,41 @@ This guide has been written against a fresh install of Ubuntu 20.04. With Ubuntu
 
 \subsubsection{Prerequisite software}
 
-\paragraph*{G++ compiler}
+\subsubsection*{G++ compiler}
 
 If gfortran is not installed, install this with: \texttt{sudo apt-get install gfortran}.
 
-\paragraph*{GIT version control}
+\subsubsection*{GIT version control}
 
 Git may not be installed by default and it can be installed with \texttt{sudo apt-get install git}
 
 Note that all of the \CNAME\ source files must be in a local GIT repository so the version and repository name can evaluated. \CNAME\ automatically adds the version details to its files based on the GIT version of the latest commit to the source repository. This includes the name of source repository that was used. The command line version of GIT is used  to generate the version details.
 
-\paragraph*{CMake}
+\subsubsection*{CMake}
 
 CMake is required to build multiple third-party libraries and the main code base. You can do this with \texttt{sudo apt-get install cmake}
 
-\paragraph*{Python}
+\subsubsection*{Python}
 
 Python3 is used to run the build scripts and set the required environment variables required to build \CNAME. This is usually installed by default on Linux systems, but if not, it can be installed using: \texttt{sudo apt-get install python3}
 
-\paragraph*{Python modules}
+\subsubsection*{Python modules}
 
 There are a number of Python3 modules that are required to build \CNAME. These can be installed with \texttt{sudo apt-get install \texttt{module-name}}. For example, You may need to install \texttt{datetime}, \texttt{re}, and \texttt{distutils} Python modules. 
 
-\paragraph*{LaTeX}
+\subsubsection*{\LaTeX}
 
-LaTeX on Linux is required, and the Texlive LaTeX Processor is recommended. This can be installed with:
+\LaTeX\ on Linux is required, and the Texlive \LaTeX\ processor is recommended. This can be installed with:
 
-\texttt{sudo apt-get install texlive-binaries}
-\texttt{sudo apt-get install texlive-latex-base}
-\texttt{sudo apt-get install texlive-latex-recommended}
-\texttt{sudo apt-get install texlive-latex-extra}
+\texttt{sudo apt-get install texlive-binaries} \\
+\texttt{sudo apt-get install texlive-latex-base} \\
+\texttt{sudo apt-get install texlive-latex-recommended} \\
+\texttt{sudo apt-get install texlive-latex-extra} \
 
 Alternatively you can install the complete package with 
 \texttt{sudo apt-get install texlive-full}
 
-A number of additional LaTeX styles are used --- these will usually be identified doing the doBuild process and can be installed as required. 
+A number of additional \LaTeX\ styles are used --- these will usually be identified doing the doBuild process and can be installed as required. 
 
 \subsubsection{Building \CNAME}
 
@@ -250,8 +266,8 @@ It's possible that there will be build errors or issues building the C++ third-p
 
 Some of the third-party libraries require very specialised environments for compiling under GCC on Windows. These libraries are packaged with MSYS (MinGW Linux style shell system). The log files for these will be found in \path{ThirdParty/<library name>/msys/1.0/<library name>/}
 
-e.g., \path{ThirdParty/adolc/msys/1.0/adolc/ADOL-C-2.5.2/casal2_make.log}\\
-e.g., \path{ThirdParty/boost/boost_1_58_0/casal2_build.log}
+e.g., \path{ThirdParty/adolc/msys/1.0/adolc/ADOL-C-2.5.2/casal2_make.log} 
+and \path{ThirdParty/boost/boost_1_58_0/casal2_build.log}
 
 A common issue when running doBuild thirdparty are Python error messages about missing modules, e.g., ModuleNotFoundError: No module named 'dateutil'. This type of error message indicates that a Python module (library) is missing and will need to be installed. For instance, to install the 'dateutil' module, type the following into a command prompt or terminal window: pip3 install python-dateutil.  
 

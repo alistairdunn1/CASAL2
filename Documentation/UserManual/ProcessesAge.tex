@@ -127,7 +127,7 @@ There are two variants of the Beverton-Holt stock recruitment function and they 
 
 Currently, the only parametrisation for the Ricker stock recruitment relationship is in natural space with recruitment multipliers.
 
-\paragraph*{Definition of year class strengths (YCS)}\index{YCS (Year class Strengths)}\index{Year class strengths}\index{Recruitment multipliers}
+\paragraph*{Definition of year class strengths (YCS)}\index{YCS (Year class Strengths)}\index{Year class strengths}\index{Recruitment multipliers}\label{sec:DefinitionYCS}
 
 Recruitment in \CNAME\ is referenced by the recruitment year. The recruitment year is the year when a year class or age-cohort enter the partition, not (as is the case for year class strengths) when they were spawned. The recruitment year differs from the spawning event year defined in Equation~\eqref{eq:year_class}. This is a shift away from CASALs terminology which used \subcommand{ycs\_year}. Year class years are labelled spawning event year in \CNAME\ outputs. The years used for standardising YCS are also now expressed in recruitment years. This will differ CASAL models and from \CNAME\ versions before August 2022. Since August 2022, the commands \subcommand{ycs\_values}, \subcommand{ycs\_years}, and \subcommand{standardised\_ycs\_years} have been deprecated. These commands have been replaced with \subcommand{recruitment\_multipliers} and \subcommand{standardise\_years}. This distinction can summarised in documents reporting \CNAME\ models as \begin{quote}Year class strengths were parameterised in the model as multipliers on recruitment ($recruitment\_multipliers$) at the age fish enter the model. Year classes refer to the spawning event year. For example, assuming spawning occurs after recruitment in the annual cycle, then if fish recruits to the model at age $n$ the year class equals $recruitment\_multipliers - n$\end{quote}
 
@@ -730,7 +730,7 @@ Total mortality (\(Z_{t,c,a}\)) is calculated as
 \begin{equation*}
 	Z_{t,c,a} = M_{c,a,t} + \sum\limits_{f} S_{f,c,a} F_{f,t}
 \end{equation*}
-%
+
 where, \( M_{c,a,t}\) is the natural mortality rate, \( F_{f,t}\) is fishing mortality and \(S_{f,c,a}\) is the selectivity for category \(c\), age \(a\), time-step \(t\) and fishery \(f\). In the context of this description \(t\) denotes both year and time-step.
 
 The hybrid fishing mortality method allows the \(F\) values to be tuned to match input catch nearly exactly, rather than full model parameters. The process begins by calculating the mid time-step exploitation rate using Pope’s approximation. This exploitation rate is then converted to an approximation of the Baranov continuous \(F\). The \(F\) values for all fisheries operating in that time-step are then tuned over a set number of iterations (\subcommand{f\_iterations}) to match the observed catch for each fishery with its corresponding \(F\). Differentiability is achieved by the use of Pope's approximation to obtain the starting value for each \(F\) and then the use of a fixed number of tuning iterations, typically 4. Tests from Stock Synthesis have shown that modelling \(F\) as hybrid versus \(F\) as a parameter has trivial impact on the estimates of the variances of other model derived quantities. 
@@ -744,7 +744,7 @@ The hybrid method calculates the harvest rate using the Pope's approximation the
 	U_{t,f} &= 	j_{t,f} \tilde{U}_{t,f} + 0.95 (1 - j_{t,f} )\\
 	\tilde{F}_{f,t} &= \frac{-\log\left(1 - U_{t,f}\right)}{\delta_t}
 \end{align}
-%,
+
 where, \(C^{obs}_{f,t}\) is the observed catch, \(\delta_t\) is the duration of the period of observation within the time-step. In most situations where the entire catch has been observed in a time-step. This should be one. \CNAME\ will log a warning if not equal to one. \(V_{f,t}\) is partway vulnerable biomass and \(\tilde{F}_{f,t}\) is the initial \(F\).
 
 The formulation above is designed so that high exploitation rates (above 0.95) are converted into an F that corresponds to a harvest rate of close to 0.95, thus providing a more robust starting point for subsequent iterative adjustment of this F. The logistic joiner, \(j\), is used at other places in Stock Synthesis to link across discontinuities. The catch at time \(t\), for category \(c\) \TODO{what is supposed to finish this sentence?}
@@ -1086,15 +1086,15 @@ For example, a biomass prey-suitability mortality process with an overall consum
 		u_max 0.8
 \end{verbatim}}}
 
-\subsubsection{\I{Markovian Movement}}\label{sec:Process-MarkovianMovement}
+\subsubsection{\I{Markovian movement}}\label{sec:Process-MarkovianMovement}
 This process will move fish from multiple categories to multiple categories in a Markovian movement process. This cannot be done in the transition by category process because that process does not allow categories to be both in the \subcommand{from} and \subcommand{to} categories, which is required to apply Markovian movement.
 
 This process is set up be users specified a one to one relationship between \subcommand{from} and \subcommand{to} category inputs. The process will iterate over each user defined combination of \subcommand{from} and \subcommand{to} category inputs calculating the numbers at age that will move from category \(i\) into category \(j\) denoted by \(\tilde{N}_{a,i,j}\) following,
 
 \begin{align}
-	\tilde{N}_{a,i,j} \mathrel{+}=& N_{a,i} \times P_i \times S_{a,i}, & \forall \ i \\
-	N_{a,i} \mathrel{-}=& \tilde{N}_{a,i,j}, & \forall \ i \\
-	N_{a,j} \mathrel{+}=& \tilde{N}_{a,i,j}, & \forall \ j
+	\tilde{N}_{a,i,j} \mathrel{+}=& N_{a,i} \times P_i \times S_{a,i}, \qquad \forall \ i \\
+	N_{a,i} \mathrel{-}=& \tilde{N}_{a,i,j}, \qquad \forall \ i \\
+	N_{a,j} \mathrel{+}=& \tilde{N}_{a,i,j}, \qquad \forall \ j
 \end{align}
 where $N_{a,j}$ is the number of individuals that have moved to the \subcommand{to} category $j$ from the \subcommand{from} category $i$ in age $a$, $N_{a,i}$ is the number of individuals in category $i$, $P_i$ is the proportion parameter for category $i$, and $S_{a,i}$ is the selectivity at age $a$ for category $i$. See Section~\ref{syntax:Process-MarkovianMovement} for the syntax description. 
 
@@ -1124,13 +1124,15 @@ The above example can be thought of as defining a two by two movement matrix as 
 The input \subcommand{proportions} are estimable and they are indexed using the "from-to" category label. For example, if we wanted to estimate or transform the proportion of R1 moving to R2 you would specify the parameter as \subcommand{process[movement].proportions\{R1-R2\}}. If you estimate these movement proportion parameters, it is recommended that you use the simplex transformation (Section~\ref{sec:Transformation}). An example of estimating these movement rates is shown below.
 
 {\small{\begin{verbatim}
-			@parameter_transformation movement_simplex_move_from_R1
-			type simplex
-			parameters process[movement].proportions{R1-R1} process[movement].proportions{R1-R2}
-			
-			@parameter_transformation movement_simplex_move_from_R2
-			type simplex
-			parameters process[movement].proportions{R2-R1} 		process[movement].proportions{R2-R2}			
+	@parameter_transformation movement_simplex_move_from_R1
+	type simplex
+	parameters process[movement].proportions{R1-R1} 
+		process[movement].proportions{R1-R2}
+	
+	@parameter_transformation movement_simplex_move_from_R2
+	type simplex
+	parameters process[movement].proportions{R2-R1} 
+		process[movement].proportions{R2-R2}			
 \end{verbatim}}}
 
 This is an inherently spatial process and it can get cumbersome when you have other partition attributes other than space i.e., tag or sex. Currently, if you want to move these other attributes at the same rates among regions you need to specify all of the category combinations. Below is an example with a male and female partition members.
@@ -1179,7 +1181,7 @@ lower_bound -10
 upper_bound 10
 \end{verbatim}}}
 
-\subsubsection{\I{Transition By Category}}\label{sec:Process-TransitionCategory}\label{sec:Process-Maturation}
+\subsubsection{\I{Transition by category}}\label{sec:Process-TransitionCategory}\label{sec:Process-Maturation}
 
 The transition by category process moves individuals between categories. This process is used to specify transitions such as maturation (individuals move from an immature to mature state) and migration (individuals move from one area to another).
 
@@ -1220,7 +1222,7 @@ The transition by category process can be (optionally) included within a mortali
 
 A special process type is the transition by category by age process, which allows a transition to occur for a specific subset of ages in specific years only, where each year can have a different number that are moved between categories.
 
-\subsubsection{\I{Tag Release events}}\label{sec:Process-TagByAge}\label{sec:Process-TagByLength} 
+\subsubsection{\I{Tag release events}}\label{sec:Process-TagByAge}\label{sec:Process-TagByLength} 
 
 Tagging processes can be age- or length-based processes, whereby numbers of individuals are moved to a tagged category defined in the \command{categories} block. Tag release processes can also account for initial tag-induced mortality\index{Initial tag mortality or tag loss} (i.e., initial tag loss) on individuals.
 
@@ -1228,7 +1230,7 @@ Age-based tag release events move a known number of individuals tagged for each 
 
 Length-based tag release processes are more complicated, as the age-length matrix is calculated and the exploitation for each length bin to then move the correct numbers-at-age based on the known lengths of release. \CNAME\ also allows for initial tag loss.
 
-\paragraph*{{Tag Release By Length}}
+\paragraph*{{Tag Release by length}}
 \subcommand{compatibility\_switch casal2}\\
 
 For each length bin $l$ of the input vector of proportions-at-length ${p}_l$ and total tag releases denoted by \(M\). The vulnerable numbers for age \(a\), length \(l\), and category \(j\) are calculated as
@@ -1373,7 +1375,7 @@ and double tagged
 
 See Section \ref{syntax:Process-TagLoss} for more information on the syntax for tag loss.
 
-\subsubsection{\I{Tag loss empirical}}\label{sec:Process-TagLossEmpirical} 
+\subsubsection{\I{Empirical tag loss}}\label{sec:Process-TagLossEmpirical} 
 
 Tag loss is the process which accounts for tag failure or loss where tagged individuals lose their tags. It is applied as a removal, where individuals are removed from the partition as an instantaneous mortality rate, that can happen over multiple time steps in the annual cycle. The empirical tag loss process allows the user to specify specific tag loss rates for each year at liberty for tagged individuals.
 

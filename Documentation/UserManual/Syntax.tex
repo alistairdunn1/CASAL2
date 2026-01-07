@@ -49,7 +49,7 @@ The specific subcommands for a command are given within each command.
 \subsection{\I{Age-weight}}
 \input{IncludedSyntax/AgeWeight}
 \else
-\subsection{\I{Growth-Increment}}
+\subsection{\I{Growth-increment}}
 \input{IncludedSyntax/GrowthIncrement}
 \fi 
 
@@ -104,7 +104,7 @@ The specific subcommands for a command are given within each command.
 
 The description of methods for the observation section is given in Section \ref{sec:Observation}.
 
-In the following section, the sub-section headers use a notation of the form "\textbf {@observation[label].type=abundance}" which, in this case, represents the input command fragment
+In the following section, the sub-section headers use a notation of the form "\textbf {@observation[label].type=abundance}" which, in this case, represents the following input command fragment
 {\small{\begin{verbatim}
 @observation label # where label is a unique label for that observation
 type=abundance
@@ -114,16 +114,7 @@ The specific subcommands for a command are given within each command.
 
 \subsection{\I{Observation types}}\label{syntax:ObservationTypes}
 
-The description of the observations is given in Section \ref{sec:Observation}. The observation types available are:
-
-\begin{description}
-  \item Observations of proportions of individuals by \ifAgeBased age \else length \fi class
-  \item Observations of proportions of individuals by category and \ifAgeBased age \else length \fi class
-  \item Relative and absolute abundance observations
-  \item Relative and absolute biomass observations
-\end{description}
-
-Each type of observation requires a set of subcommands and arguments specific to that process.
+The description of the observations is given in Section \ref{sec:Observation}. Each type of observation requires a set of subcommands and arguments specific to that process.
 
 \ifAgeBased
 \input{IncludedSyntax/Observation}

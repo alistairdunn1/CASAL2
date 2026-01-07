@@ -1,4 +1,4 @@
-\defComLab{process}{Define an object of type \emph{Process}}.
+\defComLab{process}{Define an object of type \emph{Process}}
 \defRef{sec:Process}
 \label{syntax:Process}
 
@@ -10,8 +10,8 @@
 \defType{String}
 \defDefault{No default}
 
-\subsubsection{Process of type Ageing}
-\commandlabsubarg{process}{type}{Ageing}.
+\subsubsection{Process of type ageing}
+\commandlabsubarg{process}{type}{Ageing}
 \defRef{sec:Process-Ageing}
 \label{syntax:Process-Ageing}
 
@@ -20,7 +20,7 @@
 \defDefault{No default}
 
 %\subsubsection{Process of type Load Partition}
-%\commandlabsubarg{process}{type}{Load\_Partition}.
+%\commandlabsubarg{process}{type}{Load\_Partition}
 %\defRef{sec:Process-LoadPartition}
 %\label{syntax:Process-LoadPartition}
 %
@@ -30,8 +30,8 @@
 %\defValue{}
 %\defNote{See \ref{sec:DataTable} for more details on specifying data tables}
 %
-\subsubsection{Process of type Maturation}
-\commandlabsubarg{process}{type}{Maturation}.
+\subsubsection{Process of type maturation}
+\commandlabsubarg{process}{type}{Maturation}
 \defRef{sec:Process-Maturation}
 \label{syntax:Process-Maturation}
 
@@ -55,8 +55,8 @@
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Constant Rate}
-\commandlabsubarg{process}{type}{Mortality\_Constant\_Rate}.
+\subsubsection{Process of type mortality constant rate}
+\commandlabsubarg{process}{type}{Mortality\_Constant\_Rate}
 \defRef{sec:Process-MortalityConstantRate}
 \label{syntax:Process-MortalityConstantRate}
 
@@ -80,8 +80,8 @@
 \defType{Vector of strings}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Constant Exploitation}
-\commandlabsubarg{process}{type}{Mortality\_Constant\_Exploitation}.
+\subsubsection{Process of type mortality constant exploitation}
+\commandlabsubarg{process}{type}{Mortality\_Constant\_Exploitation}
 \defRef{sec:Process-MortalityConstantExploitation}
 \label{syntax:Process-MortalityConstantExploitation}
 
@@ -106,8 +106,8 @@
 \defType{Vector of strings}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Disease Rate}
-\commandlabsubarg{process}{type}{Mortality\_Disease\_Rate}.
+\subsubsection{Process of type mortality disease rate}
+\commandlabsubarg{process}{type}{Mortality\_Disease\_Rate}
 \defRef{sec:Process-MortalityDiseaseRate}
 \label{syntax:Process-MortalityDiseaseRate}
 
@@ -134,8 +134,8 @@
 \defType{Vector of non-negative integers}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Event}
-\commandlabsubarg{process}{type}{Mortality\_Event}.
+\subsubsection{Process of type mortality event}
+\commandlabsubarg{process}{type}{Mortality\_Event}
 \defRef{sec:Process-MortalityEvent}
 \label{syntax:Process-MortalityEvent}
 
@@ -165,8 +165,8 @@
 \defType{String}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Event Biomass}
-\commandlabsubarg{process}{type}{Mortality\_Event\_Biomass}.
+\subsubsection{Process of type mortality event biomass}
+\commandlabsubarg{process}{type}{Mortality\_Event\_Biomass}
 \defRef{sec:Process-MortalityEventBiomass}
 \label{syntax:Process-MortalityEventBiomass}
 
@@ -196,8 +196,8 @@
 \defType{String}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Holling Rate}
-\commandlabsubarg{process}{type}{Mortality\_Holling\_Rate}.
+\subsubsection{Process of type mortality Holling rate}
+\commandlabsubarg{process}{type}{Mortality\_Holling\_Rate}
 \defRef{sec:Process-MortalityHollingRate}
 \label{syntax:Process-MortalityHollingRate}
 
@@ -251,19 +251,17 @@
 \defDefault{No default}
 
 \defSub{table}{The table of data specifying the predator selectivities}
-\defType{Data table with label = \TODO{I don't know how this one works?}}
+\defType{Data table with label = prey\_selectivities\_by\_year}
 \defDefault{No default}
-\defValue{}
 \defNote{See \ref{sec:DataTable} for more details on specifying data tables}
 
 \defSub{table}{The table of data specifying the prey selectivities}
-\defType{Data table with label = \TODO{I don't know how this one works?}}
+\defType{Data table with label = predator\_selectivities\_by\_year}
 \defDefault{No default}
-\defValue{}
 \defNote{See \ref{sec:DataTable} for more details on specifying data tables}
 
-\subsubsection{Process of type Mortality Initialisation Event}
-\commandlabsubarg{process}{type}{mortality\_initialisation\_event}.
+\subsubsection{Process of type mortality initialisation event}
+\commandlabsubarg{process}{type}{mortality\_initialisation\_event}
 \defRef{sec:Process-MortalityInitialisationEvent}
 \label{syntax:Process-MortalityInitialisationEvent}
 
@@ -289,13 +287,8 @@
 \defType{String}
 \defDefault{No default}
 
-\defSub{table}{The table of data specifying the catches for each fishery, the categories, years, and the $U_max$}
-\defType{Data table with label = \TODO{Craig? Can you specify this table?}}
-\defDefault{No default}
-\defNote{See \ref{sec:DataTable} for more details on specifying data tables}
-
-\subsubsection{Process of type Mortality Initialisation Event Biomass}
-\commandlabsubarg{process}{type}{Mortality\_Initialisation\_Event\_Biomass}.
+\subsubsection{Process of type mortality initialisation event biomass}
+\commandlabsubarg{process}{type}{Mortality\_Initialisation\_Event\_Biomass}
 \defRef{sec:Process-MortalityInitialisationEventBiomass}
 \label{syntax:Process-MortalityInitialisationEventBiomass}
 
@@ -321,9 +314,8 @@
 \defType{String}
 \defDefault{No default}
 
-
-\subsubsection{Process of type Mortality Initialisation Baranov}
-\commandlabsubarg{process}{type}{mortality\_initialisation\_baranov}.
+\subsubsection{Process of type mortality initialisation Baranov}
+\commandlabsubarg{process}{type}{mortality\_initialisation\_baranov}
 \defRef{sec:Process-MortalityInitialisationEventBiomass}
 \label{syntax:Process-MortalityInitialisationBaranov}
 
@@ -331,7 +323,7 @@
 \defType{Vector of strings}
 \defDefault{No default}
 
-\defSub{fishing\_mortality}{The fishing mortality to apply}
+\defSub{fishing\_mortality}{The fishing mortality, $F$, to apply}
 \defType{Real number (estimable)}
 \defDefault{No default}
 
@@ -339,8 +331,8 @@
 \defType{Vector of strings}
 \defDefault{No default}
 
-\subsubsection{Process of type Mortality Hybrid}
-\commandlabsubarg{process}{type}{mortality\_hybrid}.
+\subsubsection{Process of type mortality hybrid}
+\commandlabsubarg{process}{type}{mortality\_hybrid}
 \defRef{sec:Process-MortalityHybrid}
 \label{syntax:Process-MortalityHybrid}
 
@@ -379,8 +371,7 @@
 \defLowerBound{0 (inclusive)}
 
 \defSub{table catches}{The table of data specifying the catches for each fishery and year}
-\defDefault{No default}
-\defNote{See below for example}
+\defDefault{No default. e below for example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	table catches
 	year Fishery1_label Fishery2_label
@@ -390,8 +381,7 @@
 \end{verbatim}
 
 \defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, penalty, and time-step for each fishery and annual duration of the fishery.}
-\defDefault{No default}
-\defNote{See below for example}
+\defDefault{No default. See below for example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	table method
 	method         category selectivity annual_duration time_step penalty
@@ -400,8 +390,8 @@
 	end_table
 \end{verbatim}
 
-\subsubsection{Process of type Mortality Instantaneous}
-\commandlabsubarg{process}{type}{Mortality\_Instantaneous}.
+\subsubsection{Process of type mortality instantaneous}
+\commandlabsubarg{process}{type}{Mortality\_Instantaneous}
 \defRef{sec:Process-MortalityInstantaneous}
 \label{syntax:Process-MortalityInstantaneous}
 
@@ -428,8 +418,7 @@
 \defSub{table catches}{The table of data specifying the catches for each fishery and year}
 \defDefault{No default}
 \defValue{A column of catches as biomass or abundance; or a column of exploitation rates of biomass or abundance. Valid column names are \argument{year} and \argument{catches}}
-\defLowerBound{0 (inclusive)}
-\defNote{See below for example}
+\defLowerBound{0 (inclusive). See below for example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	table catches
 	year Fishery1_label Fishery2_label
@@ -440,8 +429,7 @@
 
 \defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery. Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
 \defDefault{No default}
-\defValue{Valid column names are: \argument{method}, \argument{category}, \argument{selectivity}, \argument{u\_max}, \argument{time\_step}, and \argument{penalty}; and optionally \argument{biomass}, \argument{u}, and \argument{age\_weight\_label}}
-\defNote{See below for example}
+\defValue{Valid column names are: \argument{method}, \argument{category}, \argument{selectivity}, \argument{u\_max}, \argument{time\_step}, and \argument{penalty}; and optionally \argument{biomass}, \argument{u}, and \argument{age\_weight\_label}. See below for example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	table method
 	method category selectivity u_max time_step penalty biomass u
@@ -450,8 +438,8 @@
 	end_table
 \end{verbatim}
 
-\subsubsection{Process of type Mortality Instantaneous Retained}
-\commandlabsubarg{process}{type}{Mortality\_Instantaneous\_Retained}.
+\subsubsection{Process of type mortality instantaneous retained}
+\commandlabsubarg{process}{type}{Mortality\_Instantaneous\_Retained}
 \defRef{sec:Process-MortalityInstantaneousRetained}
 \label{syntax:Process-MortalityInstantaneousRetained}
 
@@ -475,14 +463,31 @@
 \defType{Vector of strings}
 \defDefault{No default}
 
-\defSub{table}{The table of data specifying the catches for each fishery, the categories, years, and the $U_max$}
-\defType{Data table with label = \TODO{Craig? Can you specify this table?}}
+\defSub{table catches}{The table of data specifying the catches for each fishery and year}
 \defDefault{No default}
-\defValue{}
-\defNote{See \ref{sec:DataTable} for more details on specifying data tables}
+\defValue{A column of catches as biomass or abundance; or a column of exploitation rates of biomass or abundance. Valid column names are \argument{year} and \argument{catches}}
+\defLowerBound{0 (inclusive). See below for example} \hfill \vspace{-\baselineskip}
+\begin{verbatim}
+	table catches
+	year Fishery1_label Fishery2_label
+	1993 34 34 
+	1994 23 34 
+	end_table
+\end{verbatim}
 
-\subsubsection{Process of type Mortality Prey Suitability}
-\commandlabsubarg{process}{type}{Mortality\_Prey\_Suitability}.
+\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery. Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
+\defDefault{No default}
+\defValue{Valid column names are: \argument{method}, \argument{category}, \argument{selectivity}, \argument{u\_max}, \argument{time\_step}, and \argument{penalty}; and optionally \argument{biomass}, \argument{u}, and \argument{age\_weight\_label}. See below for example} \hfill \vspace{-\baselineskip}
+\begin{verbatim}
+	table method
+	method category selectivity u_max time_step penalty biomass u
+	Fishery1_label male fish_sel 0.99 step1 CatchMustBeTaken true false
+	Fishery2_label male fish_sel 0.99 step1 CatchMustBeTaken true false
+	end_table
+\end{verbatim}
+
+\subsubsection{Process of type mortality prey suitability}
+\commandlabsubarg{process}{type}{Mortality\_Prey\_Suitability}
 \defRef{sec:Process-MortalityPreySuitability}
 \label{syntax:Process-MortalityPreySuitability}
 
@@ -527,8 +532,8 @@
 \defSub{years}{The year that process occurs}
 \defType{Vector of non-negative integers}
 \defDefault{No default}
-\subsubsection{Markovian Movement}
-\commandlabsubarg{process}{type}{markovian\_movement}.
+\subsubsection{Markovian movement}
+\commandlabsubarg{process}{type}{markovian\_movement}
 \defRef{sec:Process-MarkovianMovement}
 \label{syntax:Process-MarkovianMovement}
 
@@ -554,13 +559,13 @@
 \defValue{Valid selectivity labels}
 
 \subsubsection{Process of type null process}
-\commandlabsubarg{process}{type}{null\_process}.
+\commandlabsubarg{process}{type}{null\_process}
 \label{syntax:Process-Null}
 
-The null\_process  type has no additional subcommands. Note that this process does nothing. It is included primarily as a means of replacing other processes with "no action" to allow for testing of alternative model structures.
+The null\_process type has no additional subcommands. Note that this process does nothing. It is included primarily as a means of replacing other processes with "no action" to allow for testing of alternative model structures.
 
-\subsubsection{Process of type Recruitment Beverton Holt}
-\commandlabsubarg{process}{type}{Recruitment\_Beverton\_Holt}.
+\subsubsection{Process of type recruitment Beverton Holt}
+\commandlabsubarg{process}{type}{Recruitment\_Beverton\_Holt}
 \defRef{sec:Process-RecruitmentBevertonHolt}
 \label{syntax:Process-RecruitmentBevertonHolt}
 
@@ -609,9 +614,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defType{String}
 \defDefault{No default}
 
-\defSub{ycs\_values}{Deprecated}
-\defSub{ycs\_years}{Deprecated}
-\defSub{standardise\_ycs\_years}{Deprecated}
+\defSub{ycs\_values}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{standardise\_ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
 
 \defSub{recruitment\_multipliers}{The recruitment values also termed year class strengths.}
 \defType{Vector of real numbers (estimable)}
@@ -621,8 +626,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defType{Vector of non-negative integers}
 \defDefault{true}
 
-\subsubsection{Process of type Recruitment Beverton Holt With Deviations}
-\commandlabsubarg{process}{type}{Recruitment\_Beverton\_Holt\_With\_Deviations}.
+\subsubsection{Process of type recruitment Beverton Holt with deviations}
+\commandlabsubarg{process}{type}{Recruitment\_Beverton\_Holt\_With\_Deviations}
 \defRef{sec:Process-RecruitmentBevertonHoltWithDeviations}
 \label{syntax:Process-RecruitmentBevertonHoltWithDeviations}
 
@@ -705,8 +710,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 
 \defSub{deviation\_years}{Deprecated}
 
-\subsubsection{Process of type Recruitment Ricker}
-\commandlabsubarg{process}{type}{Recruitment\_Ricker}.
+\subsubsection{Process of type recruitment Ricker}
+\commandlabsubarg{process}{type}{Recruitment\_Ricker}
 \defRef{sec:Process-RecruitmentRicker}
 \label{syntax:Process-RecruitmentRicker}
 
@@ -755,9 +760,9 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defType{String}
 \defDefault{No default}
 
-\defSub{ycs\_values}{Deprecated}
-\defSub{ycs\_years}{Deprecated}
-\defSub{standardise\_ycs\_years}{Deprecated}
+\defSub{ycs\_values}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{standardise\_ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
 
 \defSub{recruitment\_multipliers}{The recruitment values also termed year class strengths.}
 \defType{Vector of real numbers (estimable)}
@@ -767,8 +772,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defType{Vector of non-negative integers}
 \defDefault{true}
 
-\subsubsection{Process of type Recruitment Constant}
-\commandlabsubarg{process}{type}{Recruitment\_Constant}.
+\subsubsection{Process of type recruitment constant}
+\commandlabsubarg{process}{type}{Recruitment\_Constant}
 \defRef{sec:Process-RecruitmentConstant}
 \label{syntax:Process-RecruitmentConstant}
 
@@ -792,8 +797,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defDefault{No default}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Process of type Survival Constant Rate}
-\commandlabsubarg{process}{type}{Survival\_Constant\_Rate}.
+\subsubsection{Process of type survival constant rate}
+\commandlabsubarg{process}{type}{Survival\_Constant\_Rate}
 \defRef{sec:Process-SurvivalConstantRate}
 \label{syntax:Process-SurvivalConstantRate}
 
@@ -818,8 +823,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defType{Vector of strings}
 \defDefault{No default}
 
-\subsubsection{Process of type Tag By Age}
-\commandlabsubarg{process}{type}{Tag\_By\_Age}.
+\subsubsection{Process of type tag by age}
+\commandlabsubarg{process}{type}{Tag\_By\_Age}
 \defRef{sec:Process-TagByAge}
 \label{syntax:Process-TagByAge}
 
@@ -883,8 +888,7 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{table numbers}{The table of releases as numbers for the process}
 \defType{Data table with label = numbers}
 \defDefault{Can be replaced with 'table proportions' -- see below}
-\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example}
-\defNote{example below}
+\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example} \hfill \vspace{-\baselineskip} 
 \begin{verbatim}
 	table numbers 
 	1993 34 34 23 43
@@ -895,8 +899,7 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{table proportions}{The table of releases as numbers for the process}
 \defType{Data table with label = proportions}
 \defDefault{Can be replaced with table numbers -- see above}
-\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example}
-\defNote{example below}
+\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	n 200 300 ## need to specify n if you give proportions
 	table proportions 
@@ -911,8 +914,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defLowerBound{0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
 
-\subsubsection{Process of type Tag By Length}
-\commandlabsubarg{process}{type}{Tag\_By\_Length}.
+\subsubsection{Process of type tag by length}
+\commandlabsubarg{process}{type}{Tag\_By\_Length}
 \defRef{sec:Process-TagByLength}
 \label{syntax:Process-TagByLength}
 
@@ -972,8 +975,7 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{table numbers}{The table of releases as numbers for the process}
 \defType{Data table with label = numbers}
 \defDefault{Can be replaced with 'table proportions' -- see below}
-\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the number of ages ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example}
-\defNote{example below}
+\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the number of ages ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	table numbers 
 	1993 34 34 23 43
@@ -984,8 +986,7 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defSub{table proportions}{The table of releases as numbers for the process}
 \defType{Data table with label = proportions}
 \defDefault{Can be replaced with table numbers -- see above}
-\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the number of ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example}
-\defNote{example below}
+\defValue{A \(n_y \times (n_l\times n_c) + 1\) matrix, where $n_y=$ is the number of years, \(n_a\) are the number of ages and \(n_c\) are the number of categories. The first column is the year value for that row. See below for an example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 	n 200 300 ## need to specify n if you give proportions
 	table proportions 
@@ -1000,8 +1001,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defLowerBound{0 (inclusive)}
 \defUpperBound{1.0 (inclusive)}
 
-\subsubsection{Process of type Tag Loss}
-\commandlabsubarg{process}{type}{Tag\_Loss}.
+\subsubsection{Process of type tag loss}
+\commandlabsubarg{process}{type}{Tag\_Loss}
 \defRef{sec:Process-TagLoss}
 \label{syntax:Process-TagLoss}
 
@@ -1037,8 +1038,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defDefault{No default}
 \defNote{For the double tag loss rate, this is also assumed to be the first year in the calculation of the annual loss rates}
 
-\subsubsection{Process of type Tag Loss Empirical}
-\commandlabsubarg{process}{type}{Tag\_Loss\_Empirical}.
+\subsubsection{Process of type tag loss empirical}
+\commandlabsubarg{process}{type}{Tag\_Loss\_Empirical}
 \defRef{sec:Process-TagLossEmpirical}
 \label{syntax:Process-TagLossEmpirical}
 
@@ -1075,8 +1076,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defLowerBound{0 (inclusive)}
 \defNote{Years at liberty must be a valid value between 0 and the maximum number of years in the model. The tag\_loss\_rate is not applied for years at liberty that are not specified}
 
-\subsubsection{Process of type Transition Category}
-\commandlabsubarg{process}{type}{Transition\_Category}.
+\subsubsection{Process of type transition category}
+\commandlabsubarg{process}{type}{Transition\_Category}
 \defRef{sec:Process-TransitionCategory}
 \label{syntax:Process-TransitionCategory}
 
@@ -1107,8 +1108,8 @@ The null\_process  type has no additional subcommands. Note that this process do
 \defValue{Either true or false}
 \defNote{Warning, if true, this may adversely effect derived quantities and observations that interpolate over the mortality block - see \defRef{sec:Process-TransitionCategory}}
 
-\subsubsection{Process of type Transition Category By Age}
-\commandlabsubarg{process}{type}{Transition\_Category\_By\_Age}.
+\subsubsection{Process of type transition category by age}
+\commandlabsubarg{process}{type}{Transition\_Category\_By\_Age}
 \defRef{sec:Process-TransitionCategoryByAge}
 \label{syntax:Process-TransitionCategoryByAge}
 
@@ -1148,9 +1149,7 @@ The null\_process  type has no additional subcommands. Note that this process do
 
 \defSub{table n}{The table of numbers at age to transition from and to each category}
 \defType{See below for example}
-\defDefault{No default}
-\defValue{}
-\defNote{See below for example}
+\defDefault{No default. See below for an example} \hfill \vspace{-\baselineskip}
 \begin{verbatim}
 table n
 year 3 4 5 6

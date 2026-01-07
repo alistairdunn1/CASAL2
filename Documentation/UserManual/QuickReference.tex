@@ -203,7 +203,6 @@
 \commandlabsubarg{Derived\_Quantity}{type}{biomass\_index}
 
 \defSub{age\_weight\_labels}{The labels for the age-weights that correspond to each category for the biomass calculation}
-\defSub{length\_weights}{The labels for the length-weights that correspond to each category for the biomass calculation}
 \defSub{distribution}{The type of distribution for the biomass index}
 \defSub{cv}{The cv for the uncertainty for the distribution when generating the biomass index}
 \defSub{bias}{The bias (a positive or negative proportion) when generating the biomass index}
@@ -238,7 +237,7 @@
 \defSub{sigma}{The normal standard deviation (sigma) parameter}
 \defSub{lognormal\_transformation}{Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information}
 
-\commandlabsubarg{estimate}{type}{Lognormal}
+\commandlabsubarg{estimate}{type}{lognormal}
 
 \defSub{mu}{The lognormal prior mean (mu) parameter}
 \defSub{cv}{The lognormal variance (cv) parameter}
@@ -266,7 +265,7 @@
 \defSub{label}{The label of the growth increment model}
 \defSub{type}{The type of growth increment model}
 \defSub{time\_step\_proportions}{The proportion of annual increment to apply in each time-step. Must sum = 1.0}
-\defSub{compatibility\_option}{Backwards compatibility option: either casal2 (the default) or casal to use the (less accurate) cumulative normal function from CASAL}
+\defSub{compatibility\_option}{Compatibility option: either casal2 (the default) or casal to use the (less accurate) cumulative normal function from CASAL}
 \defSub{distribution}{The assumed distribution for the growth curve}
 \defSub{length\_weight}{The label from an associated length-weight block}
 \defSub{cv}{The $cv$ for the growth model.}
@@ -364,7 +363,7 @@
 \commandlabsubarg{likelihood}{type}{none}
 
 
-\commandlabsubarg{likelihood}{type}{bernoulli}
+\commandlabsubarg{likelihood}{type}{Bernoulli}
 
 
 \defComLab{mcmc}{Define an object of type \emph{MCMC}}
@@ -469,21 +468,23 @@
 \defSub{simulation\_likelihood}{The simulation likelihood to use}
 \defSub{likelihood\_multiplier}{The likelihood multiplier}
 \defSub{error\_value\_multiplier}{The error value multiplier for likelihood}
-\defSub{table \emph{obs}}{The table of data specifying the observed values}
-\defSub{table \emph{error\_values}}{The table of data specifying the observed error values}
-
-\commandlabsubarg{observation}{type}{Abundance}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defSub{selectivities}{The labels of the selectivities}
 \defSub{process\_error}{The process error}
 \defSub{years}{The years for which there are observations}
 \defSub{table obs}{The table of data specifying the observed and error values}
 
-\commandlabsubarg{observation}{type}{Biomass}
+\commandlabsubarg{observation}{type}{Biomass} \\
+
+\commandlabsubarg{observation}{type}{Process\_Biomass}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defSub{selectivities}{The labels of the selectivities}
 \defSub{process\_error}{The process error}
@@ -499,6 +500,7 @@
 \defSub{simulated\_data\_sum\_to\_one}{Whether simulated data is discrete or scaled by totals to be proportions for each year}
 \defSub{plus\_group}{Is the maximum age the age plus group}
 \defSub{time\_step}{The label of time-step that the observation occurs in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{years}{The years for which there are observations}
 \defSub{process\_errors}{The process errors to use}
 \defSub{ageing\_error}{The label of the ageing error to use}
@@ -513,6 +515,7 @@
 \defSub{max\_age}{The maximum age}
 \defSub{plus\_group}{Is the maximum age the age plus group?}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{sum\_to\_one}{Scale the year (row) observed values by the total, so they sum to 1}
 \defSub{simulated\_data\_sum\_to\_one}{Whether simulated data is discrete or scaled by totals to be proportions for each year}
 \defSub{years}{The years for which there are observations}
@@ -529,6 +532,7 @@
 \defSub{max\_age}{The maximum age}
 \defSub{plus\_group}{Is the maximum age the age plus group?}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{sum\_to\_one}{Scale the year (row) observed values by the total, so they sum to 1}
 \defSub{simulated\_data\_sum\_to\_one}{Whether simulated data is discrete or scaled by totals to be proportions for each year}
 \defSub{years}{The years for which there are observations}
@@ -542,6 +546,7 @@
 \commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length}
 
 \defSub{time\_step}{The time step to execute in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{years}{The years for which there are observations}
 \defSub{process\_errors}{The process errors to use}
 \defSub{method\_of\_removal}{The label of observed method of removals}
@@ -556,6 +561,7 @@
 \commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length\_Retained}
 
 \defSub{time\_step}{The time step to execute in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{years}{The years for which there are observations}
 \defSub{process\_errors}{The process errors to use}
 \defSub{method\_of\_removal}{The label of observed method of removals}
@@ -570,6 +576,7 @@
 \commandlabsubarg{observation}{type}{Process\_Removals\_By\_Length\_Retained\_Total}
 
 \defSub{time\_step}{The time step to execute in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{years}{The years for which there are observations}
 \defSub{process\_errors}{The process errors to use}
 \defSub{method\_of\_removal}{The label of observed method of removals}
@@ -586,6 +593,7 @@
 \defSub{mortality\_process}{The label of the mortality instantaneous process for the observation}
 \defSub{method\_of\_removal}{The label of observed method of removals}
 \defSub{time\_step}{The time step to execute in}
+\defSub{process\_proportion}{The proportion through the process when the observation is evaluated}
 \defSub{years}{The years for which there are observations}
 \defSub{process\_errors}{The process errors to use}
 \defSub{length\_weight\_cv}{The CV for the length-weight relationship}
@@ -596,12 +604,16 @@
 \defSub{fishbox\_weight}{The target weight of each box}
 \defSub{weight\_bins}{The weight bins}
 
-\commandlabsubarg{observation}{type}{Proportions\_At\_Age}
+\commandlabsubarg{observation}{type}{Proportions\_At\_Age} \\
+
+\commandlabsubarg{observation}{type}{Process\_Proportions\_At\_Age}
 
 \defSub{min\_age}{The minimum age}
 \defSub{max\_age}{The maximum age}
 \defSub{plus\_group}{Is the maximum age the age plus group?}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{years}{The years of the observed values}
 \defSub{selectivities}{The labels of the selectivities}
 \defSub{process\_errors}{The process errors to use}
@@ -611,9 +623,13 @@
 \defSub{table obs}{The table of data specifying the observed values}
 \defSub{table error\_values}{The table of data specifying the error values}
 
-\commandlabsubarg{observation}{type}{Proportions\_At\_Length}
+\commandlabsubarg{observation}{type}{Proportions\_At\_Length} \\
+
+\commandlabsubarg{observation}{type}{Process\_Proportions\_At\_Length}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{years}{The years for which there are observations}
 \defSub{selectivities}{The labels of the selectivities}
 \defSub{process\_errors}{The process errors to use}
@@ -624,11 +640,15 @@
 \defSub{table obs}{The table of data specifying the observed values}
 \defSub{table error\_values}{The table of data specifying the error values}
 
-\commandlabsubarg{observation}{type}{Proportions\_By\_Category}
+\commandlabsubarg{observation}{type}{Proportions\_By\_Category} \\
+
+\commandlabsubarg{observation}{type}{Process\_Proportions\_By\_Category}
 
 \defSub{min\_age}{The minimum age}
 \defSub{max\_age}{The maximum age}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{plus\_group}{Use the age plus group?}
 \defSub{years}{The years for which there are observations}
 \defSub{categories}{The categories in the numerator}
@@ -641,6 +661,7 @@
 \defSub{min\_age}{The minimum age}
 \defSub{max\_age}{The maximum age}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{process\_proportion}{The proportion through the transition category when the observation is evaluated}
 \defSub{plus\_group}{Is the maximum age the age plus group?}
 \defSub{years}{The years for which there are observations}
 \defSub{process\_errors}{The process errors to use}
@@ -649,7 +670,7 @@
 
 \commandlabsubarg{observation}{type}{tag\_recapture\_by\_fishery}
 
-\defSub{tagged\_categories}{The tagged categories that we want to generate recaptures for. Categories need to be space separated no use of the '+' category syntax.}
+\defSub{tagged\_categories}{The tagged categories that we want to generate recaptures for. Categories need to be space separated. Do not use the '+' category syntax.}
 \defSub{time\_step}{The label of time-step that the observation occurs in}
 \defSub{reporting\_rate}{The reporting rate for this observation}
 \defSub{years}{The years for which there are observations}
@@ -664,6 +685,7 @@
 \defSub{plus\_group}{Is the maximum age the age plus group?}
 \defSub{years}{The years for which there are observations}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion}{The proportion through the mortality block when the observation is evaluated}
 \defSub{selectivities}{The labels of the selectivities used for untagged categories}
 \defSub{tagged\_selectivities}{The labels of the tag category selectivities}
 \defSub{tagged\_categories}{The  categories of tagged individuals}
@@ -712,18 +734,26 @@
 \defSub{likelihood\_multiplier}{The likelihood multiplier}
 \defSub{error\_value\_multiplier}{The error value multiplier for likelihood}
 
-\commandlabsubarg{observation}{type}{Abundance}
+\commandlabsubarg{observation}{type}{Abundance} \\
+
+\commandlabsubarg{observation}{type}{Process\_Abundance}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defSub{selectivities}{The labels of the selectivities}
 \defSub{process\_error}{The process error}
 \defSub{years}{The years for which there are observations}
 \defSub{table obs}{The table of data specifying the observed and error values}
 
-\commandlabsubarg{observation}{type}{Biomass}
+\commandlabsubarg{observation}{type}{Biomass}\\
+
+\commandlabsubarg{observation}{type}{Process\_Biomass}
 
 \defSub{time\_step}{The label of the time step that the observation occurs in}
+\defSub{time\_step\_proportion \text{\normalfont or} process\_proportion}{The proportion through the mortality block (for time step observations) or the proportion through the process (for process observations) when the observation is evaluated}
+\defSub{process}{The label of the process if this is a process observations}
 \defSub{catchability}{The label of the catchability coefficient (q)}
 \defSub{selectivities}{The labels of the selectivities}
 \defSub{process\_error}{The process error}
@@ -747,7 +777,7 @@
 
 \commandlabsubarg{observation}{type}{Proportions\_At\_Length}
 
-\defSub{length\_bins}{Bespoke length bins for the observation. They need to be a subset of the \command{model}{length\_bins}.}
+\defSub{length\_bins}{Bespoke length bins for the observation. They need to be a subset of the \command{model}{length\_bins}}
 \defSub{plus\_group}{Is the maximum length bin a plus group}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defSub{years}{The years of the observed values}
@@ -760,7 +790,7 @@
 
 \commandlabsubarg{observation}{type}{Proportions\_By\_Category}
 
-\defSub{length\_bins}{Bespoke length bins for the observation. They need to be a subset of the \command{model}{length\_bins}.}
+\defSub{length\_bins}{Bespoke length bins for the observation. They need to be a subset of the \command{model}{length\_bins}}
 \defSub{time\_step}{The label of the time step that the observation occurs in}
 \defSub{plus\_group}{Use the age plus group?}
 \defSub{years}{The years for which there are observations}
@@ -923,7 +953,6 @@
 \defSub{u\_max}{The maximum exploitation rate ($U\_{max}$)}
 \defSub{selectivities}{The list of selectivities}
 \defSub{penalty}{The label of the penalty to apply if the total number of removals cannot be taken}
-\defSub{table}{The table of data specifying the catches for each fishery, the categories, years, and the $U_max$}
 
 \commandlabsubarg{process}{type}{Mortality\_Initialisation\_Event\_Biomass}
 
@@ -936,7 +965,7 @@
 \commandlabsubarg{process}{type}{mortality\_initialisation\_baranov}
 
 \defSub{categories}{The categories}
-\defSub{fishing\_mortality}{The fishing mortality to apply}
+\defSub{fishing\_mortality}{The fishing mortality, $F$, to apply}
 \defSub{selectivities}{The list of selectivities for each category}
 
 \commandlabsubarg{process}{type}{mortality\_hybrid}
@@ -966,7 +995,8 @@
 \defSub{m}{The natural mortality rates for each category}
 \defSub{time\_step\_proportions}{The time step proportions for natural mortality}
 \defSub{relative\_m\_by\_age}{The M-by-age selectivities to apply on the categories for natural mortality}
-\defSub{table}{The table of data specifying the catches for each fishery, the categories, years, and the $U_max$}
+\defSub{table catches}{The table of data specifying the catches for each fishery and year}
+\defSub{table method}{The table of data specifying which fishery interacts with which category, selectivities, u\_max, time-step, and penalty for each fishery and annual duration of the fishery. Optional columns can indicate the catches are in abundance and if the values are exploitation rates}
 
 \commandlabsubarg{process}{type}{Mortality\_Prey\_Suitability}
 
@@ -1001,9 +1031,9 @@
 \defSub{steepness}{Steepness (h)}
 \defSub{ssb}{The SSB label (i.e., the derived quantity label)}
 \defSub{b0\_initialisation\_phase}{The initialisation phase label that B0 is from}
-\defSub{ycs\_values}{Deprecated}
-\defSub{ycs\_years}{Deprecated}
-\defSub{standardise\_ycs\_years}{Deprecated}
+\defSub{ycs\_values}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{standardise\_ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
 \defSub{recruitment\_multipliers}{The recruitment values also termed year class strengths.}
 \defSub{standardise\_years}{The years that are included for year class standardisation, they refer to the recruited year not spawning or year class year.}
 
@@ -1038,9 +1068,9 @@
 \defSub{steepness}{Steepness (h)}
 \defSub{ssb}{The SSB label (i.e., the derived quantity label)}
 \defSub{b0\_initialisation\_phase}{The initialisation phase label that B0 is from}
-\defSub{ycs\_values}{Deprecated}
-\defSub{ycs\_years}{Deprecated}
-\defSub{standardise\_ycs\_years}{Deprecated}
+\defSub{ycs\_values}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
+\defSub{standardise\_ycs\_years}{This subcommand has been deprecated. See Section~\ref{sec:DefinitionYCS} for more information}
 \defSub{recruitment\_multipliers}{The recruitment values also termed year class strengths.}
 \defSub{standardise\_years}{The years that are included for year class standardisation, they refer to the recruited year not spawning or year class year.}
 
@@ -1182,8 +1212,8 @@
 \defSub{ycs\_values}{Deprecated}
 \defSub{ycs\_years}{Deprecated}
 \defSub{standardise\_ycs\_years}{Deprecated}
-\defSub{recruitment\_multipliers}{The recruitment values also termed year class strengths.}
-\defSub{standardise\_years}{The years that are included for year class standardisation, they refer to the recruited year not spawning or year class year.}
+\defSub{recruitment\_multipliers}{The recruitment values also termed year class strengths}
+\defSub{standardise\_years}{The years that are included for year class standardisation, they refer to the recruited year not spawning or year class year}
 
 \commandlabsubarg{process}{type}{Recruitment\_Constant}
 
@@ -1250,13 +1280,13 @@
 \defSub{final\_year}{The final year of sampling}
 \defSub{multiplier}{Multiplier that is applied to the projected value}
 
-\commandlabsubarg{project}{type}{Lognormal}
+\commandlabsubarg{project}{type}{lognormal}
 
 \defSub{mean}{The mean of the lognormal process}
 \defSub{sigma}{The standard deviation (sigma) of the lognormal sampling}
 \defSub{multiplier}{Multiplier that is applied to the projected value}
 
-\commandlabsubarg{project}{type}{Lognormal\_Empirical}
+\commandlabsubarg{project}{type}{lognormal\_empirical}
 
 \defSub{mean}{The mean of the Gaussian process}
 \defSub{start\_year}{The start year of sampling}
@@ -1403,7 +1433,7 @@
 
 \defSub{observation}{The observation label}
 \defSub{normalised\_residuals}{Print Normalised Residuals?}
-\defSub{pearsons\_residuals}{Print Pearsons Residuals?}
+\defSub{pearsons\_residuals}{Print Pearsons residuals?}
 
 \commandlabsubarg{report}{type}{Output\_Parameters}
 
@@ -1531,7 +1561,7 @@
 \commandlabsubarg{selectivity}{type}{Inverse\_Logistic}
 
 \defSub{a50}{The age or length where the selectivity is \(50\%\)}
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defSub{alpha}{The maximum value of the selectivity }
 \defSub{beta}{The minimum age/length for which the selectivity applies}
 
@@ -1543,7 +1573,7 @@
 \commandlabsubarg{selectivity}{type}{Logistic}
 
 \defSub{a50}{The age or length where the selectivity is \(50\%\)}
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defSub{alpha}{The maximum value of the selectivity}
 \defSub{beta}{The minimum age/length for which the selectivity applies}
 
@@ -1558,7 +1588,7 @@
 \commandlabsubarg{selectivity}{type}{compound\_left}
 
 \defSub{a50}{The a50 ($a50$}
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defSub{a\_min}{The (a\_min) parameter}
 \defSub{left\_mean}{The left\_mean parameter}
 \defSub{sigma}{The sigma parameter}
@@ -1566,7 +1596,7 @@
 \commandlabsubarg{selectivity}{type}{compound\_right}
 
 \defSub{a50}{The a50 ($a50$}
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defSub{a\_min}{The (a\_min) parameter}
 \defSub{left\_mean}{The left\_mean parameter}
 \defSub{to\_right\_mean}{The to\_right\_mean parameter}
@@ -1575,7 +1605,7 @@
 \commandlabsubarg{selectivity}{type}{compound\_middle}
 
 \defSub{a50}{The a50 ($a50$}
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defSub{a\_min}{The (a\_min) parameter}
 \defSub{left\_mean}{The left\_mean parameter}
 \defSub{to\_right\_mean}{The to\_right\_mean parameter}
@@ -1584,7 +1614,7 @@
 \commandlabsubarg{selectivity}{type}{compound\_all}
 
 \defSub{a50}{The a50 ($a50$}
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defSub{a\_min}{The (a\_min) parameter}
 \defSub{sigma}{The sigma parameter}
 

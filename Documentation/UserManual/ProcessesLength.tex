@@ -5,7 +5,11 @@ Current population processes available include:
 
 \begin{itemize}
 \item recruitment\index{Recruitment} (Section~\ref{sec:Process-Recruitment}),
+\ifAgeBased
 \item growth\index{Growth} (Section~\ref{sec:Growth}),
+\else
+\item growth increments\index{Growth increments} (Section~\ref{sec:GrowthIncrement}),
+\fi
 \item mortality\index{Mortality} events (e.g., natural and fishing) (Section~\ref{sec:Process-Mortality}), 
 \item category transition processes\index{Category transition}, i.e., processes that move individuals between categories while preserving their overall length structure (Section~\ref{sec:Process-TransitionCategory}), and
 \end{itemize}
@@ -307,7 +311,7 @@ year_effect 0.05 0.11 0.39 0.38 0.20
 years 2000 2001 2002 2003 2004 2005 
 		\end{verbatim}}}
 
-\subsubsection{\I{Transition By Category}}\label{sec:Process-TransitionCategory}
+\subsubsection{\I{Transition by category}}\label{sec:Process-TransitionCategory}
 
 The transition by category process moves individuals between categories. This process is used to specify transitions such as maturation (individuals move from an immature to mature state) and migration (individuals move from one area to another).
 

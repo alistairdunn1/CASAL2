@@ -63,6 +63,7 @@ CharEsc = \
 [Keywords 2]
 ADOLC
 Abundance
+Abundance 
 Addressable
 Age
 Age_Length
@@ -72,11 +73,13 @@ All_Values
 All_Values_Bounded
 Annual_Shift
 Basic
+Bernoulli
 Beta
 Betadiff
 Binomial
 Binomial_Approx
 Biomass
+Biomass 
 Catchability
 Cinitial
 Constant
@@ -115,8 +118,6 @@ Log_Normal
 Log_Normal_With_Q
 Logistic
 Logistic_Producing
-Lognormal
-Lognormal_Empirical
 MCMC_Covariance
 MCMC_Objective
 MCMC_Sample
@@ -145,6 +146,11 @@ Output_Parameters
 Partition
 Partition_Biomass
 Process
+Process_Abundance
+Process_Biomass
+Process_Proportions_At_Age
+Process_Proportions_At_Length
+Process_Proportions_By_Category
 Process_Removals_By_Age
 Process_Removals_By_Age_Retained
 Process_Removals_By_Age_Retained_Total
@@ -154,9 +160,11 @@ Process_Removals_By_Length_Retained_Total
 Process_Removals_By_Weight
 Profile
 Project
-Proportions_At_Age
+Proportions_At_Age 
 Proportions_At_Length
+Proportions_At_Length 
 Proportions_By_Category
+Proportions_By_Category 
 Proportions_Migrating
 Random_Draw
 Random_Number_Seed
@@ -189,7 +197,6 @@ Von_Bertalanffy
 age_length
 average_difference
 basic
-bernoulli
 biomass_index
 compound_all
 compound_left
@@ -205,6 +212,8 @@ inverse
 log
 log_sum
 logistic
+lognormal
+lognormal_empirical
 markovian_movement
 mortality_hybrid
 mortality_initialisation_baranov
@@ -363,7 +372,6 @@ length_values
 length_weight
 length_weight_cv
 length_weight_distribution
-length_weights
 lengths
 likelihood
 likelihood_multiplier
@@ -414,6 +422,7 @@ prior_applies_to_restored_parameters
 process
 process_error
 process_errors
+process_proportion
 processes
 project
 projection_final_year
@@ -469,6 +478,7 @@ threads
 time_step
 time_step_measurements_were_made
 time_step_proportion
+time_step_proportion text
 time_step_proportion_method
 time_step_proportions
 time_steps
@@ -510,7 +520,6 @@ end_table
 table
 table catches
 table data
-table emph
 table error_values
 table method
 table n
