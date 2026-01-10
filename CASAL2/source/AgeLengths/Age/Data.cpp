@@ -118,8 +118,11 @@ void Data::DoBuild() {
                               << " ages in the model";
     unsigned year = utilities::ToInline<string, unsigned>(row[0]);
     // Check year is valid
-    if (find(model_->years().begin(), model_->years().end(), year) == model_->years().end())
+    const vector<unsigned>& model_years = model_->years();
+    if (find(model_years.begin(), model_years.end(), year) == model_years.end()) {
       LOG_WARNING_P(PARAM_DATA) << "year " << year << " is not in the model run years, so this age length will not be used";
+      continue;
+    }
 
     for (unsigned i = 1; i < row.size(); ++i) {
       data_by_year_[year].push_back(utilities::ToInline<string, Double>(row[i]));
