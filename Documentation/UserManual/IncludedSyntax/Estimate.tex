@@ -1,4 +1,4 @@
-\defComLab{estimate}{Define an object of type \emph{Estimate}}.
+\defComLab{estimate}{Define an object of type \emph{Estimate}}
 \defRef{sec:Estimation}
 \label{syntax:Estimate}
 
@@ -35,10 +35,82 @@
 \defType{Boolean}
 \defDefault{false}
 
+\subsubsection{Estimate of type uniform}
+\commandlabsubarg{estimate}{type}{Uniform}
+\defRef{sec:Prior-Uniform}
+\label{syntax:Estimate-Uniform}
 
+The Uniform type has no additional subcommands.
+\subsubsection{Estimate of type uniform-log}
+\commandlabsubarg{estimate}{type}{Uniform\_Log}
+\defRef{sec:Prior-UniformLog}
+\label{syntax:Estimate-UniformLog}
 
-\subsubsection{Estimate of prior type Beta}
-\commandlabsubarg{estimate}{type}{Beta}.
+The Uniform\_Log type has no additional subcommands.
+
+\subsubsection{Estimate of prior type normal}
+\commandlabsubarg{estimate}{type}{Normal}
+\defRef{sec:Prior-Normal}
+\label{syntax:Estimate-Normal}
+
+\defSub{mu}{The normal prior mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\defSub{cv}{The normal standard deviation (sigma) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\subsubsection{Estimate of prior type normal by stdev}
+\commandlabsubarg{estimate}{type}{Normal\_By\_Stdev}
+\defRef{sec:Prior-NormalByStdev}
+\label{syntax:Estimate-NormalByStdev}
+
+\defSub{mu}{The normal prior mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\defSub{sigma}{The normal standard deviation (sigma) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{lognormal\_transformation}{Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information}
+\defType{Boolean}
+\defDefault{false}
+
+\subsubsection{Estimate of prior type lognormal}
+\commandlabsubarg{estimate}{type}{lognormal}
+\defRef{sec:Prior-Lognormal}
+\label{syntax:Estimate-Lognormal}
+
+\defSub{mu}{The lognormal prior mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{cv}{The lognormal variance (cv) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\subsubsection{Estimate of prior type normal-log}
+\commandlabsubarg{estimate}{type}{Normal\_Log}
+\defRef{sec:Prior-NormalLog}
+\label{syntax:Estimate-NormalLog}
+
+\defSub{mu}{The normal-log prior mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\defSub{sigma}{The normal-log prior standard deviation (sigma) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\subsubsection{Estimate of prior type beta}
+\commandlabsubarg{estimate}{type}{Beta}
 \defRef{sec:Prior-Beta}
 \label{syntax:Estimate-Beta}
 
@@ -59,76 +131,21 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\subsubsection{Estimate of prior type Lognormal}
-\commandlabsubarg{estimate}{type}{Lognormal}.
-\defRef{sec:Prior-Lognormal}
-\label{syntax:Estimate-Lognormal}
+\subsubsection{Estimate of prior type Student's t}
+\commandlabsubarg{estimate}{type}{students\_t}
+\defRef{sec:Prior-Studentst}
+\label{syntax:Estimate-Studentst}
 
-\defSub{mu}{The lognormal prior mean (mu) parameter}
+\defSub{mu}{The Student's t prior location (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+
+\defSub{sigma}{The Student's t scale (sigma) parameter}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
 
-\defSub{cv}{The lognormal variance (cv) parameter}
-\defType{Real number (estimable)}
+\defSub{df}{The Student's t degrees of freedom (df) parameter}
+\defType{Real number (constant)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
-
-\subsubsection{Estimate of prior type Normal}
-\commandlabsubarg{estimate}{type}{Normal}.
-\defRef{sec:Prior-Normal}
-\label{syntax:Estimate-Normal}
-
-\defSub{mu}{The normal prior mean (mu) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-
-\defSub{cv}{The normal standard deviation (sigma) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-\defLowerBound{0.0 (exclusive)}
-
-\subsubsection{Estimate of prior type Normal By Stdev}
-\commandlabsubarg{estimate}{type}{Normal\_By\_Stdev}.
-\defRef{sec:Prior-NormalByStdev}
-\label{syntax:Estimate-NormalByStdev}
-
-\defSub{mu}{The normal prior mean (mu) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-
-\defSub{sigma}{The normal standard deviation (sigma) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-\defLowerBound{0.0 (exclusive)}
-
-\defSub{lognormal\_transformation}{Add a Jacobian if the derived outcome of the estimate is assumed to be lognormal, e.g., used for recruitment deviations in the recruitment process. See the User Manual for more information}
-\defType{Boolean}
-\defDefault{false}
-
-\subsubsection{Estimate of prior type Normal-Log}
-\commandlabsubarg{estimate}{type}{Normal\_Log}.
-\defRef{sec:Prior-NormalLog}
-\label{syntax:Estimate-NormalLog}
-
-\defSub{mu}{The normal-log prior mean (mu) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-
-\defSub{sigma}{The normal-log prior standard deviation (sigma) parameter}
-\defType{Real number (estimable)}
-\defDefault{No default}
-\defLowerBound{0.0 (exclusive)}
-
-\subsubsection{Estimate of type Uniform}
-\commandlabsubarg{estimate}{type}{Uniform}.
-\defRef{sec:Prior-Uniform}
-\label{syntax:Estimate-Uniform}
-
-The Uniform type has no additional subcommands.
-\subsubsection{Estimate of type Uniform-Log}
-\commandlabsubarg{estimate}{type}{Uniform\_Log}.
-\defRef{sec:Prior-UniformLog}
-\label{syntax:Estimate-UniformLog}
-
-The Uniform\_Log type has no additional subcommands.

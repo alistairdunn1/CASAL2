@@ -37,7 +37,7 @@ The length of each individual is 1 for all ages, and the \texttt{none} length-we
 
 The von Bertalanffy relationship has parameters $L_\infty$, $k$, and $t_0$. The Schnute relationship \citep{836} has parameters $y_1$ and $y_2$, which are the mean lengths at reference ages $\tau_1$ and $\tau_2$, and $a$ and $b$; when $b=1$, this relationship reduces to the von Bertalanffy relationship with $k=a$.
 
-\subsubsection{Data: matrix of size at age relationship}\index{Age-length relationship!Data}\label{sec:AgeLength-Data}
+\subsubsection{Data matrix of the size at age relationship}\index{Age-length relationship!Data}\label{sec:AgeLength-Data}
 
 There is an option to input empirical length-at-age by year, which is an alternative to using an age-length growth model such as the von Bertalanffy and Schnute model. \CNAME\ will interpolate values for missing years across time steps. The calculations of length-at-age throughout the model years occur in the same time step.
 
@@ -89,8 +89,8 @@ The CV at age can have the three following forms
 The CV is converted into a standard deviation as follows
 
 \begin{align*}
-	\sigma_a = CV_a \bar{l}_a & \text{ For the Normal distribution}\\
-	\sigma_a = \sqrt{log(CV_a^2 + 1)} & \text{ For the Lognormal distribution}\\	
+	\sigma_a = CV_a \bar{l}_a & \text{ For the normal distribution}\\
+	\sigma_a = \sqrt{log(CV_a^2 + 1)} & \text{ For the lognormal distribution}\\	
 \end{align*}
 
 When the age-length matrix is required in a model users must specify the \subcommand{length\_bin} on the \command{model}. \CNAME\ will build the age-length matrix for each year with processes; observations request it based on the model length bins. Each process and observation can then define a bespoke set of length bins for which their data represents, as long as those length bins are a subset of the model length bins. An example of this is

@@ -150,7 +150,7 @@ and penalty
 	&if(X - 0.9999 < 0) & penalty += (X - 0.9999)^2
 \end{align}
 %
-This can be seen  \href{https://github.com/Casal2/CASAL2/blob/1b1ed731537dc551674c911da3bf387273a97a92/CASAL2/source/Utilities/Math.h#L245}{here}.
+% This can be seen  \href{https://github.com/NIWAFisheriesModelling/CASAL2/blob/1b1ed731537dc551674c911da3bf387273a97a92/CASAL2/source/Utilities/Math.h#L245}{here}.
 
 The Tan transform uses transformation
 
@@ -236,7 +236,7 @@ There are currently three options for the starting point of the MCMC. It can be 
 
 Note that if a number of parameters are at bounds at the start point, then a random jump from this point may fail to find a suitable candidate that is within bounds. A total of 10~000 attempts are made before the algorithm exits with an error. The subcommand  {\subcommand{adjust\_parameters\_at\_bounds}} can be used to identify these parameters and set their start point at a random uniformly generated point between the lower and upper bounds.
 
-The chain moves in natural space, i.e., no transformations are applied to the estimated parameters. The default proposal distribution is a either  a multivariate normal or a multivariate Student's $t$ distribution centred on the current point, with covariance matrix equal to a matrix based on the approximate covariance produced by the minimiser, multiplied by a step size factor.
+The chain moves in natural space, i.e., no transformations are applied to the estimated parameters. The default proposal distribution is a either  a multivariate normal or a multivariate Student's $t$ distribution centred on the current point, with covariance matrix equal to a matrix based on the approximate covariance produced by the minimiser, multiplied by the step-size factor.
 
 The following steps define how the initial covariance matrix of the proposal distribution is calculated:
 
@@ -260,7 +260,7 @@ for $i \ne j$, and ${\mathop{\rm var}} \left( i \right)^\prime   = k$
 
 This allows each estimated parameter to move in the MCMC even if its variance is very small according to the inverse Hessian. In both cases, the \commandsub{mcmc}{min\_difference} parameter defaults to $0.0001$.
 
-\item The \commandsub{mcmc}{stepsize} (a scalar factor applied to the covariance matrix to improve the acceptance probability) is set by the user. The default is $2.4d^{-0.5}$ where $d$ is the number of estimated parameters, as recommended by Gelman et al. \citep{823}.
+\item The \commandsub{mcmc}{step\_size} (a scalar factor applied to the covariance matrix to improve the acceptance probability) is set by the user. The default is $2.4d^{-0.5}$ where $d$ is the number of estimated parameters, as recommended by Gelman et al. \citep{823}.
 \end{enumerate}
 
 The proposal distribution can also change adaptively during the chain, using two different mechanisms. Both are offered as means of improving the convergence properties of the chain. It is important to note that any adaptive behaviour must finish before the end of the burn-in period, i.e., the proposal distribution must be finalised before the kept portion of the chain starts.
@@ -268,15 +268,13 @@ The proposal distribution can also change adaptively during the chain, using two
 The adaptive mechanisms are:
 
 \begin{itemize}
-\item The step size changes adaptively at one or more sample numbers (See next paragraph for details on the step size adaptation methods)
+\item The step-size changes adaptively at one or more sample numbers (See next paragraph for details on the step-size adaptation methods)
 \item The entire covariance matrix changes adaptively at one or more sample numbers. At each adaptation, the covariance matrix is replaced with an empirical covariance matrix, derived from the MCMC chain. The idea is that an empirical covariance is a better approximation of the proposal distribution than the inverse of the Hessian matrix, and can improve convergence and mixing of the chain.
 \end{itemize}
 
-The two options to adapt the step size are \texttt{double\_half} or \texttt{ratio}, which is chosen with the input parameter \texttt{adapt\_stepsize\_method}. The \texttt{double\_half} method is used in CASAL (see \cite{823} for justification).
+The two options to adapt the step-size are \texttt{double\_half} or \texttt{ratio}, defined by the subcommand \texttt{adapt\_stepsize\_method}. The \texttt{double\_half} method is the same as the method used in CASAL for adapting the step-size (see \cite{823} for justification). The algorithm for \texttt{double\_half} is, at each adaptation, the step-size is doubled if the acceptance rate since the last adaptation is more than $0.5$, or halved if the acceptance rate is less than $0.2$. The \texttt{ratio} method adapts the current step-size by the acceptance rate since the last adaptation multiplied by 4.1667 so-as to approach an acceptance rate of $\approx$ 0.24. See \cite{mcmc_rate} for justification on the choice of that acceptance rate.
 
-The algorithm for \texttt{double\_half} is, at each adaptation, the step size is doubled if the acceptance rate since the last adaptation is more than $0.5$, or halved if the acceptance rate is less than $0.2$. The \texttt{ratio} is taken from SPM. It adapts the current step size by the acceptance rate since the last adaptation multiplied by 4.1667 to approach an acceptance rate of $\approx$ 0.24. See \cite{mcmc_rate} for justification on that acceptance rate.
-
-The \texttt{stepsize} parameter is now on a completely different scale, and must be rescaled. It is set to a user-specified value (which may or may not be the same as the initial step size). Set the step size adaptations to occur after this, so that the step size can be readjusted to an appropriate value which gives good acceptance probabilities with the new matrix.
+The \texttt{step\_size} parameter is now on a different scale, and must be rescaled. It is set to a user-specified value (which may or may not be the same as the initial step-size). Set the step-size adaptations to occur after this, so that the step-size can be readjusted to an appropriate value which gives good acceptance probabilities with the new matrix.
 
 All modified versions of the covariance matrix are printed to the standard output, but only the initial covariance matrix (inverse Hessian) is saved to the objectives file (see Section \ref{syntax:Report-MCMCCovariance}). \label{sec:Report-MCMCCovariance}  
 
@@ -321,10 +319,9 @@ The default file name for these reports are \texttt{samples} and \texttt{objecti
 
 In a Bayesian analysis, a prior is required for every parameter that is being estimated. There are no default priors.
 
-When some of these priors are parameterised in terms of mean, c.v., and standard deviation, these refer to the parameters of the distribution before the bounds are applied. The moments of the prior after the bounds are applied may differ.
+When some of these priors are parameterised in terms of mean, CV, and standard deviation, these refer to the parameters of the distribution before the bounds are applied. The moments of the prior after the bounds are applied may differ.
 
 \CNAME\ has the following priors (expressed in terms of their contribution to the objective function):
-
 
 \subsubsection{Uniform\index{Uniform prior}\index{Priors ! Uniform}}\label{sec:Prior-Uniform}
 
@@ -357,7 +354,7 @@ The normal distribution with mean $\mu$ and standard deviation $\sigma$
 
 \subsubsection{Lognormal\index{Lognormal prior}\index{Priors ! Lognormal}}\label{sec:Prior-Lognormal}
 
-The lognormal distribution with mean $\mu$ and c.v. $c$
+The lognormal distribution with mean $\mu$ and CV $c$
 
 \begin{equation}
  - \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
@@ -367,12 +364,11 @@ where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 
 
 \subsubsection{Normal-log\index{normal-log prior}\index{Priors ! Normal-log}}\label{sec:Prior-NormalLog}
 
-The normal-log distribution  with mean $\mu$ and c.v. $c$
+The normal-log distribution  with mean $\mu$ and CV $c$
 
 Similar to the lognormal prior, but with the mean ($mu$) and standard deviation ($sigma$) specified in log space.
 
 where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 \right)}$.
-
 
 \subsubsection{Beta\index{Beta prior}\index{Priors ! Beta}}\label{sec:Prior-Beta}
 
@@ -384,30 +380,43 @@ The Beta distribution with mean $\mu$ and standard deviation $\sigma$, and range
 
 where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $\mu=\tau \nu$ and $n=\tau(1-\nu)$. Note that the beta prior is undefined when $\tau \leq 0$.
 
+\subsubsection{Student's t\index{students\_t prior}\index{Priors ! Student's t}}\label{sec:Prior-Studentst}
+
+The Student's t distribution with location (mean) $\mu$, scale $\sigma$, and degrees of freedom $\nu$ where the pdf is defined as \citep{STAN}:
+
+\begin{equation}
+	\begin{aligned}
+f(x | \mu, \sigma, \nu) &= \frac{\Gamma\left((\nu + 1)/2\right)} {\Gamma(\nu/2)} \ \frac{1}{\sqrt{\nu \pi} \ \sigma} \ \left( 1 + \frac{1}{\nu} \left(\frac{x - \mu}{\sigma}\right)^2 \right)^{-(\nu + 1)/2} \text{ and} \\
+- log \left(\pi \left( p \right) \right) &= -\log \left( f(x | \mu, \sigma, \nu) \right)
+	\end{aligned}
+\end{equation}
+
+The Student's t prior is Cauchy with $\nu = 1$ and is equivalent to the normal as $\nu \rightarrow \inf$.
+
 Vectors of parameters can be independently (but not necessarily identically) distributed according to any of the above forms, in which case the joint negative-log-prior for the vector is the sum of the negative-log-priors of the components. Values of each parameter need to be specified for each element of the vector. Example of syntax to define the estimation of a parameter and the prior assumed:
 
 {\small{\begin{verbatim}
-		## uniform-log example estimate
-		@estimate B0
-		type uniform_log	# this command "type" defines the prior type.
-		parameter process[Recruitment].b0 # "Recruitment" is the label of your process
-		upper_bound 20000
-		lower_bound 1000
+	## uniform-log example estimate
+	@estimate B0
+	type uniform_log	# this command "type" defines the prior type.
+	parameter process[Recruitment].b0 # "Recruitment" is the label of your process
+	upper_bound 20000
+	lower_bound 1000
 
-		## Lognormal YCS estimation
-		@estimate year_class_strengths_1990_1995
-		type lognormal
-		parameter process[Recruitment].ycs_values{1990:1995}
-		# ycs_year  1990	1991	1992	1993	1994	1995
-		mu   		1   	1   	1   	1   	1   	1
-		cv 			0.9 	0.9 	0.9 	0.9 	0.9 	0.9
-		lower_bound 0.01	0.01	0.01	0.01	0.01	0.01
-		upper_bound 9		9		9		9		9		9
+	## Lognormal YCS estimation
+	@estimate year_class_strengths_1990_1995
+	type lognormal
+	parameter process[Recruitment].ycs_values{1990:1995}
+	# ycs_year  1990	1991	1992	1993	1994	1995
+	mu   		1   	1   	1   	1   	1   	1
+	cv 			0.9 	0.9 	0.9 	0.9 	0.9 	0.9
+	lower_bound 0.01	0.01	0.01	0.01	0.01	0.01
+	upper_bound 9		9		9		9		9		9
 \end{verbatim}}}
 
 \subsection{Penalties}\label{sec:Penalty}\label{sec:Penalty-Process}
 
-Penalties are associated with processes and can be used to enforce parameter value or derived quantity restrictions or model outputs that are invalid by adding a penalty to the objective function. For example, estimated parameter values can be restricted so that a known mortality event removes enough individuals from the population within an event mortality process. \CNAME\ requires penalty functions for processes that remove or shift a \emph{number} of individuals between categories or from the partition. Many of the penalties that were available in CASAL have been moved to be additional priors in \CNAME (see Section~\ref{sec:AdditionalPriors}).
+Penalties are associated with processes and can be used to enforce parameter value or derived quantity restrictions or model outputs that are invalid by adding a penalty to the objective function. For example, estimated parameter values can be restricted so that a known mortality event removes enough individuals from the population within an event mortality process. \CNAME\ requires penalty functions for processes that remove or shift a \emph{number} of individuals between categories or from the partition. Many of the penalties that were available in CASAL are implemented as additional priors in \CNAME (see Section~\ref{sec:AdditionalPriors}).
 
 For penalties, a multiplier is required to be specified, and the objective function is increased by this multiplier multiplied by the penalty value. In some cases the multiplier may need to be quite large to prohibit some model behaviour.
 
@@ -453,88 +462,115 @@ Penalty = (log(X_1) - log(X_2))^2
 
 where, for example, $X_1$ is observed catch biomass and $X_2$ is the estimated catch biomass. Penalties are usually applied in situations when numbers or weight are known. Another example is for tagging, where the number of individuals that were tagged in a given year is known, so a penalty can be used to restrict the model to estimate reasonable values for the numbers of tagged individuals in that year.
 
-\subsection{Additional priors\label{sec:AdditionalPriors}}
+\subsection{Additional priors\label{sec:AdditionalPriors}}\index{Additional priors}
 
-Additional priors can be thought of as the inverse of penalties \TODO{please rephrase}. For CASAL models, most of the legacy \command{penalty} blocks have now been implemented as \command{additional\_prior} blocks. They restrict parameters in user-defined spaces \TODO{please rephrase}.
+Additional priors are optional additional priors or penalties that can be applied to encourage vectors to be smooth or have some average, or apply a prior to parameter or group of parameters.
 
-The types of additional priors available in \CNAME\ are \texttt{vector\_smoothing}, \texttt{vector\_averaging}, \texttt{uniform\_log}, \texttt{lognormal}, \texttt{element\_difference}, and \texttt{Beta}:
+The types of additional priors available include smoothing and averaging of vector parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are described below.
 
-\begin{itemize}
-	\item \texttt{vector\_smoothing}\label{sec:AdditionalPrior-VectorSmoothing}
+\subsubsection{Vector smoothing}\label{sec:AdditionalPrior-VectorSmoothing}\index{Additional prior!Vector smoothing}
 
-	This prior can be applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be "smoothed" can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
+The \subcommand{vector\_smoothing} additional prior is applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be "smoothed" can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
 
-	\item \texttt{vector\_average}\label{sec:AdditionalPrior-VectorAverage}
+\subsubsection{Vector average}\label{sec:AdditionalPrior-VectorAverage}\index{Additional prior!Vector average}
 
-	This prior can be applied to a vector parameter, $v$, with the value of the prior $P$ being one of three options: 
-	\begin{enumerate} 
-		\item $P=(\text{mean}(v)-k)^2$, e.g., using \commandlabsubarg{vector\_average}{method}{k}, or
-		\item $P=\text{mean}(log(v))-k$, e.g., using \commandlabsubarg{vector\_average}{method}{l}, or
-		\item $P=log(\text{mean}(v)/k)$, e.g., using \commandlabsubarg{vector\_average}{method}{m}. 
-	\end{enumerate}
-
-	The vector\_average additional prior restricts the vector to average arithmetically with \subcommand{method=k} or \subcommand{method=m}, or geometrically to $exp(k)$ when \subcommand{method=m}. Typically used with $k=1$ with \subcommand{method=k} or \subcommand{method=l}, or $k=0$ with \subcommand{method=m}, to restrict the recruitment\_multipliers to centre on $1$. Optionally, indices can be chosen or excluded outside a given set of bounds.
-
-	\item\texttt{lognormal} with mean $\mu$ and c.v. $c$\label{sec:AdditionalPrior-Lognormal}
-
-	\begin{equation}
-	- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
-	\end{equation}
-
-	\item\texttt{uniform\_log}\label{sec:AdditionalPrior-UniformLog}
-
-	\begin{equation}
-	- \log \left(\pi \left(p \right) \right) = \log \left( p \right)
-	\end{equation}
-
-	\item\texttt{element\_difference}\label{sec:AdditionalPrior-ElementDifference}
-
-	\begin{equation}
-	- \log \left(\pi \left(p_1,p_2 \right) \right) = \sum_{i = 1}^n \left( p_{1,i} - p_{2,i} \right)^2
-	\end{equation}
-
-	\item\texttt{Beta}\label{sec:AdditionalPrior-Beta}
-
-	{Beta\index{Beta additional prior}\index{Additional Priors ! Beta} with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$, for parameter value = $p$}
-
-	\begin{equation}
-	- \log \left(\pi \left( p \right) \right) = \left( 1 - m \right) \log \left( p - A \right) + \left( 1 - n \right)\log \left( B - p \right)
-	\end{equation}
-
-	where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $m=\tau \nu$ and $n=\tau(1-\nu)$. The beta prior is undefined when $\tau \leq 0$.
-\end{itemize}
+The \subcommand{vector\_average} additional prior is applied to a vector parameter and restricts the vector to average arithmetically with \subcommand{method=k} or \subcommand{method=m}, or geometrically to $exp(k)$ when \subcommand{method=m}. Typically used with $k=1$ with \subcommand{method=k} or \subcommand{method=l}, or $k=0$ with \subcommand{method=m}, to restrict the recruitment\_multipliers to centre on $1$. Optionally, indices can be chosen or excluded outside a given set of bounds.
 
 Methods available for the type \texttt{vector\_average} are \subcommand{l}, \subcommand{k}, \subcommand{m}. For a target vector parameter $\textbf{X}$ and target mean $k$, the contribution to the objective score is
-
+	
 \begin{itemize}
 	\item \subcommand{method k}
-
+	
 	$- \log \left(\pi \left(p \right) \right) = \left(\bar{X} - k\right)^2$
-
+	
 	\item \subcommand{method l}
-
+	
 	$- \log \left(\pi \left(p \right) \right) = \left(\overline{ln\left(X\right)} - k\right)^2$
-
+	
 	\item \subcommand{method m}
-
+	
 	$- \log \left(\pi \left(p \right) \right) = \left(ln\left(\bar{X}\right) - k\right)^2$
 \end{itemize}
 
 where $\overline{ln\left(X\right)}$ is the mean of the logged values.
 
-There are a range of parameters and derived values that additional priors can be applied to. Here are a list of non-estimated (all parameters that can be estimated can have an additional prior attached to them) parameters that additional priors can be applied to.
+\subsubsection{Lognormal}\label{sec:AdditionalPrior-LogNormal}\index{Additional prior!lognormal}
+
+Apply a \subcommand{lognormal} additional prior with mean $\mu$ and CV $c$ to a single parameter,
+
+\begin{equation}
+- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
+\end{equation}
+
+\subsubsection{Uniform}\label{sec:AdditionalPrior-UniformLog}\index{Additional prior!Uniform}
+	
+Apply a \subcommand{uniform} additional prior to a single parameter,
+	
+\begin{equation}
+- \log \left(\pi \left(p \right) \right) = 0
+\end{equation}
+
+\subsubsection{Uniform-log}\label{sec:AdditionalPrior-Uniform}\index{Additional prior!Uniform log}
+
+Apply a \subcommand{uniform\_log} additional prior to a single parameter,
+
+\begin{equation}
+	- \log \left(\pi \left(p \right) \right) = \log \left( p \right)
+\end{equation}
+
+\subsubsection{Element difference}\label{sec:AdditionalPrior-ElementDifference}\index{Additional prior!Element difference}
+
+Apply an \subcommand{element\_difference} additional prior to encourage two vectors of equal length to be similar, where the value is the difference between the elements of each vector, such that,
+
+\begin{equation}
+- \log \left(\pi \left(p_1,p_2 \right) \right) = \sum_{i = 1}^n \left( p_{1,i} - p_{2,i} \right)^2
+\end{equation}
+
+\subsubsection{Beta}\label{sec:AdditionalPrior-Beta}\index{Additional prior!Beta}
+
+Apply a \subcommand{beta} additional prior to a single parameter\index{Beta additional prior}\index{Additional Priors ! Beta} with mean $\mu$ and standard deviation $\sigma$, and range parameters $A$ and $B$, for parameter value = $p$
+
+\begin{equation}
+- \log \left(\pi \left( p \right) \right) = \left( 1 - m \right) \log \left( p - A \right) + \left( 1 - n \right)\log \left( B - p \right)
+\end{equation}
+
+where $\nu  = \frac{\mu  - A}{B - A}$, and $\tau = \frac{\left(\mu -A \right)\left(B - \mu \right)}{\sigma ^2} - 1$ and then $m=\tau \nu$ and $n=\tau(1-\nu)$. 
+
+Note that the beta prior is undefined when $\tau \leq 0$.
+
+\subsubsection{Sum}\label{sec:AdditionalPrior-Sum}\index{Additional prior!Sum}
+	
+Apply a \subcommand{sum} additional prior on the sum of a list of parameters, using either a normal or lognormal distribution.
+	
+The normal distribution has mean $\mu$ and standard deviation with c.v $c$
+
+\begin{equation}
+	- \log \left(\pi \left(p \right) \right) = 0.5\left(\frac{p - \mu}{c\mu} \right)^2
+\end{equation}
+
+And the lognormal distribution has mean $\mu$ and CV $c$
+
+\begin{equation}
+	- \log \left(\pi \left(p \right) \right) = \log \left( p \right) + 0.5 \left( \frac{\log \left( p / \mu \right)}{s} + \frac{s}{2} \right)^2
+\end{equation}
+	
+where $s$ is the standard deviation of $\log(p)$ and $s= \sqrt{\log \left(1+c^2 \right)}$.
+
+This additional prior can be used to encourage the sum of a list of parameters to have value $mu$.
+	
+\subsubsection{Applying additional priors}
+
+All parameters that can be estimated can also have an additional prior. For parameters that are not estimated within a specific model run, additional priors can be applied to.
 
 \begin{itemize}
 	\item \subcommand{selectivity[Selectivity\_label].values\{i:j\}}.
 
-	This subcommand applies a selectivity to the value by age (for ages $i$ through $j$). This option is available only for certain types of selectivities (\subcommand{all\_values}, \subcommand{all\_values\_bounded}, \subcommand{double\_exponential}). See the Hoki stock assessment for an example of applying additional priors on selectivities.
+	This subcommand applies a selectivity to the value by age (for ages $i$ through $j$). This option is available only for certain types of selectivities (\subcommand{all\_values}, \subcommand{all\_values\_bounded}, \subcommand{double\_exponential}). 
 
 	\item \subcommand{catchability[Catchability\_label].q}
 
-	This subcommand is for catchabilities that are of type \subcommand{nuisance} only. Since \subcommand{nuisance} $q$s are not free parameters, additional priors can be applied to replicate CASAL models with \command{estimate} blocks in nuisance $q$s. If a CASAL model applied a uniform prior, then this has a null effect and this functionality can be ignored when converting to a \CNAME\ model.
+	This subcommand is for catchabilities that are of type \subcommand{nuisance} only. Since \subcommand{nuisance} $q$s are not free parameters, additional priors can be applied to replicate CASAL models with \command{estimate} blocks in nuisance $q$s.
 \end{itemize}
-
-This list may be useful for users who are trying to apply the equivalent CASAL penalties in a \CNAME\ model.
 
 \subsection{\I{Parameter transformations}\label{sec:Transformation}}
 \CNAME\ has multiple methods to transform a parameter into a different \enquote{space}. Transformations are implemented to try and achieve \enquote{better} model optimisation. Complex population models can have highly correlated parameters so transforming them is a method of addressing confounded parameters, and \enquote{help} the minimisers find a \enquote{global} solution faster. To read more about transformations and get a better understanding of why they are used, see \cite{gilks1995markov}, specifically chapter 6.
@@ -557,11 +593,11 @@ To transform a parameter the \command{parameter\_transformation} block is used. 
 %
 The available parameter transformations are,
 \begin{enumerate}
-	\item log (Univariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Log}
-	\item inverse (Univariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Inverse}
-	\item difference (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Difference}
-	\item average difference (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-AverageDifference}
-	\item log sum (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-LogSum}	
+	\item Log (Univariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Log}
+	\item Inverse (Univariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Inverse}
+	\item Difference (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Difference}
+	\item Average difference (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-AverageDifference}
+	\item Log sum (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-LogSum}	
 	\item Orthogonal (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Orthogonal}
 	\item Logistic (Univariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-Logistic}
 	\item Sum to one (Bivariate transformation) Section~\ref{subsec:Transformation-types} - \ref{sec:Transformation-SumToOne}
@@ -573,7 +609,7 @@ To see the parameters that can be used in \command{estimate} block for each esti
 
 When users estimate a transformed parameter they have the option of defining the prior for the transformed parameter or for the parameter in natural space. An example of when the later has been used. Say a meta-analysis has been done on the catchability parameter, for which an \textit{a priori} assumption can be made, but the user wants to estimate log transformed catchability for optimisation reasons. In this instance users are required to use the subcommand \subcommand{prior\_applies\_to\_restored\_parameters}. If this is true the prior will be applied to the untransformed parameter and a Jacobian will be added (if it is known) to account for the change in variable. If the Jacobian is false then the prior refers to the transformed parameter and no adjustments are needed. If users specify to calculate a Jacobian and the estimate is not a \subcommand{parameter\_transformation} \CNAME\ will print a warning and ignore this input.
 
-\subsubsection{Transform with Jacobian}
+\subsubsection{Transformations with the Jacobian}
 The support of a random variable $X$ with density $p_X(x)$ is that subset of values for which it has non-zero density,
 \begin{equation}
   supp(X) = \{x|p_X(x) > 0\}
@@ -591,299 +627,354 @@ Suppose $X$ is one dimensional and $f$: $supp(X) \to \mathbf{R}$ is a one-to-one
 
 where $\begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix}$ si the Jacobian adjustment is the absolute derivative of the transform. The Jacobian measures how the scale of the transformed variable changes with respect to the underlying variable. This can be expanded to the multivariate case where the Jacobian becomes a matrix of partial derivatives.
 
-In equation~\ref{eq:jacobian} the term $p_X(f^{-1}(y)) = p_X(X)$ and in a Bayesian context is the prior of the untransformed variable/parameter. \CNAME\ defines the objective function as the negative log-likelihood. This means \(\begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix}\) needs to be times by a negative log, as it is currently defined as an adjustment to the density.
+In equation~\ref{eq:jacobian} the term $p_X(f^{-1}(y)) = p_X(X)$ and in a Bayesian context is the prior of the untransformed variable/parameter. \CNAME\ defines the objective function as the negative log-likelihood. This means \(\begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix}\) needs to be the negative log value, as it is currently defined as an adjustment to the density.
 
-\subsubsection{Transformation types}\label{subsec:Transformation-types}
-\begin{enumerate}
-\item \subcommand{type} \subcommand{log} : natural logarithm transformation\\
-\subcommand{Jacobian defined = true}\\
-\subcommand{estimable parameter = log\_parameter}\\
-$Y = log(X)$\\
-$f() = log()$\\
-$f^{-1}() = exp()$
-\[
-log \begin{vmatrix} \frac{\partial}{\partial y}  exp (y) \end{vmatrix} = log \begin{vmatrix}  exp (y) \end{vmatrix} = log(x)
-\]
-\label{sec:Transformation-Log}
+\label{subsec:Transformation-types}
+\subsubsection{The \argument{log} transformation}\label{sec:Transformation-Log}
+
+The natural logarithm transformation has one parameter that is the log of its value. It has the Jacobian defined and the transformation has estimable parameter \argument{log\_parameter}. 
+
+It is defined as: \\
+$Y = log(X)$ \\
+$f() = log(X)$
+
+and where, \\
+$f^{-1}() = exp(Y)$
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = \log \begin{vmatrix} \frac{\partial}{\partial y}  \exp(y) \end{vmatrix} = \log \begin{vmatrix} \exp(y) \end{vmatrix} = \log(x)$
+
+For example,
 {\small{\begin{verbatim}
-@parameter_transformation log_R0
-type log
-parameters process[Recruitment].r0
-
-@estimate log_R0
-type uniform
-parameter parameter_transformation[log_r0].log_parameter
-lower_bound 1
-upper_bound 25
+	@parameter_transformation log_R0
+	type log
+	parameters process[Recruitment].r0
+	
+	@estimate log_R0
+	type uniform
+	parameter parameter_transformation[log_r0].log_parameter
+	lower_bound 1
+	upper_bound 25
 \end{verbatim}}}
 
-\item \subcommand{inverse}\\
-\subcommand{Jacobian defined = true}\\
-\subcommand{estimable parameter = inverse\_parameter}\\
-$Y = X^{-1}$
-\[
-log \begin{vmatrix} \frac{\partial}{\partial y} \frac{1}{y} \end{vmatrix} = log \begin{vmatrix} y^{-2}\end{vmatrix} = -2log(y)
-\]
-\label{sec:Transformation-Inverse}
+\subsubsection{The \subcommand{inverse} transformation} \label{sec:Transformation-Inverse}
+
+The inverse transformation has one parameter that is the inverse of its value. It has the Jacobian defined and the transformation has the estimable parameter \argument{inverse\_parameter}.
+
+It is defined as: \\
+$Y = X^{-1}$ \\
+$f() = X^{-1}$
+
+and with,\\
+$f^{-1}() = Y^{-1}$
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = \log \begin{vmatrix} \frac{\partial}{\partial y} \frac{1}{y} \end{vmatrix} = \log \begin{vmatrix} y^{-2}\end{vmatrix} = -2\log(y)$
+
+For example,
 {\small{\begin{verbatim}
-		@parameter_transformation inverse_R0
-		type inverse
-		parameters process[Recruitment].r0
-		
-		@estimate inverse_R0
-		type uniform
-		parameter parameter_transformation[inverse_R0].inverse_parameter
-		lower_bound 0.001
-		upper_bound 1
-		\end{verbatim}}}
+	@parameter_transformation inverse_R0
+	type inverse
+	parameters process[Recruitment].r0
 	
-\item \subcommand{difference} : two parameters $X_1$ and $X_2$ are transformed to $X_1$ and $X_1 - d$, where $d$ is the difference between the original parameters.\\
-\subcommand{Jacobian defined = true}\\
-\subcommand{estimable parameter = difference\_parameter}\\
+	@estimate inverse_R0
+	type uniform
+	parameter parameter_transformation[inverse_R0].inverse_parameter
+	lower_bound 0.001
+	upper_bound 1
+\end{verbatim}}}
+	
+\subsubsection{The \subcommand{difference} transformation} \label{sec:Transformation-Difference}
+
+The difference transformation has two parameters $X_1$ and $X_2$ that are transformed to $X_1$ and $X_1 - d$, where $d$ is the difference between the original parameters. The Jacobian is defined and the transformation has estimable parameter \argument{difference\_parameter}\\
+
+It is defined as:\\
 $Y_1 = X_1$\\
-$Y_2 = X_1 - d$\\
-Restore transformations\\
+$Y_2 = X_1 - d$
+
+and with,\\
 $X_1 = Y_1$\\
-$X_2 = X_1 - d$\\
-\label{sec:Transformation-Difference}
+$X_2 = X_1 - d$
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = 0$
+
+For example,
 {\small{\begin{verbatim}
-			@parameter_transformation diff
-			type difference
-			parameters process[InstantMortality].m{male} process[InstantMortality].m{female}
-			difference_parameter 0.05
-			
-			@estimate diff_m
-			type uniform
-			parameter parameter_transformation[diff].difference_parameter
-			lower_bound -0.5
-			upper_bound 0.5		
+	@parameter_transformation diff
+	type difference
+	parameters process[InstantMortality].m{male} process[InstantMortality].m{female}
+	difference_parameter 0.05
+	
+	@estimate diff_m
+	type uniform
+	parameter parameter_transformation[diff].difference_parameter
+	lower_bound -0.5
+	upper_bound 0.5		
 \end{verbatim}}}
 
-\item \subcommand{average\_difference} : two parameters $X_1$ and $X_2$ are transformed to $Y_1$ and $Y_2$, where $Y_1$ is the average of the original parameters and $Y_2$ is the difference between the mean and each parameter.\\
-\subcommand{Jacobian defined = false}\\
-\subcommand{estimable parameter = average\_parameter, difference\_parameter}\\
+\subsubsection{The \subcommand{average\_difference} transformation}  \label{sec:Transformation-AverageDifference}
+
+The average-difference transformation has two parameters $X_1$ and $X_2$ that are transformed to $Y_1$ and $Y_2$, where $Y_1$ is the average of the original parameters and $Y_2$ is the difference between the mean and each parameter. The Jacobian is defined and the transformation has estimable parameters \argument{average\_parameter} and \argument{difference\_parameter}.
+
+It is defined as:\\
 $Y_1 = \frac{X_1 + X_2}{2}$\\
-$Y_2 =  (Y_1 - X_2)^2 $\\
-Restore transformations\\
+$Y_2 =  (Y_1 - X_2)^2 $
+
+and with, \\
 $X_1 = Y_1 + 0.5Y_2$\\
-$X_2 = X_1 - 0.5Y_2$\\
-$\begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix}$ Hasn't been assessed (i.e it could exist) \label{sec:Transformation-AverageDifference}
+$X_2 = X_1 - 0.5Y_2$
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = 0$
+
+For example,
 {\small{\begin{verbatim}
-		@parameter_transformation avg_diff
-		type average_difference
-		parameters process[InstantMortality].m{male} process[InstantMortality].m{female}
-		
-		@estimate avg_m
-		type uniform
-		parameter parameter_transformation[avg_diff].average_parameter
-		lower_bound 0.01
-		upper_bound 1
-		
-		@estimate diff_m
-		type uniform
-		parameter parameter_transformation[avg_diff].difference_parameter
-		lower_bound -0.5
-		upper_bound 0.5		
+	@parameter_transformation avg_diff
+	type average_difference
+	parameters process[InstantMortality].m{male} process[InstantMortality].m{female}
+	
+	@estimate avg_m
+	type uniform
+	parameter parameter_transformation[avg_diff].average_parameter
+	lower_bound 0.01
+	upper_bound 1
+	
+	@estimate diff_m
+	type uniform
+	parameter parameter_transformation[avg_diff].difference_parameter
+	lower_bound -0.5
+	upper_bound 0.5		
 \end{verbatim}}}
 	
-\item \subcommand{log\_sum} : two parameters $X_1$ and $X_2$ are transformed to $Y_1$ and $Y_2$, where $Y_1$ is the natural logarithm of the sum of $X_1$ and $X_2$. $Y_2$ describes the proportion of the sum with respect to $X_1$\\
-\subcommand{Jacobian defined = false}\\
-\subcommand{estimable parameter = log\_total\_parameter, total\_proportion\_parameter}\\
+\subsubsection{The \subcommand{log\_sum} transformation} \label{sec:Transformation-LogSum}
+
+The log-sum transformation has two parameters $X_1$ and $X_2$ that are transformed to $Y_1$ and $Y_2$, where $Y_1$ is the natural logarithm of the sum of $X_1$ and $X_2$. $Y_2$ describes the proportion of the sum with respect to $X_1$.
+
+The Jacobian is defined and the transformation has estimable parameters \argument{log\_total\_parameter} and \argument{total\_proportion\_parameter}.
+
+It is defined as:\\
 $Y_1 = ln(X_1 + X_2)$\\
-$Y_2 = X_1 / (X_1 + X_2)$\\
-Restore transformations\\
+$Y_2 = X_1 / (X_1 + X_2)$
+
+and with,\\
 $X_1 = exp(Y_1)Y_2$\\
-$X_2 =exp(Y_1)(1 - Y_2)$\\
-$\begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix}$ Hasn't been assessed (i.e it could exist) \TODO{?????}\\
-\label{sec:Transformation-LogSum}
-{\small{\begin{verbatim}
-		@parameter_transformation log_total_r0
-		type log_sum
-		parameters process[Recruitment_east].r0 process[Recruitment_west].r0
-		
-		@estimate log_total_r0
-		type uniform
-		parameter parameter_transformation[log_total_r0].log_total_parameter
-		lower_bound 4
-		upper_bound 25
-		
-		@estimate prop_r0_east
-		type uniform
-		parameter parameter_transformation[log_total_r0].total_proportion_parameter
-		lower_bound 0.001
-		upper_bound 0.8		
-		\end{verbatim}}}
-	
-\item \subcommand{orthogonal} : two parameters $X_1$ and $X_2$ are transformed to $Y_1$ and $Y_2$, where $Y_1$ is the multiplication of $X_1$ and $X_2$. $Y_2$ is the division of $X_1$ and $X_2$\\
-\subcommand{Jacobian defined = true}\\
-\subcommand{estimable parameter = product\_parameter, quotient\_parameter}\\
-$Y_1 = X_1 X_2$\\
-$Y_2 = X_1 / X_2$\\
-Restore transformations\\
-$X_1 = \sqrt{Y_1 Y_2}$\\
-$X_2 = \sqrt{Y_1 / Y_2}$\\
-$\begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix} = 2Y_2$\\\\
-\label{sec:Transformation-Orthogonal}
+$X_2 =exp(Y_1)(1 - Y_2)$
+
+ The negative log Jacobian is: \\
+ $-\log(\text{Jacobian}) = -\log(2) + 2 \log(\text{total\_parameter})$
 
 {\small{\begin{verbatim}
-			@parameter_transformation orthogonal_trans
-			type orthogonal
-			parameters process[Recruitment].r0 catchability[CPUEQ].q
-			
-			@estimate B0_times_q
-			type uniform
-			parameter parameter_transformation[orthogonal_trans].product_parameter
-			lower_bound 0.1
-			upper_bound 2500
-			
-			@estimate B0_divide_q
-			type uniform
-			parameter parameter_transformation[orthogonal_trans].quotient_parameter
-			lower_bound 0.001
-			upper_bound 1e8	
+	@parameter_transformation log_total_r0
+	type log_sum
+	parameters process[Recruitment_east].r0 process[Recruitment_west].r0
+	
+	@estimate log_total_r0
+	type uniform
+	parameter parameter_transformation[log_total_r0].log_total_parameter
+	lower_bound 4
+	upper_bound 25
+	
+	@estimate prop_r0_east
+	type uniform
+	parameter parameter_transformation[log_total_r0].total_proportion_parameter
+	lower_bound 0.001
+	upper_bound 0.8		
+\end{verbatim}}}
+	
+\subsubsection{The \subcommand{orthogonal} transformation} \label{sec:Transformation-Orthogonal}
+
+The orthogonal transformation has two parameters $X_1$ and $X_2$ that are transformed to $Y_1$ and $Y_2$, where $Y_1$ is the multiplication of $X_1$ and $X_2$. $Y_2$ is the division of $X_1$ and $X_2$.
+
+The Jacobian is defined and the transformation has estimable parameters \argument{product\_parameter} and \argument{quotient\_parameter}.
+
+It is defined as:\\
+$Y_1 = X_1 X_2$\\
+$Y_2 = X_1 / X_2$
+
+and with,\\
+$X_1 = \sqrt{Y_1 Y_2}$\\
+$X_2 = \sqrt{Y_1 / Y_2}$
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = \begin{vmatrix} \frac{\partial}{\partial y} f^{-1}(y) \end{vmatrix} = 2Y_2$
+
+For example,
+{\small{\begin{verbatim}
+	@parameter_transformation orthogonal_trans
+	type orthogonal
+	parameters process[Recruitment].r0 catchability[CPUEQ].q
+	
+	@estimate B0_times_q
+	type uniform
+	parameter parameter_transformation[orthogonal_trans].product_parameter
+	lower_bound 0.1
+	upper_bound 2500
+	
+	@estimate B0_divide_q
+	type uniform
+	parameter parameter_transformation[orthogonal_trans].quotient_parameter
+	lower_bound 0.001
+	upper_bound 1e8	
 \end{verbatim}}}
 
-\item \subcommand{type} \subcommand{logistic} : logistic transformation\\
-\subcommand{Jacobian defined = true}\\
-\subcommand{estimable parameter = logistic\_parameter}\\
+\subsubsection{The \subcommand{logistic} transformation}  \label{sec:Transformation-Logistic}
+
+logistic transformation\\
+
+The logistic transformation is the logit transformation of its value. It has parameter $X$ that is transformed to $\text{logit}(X)$.
+
+The Jacobian is defined and the transformation has estimable parameter \argument{logistic\_parameter}.
+
+It is defined as: \\
 $Y = logit(\frac{X - lb}{ub - lb})$\\
+
+and where,\\
 $f^{-1}() = lb +(ub - lb)  logit^{-1}()$
-\[
- \begin{vmatrix} \frac{\partial}{\partial y}   lb +(ub - lb)  logit^{-1}(y) \end{vmatrix} =  (ub - lb)logit^{-1}(y)\left(1 - logit^{-1}(y)\right) 
-\]
-\label{sec:Transformation-Logistic}
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = \begin{vmatrix} \frac{\partial}{\partial y}   lb +(ub - lb)  logit^{-1}(y) \end{vmatrix} =  (ub - lb)logit^{-1}(y)\left(1 - logit^{-1}(y)\right)$
+
+For example,
 {\small{\begin{verbatim}
-		@parameter_transformation logistic_R0
-		type logistic
-		parameters process[Recruitment].r0
-		lower_bound 10000
-		upper_bound 600000
-		
-		@estimate logistic_R0
-		type uniform
-		parameter parameter_transformation[logistic_R0].logistic_parameter
-		lower_bound -1000 # theoretically -Inf
-		upper_bound 1000 # theoretically Inf
-		\end{verbatim}}}
+	@parameter_transformation logistic_R0
+	type logistic
+	parameters process[Recruitment].r0
+	lower_bound 10000
+	upper_bound 600000
 	
-\item \subcommand{SumToOne} : given two parameters $X_1$ and $X_2$ that have the constraint $\sum_{i = 1}^2X_i$, estimate $X_1$ only given $X_2 = 1 - X_1$\\
-\subcommand{Jacobian defined = false}\\
-\label{sec:Transformation-SumToOne}
+	@estimate logistic_R0
+	type uniform
+	parameter parameter_transformation[logistic_R0].logistic_parameter
+	lower_bound -1000 # theoretically -Inf
+	upper_bound 1000 # theoretically Inf
+\end{verbatim}}}
+	
+\subsubsection{The \subcommand{SumToOne} transformation} \label{sec:Transformation-SumToOne}
+
+The sum to one transformation forced a sum-to-one constraint on the values. Given two parameters $X_1$ and $X_2$ that have the constraint $\sum_{i = 1}^2X_i$, then given $X_1$, $X_2 = 1 - X_1$
+
+The Jacobian for the sum-to-one transformation is not defined, and therefore the prior can only be applied to the transformed values. The transformation has estimable parameter \argument{total\_parameter}.
+
 {\small{\begin{verbatim}
-			@parameter_transformation total_r0
-			type sum_to_one
-			parameters process[Recruitment_east].r0 process[Recruitment_west].r0
-			
-			@estimate total_r0
-			type uniform
-			parameter parameter_transformation[log_total_r0].total_parameter
-			lower_bound 4
-			upper_bound 25
-			
-			@estimate prop_r0_east
-			type uniform
-			parameter parameter_transformation[log_total_r0].proportion_parameter
-			lower_bound 0.001
+	@parameter_transformation total_r0
+	type sum_to_one
+	parameters process[Recruitment_east].r0 process[Recruitment_west].r0
+	
+	@estimate total_r0
+	type uniform
+	parameter parameter_transformation[log_total_r0].total_parameter
+	lower_bound 4
+	upper_bound 25
+	
+	@estimate prop_r0_east
+	type uniform
+	parameter parameter_transformation[log_total_r0].proportion_parameter
+	lower_bound 0.001
 			upper_bound 0.8		
 \end{verbatim}}}
 
-% useful reference for the simplex https://mc-stan.org/docs/2_27/reference-manual/simplex-transform-section.html#fn15
-\item \subcommand{simplex} : given the vector of parameters $\mathbf{X} = (X_1, \dots, X_n)$ which either has the constraint $\sum_{i = 1}^n X_i = 1$ or $\sum_{i = 1}^n X_i = n$. Then the simplex is a suitable transformation. It translates to a new vector parameter \(\mathbf{Y} = (Y_1, \dots, Y_{n - 1})\) which has unconstrained parameter space i.e \(Y_i \in (-\infty, \infty)\). Note that the calculation of the Jacobian for the simplex is still experimental and may not be suitable in all circumstances.\\
+\subsubsection{The \subcommand{simplex} transformation} \label{sec:Transformation-Simplex}
 
-This transformation follows the implementation in stan, where an intermediate variable \(Z_i\) is used. The transformation going from $\mathbf{X}$ to $\mathbf{Y}$ follows\\
-\[
-Z_i = \frac{X_i}{1 - \sum_{j = 1}^{i - 1}X_j}
-\]
+% useful reference for the simplex https://mc-stan.org/docs/2_27/reference-manual/simplex-transform-section.html#fn15
+
+The simplex transformation transforms a vector of parameters $\mathbf{X} = (X_1, \dots, X_n)$ which can have either has the constraint $\sum_{i = 1}^n X_i = 1$ or $\sum_{i = 1}^n X_i = n$. It has the Jacobian defined and the transformation has estimable parameter \argument{simplex}).
+
+It translates the vector $\mathbf{X}$ to a new vector parameter \(\mathbf{Y} = (Y_1, \dots, Y_{n - 1})\) which has unconstrained parameter space, i.e., \(Y_i \in (-\infty, \infty)\). 
+
+This transformation follows the implementation in stan \citep{STAN}, where an intermediate variable \(Z_i\) is used. The transformation going from $\mathbf{X}$ to $\mathbf{Y}$ is as follows:\\
+\[Z_i = \frac{X_i}{1 - \sum_{j = 1}^{i - 1}X_j}\]
 and 
-\[
-Y_i = logit(Z_i) - log\left(\frac{1}{n -i}\right)
-\]
+\[Y_i = logit(Z_i) - log\left(\frac{1}{n -i}\right)\]
 The inverse transformation going from $\mathbf{Y}$ to $\mathbf{X}$ follows
-\[
-Z_i = logit^{-1}\left(Y_i +  log\left(\frac{1}{n -i}\right)\right)
-\]
+\[Z_i = logit^{-1}\left(Y_i +  log\left(\frac{1}{n -i}\right)\right)\]
 and
 \begin{align*}
 	X_i &= \left( \sum_{j = 1}^{i - 1}X_j\right)Z_i & \text{ for } i < n\\
 	X_n &= 1 - \sum_{i = 1}^{n - 1} X_i & \text{ for } i = n
 \end{align*}
-The Jacobian for the density is evaluated as follows,
+
+The negative log Jacobian is: \\
 \begin{align*}
-|det \ J| = \prod_{i = 1}^{n - 1} Z_i \left(1 - Z_i\right) \left(1 - \sum_{j = 1}^{i - 1}X_j\right)
+-\log(\text{Jacobian}) = |det \ J| = \prod_{i = 1}^{n - 1} Z_i \left(1 - Z_i\right) \left(1 - \sum_{j = 1}^{i - 1}X_j\right)
 \end{align*}
-\subcommand{Jacobian defined = true}\\
-\subcommand{estimable parameter = simplex}\\
-\label{sec:Transformation-Simplex}
+
+For example,
 {\small{\begin{verbatim}
-		@parameter_transformation simplex_ycs
-		type simplex
-		sum_to_one false
-		parameters process[Recruitment].ycs_values{1950:2018}
-		prior_applies_to_restored_parameters true
-		
-		@estimate simplex_ycs
-		type uniform
-		parameter parameter_transformation[simplex_ycs].simplex
-		lower_bound -10
-		upper_bound 10
-
-		\end{verbatim}}}	
-	\item \subcommand{type} \subcommand{sqrt} : square root transformation\\
-	\subcommand{Jacobian defined = true}\\
-	\subcommand{estimable parameter = sqrt\_parameter}\\
-	$Y = sqrt(X)$\\
-	$f() = sqrt()$\\
-	$f^{-1}(x) = x * x$
-	\[
-	log \begin{vmatrix} \frac{\partial}{\partial y}  (y^2) \end{vmatrix} = sqrt \begin{vmatrix}  (y^2) \end{vmatrix} = sqrt(x)
-	\]
-	\label{sec:Transformation-Sqrt}
-	{\small{\begin{verbatim}
-				@parameter_transformation sqrt_R0
-				type sqrt
-				parameters process[Recruitment].r0
-				
-				@estimate sqrt_R0
-				type uniform
-				parameter parameter_transformation[sqrt_r0].sqrt_parameter
-				lower_bound 1
-				upper_bound 25
-	\end{verbatim}}}
+	@parameter_transformation simplex_ycs
+	type simplex
+	sum_to_one false
+	parameters process[Recruitment].ycs_values{1950:2018}
+	prior_applies_to_restored_parameters true
 	
+	@estimate simplex_ycs
+	type uniform
+	parameter parameter_transformation[simplex_ycs].simplex
+	lower_bound -10
+	upper_bound 10
 	
-\end{enumerate}
+\end{verbatim}}}	
 
+\subsubsection{The \subcommand{sqrt} transformation} \label{sec:Transformation-Sqrt}
+
+The square root transformation is the square root of its value. The Jacobian is defined and the transformation has estimable parameter \argument{sqrt\_parameter}.
+
+It is defined as:\\
+$Y = sqrt(X)$\\
+$f() = sqrt()$
+
+and with, \\
+$f^{-1}(x) = x * x$
+\[log \begin{vmatrix} \frac{\partial}{\partial y}  (y^2) \end{vmatrix} = sqrt \begin{vmatrix}  (y^2) \end{vmatrix} = sqrt(x) \]
+
+The negative log Jacobian is: \\
+$-\log(\text{Jacobian}) = -\log{(1/(2\sqrt{x}))}$
+	
+For example,
+{\small{\begin{verbatim}
+	@parameter_transformation sqrt_R0
+	type sqrt
+	parameters process[Recruitment].r0
+	
+	@estimate sqrt_R0
+	type uniform
+	parameter parameter_transformation[sqrt_r0].sqrt_parameter
+	lower_bound 1
+	upper_bound 25
+\end{verbatim}}}
+	
+\subsubsection{Using transformations}
 
 If users want to force other parameters in the system to be the same as an estimated transformation, this can be done by creating multiple \command{parameter\_transformation} blocks. For example if there were multiple categories (spawning and non spawning males and females) and the average difference parametrisation was used to estimate natural mortality. The non-spawning components can be set the same as the spawning values using the following syntax.
 
 {\small{\begin{verbatim}
-		@categories
-		format sex.maturity
-		names male.spawn female.spawn male.nonspawn female.nonspawn
-		
-		@parameter_transformation avg_diff_spawn
-		type average_difference
-		parameters process[InstantMortality].m{male.spawn} 
-		           process[InstantMortality].m{female.spawn}
-		
-		@parameter_transformation avg_diff_non_spawn
-		type average_difference
-		parameters process[InstantMortality].m{male.nonspawn} 
-		           process[InstantMortality].m{female.nonspawn}
-		
-		@estimate avg_m
-		type uniform
-		parameter parameter_transformation[avg_diff_spawn].average_parameter
-		same parameter_transformation[avg_diff_non_spawn].average_parameter
-		lower_bound 0.01
-		upper_bound 1
-		
-		@estimate diff_m
-		type uniform
-		parameter parameter_transformation[avg_diff_spawn].difference_parameter
-		same parameter_transformation[avg_diff_non_spawn].average_parameter
-		lower_bound -0.5
-		upper_bound 0.5		
+	@categories
+	format sex.maturity
+	names male.spawn female.spawn male.nonspawn female.nonspawn
+	
+	@parameter_transformation avg_diff_spawn
+	type average_difference
+	parameters process[InstantMortality].m{male.spawn} 
+         process[InstantMortality].m{female.spawn}
+	
+	@parameter_transformation avg_diff_non_spawn
+	type average_difference
+	parameters process[InstantMortality].m{male.nonspawn} 
+         process[InstantMortality].m{female.nonspawn}
+	
+	@estimate avg_m
+	type uniform
+	parameter parameter_transformation[avg_diff_spawn].average_parameter
+	same parameter_transformation[avg_diff_non_spawn].average_parameter
+	lower_bound 0.01
+	upper_bound 1
+	
+	@estimate diff_m
+	type uniform
+	parameter parameter_transformation[avg_diff_spawn].difference_parameter
+	same parameter_transformation[avg_diff_non_spawn].average_parameter
+	lower_bound -0.5
+	upper_bound 0.5		
 \end{verbatim}}}
 
 This can be done for any set of parameters in the system, for example if you had multiple recruitment dynamics and wanted to estimate a joint steepness parameter with the log transformation, you would need to create multiple blocks and force them in the same.

@@ -1,4 +1,4 @@
-\defComLab{additional\_prior}{Define an object of type \emph{Additional\_Prior}}.
+\defComLab{additional\_prior}{Define an object of type \emph{Additional\_Prior}}
 \defRef{sec:AdditionalPriors}
 \label{syntax:AdditionalPriors}
 
@@ -6,18 +6,18 @@
 \defType{String}
 \defDefault{No default}
 
+\defSub{type}{The additional prior type}
+\defType{String}
+\defDefault{Uniform}
+
+\subsubsection{Additional prior of type beta}
+\commandlabsubarg{additional\_prior}{type}{Beta}
+\defRef{sec:AdditionalPrior-Beta}
+\label{syntax:AdditionalPrior-Beta}
+
 \defSub{parameter}{The name of the parameter for the additional prior}
 \defType{String}
 \defDefault{No default}
-
-\defSub{type}{The additional prior type}
-\defType{String}
-\defDefault{No default}
-
-\subsubsection{Additional Prior of type Beta}
-\commandlabsubarg{additional\_prior}{type}{Beta}.
-\defRef{sec:AdditionalPrior-Beta}
-\label{syntax:AdditionalPrior-Beta}
 
 \defSub{mu}{Beta distribution mean $\mu$ parameter}
 \defType{Real number (estimable)}
@@ -36,10 +36,14 @@
 \defType{Real number}
 \defDefault{No default}
 
-\subsubsection{Additional Prior of type Element Difference}
-\commandlabsubarg{additional\_prior}{type}{Element\_Difference}.
+\subsubsection{Additional prior of type element difference}
+\commandlabsubarg{additional\_prior}{type}{Element\_Difference}
 \defRef{sec:AdditionalPrior-ElementDifference}
 \label{syntax:AdditionalPrior-ElementDifference}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
 
 \defSub{second\_parameter}{The name of the second parameter for comparing}
 \defType{String}
@@ -49,10 +53,14 @@
 \defType{Real number}
 \defDefault{1}
 
-\subsubsection{Additional Prior of type Lognormal}
-\commandlabsubarg{additional\_prior}{type}{Lognormal}.
-\defRef{sec:AdditionalPrior-Lognormal}
-\label{syntax:AdditionalPrior-Lognormal}
+\subsubsection{Additional prior of type lognormal}
+\commandlabsubarg{additional\_prior}{type}{Log\_Normal}
+\defRef{sec:AdditionalPrior-LogNormal}
+\label{syntax:AdditionalPrior-LogNormal}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
 
 \defSub{mu}{The lognormal prior mean (mu) parameter}
 \defType{Real number (estimable)}
@@ -64,17 +72,32 @@
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Additional Prior of type Uniform-Log}
-\commandlabsubarg{additional\_prior}{type}{Uniform\_Log}.
+\subsubsection{Additional prior of type uniform}
+\commandlabsubarg{additional\_prior}{type}{Uniform}
+\defRef{sec:AdditionalPrior-Uniform}
+\label{syntax:AdditionalPrior-Uniform}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
+
+\subsubsection{Additional prior of type uniform-log}
+\commandlabsubarg{additional\_prior}{type}{Uniform\_Log}
 \defRef{sec:AdditionalPrior-UniformLog}
 \label{syntax:AdditionalPrior-UniformLog}
 
-The Uniform\_Log type has no additional subcommands.
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
 
-\subsubsection{Additional Prior of type Vector Average}
-\commandlabsubarg{additional\_prior}{type}{Vector\_Average}.
+\subsubsection{Additional prior of type vector average}
+\commandlabsubarg{additional\_prior}{type}{Vector\_Average}
 \defRef{sec:AdditionalPrior-VectorAverage}
 \label{syntax:AdditionalPrior-VectorAverage}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
 
 \defSub{method}{Which calculation method to use: k, l, or m}
 \defType{String}
@@ -88,10 +111,14 @@ The Uniform\_Log type has no additional subcommands.
 \defType{Real number}
 \defDefault{1}
 
-\subsubsection{Additional Prior of type Vector Smoothing}
-\commandlabsubarg{additional\_prior}{type}{Vector\_Smoothing}.
+\subsubsection{Additional prior of type vector smoothing}
+\commandlabsubarg{additional\_prior}{type}{Vector\_Smoothing}
 \defRef{sec:AdditionalPrior-VectorSmoothing}
 \label{syntax:AdditionalPrior-VectorSmoothing}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
 
 \defSub{log\_scale}{Should the sums of squares be calculated on the log scale?}
 \defType{Boolean}
@@ -113,3 +140,26 @@ The Uniform\_Log type has no additional subcommands.
 \defType{Non-negative integer}
 \defDefault{2}
 
+\subsubsection{Additional prior of type sum}
+\commandlabsubarg{additional\_prior}{type}{Sum}
+\defRef{sec:AdditionalPrior-Sum}
+\label{syntax:AdditionalPrior-Sum}
+
+\defSub{parameters}{The names of the parameters for summing}
+\defType{Vector of strings}
+\defDefault{No default}
+
+\defSub{distribution}{The additional prior distribution to apply}
+\defType{String}
+\defDefault{lognormal}
+\defValue(Either normal or lognormal)
+
+\defSub{mu}{Mean of the distribution}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{cv}{cv of the distribution}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}

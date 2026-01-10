@@ -1,4 +1,4 @@
-\defComLab{selectivity}{Define an object of type \emph{Selectivity}}.
+\defComLab{selectivity}{Define an object of type \emph{Selectivity}}
 \defRef{sec:Selectivity}
 \label{syntax:Selectivity}
 
@@ -26,8 +26,8 @@
 \defType{Vector of addressables}
 \defDefault{No default}
 
-\subsubsection{Selectivity of type All Values}
-\commandlabsubarg{selectivity}{type}{All\_Values}.
+\subsubsection{Selectivity of type all values}
+\commandlabsubarg{selectivity}{type}{All\_Values}
 \defRef{sec:Selectivity-AllValues}
 \label{syntax:Selectivity-AllValues}
 
@@ -35,8 +35,8 @@
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
 
-\subsubsection{Selectivity of type All Values Bounded}
-\commandlabsubarg{selectivity}{type}{All\_Values\_Bounded}.
+\subsubsection{Selectivity of type all values bounded}
+\commandlabsubarg{selectivity}{type}{All\_Values\_Bounded}
 \defRef{sec:Selectivity-AllValuesBounded}
 \label{syntax:Selectivity-AllValuesBounded}
 
@@ -52,22 +52,35 @@
 \defType{Vector of real numbers (estimable)}
 \defDefault{No default}
 
-\subsubsection{Selectivity of type Constant}
-\commandlabsubarg{selectivity}{type}{Constant}.
+\subsubsection{Selectivity of type constant}
+\commandlabsubarg{selectivity}{type}{Constant}
 \defRef{sec:Selectivity-Constant}
 \label{syntax:Selectivity-Constant}
 
-\defSub{c}{The constant value}
+\defSub{a}{The $a$ value in $ax^b + c$}
 \defType{Real number (estimable)}
-\defDefault{No default}
+\defDefault{0.0}
+\defLowerBound{0.0 (inclusive)}
+\defNote{The defaults result in a simple linear constant where $x=1$ for all values of $x$}
+
+\defSub{b}{The $b$ value in $ax^b + c$}
+\defType{Real number (estimable)}
+\defDefault{0.0}
+\defNote{The defaults result in a simple linear constant where $x=1$ for all values of $x$}
+
+\defSub{c}{The $c$ value in $ax^b + c$}
+\defType{Real number (estimable)}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defNote{The defaults result in a simple linear constant where $x=1$ for all values of $x$}
 
 \defSub{beta}{The minimum age/length for which the selectivity applies}
 \defType{Real number (constant)}
-\defDefault{0}
+\defDefault{0.0}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Selectivity of type Double Exponential}
-\commandlabsubarg{selectivity}{type}{Double\_Exponential}.
+\subsubsection{Selectivity of type double exponential}
+\commandlabsubarg{selectivity}{type}{Double\_Exponential}
 \defRef{sec:Selectivity-DoubleExponential}
 \label{syntax:Selectivity-DoubleExponential}
 
@@ -108,8 +121,8 @@
 \defDefault{0}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Selectivity of type Double Normal}
-\commandlabsubarg{selectivity}{type}{Double\_Normal}.
+\subsubsection{Selectivity of type double normal}
+\commandlabsubarg{selectivity}{type}{Double\_Normal}
 \defRef{sec:Selectivity-DoubleNormal}
 \label{syntax:Selectivity-DoubleNormal}
 
@@ -137,8 +150,8 @@
 \defDefault{0}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Selectivity of type Double Normal Plateau}
-\commandlabsubarg{selectivity}{type}{Double\_Normal\_Plateau}.
+\subsubsection{Selectivity of type double normal plateau}
+\commandlabsubarg{selectivity}{type}{Double\_Normal\_Plateau}
 \defRef{sec:Selectivity-DoubleNormalPlateau}
 \label{syntax:Selectivity-DoubleNormalPlateau}
 
@@ -170,8 +183,8 @@
 \defDefault{0}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Selectivity of type Double Normal Stock Synthesis}
-\commandlabsubarg{selectivity}{type}{Double\_Normal\_Stock\_Synthesis}.
+\subsubsection{Selectivity of type double normal Stock Synthesis}
+\commandlabsubarg{selectivity}{type}{Double\_Normal\_Stock\_Synthesis}
 \defRef{sec:Selectivity-DoubleNormalStockSynthesis}
 \label{syntax:Selectivity-DoubleNormalStockSynthesis}
 
@@ -217,8 +230,8 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Selectivity of type Increasing}
-\commandlabsubarg{selectivity}{type}{Increasing}.
+\subsubsection{Selectivity of type increasing}
+\commandlabsubarg{selectivity}{type}{Increasing}
 \defRef{sec:Selectivity-Increasing}
 \label{syntax:Selectivity-Increasing}
 
@@ -239,8 +252,8 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Selectivity of type Inverse Logistic}
-\commandlabsubarg{selectivity}{type}{Inverse\_Logistic}.
+\subsubsection{Selectivity of type inverse logistic}
+\commandlabsubarg{selectivity}{type}{Inverse\_Logistic}
 \defRef{sec:Selectivity-InverseLogistic}
 \label{syntax:Selectivity-InverseLogistic}
 
@@ -248,7 +261,7 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
@@ -263,8 +276,8 @@
 \defDefault{0}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Selectivity of type Knife Edge}
-\commandlabsubarg{selectivity}{type}{Knife\_Edge}.
+\subsubsection{Selectivity of type knife edge}
+\commandlabsubarg{selectivity}{type}{Knife\_Edge}
 \defRef{sec:Selectivity-KnifeEdge}
 \label{syntax:Selectivity-KnifeEdge}
 
@@ -276,8 +289,8 @@
 \defType{Real number (estimable)}
 \defDefault{1.0}
 
-\subsubsection{Selectivity of type Logistic}
-\commandlabsubarg{selectivity}{type}{Logistic}.
+\subsubsection{Selectivity of type logistic}
+\commandlabsubarg{selectivity}{type}{Logistic}
 \defRef{sec:Selectivity-Logistic}
 \label{syntax:Selectivity-Logistic}
 
@@ -285,7 +298,7 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
@@ -300,8 +313,8 @@
 \defDefault{0}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Selectivity of type Logistic Producing}
-\commandlabsubarg{selectivity}{type}{Logistic\_Producing}.
+\subsubsection{Selectivity of type logistic producing}
+\commandlabsubarg{selectivity}{type}{Logistic\_Producing}
 \defRef{sec:Selectivity-LogisticProducing}
 \label{syntax:Selectivity-LogisticProducing}
 
@@ -327,8 +340,8 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Selectivity of type Compound Left }
-\commandlabsubarg{selectivity}{type}{compound\_left}.
+\subsubsection{Selectivity of type compound left }
+\commandlabsubarg{selectivity}{type}{compound\_left}
 \defRef{sec:Selectivity-CompoundLeft}
 \label{syntax:Selectivity-CompoundLeft}
 
@@ -336,7 +349,7 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
@@ -357,8 +370,8 @@
 \defLowerBound{0.0 (exclusive)}
 
 
-\subsubsection{Selectivity of type Compound Right }
-\commandlabsubarg{selectivity}{type}{compound\_right}.
+\subsubsection{Selectivity of type compound right }
+\commandlabsubarg{selectivity}{type}{compound\_right}
 \defRef{sec:Selectivity-CompoundRight}
 \label{syntax:Selectivity-CompoundRight}
 
@@ -366,7 +379,7 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
@@ -391,8 +404,8 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Selectivity of type Compound Middle }
-\commandlabsubarg{selectivity}{type}{compound\_middle}.
+\subsubsection{Selectivity of type compound middle }
+\commandlabsubarg{selectivity}{type}{compound\_middle}
 %\defRef{sec:Selectivity-CompoundMiddle}
 \label{syntax:Selectivity-CompoundMiddle}
 
@@ -400,7 +413,7 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
@@ -425,8 +438,8 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Selectivity of type Compound All }
-\commandlabsubarg{selectivity}{type}{compound\_all}.
+\subsubsection{Selectivity of type compound all }
+\commandlabsubarg{selectivity}{type}{compound\_all}
 \defRef{sec:Selectivity-CompoundAll}
 \label{syntax:Selectivity-CompoundAll}
 
@@ -434,7 +447,7 @@
 \defType{Real number (estimable)}
 \defDefault{No default}
 
-\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) selective}
+\defSub{ato95}{The age or length between \(50\%\) and \(95\%\) in the selectivity}
 \defType{Real number (estimable)}
 \defDefault{No default}
 \defLowerBound{0.0 (exclusive)}
@@ -449,8 +462,8 @@
 \defDefault{1.0}
 \defLowerBound{0.0 (exclusive)}
 
-\subsubsection{Selectivity of type Multi-Selectivity}
-\commandlabsubarg{Selectivity}{type}{multi\_selectivity}.
+\subsubsection{Selectivity of type multi-selectivity}
+\commandlabsubarg{Selectivity}{type}{multi\_selectivity}
 \defRef{sec:Selectivity-MultiSelectivities}
 \label{syntax:Selectivity-MultiSelectivities}
 

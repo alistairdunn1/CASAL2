@@ -1,4 +1,4 @@
-\section{Population command and subcommand syntax\label{syntax:Population}}
+\section{\I{Population command and subcommand syntax}\label{syntax:Population}}
 
 The description of the methods for the population section is given in Section \ref{sec:Population}.
 
@@ -49,7 +49,7 @@ The specific subcommands for a command are given within each command.
 \subsection{\I{Age-weight}}
 \input{IncludedSyntax/AgeWeight}
 \else
-\subsection{\I{Growth-Increment}}
+\subsection{\I{Growth-increment}}
 \input{IncludedSyntax/GrowthIncrement}
 \fi 
 
@@ -62,7 +62,8 @@ The specific subcommands for a command are given within each command.
 \subsection{\I{Projections}}
 \input{IncludedSyntax/Project}
 
-\section{Estimation command and subcommand syntax\label{syntax:Estimation}}
+ \pagebreak 
+ \section{\I{Estimation command and subcommand syntax}\label{syntax:Estimation}}
 
 The description of methods for the estimation section is given in Section \ref{sec:Estimation}.
 
@@ -83,26 +84,27 @@ The specific subcommands for a command are given within each command.
 \subsection{\I{Markov chain Monte Carlo (MCMC)}}
 \input{IncludedSyntax/MCMC}
 
-\subsection{\I{Profiles}}
+\subsection{\I{Posterior profiles}}
 \input{IncludedSyntax/Profile}
 
-\subsection{\I{Defining catchability constants}}
+\subsection{\I{Catchability constants}}
 \input{IncludedSyntax/Catchability}
 
-\subsection{\I{Defining penalties}}
+\subsection{\I{Penalties}}
 \input{IncludedSyntax/Penalty}
 
-\subsection{\I{Defining the priors on parameter ratios, differences, and means}}
+\subsection{\I{Additional priors}}
 \input{IncludedSyntax/AdditionalPrior}
 
-\subsection{\I{Defining the parameters of transformations}}
+\subsection{\I{Parameter transformations}}
 \input{IncludedSyntax/ParameterTransformation.tex}
 
-\section{Observation command and subcommand syntax\label{syntax:Observations}}
+ \pagebreak 
+ \section{\I{Observation command and subcommand syntax}\label{syntax:Observations}}
 
 The description of methods for the observation section is given in Section \ref{sec:Observation}.
 
-In the following section, the sub-section headers use a notation of the form "\textbf {@observation[label].type=abundance}" which, in this case, represents the input command fragment
+In the following section, the sub-section headers use a notation of the form "\textbf {@observation[label].type=abundance}" which, in this case, represents the following input command fragment
 {\small{\begin{verbatim}
 @observation label # where label is a unique label for that observation
 type=abundance
@@ -112,16 +114,7 @@ The specific subcommands for a command are given within each command.
 
 \subsection{\I{Observation types}}\label{syntax:ObservationTypes}
 
-The description of the observations is given in Section \ref{sec:Observation}. The observation types available are:
-
-\begin{description}
-  \item Observations of proportions of individuals by age class
-  \item Observations of proportions of individuals by category and age class
-  \item Relative and absolute abundance observations
-  \item Relative and absolute biomass observations
-\end{description}
-
-Each type of observation requires a set of subcommands and arguments specific to that process.
+The description of the observations is given in Section \ref{sec:Observation}. Each type of observation requires a set of subcommands and arguments specific to that process.
 
 \ifAgeBased
 \input{IncludedSyntax/Observation}
@@ -151,7 +144,8 @@ Each type of ageing error has a set of subcommands and arguments specific to its
 %\subsection{\I{Simulating observations}}
 %\input{IncludedSyntax/Simulate}
 
-\section{Report command and subcommand syntax\label{syntax:Reports}}
+ \pagebreak 
+ \section{\I{Report command and subcommand syntax}\label{syntax:Reports}}
 
 The description of each report is given in Section \ref{sec:Report}.
 
@@ -159,7 +153,8 @@ The description of each report is given in Section \ref{sec:Report}.
 
 \input{IncludedSyntax/Report}
 
-\section{Including commands from other files\label{syntax:General}}
+ \pagebreak 
+ \section{\I{Including commands from other files}\label{syntax:General}}
 
 \defComArg{include}{file}{\I{Include an external file}}
 
@@ -169,7 +164,8 @@ The description of each report is given in Section \ref{sec:Report}.
 \defValue{A valid \config}
 \defNote{If \texttt{file\_name} includes a space character, then it must be enclosed in quotes, for example \command{include} \argument{\ "my file.csl2"}. Also note that the \command{include} does not denote the end of the previous command block as is the case for all other commands}
 
-\section{\I{Validating model values using asserts}}\label{syntax:Assert}
+ \pagebreak 
+ \section{\I{Validating model values using asserts}}\label{syntax:Assert}
 
 \CNAME\ can validate or check certain addressables parameters as a part of testing and validation with the assert command. Asserts check the value of a specific addressables (for example, and observations, parameters, or the objective function). Asserts are one aspect of the internal tests \CNAME\ uses to ensure accuracy across versions and revisions (see Section \ref{sec:Assert})
 

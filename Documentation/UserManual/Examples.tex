@@ -1,7 +1,7 @@
 
 \section{\I{Syntax conventions and examples}\label{sec:examples}}
 
-\subsection{Input File Specification}
+\subsection{Input configuration file specification}
 
 The file format used for \CNAME\ is based on the command block formats used in CASAL and SPM. It is a text file that contains definitions organised into blocks.
 
@@ -33,13 +33,13 @@ Some general notes about configuration files:
 	\item The configuration files support in-line declarations of objects.
 \end{itemize}
 
-\subsection{Keywords And Reserved Characters}
+\subsection{Keywords and reserved characters}
 
 In order to allow efficient creation of input files, the \CNAME\ file format has special keywords and characters that cannot be used for labels.
 
 Labels cannot start with a double underscore --- labels with a double underscore are reserved, and are used by \CNAME\ for automatic reports and other internal constructs.
 
-\paragraph*{Block Definitions}
+\paragraph*{Block definitions}
 
 Each block in the configuration file must start with the block definition character, which is the "\command" character.
 
@@ -53,7 +53,7 @@ type <type>
 type <type>
 \end{verbatim}}}
 
-\paragraph*{The 'type' Keyword}
+\paragraph*{The 'type' keyword}
 
 The 'type' keyword is used for declaring the sub-type of a defined block. Any block object that has multiple sub-types will use the \texttt{type} keyword.
 
@@ -67,7 +67,7 @@ type <sub_type>
 type <sub_type>
 \end{verbatim}}}
 
-\paragraph*{\# (Single Line Comments)}
+\paragraph*{\# (Single line comments)}
 
 Comments are supported in the configuration file on one line (to the end of that line) or over multiple lines.  Comments on single lines start with the "\#" character.
 
@@ -80,7 +80,7 @@ type <sub_type> # Descriptive comment
 parameter <value_1> # <value_2> *** value_2 is commented out
 \end{verbatim}}}
 
-\paragraph*{\commentstart\ \commentend\ (Multiple Line Comments)}
+\paragraph*{\commentstart\ \commentend\ (Multiple line comments)}
 
 Multiple line comments are supported by surrounding the comments in \commentstart\ and \commentend
 
@@ -101,7 +101,7 @@ parameter <value_1> <value_2>
 */
 \end{verbatim}}}
 
-\paragraph*{$\{ \}$ (Indexing Parameters)}
+\paragraph*{$\{ \}$ (Indexing parameters)}
 
 Individual elements of a vector can be referenced using the \texttt{\{ \}} syntax. For example, when estimating \subcommand{ycs\_values} a range or block of YCS values can be referenced.
 
@@ -115,7 +115,7 @@ Example:
 		upper_bound
 		\end{verbatim}}}
 
-\paragraph*{':' (Range Specifier)}
+\paragraph*{':' (Range specifier)}
 
 The range specifier "\texttt{:}" allows specifying a range of values instead of specifying each value explicitly. Ranges can be either incremental or decremental.
 
@@ -133,7 +133,7 @@ type natural_mortality
 years_to_run 2000 2001 2002 2003 2004 2005 2006 2007
 \end{verbatim}}}
 
-\paragraph*{',' (List Specifier)}
+\paragraph*{',' (List specifier)}
 
 When a parameter supports multiple values in a single entry, the list specifier "\texttt{,}" can be used to define multiple values as a single parameter.
 
@@ -151,7 +151,7 @@ format sex.stage
 names male.immature male.mature female.immature female.mature
 \end{verbatim}}}
 
-\paragraph*{`table' and `end\_table' Keyword}\label{sec:DataTable}\TODO{Tables need a section of their own, and better documentation}
+\paragraph*{`table' and `end\_table' keywords}\label{sec:DataTable}\TODO{Tables need a section of their own, and better documentation}
 
 The table keyword \texttt{table} is used to define a block of values used as parameters (e.g., catch data, observations data, etc.). In many cases an appropriate table label will need to be supplied (i.e., `obs', `error\_value', or simply `table', depending on where used) The first line following the \texttt{table} declaration must either (1) contain a list of columns to be used, or (2) in the case of observations the data in the specified format. The subsequent lines are rows of the table. Each row must have the same number of values as the number of columns specified. The table definition must end with the "\texttt{end\_table}" keyword on its own line.
 
@@ -168,7 +168,7 @@ table <table_label>
 end_table
 \end{verbatim}}}
 
-\paragraph*{$[\ ]$ (in-line Declarations)}
+\paragraph*{$[\ ]$ (in-line declarations)}
 
 When an object takes the label of a target object as a parameter, the label can be replaced with an in-line declaration. An in-line declaration "\texttt{$[\ ]$}" is a complete declaration of an object on one line. This feature is designed to allow simplifying the configuration definition.
 

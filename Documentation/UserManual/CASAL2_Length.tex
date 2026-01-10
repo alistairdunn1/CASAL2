@@ -1,9 +1,9 @@
 % Standard A4 2-sided layout
-\documentclass[a4paper,11pt,twoside,pdftex]{article}
+\documentclass[a4paper,11pt,twoside,pdftex,fleqn]{article}
 
 %
 % Define the switch here using "newif" and start its name with "if"
-% Here, NAME_OF_SWITCH == "LengthBased"
+% Here, NAME_OF_SWITCH == "AgeBased"
 \newif\ifAgeBased
 
 % By default, a switch is "false". Use \NAME_OF_SWITCHtrue to set to true
@@ -17,20 +17,22 @@
 % Misc packages
 \usepackage{ifthen}   % for conditional expressions
 \usepackage{float}    % for floating tables and graphics
-\usepackage{setspace} % for defining spacing between lines
+\usepackage{setspace} % for defining spacing between lines 
 \usepackage{cmap}     % allow searching in pdf documents
 \usepackage{tabulary} % better tables
 \usepackage{comment}  % block comments
 \usepackage[toc,page]{appendix}
 \usepackage{csquotes} % better tables
+\usepackage[T1]{fontenc} % for searching for terms with underscores
+
 % hyperref for HTML links within pdf
 % EXAMPLE: \href{https://www.niwa.co.nz}{NIWA}
 \usepackage[bookmarks=true,bookmarksopen=false,bookmarksnumbered=true,
-            pdfpagelayout=TwoPageRight,
-            pdftitle={Casal2 user manual for length-based models},
-            pdfauthor={Casal2 Development Team} %authors
-            pdfsubject={Casal2 user manual for length-based models, NIWA Technical Report},
-            pdftex]{hyperref}
+    pdfpagelayout=TwoPageRight,
+    pdftitle={Casal2 user manual for length-based models},
+    pdfauthor={Casal2 Development Team} %authors
+    pdfsubject={Casal2 user manual for length-based models, Casal2 Steering Group Technical Report},
+    pdftex]{hyperref}
 \hypersetup{
   breaklinks=true,      % allow line breaks in URLs
   colorlinks=true,      % use colour to define links
@@ -49,15 +51,15 @@
 % Package for including and pretty printing of external config files and program code
 \usepackage{listings}
 \lstset{
-  basicstyle=\ttfamily\footnotesize,
-  breaklines=true,
-  columns=fullflexible,
-  showspaces=false,               % show spaces adding particular underscores
-  showstringspaces=false,         % underline spaces within strings
-  showtabs=false,                 % show tabs within strings adding particular underscores
-  tabsize=2,			                % sets default tabsize to 2 spaces
-  breakatwhitespace=false,	      % sets if automatic breaks should only happen at whitespace
-  escapeinside={\%*}{*)}          % if you want to add a comment within your code
+	basicstyle=\ttfamily\footnotesize,
+	breaklines=true,
+	columns=fullflexible,
+	showspaces=false,               % show spaces adding particular underscores
+	showstringspaces=false,         % underline spaces within strings
+	showtabs=false,                 % show tabs within strings adding particular underscores
+	tabsize=2,                      % sets default tabsize to 2 spaces
+	breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+	escapeinside={\%*}{*)}          % if you want to add a comment within your code
 }
 
 % Allow colour for HTML links
@@ -85,6 +87,7 @@
 \allsectionsfont{\sffamily\large}
 % Add a dot after section headings
 \makeatletter
+
 \makeatother
 
 % Page style
@@ -132,8 +135,9 @@
 \usepackage[small,compact]{titlesec}
 
 % New commands to define macros and other aids to text and layout
-\newcommand{\config}{input configuration files}
+\newcommand{\config}{input configuration file}
 \newcommand{\command}[1] {\texttt{@#1}}
+\newcommand{\commandlab}[1] {\command{#1\texttt{[label]}}}
 \newcommand{\subcommand}[1] {\texttt{#1}}
 \newcommand{\commandsub}[2] {\command{#1}\subcommand{.#2}}
 \newcommand{\commandlabsub}[2] {\command{#1\texttt{[label]}}\subcommand{.#2}}
@@ -158,12 +162,12 @@
 
 % New commands to template syntax definitions: setup needs defining
 % Define a command without a label
-\newcommand{\defCom}[2]{\texttt{\textbf{@#1}\index{Command ! #1}} \hspace{0.5cm} {#2}}
+\newcommand{\defCom}[2]{\texttt{@#1\index{Command ! #1}} \hspace{0.5cm} {#2}}
 % Define a command with a label
-\newcommand{\defComLab}[2]{\texttt{\textbf{@#1}\ \emph{label}\index{Command ! #1}} \hspace{0.5cm} {#2}}
+\newcommand{\defComLab}[2]{\texttt{@#1\ \emph{label}\index{Command ! #1}} \hspace{0.5cm} {#2}}
 % Define a subcommand
 \newcommand{\defSub}[2]{\texttt{#1} \hspace{0.5cm} #2 \\*}% Define a command with an argument
-\newcommand{\defComArg}[3]{\texttt{\textbf{@#1}\ \emph{#2}\index{Command ! #1}} \hspace{0.5cm} {#3}}
+\newcommand{\defComArg}[3]{\texttt{@#1\ \emph{#2}\index{Command ! #1}} \hspace{0.5cm} {#3}}
 % Define a Command\index{Command} argument
 \newcommand{\defArg}[2]{\emph{\texttt{#1}} \hspace{0.5cm} #2 \\*}
 
@@ -176,7 +180,8 @@
 \newcommand{\defLowerBound}[1]{\defText{Lower bound:}{#1}}
 \newcommand{\defUpperBound}[1]{\defText{Upper bound:}{#1}}
 \newcommand{\defNote}[1]{\defText{Note:}{#1}}
-\newcommand{\defRef}[1]{See Section \ref{#1} for more information.}
+\newcommand{\defallowed}[1]{\defText{Allowed values:}{#1}}                                                        
+\newcommand{\defRef}[1]{\\See Section \ref{#1} for more information.}
 
 % Input Casal2 version definitions
 \input{Version.tex}
@@ -191,12 +196,12 @@
 \newcommand{\cname}{\texttt{casal2}} % Casal2 binary name
 \newcommand{\authors}{\CNAME\ Development Team}
 % hyper ref for Development Team email
-\newcommand{\emaillink}{\href{mailto:"Scott Rasmussen"<scott@zaita.com>?subject=Casal2:}{\texttt{Casal2 Lead Developer}}}
-\newcommand{\github}{\url{https://github.com/Casal2/CASAL2}}
-\newcommand{\authorlink}{\href{mailto:"Scott Rasmussen"<scott@zaita.com>?subject=Casal2:}{authors}}
+\newcommand{\emaillink}{\href{mailto:"Casal2 Development Team"<casal2@zaita.com>?subject=Casal2:}{\texttt{Casal2 Development Team}}}
+\newcommand{\github}{\url{https://github.com/Casal2}}
+% \newcommand{\authorlink}{\href{mailto:"Casal2 Development Team"<casal2@niwa.co.nz>?subject=Casal2:}{authors}}
 % hyper ref for email
-\newcommand{\Organisation}{National Institute of Water \& Atmospheric Research Ltd.} %NIWA
-\newcommand{\ManualRef}{\authors\ (\DocYear). \CNAME\ user manual for length-based models with \VER. \ref{TotPages} p. (Using source code from \SourceRepos)} % full document reference
+\newcommand{\Organisation}{Casal2 Steering Group.}
+\newcommand{\ManualRef}{\authors\ (\DocYear). \CNAME\ user manual for length-based models, \VER. \Organisation\ \emph{Technical Report}. \ref{TotPages} p. (Using source code from \SourceRepos)} % full document reference
 
 % Special commands for TODOs and Status checking
 %% Use these for developers
@@ -205,7 +210,6 @@
 %% Use these for external PDF manual versions
 \newcommand{\TODO}[1]{}
 \newcommand{\STATUS}[1]{}
-
 
 % Define \clearemptydoublepage so-as to have truly blank pages between sections
 \let\origdoublepage\cleardoublepage
@@ -222,10 +226,12 @@
 % For getting number of pages in document (NOT the last page number printed), use \ref{TotPages}
 % Load this last to ensure its macros are not overwritten
 \usepackage{totpages}
+
 \makeatother
 
 % Begin the document
 \begin{document}
+
 \hbadness=10000 % to deal with under-full hbox warnings
 \sloppy % use sloppy paras
 
@@ -251,8 +257,8 @@
 		\end{figure}
 
 		~\vfill
-		\Large NIWA Technical Report 139 \\% Document Date
-		\Large ISSN 1174-2631 \\% Document Date
+		\Large Casal2 Steering Group Technical Report \\% Document Date
+		% \Large ISSN 1174-2631 \\% Document Date
 		\Large \DocYear \\% Document Date
 
 		\vspace{1.0cm}
@@ -320,6 +326,7 @@ Citation: \ManualRef
 \include{Estimation}
 
 \clearemptydoublepage{}
+
 \include{Observation}
 
 \clearemptydoublepage{}

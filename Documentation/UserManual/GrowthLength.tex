@@ -1,24 +1,25 @@
-\subsection{\I{Growth Increment models}\label{sec:GrowthIncrement}}
-
 For length-based models the length structure of the partition has \(n_l\) length bins where \(l_i\) denotes length bin \(i\) with minimum length value denoted by \(lc_i\) and midpoint denoted as \(lm_i\).
-
-\[
-lm_i = 0.5 \left(lc_i + lc_{i+1}\right)
-\]
+\[lm_i = 0.5 \left(lc_i + lc_{i+1}\right)\]
 
 In length-based models a growth transition matrix describes the probability of fish moving from length bin \(l_j\) to length bin \(l_k\). The growth increment models describe the expected mean length increment denoted by \(\mu_i\) for fish in length bin \(l_i\).
+
+Note that the presence of a model plus-group will affect the behaviour of the growth transition matrix. 
+
+In models with a length plus group (i.e., \commandsubarg{model}{length\_plus}{true}) then every individual is 'grown' according to the growth transition matrix (i.e., individuals in each length bin are redistributed to, typically larger, length bins). Individuals where the growth increment would result in a size larger then the plus group size are assumed to become that size, and no individuals are 'lost'. 
+
+In models without a length plus group (i.e., \commandsubarg{model}{length\_plus}{false}), some individuals may have a growth increment that would result in them being larger than the largest length bin in the model. In this case, these individuals 'fall off the end' and are 'lost' to the mode, i.e., the are removed from the model. This approximates a similar process in age-based models with the ageing process and the presence or absence of a model age plus group. 
 
 \subsubsection{The `none' model}\index{Growth Increment!None}\label{sec:GrowthIncrement-None}
 
 All individuals have a mean length increment of 1 regardless of where they are in the length partition.
 
-\subsubsection{The Exponential model}\index{Growth Increment!Exponential}\label{sec:GrowthIncrement-Exponential}
+\subsubsection{The exponential model}\index{Growth Increment!Exponential}\label{sec:GrowthIncrement-Exponential}
 
 \begin{equation}
 \mu_i = g_\alpha \left(\frac{g_\beta}{g_\alpha} \right)^{\frac{(lm_i - l_\alpha)}{(l_\beta - l_\alpha)}}
 \end{equation}
 
-\subsubsection{The Basic model}\index{Growth Increment!Basic}\label{sec:GrowthIncrement-Basic}
+\subsubsection{The basic model}\index{Growth Increment!Basic}\label{sec:GrowthIncrement-Basic}
 
 \begin{equation}
 \mu_i = g_\alpha + (g_\beta - g_\alpha) \frac{lm_i - l_\alpha}{l_\beta - l_\alpha}

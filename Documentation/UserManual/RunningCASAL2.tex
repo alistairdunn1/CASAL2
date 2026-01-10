@@ -1,10 +1,10 @@
-\section{Running \CNAME\label{sec:RunningCasal2}\index{Running \CNAME}}
+\section{\I{Running \CNAME}\label{sec:RunningCasal2}\index{Running \CNAME}}
 
-\CNAME\ is run from a console window (i.e., the command line) on \I{Microsoft Windows} or from a terminal window on \I{Linux}. \CNAME\ uses information from input data files -{}- the \emph{\config\index{Input configuration file}}\ being the input files that are supplied to \CNAME.
+\CNAME\ is run from a console window (i.e., the command line) on \I{Microsoft Windows} or from a terminal window on \I{Linux}. \CNAME\ uses information from input data files -{}- the \emph{\config\index{Input configuration file}}\ being the input file that is supplied to \CNAME.
 
 The \config\ is required and defines the model structure, processes, observations, parameters (both the fixed parameters and the parameters to be estimated)\index{Estimable parameters}, and the requested reports (outputs).
 
-By convention, the name of the \config\ ends with the suffix \texttt{.csl2}. However, any suffix is acceptable. The default name for the initial \config\ is \emph{config.csl2} and if used it does not have to be specified as one of the command line arguments to to \CNAME. Note that the \config\ can include other files so the specification can be split into parts, e.g., files for specifying information on the 'population', 'estimation', 'observation', and 'reports'.
+By convention, the name of the \config\ ends with the suffix \texttt{.csl2}. However, any suffix is acceptable. The default name for the \config\ is \emph{config.csl2} and if used it does not have to be specified as one of the command line arguments to to \CNAME. Note that the \config\ can include other files so the specification can be split into parts, e.g., files for specifying information on the 'population', 'estimation', 'observation', and 'reports'.
 
 Command line arguments\index{Command line arguments} are used to specify the actions or \emph{tasks}\index{Tasks} of \CNAME, e.g., to run a model with a set of parameter values, to estimate parameter values (either point estimates or MCMC), to project quantities, or to simulate observations.For example, \texttt{-r} is the \emph{run} mode, \texttt{-e} is the \emph{estimation} mode, and \texttt{-m} is the \emph{MCMC} mode. The \emph{command line arguments} are described in Section \ref{sec:CommandLineArguments}.
 
@@ -42,13 +42,12 @@ And, on some Microsoft Windows systems (e.g., Windows 10), you can redirect to b
 
 \CNAME\ is called using:
 
-\texttt{\cname\ [-c \emph{config\_file\_1} \emph{config\_file\_2} \emph{config\_file\_N}] [\emph{task}] [\emph{options}]}
+\texttt{\cname\ [-c \emph{config\_file}] [\emph{task}] [\emph{options}]}
 
 where
 
 \begin{description}
-  \item [\texttt{-c \emph{config\_file\_1 config\_file\_N}}] Define the \config for \CNAME\ (if this argument is omitted, the default \config\ is \texttt{config.csl2}).
-  \CNAME\ supports one or many configuration files. The first file specified must start with @model definition, subsequent files will be treated the same as an include from the end of the previous file.
+  \item [\texttt{-c \emph{config\_file}}] Define the \config for \CNAME\ (if this argument is omitted, the default \config\ is \texttt{config.csl2})
 \end{description}
 
 and where \emph{task} must be one of the following (\textbf{[]} indicates a secondary label to call the task, e.g. \textbf{\texttt{-h}} will execute the same task as \textbf{\texttt{-{}-help}}),
@@ -60,12 +59,12 @@ and where \emph{task} must be one of the following (\textbf{[]} indicates a seco
 
 \item [\texttt{-r [-{}-run]}] \emph{Run} the model once using the parameter values in the \config, or optionally with the free parameter values from the file specified with argument \texttt{-i} or \texttt{-I}.
 \item [\texttt{-e [-{}-estimate]}] Do a point \emph{estimate} using the values in the \config\ as the starting point for the parameters to be estimated, or optionally with the free parameter values from the file specified with argument \texttt{-i} or \texttt{-I}.
-\item [\texttt{-E [-{}-Estimate]} \emph{filename}] Do a point \emph{estimate} and generate an MPD file (ie.e., a file containing the free parameters and the covariance matrix). As with \texttt{-e}, this uses the values in the \config\ as the starting point for the parameters to be estimated, or optionally the free parameter values from the file specified with argument \texttt{-i} or \texttt{-I}.
+\item [\texttt{-E [-{}-Estimate]} \emph{filename}] Do a point \emph{estimate} and generate an MPD file (i.e., a file containing the free parameters and the covariance matrix). As with \texttt{-e}, this uses the values in the \config\ as the starting point for the parameters to be estimated, or optionally the free parameter values from the file specified with argument \texttt{-i} or \texttt{-I}.
 \item [\texttt{-{p}[-profiling]}] Do an objective function \emph{profile} using the parameter values in the \config\ as the starting point, or optionally with the free parameter values from the file specified with argument \texttt{-i} or \texttt{-I}
 \item [\texttt{-m [-{}-mcmc]}] Do an \emph{MCMC}. An estimate run is fist carried out to estimate the covariance matrix for the MCMC proposal distribution, using the values in the \config\ as the starting point for the parameters to be estimated. Optionally the free parameter values from the file specified with argument \texttt{-i} or \texttt{-I} can be used as the starting point.
 \item [\texttt{-M [-{}-mcmc-from-estimate] \emph{filename}}] Do an \emph{MCMC} run using the covariance and free parameters in the MPD file.
 \item [\texttt{-R [-{}-resume] \emph{filename}}] Resume a previously stopped \emph{MCMC} run using the covariance and free parameters in the MPD file. Additional arguments must be supplied to specify the sample and objective files from the previous MCMC with \texttt{-{}-objective-file} and \texttt{-{}-sample-file}.
-\item [\texttt{-f [-{}-projection]}] \emph{n}. Project the model \emph{forward} in time using the parameter values in the \config\ as the starting point for the estimation, or optionally with the parameter values from the file specified with the argument \texttt{-i} or \texttt{-I}. Projections are repeated for each parameter set (i.e., each line of data in the free parameter file) \emph{n} times (the default is 1). Typically, the MCMC sample output will be used with \texttt{-i}.
+\item [\texttt{-f [-{}-projection]}] \emph{n}. Project the model \emph{forward} in time using the parameter values from a file specified with the argument \texttt{-i} or \texttt{-I}. Projections are repeated for each parameter set (i.e., for each line of data in the free parameter file) \emph{n} times. Typically, the MCMC sample output will be used with \texttt{-i}.
 \item [\texttt{-s [-{}-simulation]} \emph{n}] \emph{Simulate} \emph{n} sets of observation data using values in the \config\ as the parameter values, or optionally with the parameter values from the file specified with the argument \texttt{-i} or \texttt{-I}.
 
 \end{description}
@@ -318,7 +317,7 @@ Single-stepping means \CNAME\ can 'pause' after each year in the annual cycle du
 
 %This enables \CNAME\ to implement models for management simulations or scenarios that require feedback and can be used, for example, in operational management procedures (OMPs). The single-stepping process can be automated using \R, so that \CNAME\ may be used with \R\ to update input harvest values (e.g., catches from a fishery in a fisheries model) to evaluate a particular harvest control rule.
 
-\subsection{\I{Logging and verifying Models}}\label{sec:LogandVerify}\index{Logging and Verifying Models}
+\subsection{\I{Logging and verifying models} \label{sec:LogandVerify} \index{Logging and Verifying Models}}
 
 \CNAME\ has a  number of standard information, warning, and error message outputs. Additional logging and debugging information is available using the \subcommand{--loglevel} or \subcommand{-L} command line option. See Section~\ref{sec:TroubleShooting-logging} for details on logging. 
 
@@ -338,3 +337,6 @@ When \CNAME\ is run, it will either complete its task successfully or output an 
 {\small{\begin{verbatim}
 	[ERROR] At line 15 in Reports.csl2: Parameter '{' is not supported
 \end{verbatim}}}
+
+Note that if the standard error is redirected to a file (see Section \ref{sec:RedirectingStandardOut}), then the exit status is  redirected to that file. Hence, if calling \CNAME\ from other software (e.g., \R) with a command line that redirects the standard error, the exit status and any messages from \CNAME\ can be found in the file that contains the standard error.
+

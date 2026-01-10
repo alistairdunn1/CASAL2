@@ -1,4 +1,4 @@
-\defComLab{project}{Define an object of type \emph{Project}}.
+\defComLab{project}{Define an object of type \emph{Project}}
 \defRef{sec:Project}
 \label{syntax:Project}
 
@@ -18,46 +18,50 @@
 \defType{String}
 \defDefault{No default}
 
-\defSub{multiplier}{Multiplier that is applied to the projected value}
-\defType{Real number (estimable)}
-\defDefault{1.0}
-\defLowerBound{0.0 (exclusive)}
-
-\subsubsection{Project of type Constant}
-\commandlabsubarg{project}{type}{Constant}.
+\subsubsection{Project of type constant}
+\commandlabsubarg{project}{type}{Constant}
 \defRef{sec:Project-Constant}
 \label{syntax:Project-Constant}
 
 \defSub{values}{The values to assign to the addressable}
-\defType{Vector of real numbers (estimable)}
+\defType{Vector of real numbers}
 \defDefault{No default}
 
-\subsubsection{Project of type Multiple Values}
-\commandlabsubarg{project}{type}{multiple\_values}.
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
+\subsubsection{Project of type multiple values}
+\commandlabsubarg{project}{type}{multiple\_values}
 \defRef{sec:Project-MultipleValues}
 \label{syntax:Multiple-Values}
 
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
 
-\defSub{table values}{The table of data specifying the projected values to use for each row of the \texttt{-i} or \texttt{-I} file}
+\defSub{table values}{The table of data specifying the projected values to use for each row of the supplied free parameter file (\texttt{-i} or \texttt{-I}) with one column of data for each projected year}
 \defType{table with label = values}
 \defDefault{No default}
-\defValue{A $n_i \times n_y$ matrix. Where \(n_i\) is the number of rows (parameter sets) in the \texttt{-i} or \texttt{-I} file. And \(n_y\) is the number of projection years defined by the input \texttt{years}}
-\defNote{example below}
+\defValue{A $n_i \times n_y$ matrix. Where \(n_i\) is the number of rows (parameter sets) in the free parameter file. And \(n_y\) is the number of projection years defined by the input \texttt{years}}
 \begin{verbatim}
-@project future_disease_rates
-type multiple_values
-parameter process[dtransition].proportions{disease}  	
-years 2024:2026
-
-table values
-2024 2025 2026
-0.1 0.2 0.3
-0.3 0.4 0.5
-end_table
+	@project future_disease_rates
+	type multiple_values
+	parameter process[dtransition].proportions{disease}  	
+	years 2024:2026
+	table values
+	# 2024 2025 2026
+	   0.1  0.2  0.3
+	   0.3  0.4  0.5
+	end_table
 \end{verbatim}
 
-\subsubsection{Project of type Empirical Sampling}
-\commandlabsubarg{project}{type}{Empirical\_Sampling}.
+\subsubsection{Project of type empirical sampling}
+\commandlabsubarg{project}{type}{Empirical\_Sampling}
 \defRef{sec:Project-EmpiricalSampling}
 \label{syntax:Project-EmpiricalSampling}
 
@@ -69,27 +73,39 @@ end_table
 \defType{Non-negative integer}
 \defDefault{No default}
 
-\subsubsection{Project of type Lognormal}
-\commandlabsubarg{project}{type}{Lognormal}.
-\defRef{sec:Project-Lognormal}
-\label{syntax:Project-Lognormal}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
+\subsubsection{Project of type lognormal}
+\commandlabsubarg{project}{type}{lognormal}
+\defRef{sec:Project-LogNormal}
+\label{syntax:Project-LogNormal}
 
 \defSub{mean}{The mean of the lognormal process}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 
 \defSub{sigma}{The standard deviation (sigma) of the lognormal sampling}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{No default}
 \defLowerBound{0.0 (inclusive)}
 
-\subsubsection{Project of type Lognormal Empirical}
-\commandlabsubarg{project}{type}{Lognormal\_Empirical}.
-\defRef{sec:Project-LognormalEmpirical}
-\label{syntax:Project-LognormalEmpirical}
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
+\subsubsection{Project of type lognormal empirical}
+\commandlabsubarg{project}{type}{lognormal\_empirical}
+\defRef{sec:Project-LogNormalEmpirical}
+\label{syntax:Project-LogNormalEmpirical}
 
 \defSub{mean}{The mean of the Gaussian process}
-\defType{Real number (estimable)}
+\defType{Real number}
 \defDefault{0.0}
 
 \defSub{start\_year}{The start year of sampling}
@@ -100,8 +116,198 @@ end_table
 \defType{Non-negative integer}
 \defDefault{No default}
 
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0.0 (inclusive)}
+\defValue{A vector of length 1 (for a constant value for all years), or a vector of length years (for a specific value for each year)}
+
+\subsubsection{Project of type harvest strategy constant catch}
+\commandlabsubarg{Project}{type}{harvest\_strategy\_constant\_catch}
+\defRef{sec:Project-HarvestStrategyConstantCatch}
+\label{syntax:Project-HarvestStrategyConstantCatch}
+
+\defSub{catch}{The catch to apply}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{alpha}{The multiplier on the proportional change in biomass applied to the catch}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0 (exclusive)}
+
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+\defNote(Use max\_delta = 0 to have no maximum)
+
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defType{Non-negative integer}
+\defDefault{1}
+\defLowerBound{1 (inclusive)}
+
+\defSub{biomass\_index}{The biomass index for calculating the changes in catch}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defType{Non-negative integer}
+\defDefault{1}
+\defLowerBound{1 (inclusive)}
+
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defType{Real number}
+\defDefault{0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+\defType{Non-negative integer}
+\defDefault{0}
+
+\subsubsection{Project of type harvest strategy constant U}
+\commandlabsubarg{Project}{type}{Harvest\_Strategy\_Constant\_U}
+\defRef{sec:Project-HarvestStrategyConstantU}
+\label{syntax:Project-HarvestStrategyConstantU}
+
+\defSub{u}{The exploitation rate to apply ($U$)}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+\defUpperBound{1 (inclusive)}
+
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+\defNote(Use max\_delta = 0 to have no maximum)
+
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defType{Non-negative integer}
+\defDefault{1}
+\defLowerBound{1 (inclusive)}
+
+\defSub{biomass\_index}{The biomass index for calculating the changes in $U$}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
+\defSub{biomass\_index\_scalar}{A multiplicative scalar on the biomass index used for calculating the changes in $U$}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defType{Non-negative integer}
+\defDefault{1}
+\defLowerBound{1 (inclusive)}
+
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defType{Real number}
+\defDefault{0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+\defType{Non-negative integer}
+\defDefault{0}
+
+\subsubsection{Project of type harvest strategy ramp U}
+\commandlabsubarg{Project}{type}{harvest\_strategy\_ramp\_u}
+\defRef{sec:Project-HarvestStrategyRampU}
+\label{syntax:Project-HarvestStrategyRampU}
+
+\defSub{u}{The exploitation rates to apply}
+\defType{Vector of real numbers}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{reference\_points}{The reference points for each exploitation rate}
+\defType{Vector of real numbers}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{reference\_index}{The biomass index for reference points (i.e., the derived quantity label for the calculation of reference points)}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
+\defSub{bias\_adjustment}{Whether to apply the bias adjustment for the lognormal derived quantity in the calculation of the ratio of the initial and current reference index}
+\defType{boolean}
+\defDefault{False}
+
+\defSub{min\_delta}{The minimum difference (proportion) in catch required before it is updated}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{max\_delta}{The maximum difference (proportion) in catch that can be applied}
+\defType{Real number}
+\defDefault{0.0}
+\defLowerBound{0 (inclusive)}
+\defNote(Use max\_delta = 0 to have no maximum)
+
+\defSub{update\_frequency\_years}{The number of years between updates}
+\defType{Non-negative integer}
+\defDefault{1}
+\defLowerBound{1 (inclusive)}
+
+\defSub{biomass\_index}{The biomass index for calculating the changes in $U$}
+\defType{String}
+\defDefault{No default}
+\defValue{A valid derived quantity label}
+
+\defSub{biomass\_index\_scalar}{A multiplicative scalar on the biomass index used for calculating the changes in $U$}
+\defType{Real number}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{biomass\_index\_lag\_years}{The lag (years) of the derived\_quantity that is used for the calculation of the catch}
+\defType{Non-negative integer}
+\defDefault{1}
+\defLowerBound{1 (inclusive)}
+
+\defSub{current\_catch}{The current catch to apply at the start of the projections (applied until first\_year)}
+\defType{Real number}
+\defDefault{0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{multiplier}{Multiplier that is applied to the projected value}
+\defType{Vector of real numbers}
+\defDefault{1.0}
+\defLowerBound{0 (inclusive)}
+
+\defSub{first\_year}{The first year in which to consider an update using the harvest strategy rule}
+\defType{Non-negative integer}
+\defDefault{0}
+
+\defSub{b0\_initialisation\_phase}{The phase that defines the initial biomass (e.g., B0)}
+\defType{Non-negative integer}
+\defDefault{The first initialisation phase}
+
 %\subsubsection{Project of type User Defined}
-%\commandlabsubarg{project}{type}{User\_Defined}.
+%\commandlabsubarg{project}{type}{User\_Defined}
 %\defRef{sec:Project-UserDefined}
 %\label{syntax:Project-UserDefined}
 %
