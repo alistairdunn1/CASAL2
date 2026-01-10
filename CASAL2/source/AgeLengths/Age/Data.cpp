@@ -121,7 +121,6 @@ void Data::DoBuild() {
     const vector<unsigned>& model_years = model_->years();
     if (find(model_years.begin(), model_years.end(), year) == model_years.end()) {
       LOG_WARNING_P(PARAM_DATA) << "year " << year << " is not in the model run years, so this age length will not be used";
-      continue;
     }
 
     for (unsigned i = 1; i < row.size(); ++i) {
