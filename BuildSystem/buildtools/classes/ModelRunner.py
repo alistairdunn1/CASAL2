@@ -58,6 +58,11 @@ class ModelRunner:
         self.executionTypeList.append(["SingleSexTagByLength_input", "run_dash_I"])
         self.executionTypeList.append(["SingleSexTagByLength_n", "run_dash_I"])
         self.executionTypeList.append(["Simple", "projections"])
+        # self.executionTypeList.append(["MultiSelectivity", "betadiff"])
+        # self.executionTypeList.append(["SimpleExploitationRates", "projections"])
+        self.executionTypeList.append(["SimpleNoStdYcs", "adolc"])
+        self.executionTypeList.append(["SimpleNoStdYcs", "betadiff"])
+        self.executionTypeList.append(["SimpleNoStdYcs", "projections"])
 
         self.adolcLock = threading.Lock()
 
