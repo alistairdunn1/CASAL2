@@ -11,12 +11,11 @@
 
 // headers
 #include "../Age/Mortality/MortalityConstantExploitation.h"
-#include "../Age/Mortality/MortalityConstantRate.h"
 #include "../Age/Mortality/MortalityHybrid.h"
 #include "../Age/Mortality/MortalityInstantaneous.h"
 #include "../Age/Mortality/MortalityInstantaneousRetained.h"
+#include "../Common/Mortality/MortalityConstantRate.h"
 #include "../Length/MortalityConstantExploitation.h"
-#include "../Length/MortalityConstantRate.h"
 #include "../Length/MortalityInstantaneous.h"
 #include "../Manager.h"
 #include "../Process.h"
@@ -40,7 +39,7 @@ void AllCategoriesHaveAnM(shared_ptr<Model> model) {
     for (auto* process : process_list) {
       if (process->process_type() == ProcessType::kMortality) {
         if (process->type() == PARAM_MORTALITY_CONSTANT_RATE) {
-          age::MortalityConstantRate* mortality = dynamic_cast<age::MortalityConstantRate*>(process);
+          common::MortalityConstantRate* mortality = dynamic_cast<common::MortalityConstantRate*>(process);
           if (!mortality)
             LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<age::MortalityConstantRate*>(process)";
 
@@ -86,7 +85,7 @@ void AllCategoriesHaveAnM(shared_ptr<Model> model) {
     for (auto* process : process_list) {
       if (process->process_type() == ProcessType::kMortality) {
         if (process->type() == PARAM_MORTALITY_CONSTANT_RATE) {
-          length::MortalityConstantRate* mortality = dynamic_cast<length::MortalityConstantRate*>(process);
+          common::MortalityConstantRate* mortality = dynamic_cast<common::MortalityConstantRate*>(process);
           if (!mortality)
             LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<length::MortalityConstantRate*>(process)";
 

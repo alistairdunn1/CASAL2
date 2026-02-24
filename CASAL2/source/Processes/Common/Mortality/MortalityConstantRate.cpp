@@ -21,9 +21,7 @@
 #include "TimeSteps/Manager.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::common {
 
 /**
  * Default Constructor
@@ -33,9 +31,12 @@ MortalityConstantRate::MortalityConstantRate(shared_ptr<Model> model) : Mortalit
   parameters_.Bind<string>(PARAM_CATEGORIES, &category_labels_, "The list of category labels")->flag_is_category();
   parameters_.Bind<Double>(PARAM_M, &m_input_, "The mortality rates");
   parameters_.Bind<double>(PARAM_TIME_STEP_PROPORTIONS, &ratios_, "The time step proportions for the mortality rates");
-  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The list of mortality by age ogive labels for the categories")->set_alias_labels({PARAM_RELATIVE_M_BY_AGE});
+  parameters_.Bind<string>(PARAM_SELECTIVITIES, &selectivity_names_, "The selectivity labels for each category")
+      ->set_alias_labels({PARAM_RELATIVE_M_BY_AGE, PARAM_RELATIVE_M_BY_LENGTH});
 
   RegisterAsAddressable(PARAM_M, &m_);
+
+  partition_structure_ = PartitionType::kAge | PartitionType::kLength;
 }
 
 /**
@@ -111,6 +112,12 @@ void MortalityConstantRate::DoBuild() {
   // dealing with memory allocation during the execute
   unsigned n_years = model_->years().size();
   total_removals_by_year_.reserve(n_years);
+
+  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model_->age_spread() : model_->get_number_of_length_bins();
+  mortality_rates_.resize(category_labels_.size());
+  for (unsigned i = 0; i < category_labels_.size(); ++i) {
+    mortality_rates_[i].resize(num_bins, 0.0);
+  }
 }
 
 /**
@@ -125,8 +132,7 @@ void MortalityConstantRate::DoExecute() {
   LOG_FINEST() << "Ratios.size() " << time_step_ratios_.size() << " : time_step: " << time_step << "; ratio: " << time_step_ratios_[time_step];
   double ratio = time_step_ratios_[time_step];
 
-  unsigned i = 0;
-  Double   amount;
+  unsigned i            = 0;
   Double   total_amount = 0.0;
   for (auto category : partition_) {
     Double m = m_[category->name_];
@@ -135,7 +141,9 @@ void MortalityConstantRate::DoExecute() {
 
     LOG_FINEST() << "category " << category->name_ << "; min_age: " << category->min_age_ << "; ratio: " << ratio;
     for (Double& data : category->data_) {
-      amount = data * (1 - exp(-selectivities_[i]->GetAgeResult(category->min_age_ + j, category->age_length_) * (m * ratio)));
+      Double selectivity_value
+          = (process_profile_ == ProcessProfile::kAge) ? selectivities_[i]->GetAgeResult(category->min_age_ + j, category->age_length_) : selectivities_[i]->GetLengthResult(j);
+      Double amount = data * (1 - exp(-selectivity_value * m * ratio));
       data -= amount;
       total_amount += amount;
       ++j;
@@ -186,6 +194,4 @@ void MortalityConstantRate::FillTabularReportCache(ostringstream& cache, bool fi
   cache << REPORT_EOL;
 }
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+}  // namespace niwa::processes::common

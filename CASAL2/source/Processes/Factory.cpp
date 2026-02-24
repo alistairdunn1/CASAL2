@@ -19,7 +19,6 @@
 #include "../Processes/Age/MarkovianMovement.h"
 #include "../Processes/Age/Maturation.h"
 #include "../Processes/Age/Mortality/MortalityConstantExploitation.h"
-#include "../Processes/Age/Mortality/MortalityConstantRate.h"
 #include "../Processes/Age/Mortality/MortalityEvent.h"
 #include "../Processes/Age/Mortality/MortalityEventBiomass.h"
 #include "../Processes/Age/Mortality/MortalityHollingRate.h"
@@ -41,12 +40,12 @@
 #include "../Processes/Age/TagLossEmpirical.h"
 #include "../Processes/Age/TransitionCategoryByAge.h"
 #include "../Processes/Common/LoadPartition.h"
+#include "../Processes/Common/Mortality/MortalityConstantRate.h"
 #include "../Processes/Common/Mortality/MortalityDiseaseRate.h"
 #include "../Processes/Common/Nop.h"
 #include "../Processes/Common/TransitionCategory.h"
 #include "../Processes/Length/Growth.h"
 #include "../Processes/Length/MortalityConstantExploitation.h"
-#include "../Processes/Length/MortalityConstantRate.h"
 #include "../Processes/Length/MortalityInstantaneous.h"
 #include "../Processes/Length/RecruitmentBevertonHolt.h"
 #include "../Processes/Length/RecruitmentConstant.h"
@@ -104,7 +103,7 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_MATURATION)
         result = new age::Maturation(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_RATE)
-        result = new age::MortalityConstantRate(model);
+        result = new common::MortalityConstantRate(model);
       else if (sub == PARAM_SURVIVAL_CONSTANT_RATE)
         result = new age::SurvivalConstantRate(model);
       else if (sub == PARAM_MORTALITY_DISEASE_RATE)
@@ -156,7 +155,7 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       if (sub == PARAM_GROWTH)
         result = new length::Growth(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_RATE)
-        result = new length::MortalityConstantRate(model);
+        result = new common::MortalityConstantRate(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_EXPLOITATION)
         result = new length::MortalityConstantExploitation(model);
       else if (sub == PARAM_RECRUITMENT_CONSTANT)
