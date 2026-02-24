@@ -15,8 +15,8 @@
  *
  * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
-#ifndef TRANSITIONCATEGORY_H_
-#define TRANSITIONCATEGORY_H_
+#ifndef PROCESS_COMMON_TRANSITIONCATEGORY_H_
+#define PROCESS_COMMON_TRANSITIONCATEGORY_H_
 
 // Headers
 #include "Partition/Accessors/Categories.h"
@@ -24,9 +24,7 @@
 #include "Selectivities/Selectivity.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::common {
 
 namespace accessor = niwa::partition::accessors;
 using utilities::OrderedMap;
@@ -56,12 +54,11 @@ private:
   accessor::Categories                      to_partition_;
   vector<Selectivity*>                      selectivities_;
   vector<vector<Double>>                    abundance_to_move_categories_;
-  unsigned                                  min_age_                       = model_->min_age();
+  unsigned                                  min_age_                       = 0;
   bool                                      process_is_in_mortality_block_ = false;
   map<unsigned, OrderedMap<string, Double>> proportions_by_year_;  // n_years x n_categories
 };
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
-#endif /* TRANSITIONCATEGORY_H_ */
+}  // namespace niwa::processes::common
+
+#endif /* PROCESS_COMMON_TRANSITIONCATEGORY_H_ */

@@ -17,9 +17,7 @@
 #include "Selectivities/Manager.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::common {
 
 /**
  * Default constructor
@@ -43,7 +41,7 @@ TransitionCategory::TransitionCategory(shared_ptr<Model> model) : Process(model)
 
   // this is changed in validate if process_is_in_mortality_block_ = true
   process_type_        = ProcessType::kTransition;
-  partition_structure_ = PartitionType::kAge;
+  partition_structure_ = PartitionType::kAge | PartitionType::kLength;
 }
 
 /**
@@ -71,16 +69,18 @@ void TransitionCategory::DoValidate() {
   //  // Validate Categories
   auto categories = model_->categories();
 
-  // Validate that each from and to category have the same age range.
-  for (unsigned i = 0; i < from_category_names_.size(); ++i) {
-    if (categories->min_age(from_category_names_[i]) != categories->min_age(to_category_names_[i])) {
-      LOG_ERROR_P(PARAM_FROM) << ": 'from' category " << from_category_names_[i] << " does not"
-                              << " have the same age range as the 'to' category " << to_category_names_[i];
-    }
+  if (process_profile_ == ProcessProfile::kAge) {
+    // Validate that each from and to category have the same age range.
+    for (unsigned i = 0; i < from_category_names_.size(); ++i) {
+      if (categories->min_age(from_category_names_[i]) != categories->min_age(to_category_names_[i])) {
+        LOG_ERROR_P(PARAM_FROM) << ": 'from' category " << from_category_names_[i] << " does not"
+                                << " have the same age range as the 'to' category " << to_category_names_[i];
+      }
 
-    if (categories->max_age(from_category_names_[i]) != categories->max_age(to_category_names_[i])) {
-      LOG_ERROR_P(PARAM_FROM) << ": 'from' category " << from_category_names_[i] << " does not"
-                              << " have the same age range as the 'to' category " << to_category_names_[i];
+      if (categories->max_age(from_category_names_[i]) != categories->max_age(to_category_names_[i])) {
+        LOG_ERROR_P(PARAM_FROM) << ": 'from' category " << from_category_names_[i] << " does not"
+                                << " have the same age range as the 'to' category " << to_category_names_[i];
+      }
     }
   }
 }
@@ -109,9 +109,15 @@ void TransitionCategory::DoBuild() {
     LOG_FATAL() << "The list of categories for the transition category process are not of equal size in year " << model_->current_year() << ". Number of 'From' "
                 << from_partition_.size() << " and 'To' " << to_partition_.size() << " categories to transition between";
   }
+
   abundance_to_move_categories_.resize(from_category_names_.size());
+  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model_->age_spread() : model_->get_number_of_length_bins();
   for (unsigned i = 0; i < from_category_names_.size(); i++) {
-    abundance_to_move_categories_[i].resize(model_->age_spread(), 0.0);
+    abundance_to_move_categories_[i].resize(num_bins, 0.0);
+  }
+
+  if (process_profile_ == ProcessProfile::kAge) {
+    min_age_ = model_->min_age();
   }
 }
 
@@ -129,9 +135,11 @@ void TransitionCategory::DoExecute() {
   for (unsigned i = 0; from_iter != from_partition_.end() && to_iter != to_partition_.end(); ++from_iter, ++to_iter, ++i) {
     LOG_FINEST() << "category = " << (*from_iter)->name_ << " to category = " << (*to_iter)->name_ << " i = " << i << " prop = " << proportions_by_category_[(*to_iter)->name_];
     fill(abundance_to_move_categories_[i].begin(), abundance_to_move_categories_[i].end(), 0.0);
-    for (unsigned offset = 0; offset < (*from_iter)->data_.size(); ++offset)
-      abundance_to_move_categories_[i][offset]
-          = proportions_by_category_[(*to_iter)->name_] * selectivities_[i]->GetAgeResult(min_age_ + offset, (*from_iter)->age_length_) * (*from_iter)->data_[offset];
+    for (unsigned offset = 0; offset < (*from_iter)->data_.size(); ++offset) {
+      Double selectivity_value
+          = (process_profile_ == ProcessProfile::kAge) ? selectivities_[i]->GetAgeResult(min_age_ + offset, (*from_iter)->age_length_) : selectivities_[i]->GetLengthResult(offset);
+      abundance_to_move_categories_[i][offset] = proportions_by_category_[(*to_iter)->name_] * selectivity_value * (*from_iter)->data_[offset];
+    }
   }
   from_iter = from_partition_.begin();
   to_iter   = to_partition_.begin();
@@ -142,7 +150,7 @@ void TransitionCategory::DoExecute() {
       LOG_FINEST() << "before = " << (*from_iter)->data_[offset];
       (*from_iter)->data_[offset] -= abundance_to_move_categories_[i][offset];
       (*to_iter)->data_[offset] += abundance_to_move_categories_[i][offset];
-      LOG_FINEST() << "age-ndx: " << offset << " Moving " << abundance_to_move_categories_[i][offset] << " out of " << (*from_iter)->data_[offset] << " to "
+      LOG_FINEST() << "age/length-ndx: " << offset << " Moving " << abundance_to_move_categories_[i][offset] << " out of " << (*from_iter)->data_[offset] << " to "
                    << (*to_iter)->data_[offset];
       if ((*from_iter)->data_[offset] < 0.0)
         LOG_FATAL() << "TransitionCategory rate caused a negative partition if ((*from_iter)->data_[offset] < 0.0) ";
@@ -176,6 +184,5 @@ void TransitionCategory::FillReportCache(ostringstream& cache) {
     cache << REPORT_EOL;
   }
 }
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+
+}  // namespace niwa::processes::common

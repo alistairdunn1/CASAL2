@@ -25,9 +25,7 @@
 #include "TransitionCategory.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::age {
 
 using niwa::testfixtures::BasicModel;
 using std::cout;
@@ -118,8 +116,6 @@ TEST_F(BasicModel, Processes_Transition_Category_Constant_One_Selectivity) {
   }
 }
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+}  // namespace niwa::processes::age
 
 #endif /* TESTMODE */

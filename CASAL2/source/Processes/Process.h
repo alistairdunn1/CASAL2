@@ -36,6 +36,12 @@ enum class ProcessType {
   kNullProcess,  // Special process type for the process child nop
 };
 
+// How is this process being executed?
+enum class ProcessProfile {
+  kAge,
+  kLength,
+};
+
 /**
  * Class Definition
  */
@@ -56,11 +62,12 @@ public:
   virtual void DoBuild()    = 0;
   virtual void DoReset()    = 0;
   virtual void DoVerify(shared_ptr<Model> model) {};
-  virtual void DoExecute()  = 0;
-  virtual void FillReportCache(ostringstream& cache){};
-  virtual void FillTabularReportCache(ostringstream& cache, bool first_run){};
+  virtual void DoExecute() = 0;
+  virtual void FillReportCache(ostringstream& cache) {};
+  virtual void FillTabularReportCache(ostringstream& cache, bool first_run) {};
 
   // accessors
+  void          set_process_profile(ProcessProfile process_profile) { process_profile_ = process_profile; }
   PartitionType partition_structure() const { return partition_structure_; }
   ProcessType   process_type() const { return process_type_; }
 
@@ -70,6 +77,7 @@ protected:
   ProcessType                                   process_type_        = ProcessType::kUnknown;
   PartitionType                                 partition_structure_ = PartitionType::kInvalid;
   map<unsigned, map<string, vector<Executor*>>> executors_;
+  ProcessProfile                                process_profile_ = ProcessProfile::kAge;
 };
 } /* namespace niwa */
 
