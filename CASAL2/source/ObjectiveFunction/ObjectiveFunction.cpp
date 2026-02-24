@@ -89,8 +89,7 @@ void ObjectiveFunction::CalculateScore() {
     score_list_.push_back(new_score);
     score_ += new_score.score_;
     penalties_ += new_score.score_;
-    
-  }
+    }
 
   /**
    * Get the scores from each of the estimate priors
@@ -147,7 +146,7 @@ void ObjectiveFunction::CalculateScore() {
     jacobians_ += new_score.score_;
   }
 
-  LOG_MEDIUM() << "objective.score: " << score_;
+  LOG_FINE() << "objective.score: " << score_;
 }
 
 } /* namespace niwa */
