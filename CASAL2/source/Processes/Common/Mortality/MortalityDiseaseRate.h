@@ -12,19 +12,16 @@
  * This class is a replicates CASAL's disease mortality class.
  *
  */
-#ifndef LENGTH_MORTALITYDISEASERATE_H_
-#define LENGTH_MORTALITYDISEASERATE_H_
+#ifndef COMMON_MORTALITYDISEASERATE_H_
+#define COMMON_MORTALITYDISEASERATE_H_
 
 // Headers
-#include "../../Partition/Accessors/Categories.h"
-#include "../../Processes/Process.h"
-#include "../../Utilities/Types.h"
+#include "../../../Partition/Accessors/Categories.h"
+#include "../../../Processes/Process.h"
+#include "../../../Utilities/Types.h"
 
 // namespaces
-namespace niwa {
-// class Selectivity;
-namespace processes {
-namespace length {
+namespace niwa::processes::common {
 namespace accessor = niwa::partition::accessors;
 using utilities::OrderedMap;
 /**
@@ -44,22 +41,19 @@ public:
 
   const vector<string>& category_labels() const { return category_labels_; }
 
-
 private:
   // Members
-  vector<string>              category_labels_;
-  vector<Double>              dm_input_;
-  OrderedMap<string, Double>  dm_;
-  map<unsigned, Double>       year_effect_by_year_;
-  vector<Double>              year_effect_input_;
-  vector<string>              selectivity_names_;
-  accessor::Categories partition_;
-  vector<Selectivity*>        selectivities_;
-  vector<unsigned>            process_years_;
-  vector<vector<vector<Double>>>      results_; // year x category x length bin
+  vector<string>                 category_labels_;
+  vector<Double>                 dm_input_;
+  OrderedMap<string, Double>     dm_;
+  map<unsigned, Double>          year_effect_by_year_;
+  vector<Double>                 year_effect_input_;
+  vector<string>                 selectivity_names_;
+  accessor::Categories           partition_;
+  vector<Selectivity*>           selectivities_;
+  vector<unsigned>               process_years_;
+  vector<vector<vector<Double>>> results_;  // year x category x age classes
 };
 
-} /* namespace length */
-} /* namespace processes */
-} /* namespace niwa */
-#endif /* LENGTH_MORTALITYDISEASERATE_H_ */
+}  // namespace niwa::processes::common
+#endif /* COMMON_MORTALITYDISEASERATE_H_ */
