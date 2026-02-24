@@ -89,7 +89,7 @@ std::vector<double> Calculate(std::shared_ptr<ThreadPool> thread_pool, std::vect
   } else {
     scaled_values = estimate_values;
   }
-  LOG_MEDIUM() << "Calculating a gradient with previous score " << last_score;
+  LOG_FINE() << "Calculating a gradient with previous score " << last_score;
   // for (auto e : estimate_values) cout << "e: " << e << endl;
 
   for (unsigned i = 0; i < estimate_values.size(); ++i) {
@@ -126,9 +126,9 @@ std::vector<double> Calculate(std::shared_ptr<ThreadPool> thread_pool, std::vect
     score += gradient_penalties[i];
 
     // Populate Gradient, and Restore Orig Value
-    LOG_MEDIUM() << "Score: " << gradient_scores[i] << ", penalty: " << gradient_penalties[i];
+    LOG_FINE() << "Score: " << gradient_scores[i] << ", penalty: " << gradient_penalties[i];
     result_gradient[i] = (score - last_score) / step_size_temp;
-    LOG_MEDIUM() << "Result gradient: " << result_gradient[i] << " = (" << score << " - " << last_score << ") / " << step_size_temp;
+    LOG_FINE() << "Result gradient: " << result_gradient[i] << " = (" << score << " - " << last_score << ") / " << step_size_temp;
 
     scaled_values[i] = original_value;
   }
