@@ -125,7 +125,7 @@ void ProcessRemovalsByLength::DoBuild() {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
     auto process             = time_step->SubscribeToProcess(this, years_, process_label_);
-    mortality_instantaneous_ = dynamic_cast<length::MortalityInstantaneous*>(process);
+    mortality_instantaneous_ = dynamic_cast<MortalityInstantaneous*>(process);
   }
 
   if (mortality_instantaneous_ == nullptr)

@@ -1,5 +1,5 @@
 /**
- * @file RecruitmentBevertonHolt.Test.cpp
+ * @file RecruitmentBevertonHolt.Length.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
  * @date 2025/04/02
  * @section LICENSE
@@ -8,8 +8,6 @@
  *
  */
 #ifdef TESTMODE
-
-#include "RecruitmentBevertonHolt.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -20,7 +18,7 @@
 #include "Processes/Manager.h"
 #include "TestResources/TestFixtures/InternalEmptyLengthModel.h"
 
-namespace niwa::processes::length {
+namespace niwa::processes::common {
 using niwa::testfixtures::InternalEmptyLengthModel;
 using std::cout;
 using std::endl;
@@ -115,7 +113,7 @@ type constant
 c 1
 )";
 
-TEST_F(InternalEmptyLengthModel, Processes_Recruitment_BevertonHolt) {
+TEST_F(InternalEmptyLengthModel, Processes_Recruitment_BevertonHolt_Length) {
   AddConfigurationLine(test_cases_process_recruitment_bh, __FILE__, 30);
   LoadConfiguration();
 
@@ -229,7 +227,7 @@ type constant
 c 1
 )";
 
-TEST_F(InternalEmptyLengthModel, Processes_Recruitment_BevertonHolt_Modified) {
+TEST_F(InternalEmptyLengthModel, Processes_Recruitment_BevertonHolt_Modified_Length) {
   AddConfigurationLine(test_cases_process_recruitment_bh_modified, __FILE__, 144);
   LoadConfiguration();
 
@@ -253,5 +251,5 @@ TEST_F(InternalEmptyLengthModel, Processes_Recruitment_BevertonHolt_Modified) {
   EXPECT_NEAR(6.2344119526705951e+18, uni.data_[14], 1e-5);
 }
 
-}  // namespace niwa::processes::length
+}  // namespace niwa::processes::common
 #endif  // TESTMODE

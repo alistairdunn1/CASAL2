@@ -1,20 +1,20 @@
 /**
- * @file MortalityInstantaneous.Test.cpp
+ * @file MortalityInstantaneousLength.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
  * @date 2025/04/07
  * @section LICENSE
  *
  * Copyright Casal2 Project 2025 - https://github.com/Casal2/
  *
+ * @description Length-based tests for consolidated MortalityInstantaneous
  */
 #ifdef TESTMODE
 
 // Headers
-#include "MortalityInstantaneous.h"
-
 #include <iomanip>
 
 #include "Model/Model.h"
+#include "MortalityInstantaneous.h"
 #include "ObjectiveFunction/ObjectiveFunction.h"
 #include "Partition/Partition.h"
 #include "Processes/Manager.h"
@@ -23,11 +23,11 @@
 // Namespaces
 namespace niwa {
 namespace processes {
-namespace length {
+namespace common {
 
 using niwa::testfixtures::InternalEmptyLengthModel;
 
-const std::string test_cases_process_mortality_instantaneous =
+const std::string test_cases_process_mortality_instantaneous_length =
     R"(
 @model
 type length
@@ -120,7 +120,7 @@ cv 0.0
 compatibility_option casal
 )";
 
-const std::string test_cases_process_mortality_instantaneous_simple =
+const std::string test_cases_process_mortality_instantaneous_simple_length =
     R"(
 @process mortality
 type mortality_instantaneous
@@ -169,9 +169,9 @@ end_table
 /**
  *
  */
-TEST_F(InternalEmptyLengthModel, Processes_Mortality_Instantaneous_Simple) {
-  AddConfigurationLine(test_cases_process_mortality_instantaneous, __FILE__, 31);
-  AddConfigurationLine(test_cases_process_mortality_instantaneous_simple, __FILE__, 136);
+TEST_F(InternalEmptyLengthModel, Processes_Mortality_Instantaneous_Length_Simple) {
+  AddConfigurationLine(test_cases_process_mortality_instantaneous_length, __FILE__, 31);
+  AddConfigurationLine(test_cases_process_mortality_instantaneous_simple_length, __FILE__, 136);
   LoadConfiguration();
 
   model_->Start(RunMode::kBasic);
@@ -188,7 +188,7 @@ TEST_F(InternalEmptyLengthModel, Processes_Mortality_Instantaneous_Simple) {
   }
 }
 
-}  // namespace length
+}  // namespace common
 } /* namespace processes */
 } /* namespace niwa */
 #endif /* TESTMODE */

@@ -1,5 +1,5 @@
 /**
- * @file RecruitmentConstant.Test.cpp
+ * @file RecruitmentConstant_Length.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
  * @date 2025/05/07
  * @section LICENSE
@@ -9,16 +9,15 @@
  */
 #ifdef TESTMODE
 
-#include "RecruitmentConstant.h"
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <string>
 
+#include "RecruitmentConstant.h"
 #include "TestResources/TestFixtures/InternalEmptyLengthModel.h"
 
-namespace niwa::processes::length {
+namespace niwa::processes::common {
 using niwa::testfixtures::InternalEmptyLengthModel;
 
 /**
@@ -107,5 +106,5 @@ TEST_F(InternalEmptyLengthModel, Processes_Recruitment_Constant) {
   EXPECT_NEAR(16053.928757326928, female.data_[4], 1e-5);
 }
 
-}  // namespace niwa::processes::length
+}  // namespace niwa::processes::common
 #endif  // TESTMODE

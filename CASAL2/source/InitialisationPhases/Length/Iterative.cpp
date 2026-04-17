@@ -18,7 +18,7 @@
 #include "../../Categories/Categories.h"
 #include "../../DerivedQuantities/Manager.h"
 #include "../../Partition/Accessors/Categories.h"
-#include "../../Processes/Length/RecruitmentBevertonHolt.h"
+#include "../../Processes/Common/Recruitment/RecruitmentBevertonHolt.h"
 #include "../../Processes/Manager.h"
 #include "../../TimeSteps/Factory.h"
 #include "../../TimeSteps/Manager.h"

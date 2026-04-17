@@ -10,13 +10,11 @@
  */
 
 // headers
-#include "../Age/Mortality/MortalityConstantExploitation.h"
 #include "../Age/Mortality/MortalityHybrid.h"
-#include "../Age/Mortality/MortalityInstantaneous.h"
 #include "../Age/Mortality/MortalityInstantaneousRetained.h"
+#include "../Common/Mortality/MortalityConstantExploitation.h"
 #include "../Common/Mortality/MortalityConstantRate.h"
-#include "../Length/MortalityConstantExploitation.h"
-#include "../Length/MortalityInstantaneous.h"
+#include "../Common/Mortality/MortalityInstantaneous.h"
 #include "../Manager.h"
 #include "../Process.h"
 #include "Categories/Categories.h"
@@ -46,9 +44,9 @@ void AllCategoriesHaveAnM(shared_ptr<Model> model) {
           for (auto label : mortality->category_labels()) category_count[label]++;
 
         } else if (process->type() == PARAM_MORTALITY_INSTANTANEOUS) {
-          age::MortalityInstantaneous* mortality = dynamic_cast<age::MortalityInstantaneous*>(process);
+          common::MortalityInstantaneous* mortality = dynamic_cast<common::MortalityInstantaneous*>(process);
           if (!mortality)
-            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<age::MortalityInstantaneous*>(process)";
+            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<common::MortalityInstantaneous*>(process)";
 
           for (auto label : mortality->category_labels()) {
             category_count[label]++;
@@ -70,9 +68,9 @@ void AllCategoriesHaveAnM(shared_ptr<Model> model) {
             category_count[label]++;
           }
         } else if (process->type() == PARAM_MORTALITY_CONSTANT_EXPLOITATION) {
-          age::MortalityConstantExploitation* mortality = dynamic_cast<age::MortalityConstantExploitation*>(process);
+          common::MortalityConstantExploitation* mortality = dynamic_cast<common::MortalityConstantExploitation*>(process);
           if (!mortality)
-            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<age::MortalityConstantExploitation*>(process)";
+            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<common::MortalityConstantExploitation*>(process)";
 
           for (auto label : mortality->category_labels()) {
             category_count[label]++;
@@ -92,17 +90,17 @@ void AllCategoriesHaveAnM(shared_ptr<Model> model) {
           for (auto label : mortality->category_labels()) category_count[label]++;
 
         } else if (process->type() == PARAM_MORTALITY_INSTANTANEOUS) {
-          length::MortalityInstantaneous* mortality = dynamic_cast<length::MortalityInstantaneous*>(process);
+          common::MortalityInstantaneous* mortality = dynamic_cast<common::MortalityInstantaneous*>(process);
           if (!mortality)
-            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<length::MortalityInstantaneous*>(process)";
+            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<common::MortalityInstantaneous*>(process)";
 
           for (auto label : mortality->category_labels()) {
             category_count[label]++;
           }
         } else if (process->type() == PARAM_MORTALITY_CONSTANT_EXPLOITATION) {
-          length::MortalityConstantExploitation* mortality = dynamic_cast<length::MortalityConstantExploitation*>(process);
+          common::MortalityConstantExploitation* mortality = dynamic_cast<common::MortalityConstantExploitation*>(process);
           if (!mortality)
-            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<length::MortalityConstantExploitation*>(process)";
+            LOG_CODE_ERROR() << "!mortality with auto* mortality = dynamic_cast<common::MortalityConstantExploitation*>(process)";
 
           for (auto label : mortality->category_labels()) {
             category_count[label]++;

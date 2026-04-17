@@ -13,12 +13,10 @@
 #include "../../Categories/Categories.h"
 #include "../../InitialisationPhases/Manager.h"
 #include "../../Model/Model.h"
-#include "../Age/RecruitmentBevertonHolt.h"
 #include "../Age/RecruitmentBevertonHoltWithDeviations.h"
-#include "../Age/RecruitmentConstant.h"
 #include "../Age/RecruitmentRicker.h"
-#include "../Length/RecruitmentBevertonHolt.h"
-#include "../Length/RecruitmentConstant.h"
+#include "../Common/Recruitment/RecruitmentBevertonHolt.h"
+#include "../Common/Recruitment/RecruitmentConstant.h"
 #include "../Manager.h"
 #include "../Process.h"
 
@@ -41,16 +39,16 @@ void RecruitmentCategoriesVerification(shared_ptr<Model> model) {
     for (auto* process : process_list) {
       if (process->process_type() == ProcessType::kRecruitment) {
         if (process->type() == PARAM_RECRUITMENT_CONSTANT) {
-          age::RecruitmentConstant* recruitment = dynamic_cast<age::RecruitmentConstant*>(process);
+          common::RecruitmentConstant* recruitment = dynamic_cast<common::RecruitmentConstant*>(process);
           if (!recruitment)
-            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<age::RecruitmentConstant*>(process)";
+            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<common::RecruitmentConstant*>(process)";
 
           for (auto label : recruitment->category_labels()) category_count[label]++;
 
         } else if (process->type() == PARAM_RECRUITMENT_BEVERTON_HOLT) {
-          age::RecruitmentBevertonHolt* recruitment = dynamic_cast<age::RecruitmentBevertonHolt*>(process);
+          common::RecruitmentBevertonHolt* recruitment = dynamic_cast<common::RecruitmentBevertonHolt*>(process);
           if (!recruitment)
-            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<age::RecruitmentBevertonHolt*>(process)";
+            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<common::RecruitmentBevertonHolt*>(process)";
 
           for (auto label : recruitment->category_labels()) {
             category_in_recruitment_that_scale[label]++;
@@ -81,16 +79,16 @@ void RecruitmentCategoriesVerification(shared_ptr<Model> model) {
     for (auto* process : process_list) {
       if (process->process_type() == ProcessType::kRecruitment) {
         if (process->type() == PARAM_RECRUITMENT_CONSTANT) {
-          length::RecruitmentConstant* recruitment = dynamic_cast<length::RecruitmentConstant*>(process);
+          common::RecruitmentConstant* recruitment = dynamic_cast<common::RecruitmentConstant*>(process);
           if (!recruitment)
-            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<length::RecruitmentConstant*>(process)";
+            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<common::RecruitmentConstant*>(process)";
 
           for (auto label : recruitment->category_labels()) category_count[label]++;
 
         } else if (process->type() == PARAM_RECRUITMENT_BEVERTON_HOLT) {
-          length::RecruitmentBevertonHolt* recruitment = dynamic_cast<length::RecruitmentBevertonHolt*>(process);
+          common::RecruitmentBevertonHolt* recruitment = dynamic_cast<common::RecruitmentBevertonHolt*>(process);
           if (!recruitment)
-            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<length::RecruitmentBevertonHolt*>(process)";
+            LOG_CODE_ERROR() << "!rec with auto* rec = dynamic_cast<common::RecruitmentBevertonHolt*>(process)";
 
           for (auto label : recruitment->category_labels()) {
             category_in_recruitment_that_scale[label]++;

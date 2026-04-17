@@ -1,5 +1,5 @@
 /**
- * @file RecruitmentBevertonHolt.Test.cpp
+ * @file RecruitmentBevertonHolt.Age.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
  * @date 20/08/2013
  * @section LICENSE
@@ -19,9 +19,7 @@
 #include "TestResources/TestFixtures/InternalEmptyModel.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::common {
 
 using niwa::testfixtures::InternalEmptyModel;
 using std::cout;
@@ -310,8 +308,6 @@ TEST_F(InternalEmptyModel, Processes_BevertonHolt_Recruitment_B0_initialised) {
   EXPECT_DOUBLE_EQ(11994661.788456656, stock.data_[7]);
 }
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+}  // namespace niwa::processes::common
 
 #endif /* TESTMODE */

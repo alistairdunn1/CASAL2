@@ -1,24 +1,24 @@
 /**
- * @file Tagging.Test.cpp
+ * @file TaggingLength.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
  * @date 2025/05/07
  * @section LICENSE
  *
  * Copyright Casal2 Project 2025 - https://github.com/Casal2/
  *
+ * Length-based Tagging tests
  */
 #ifdef TESTMODE
-
-#include "Tagging.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <string>
 
+#include "Partition/Partition.h"
 #include "TestResources/TestFixtures/InternalEmptyLengthModel.h"
 
-namespace niwa::processes::length {
+namespace niwa::processes::common {
 using niwa::testfixtures::InternalEmptyLengthModel;
 
 /**
@@ -87,7 +87,7 @@ c 1
 /*
  * Simple unit test
  */
-TEST_F(InternalEmptyLengthModel, Processes_Tagging) {
+TEST_F(InternalEmptyLengthModel, Processes_Tagging_Length) {
   const string tagging_process = R"(
     @process tagging
     type tagging
@@ -136,7 +136,7 @@ TEST_F(InternalEmptyLengthModel, Processes_Tagging) {
 /*
  * Complicate the test a bit more
  */
-TEST_F(InternalEmptyLengthModel, Processes_Tagging_HigherN) {
+TEST_F(InternalEmptyLengthModel, Processes_Tagging_Length_HigherN) {
   const string tagging_process = R"(
     @process tagging
     type tagging
@@ -185,7 +185,7 @@ TEST_F(InternalEmptyLengthModel, Processes_Tagging_HigherN) {
 /*
  * Complicate the test a bit more with some variance of proportions and N
  */
-TEST_F(InternalEmptyLengthModel, Processes_Tagging_HigherN_and_proportions) {
+TEST_F(InternalEmptyLengthModel, Processes_Tagging_Length_HigherN_and_proportions) {
   const string tagging_process = R"(
     @process tagging
     type tagging
@@ -231,5 +231,5 @@ TEST_F(InternalEmptyLengthModel, Processes_Tagging_HigherN_and_proportions) {
   EXPECT_NEAR(200, tagged.data_[4], 1e-5);
 }
 
-}  // namespace niwa::processes::length
+}  // namespace niwa::processes::common
 #endif  // TESTMODE

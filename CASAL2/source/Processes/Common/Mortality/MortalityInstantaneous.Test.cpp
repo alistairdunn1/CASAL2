@@ -7,6 +7,7 @@
  *
  * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
+ * @description Age-based tests for consolidated MortalityInstantaneous
  */
 #ifdef TESTMODE
 
@@ -22,7 +23,7 @@
 // Namespaces
 namespace niwa {
 namespace processes {
-namespace age {
+namespace common {
 
 using niwa::testfixtures::InternalEmptyModel;
 
@@ -196,7 +197,7 @@ end_table
 /**
  *
  */
-TEST_F(InternalEmptyModel, Processes_Mortality_Instantaneous_Simple) {
+TEST_F(InternalEmptyModel, Processes_Mortality_Instantaneous_Age_Simple) {
   AddConfigurationLine(test_cases_process_mortality_instantaneous, __FILE__, 31);
   AddConfigurationLine(test_cases_process_mortality_instantaneous_simple, __FILE__, 136);
   LoadConfiguration();
@@ -204,10 +205,6 @@ TEST_F(InternalEmptyModel, Processes_Mortality_Instantaneous_Simple) {
   model_->Start(RunMode::kBasic);
 
   vector<Double> expected
-      //    = {0.000000,           4949176.82048178,   4064898.2621518681, 3328684.1087008952, 2706834.6065880726, 2190888.450324099,  1767721.5580938468, 1425641.5667563954,
-      //       1140148.3260357741, 907812.45802352321, 720031.05614045332, 567731.9296628146,  445605.3260517047,  350563.78174247633, 275339.15723073942, 215262.40630128933,
-      //       167136.53823274924, 129653.50528339949, 101157.68202146454, 79586.351305909513, 63116.075477451588, 50550.346367653998, 41118.131347039118, 33999.31527315217,
-      //       28565.45150964101,  24327.409298919287, 20914.675439551294, 18089.274781314001, 15700.519200272849, 95507.546634746832};
       = {0.000000,           4517589.0844696956, 3400691.3934206986, 2542848.3045898164, 1876030.9612151617, 1369154.0560226361, 991396.00288786006, 715618.31706929638,
          509361.3213449379,  357692.23566706764, 247971.25787719179, 169279.1117503815,  114404.71799508265, 77754.075380072783, 52762.727570033501, 35311.288777986818,
          23280.758849926286, 15361.723675611222, 10317.943765057791, 7107.375965894933,  5009.7080836049681, 3620.3603525061744, 2711.6817731540582, 2106.2174296031831,
@@ -219,7 +216,7 @@ TEST_F(InternalEmptyModel, Processes_Mortality_Instantaneous_Simple) {
   }
 }
 
-} /* namespace age */
+} /* namespace common */
 } /* namespace processes */
 } /* namespace niwa */
 #endif /* TESTMODE */

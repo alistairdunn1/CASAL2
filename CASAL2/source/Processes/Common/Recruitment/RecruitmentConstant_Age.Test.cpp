@@ -1,13 +1,12 @@
 /**
- * @file RecruitmentConstant.Test.cpp
+ * @file RecruitmentConstant_Age.Test.cpp
  * @author  Scott Rasmussen (scott.rasmussen@zaita.com)
  * @version 1.0
  * @date 4/04/2013
  * @section LICENSE
  *
- * Copyright Casal2 Project 2024 - https://github.com/Casal2/�2013 - www.niwa.co.nz
+ * Copyright Casal2 Project 2024 - https://github.com/Casal2/
  *
- * $Date: 2008-03-04 16:33:32 +1300 (Tue, 04 Mar 2008) $
  */
 #ifdef TESTMODE
 
@@ -21,9 +20,7 @@
 #include "TimeSteps/Manager.h"
 
 // Namespaces
-namespace niwa {
-namespace processes {
-namespace age {
+namespace niwa::processes::common {
 
 using niwa::testfixtures::BasicModel;
 using std::cout;
@@ -73,8 +70,6 @@ TEST_F(BasicModel, Processes_Constant_Recruitment) {
   for (unsigned i = 1; i < immature_female.data_.size(); ++i) EXPECT_DOUBLE_EQ(0.0, immature_female.data_[i]) << " where i = " << i << "; age = " << i + immature_female.min_age_;
 }
 
-} /* namespace age */
-} /* namespace processes */
-} /* namespace niwa */
+} /* namespace niwa::processes::common */
 
 #endif /* TESTMODE */

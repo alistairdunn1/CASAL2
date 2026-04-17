@@ -17,7 +17,7 @@
 #include "Observations/Observation.h"
 #include "Partition/Accessors/Cached/CombinedCategories.h"
 #include "Partition/Accessors/CombinedCategories.h"
-#include "Processes/Length/MortalityInstantaneous.h"
+#include "Processes/Common/Mortality/MortalityInstantaneous.h"
 
 // Namespace
 namespace niwa {
@@ -26,7 +26,7 @@ namespace length {
 
 using partition::accessors::CombinedCategoriesPtr;
 using partition::accessors::cached::CachedCombinedCategoriesPtr;
-using processes::length::MortalityInstantaneous;
+using processes::common::MortalityInstantaneous;
 
 /**
  * Class Definition
@@ -56,7 +56,7 @@ protected:
   string                                     method_                                       = "";
   parameters::table::Table*                  error_values_table_                           = nullptr;
   CombinedCategoriesPtr                      partition_                                    = nullptr;
-  length::MortalityInstantaneous*            mortality_instantaneous_                      = nullptr;
+  MortalityInstantaneous*                    mortality_instantaneous_                      = nullptr;
   string                                     time_step_label_                              = "";
   string                                     process_label_                                = "";
   vector<Double>                             expected_values_                              = {};
