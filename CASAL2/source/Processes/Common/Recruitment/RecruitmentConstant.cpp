@@ -127,6 +127,11 @@ void RecruitmentConstant::DoExecute() {
     Double total_proportions = 0.0;
     for (auto category : partition_length_) total_proportions += proportions_categories_[category->name_];
 
+    if (length_bins_.empty()) {
+      LOG_ERROR_P(PARAM_LENGTH_BINS) << "At least one length bin must be specified for length-based recruitment";
+      return;
+    }
+
     // Update our partition with new recruitment values
     for (auto category : partition_length_) {
       if (category->data_.size() != model_->length_bins().size())
@@ -135,7 +140,16 @@ void RecruitmentConstant::DoExecute() {
       r0_by_length_bin_     = (r0_ * (proportions_categories_[category->name_]) / total_proportions) / length_bins_.size();
       unsigned length_index = 0;
       for (auto length_bin : length_bins_) {
-        length_index = std::distance(std::find(model_->length_bins().begin(), model_->length_bins().end(), length_bin), model_->length_bins().begin());
+        auto model_length_iter = std::find(model_->length_bins().begin(), model_->length_bins().end(), length_bin);
+        if (model_length_iter == model_->length_bins().end()) {
+          LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bin " << length_bin << " is not defined in the model length bins";
+          continue;
+        }
+        length_index = std::distance(model_->length_bins().begin(), model_length_iter);
+        if (length_index >= category->data_.size()) {
+          LOG_CODE_ERROR() << "Length index " << length_index << " is out of range for category " << category->name_;
+          continue;
+        }
         LOG_FINEST() << "putting " << r0_by_length_bin_ << " in category " << category->name_ << " in length bin " << model_->length_bins()[length_index];
         category->data_[length_index] += r0_by_length_bin_;
       }

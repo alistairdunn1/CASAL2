@@ -79,12 +79,16 @@ void MortalityDiseaseRate::DoBuild() {
   }
 
   results_.resize(process_years_.size());
-  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model_->age_spread() : model_->get_number_of_length_bins();
-  results_.resize(process_years_.size());
+  vector<unsigned> category_bin_counts;
+  category_bin_counts.reserve(partition_.size());
+  for (auto category : partition_) {
+    category_bin_counts.push_back(category->data_.size());
+  }
+
   for (unsigned i = 0; i < process_years_.size(); i++) {
-    results_[i].resize(category_labels_.size());
-    for (unsigned j = 0; j < category_labels_.size(); j++) {
-      results_[i][j].resize(num_bins, 0.0);
+    results_[i].resize(category_bin_counts.size());
+    for (unsigned j = 0; j < category_bin_counts.size(); j++) {
+      results_[i][j].resize(category_bin_counts[j], 0.0);
     }
   }
 }
@@ -118,8 +122,12 @@ void MortalityDiseaseRate::DoExecute() {
         for (Double& data : category->data_) {
           Double selectivity_value
               = (process_profile_ == ProcessProfile::kAge) ? selectivities_[i]->GetAgeResult(category->min_age_ + j, category->age_length_) : selectivities_[i]->GetLengthResult(j);
-          amount                   = data * (1 - exp(-selectivity_value * dm * year_effect_by_year_[year]));
-          results_[year_ndx][i][j] = amount;
+          amount = data * (1 - exp(-selectivity_value * dm * year_effect_by_year_[year]));
+          if (i >= results_[year_ndx].size() || j >= results_[year_ndx][i].size()) {
+            LOG_CODE_ERROR() << "Results index out of range for year index " << year_ndx << ", category index " << i << ", bin index " << j;
+          } else {
+            results_[year_ndx][i][j] = amount;
+          }
           LOG_FINEST() << "j = " << j << " data " << data << " dm " << dm << " Year effect " << year_effect_by_year_[year];
           data -= amount;
           ++j;

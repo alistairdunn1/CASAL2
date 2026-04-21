@@ -526,7 +526,11 @@ void MortalityInstantaneous::DoExecute() {
   double               ratio           = time_step_ratios_[time_step_index];
   std::pair<bool, int> this_year_iter  = findInVector(process_years_, year);
 
-  LOG_FINE() << "Year = " << year << " found? = " << this_year_iter.first << " should = " << process_years_[this_year_iter.second];
+  if (this_year_iter.first) {
+    LOG_FINE() << "Year = " << year << " found? = " << this_year_iter.first << " should = " << process_years_[this_year_iter.second];
+  } else {
+    LOG_FINE() << "Year = " << year << " found? = " << this_year_iter.first;
+  }
 
   Double selectivity_value = 0.0;
 

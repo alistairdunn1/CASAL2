@@ -296,6 +296,10 @@ void RecruitmentBevertonHolt::DoReset() {
       initial_length_distribution_[i] = utilities::math::distribution(model_->length_bins(), model_->length_plus(), Distribution::kNormal, initial_mean_length_[i],
                                                                       initial_mean_length_[i] * initial_length_cv_[i]);
       Double sum_temp                 = utilities::math::Sum(initial_length_distribution_[i]);
+      if (initial_length_distribution_[i].empty()) {
+        LOG_CODE_ERROR() << "Initial length distribution is empty for category " << category_labels_[i];
+        continue;
+      }
       // first bin is a min plus group
       initial_length_distribution_[i][0] += 1.0 - sum_temp;
     }
@@ -461,8 +465,12 @@ void RecruitmentBevertonHolt::DoExecute() {
     unsigned category_counter = 0;
     for (auto category : partition_) {
       LOG_FINEST() << category->name_ << " recruits = " << amount_per << ", proportion of recruits " << proportions_by_category_[category->name_];
-      for (unsigned i = 0; i < category->data_.size(); i++)
-        category->data_[i] += amount_per * initial_length_distribution_[category_counter][i] * proportions_by_category_[category->name_];
+      unsigned limit = std::min<unsigned>(category->data_.size(), initial_length_distribution_[category_counter].size());
+      if (limit != category->data_.size()) {
+        LOG_CODE_ERROR() << "Length distribution size mismatch for category " << category->name_ << ": category bins = " << category->data_.size()
+                         << ", distribution bins = " << initial_length_distribution_[category_counter].size();
+      }
+      for (unsigned i = 0; i < limit; i++) category->data_[i] += amount_per * initial_length_distribution_[category_counter][i] * proportions_by_category_[category->name_];
       ++category_counter;
     }
   }
