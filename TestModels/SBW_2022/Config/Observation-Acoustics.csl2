@@ -1,0 +1,95 @@
+@catchability TangaroaMatureq
+type nuisance
+lower_bound 0.01
+upper_bound 1.50
+
+@catchability TangaroaImmatureq
+type nuisance
+lower_bound 0.01
+upper_bound 1.50
+
+@observation TangaroaAcousticMature
+type biomass
+time_step step2
+time_step_proportion 0.5
+categories male.spawn+female.spawn
+selectivities One One
+catchability TangaroaMatureq
+likelihood lognormal
+process_error 0.1
+years 1993 1994 1995 1998 2000 2002 2004 2006 2009 2011 2013 2016 2019 2022
+table obs
+1993 16060 0.24
+1994 72168 0.34
+1995 53608 0.30
+1998 91639 0.14
+2000 71749 0.17
+2002 66034 0.68
+2004 42236 0.35
+2006 43843 0.32
+2009 99521 0.27
+2011 53299 0.22
+2013 65801 0.25
+2016 97117 0.16
+2019 91145 0.27
+2022 91968 0.20
+end_table
+
+@observation TangaroaAcousticImmature
+type biomass
+time_step step2
+time_step_proportion 0.5
+categories male.nonspawn+female.nonspawn
+selectivities TangaroaImmatureSel TangaroaImmatureSel
+catchability TangaroaImmatureq
+likelihood lognormal
+process_error 0.1
+years 1993 1994 1995 1998 2000 2002 2004 2006 2009 2011 2013 2016 2019 2022
+table obs
+1993 35208 0.25
+1994  8018 0.38
+1995 15507 0.29
+1998  6759 0.20
+2000  1864 0.24
+2002   247 0.76
+2004  5617 0.16
+2006  3423 0.24
+2009 24479 0.26
+2011 14454 0.17
+2013  8004 0.55
+2016  4456 0.19
+2019  4060 0.18
+2022  5356 0.22
+end_table
+
+##################
+## Acoustic process error
+##################
+@estimate mature_process_error
+parameter observation[TangaroaAcousticMature].process_error
+type uniform_log
+lower_bound 0.0001
+upper_bound 1.0
+MCMC_fixed True # fixed for MCMC <<<<<<<<<<<<<<<<<<<<<<<<
+
+@estimate immature_process_error
+parameter observation[TangaroaAcousticImmature].process_error
+type uniform_log
+lower_bound 0.0001
+upper_bound 1.0		#FIXED in MCMC <<<<<<<<<<<<<<<<<<<
+MCMC_fixed True
+
+#######
+## Q's
+#######
+@additional_prior TangaroaMatureq
+type lognormal
+parameter catchability[TangaroaMatureq].q
+mu 0.54
+cv 0.44
+
+#now an invalid cmd is using uniform
+@additional_prior TangaroaImmatureq
+type uniform   #lognormal
+parameter catchability[TangaroaImmatureq].q
+## don't need to add a uniform prior for the other q as- it's not a true estimate so has a null contribution.

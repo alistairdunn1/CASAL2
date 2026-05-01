@@ -45,6 +45,7 @@ class ModelRunner:
         self.executionTypeList.append(["TwoSex", "adolc"])
         self.executionTypeList.append(["TwoSexHybridMortality", "adolc"])
         self.executionTypeList.append(["SBW", "adolc"])
+        self.executionTypeList.append(["SBW_2025", "adolc"])
         self.executionTypeList.append(["Simple", "adolc"])
         self.executionTypeList.append(["SimpleRicker", "adolc"])
         self.executionTypeList.append(["SexedLengthBased", "adolc"])

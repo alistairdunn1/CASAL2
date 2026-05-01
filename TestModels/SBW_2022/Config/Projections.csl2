@@ -1,0 +1,16 @@
+# PROJECTIONS: Define YCS random process and future catches
+
+@project Recruitment
+type empirical_sampling
+parameter process[Recruitment].standardised_recruitment_multipliers
+start_year 1960
+final_year 2021
+years 2022:2250
+multiplier 1
+
+@project Trawl
+type constant
+parameter process[Mortality].method_Trawl
+years 2023:2250
+values 22803
+
