@@ -17,7 +17,7 @@
 #include "Observations/Observation.h"
 #include "Partition/Accessors/Cached/CombinedCategories.h"
 #include "Partition/Accessors/CombinedCategories.h"
-#include "Processes/Age/Mortality/MortalityInstantaneous.h"
+#include "Processes/Common/Mortality/MortalityInstantaneous.h"
 
 // Namespace
 namespace niwa {
@@ -26,7 +26,7 @@ namespace age {
 
 using partition::accessors::CombinedCategoriesPtr;
 using partition::accessors::cached::CachedCombinedCategoriesPtr;
-using processes::age::MortalityInstantaneous;
+using processes::common::MortalityInstantaneous;
 
 /**
  * Class Definition

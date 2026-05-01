@@ -18,7 +18,7 @@
 #include "../../InitialisationPhases/InitialisationPhase.h"
 #include "../../Partition/Accessors/Cached/Categories.h"
 #include "../../Partition/Accessors/Categories.h"
-#include "../../Processes/Length/RecruitmentBevertonHolt.h"
+#include "../../Processes/Common/Recruitment/RecruitmentBevertonHolt.h"
 
 // namespaces
 namespace niwa {
@@ -27,7 +27,7 @@ namespace initialisationphases {
 namespace length {
 namespace cached   = partition::accessors::cached;
 namespace accessor = partition::accessors;
-using processes::length::RecruitmentBevertonHolt;
+using processes::common::RecruitmentBevertonHolt;
 
 /**
  *
@@ -54,7 +54,7 @@ protected:
   cached::Categories   cached_partition_;
   accessor::Categories partition_;
 
-  vector<length::RecruitmentBevertonHolt*> recruitment_process_;
+  vector<RecruitmentBevertonHolt*> recruitment_process_;
 };
 
 }  // namespace length

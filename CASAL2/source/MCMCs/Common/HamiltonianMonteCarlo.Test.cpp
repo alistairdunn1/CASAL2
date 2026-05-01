@@ -12,6 +12,11 @@
 #ifndef USE_AUTODIFF
 
 // Headers
+#include "HamiltonianMonteCarlo.h"
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include <iomanip>
 #include <iostream>
 
@@ -30,730 +35,822 @@
 #include "../MCMC.Mock.h"
 #include "../MCMC.h"
 #include "../Manager.h"
+#include "Utilities/Math.h"
 
 // Namespaces
 namespace niwa {
 
 using niwa::MockMPD;
+using niwa::utilities::math::PI;
 using std::cout;
 using std::endl;
 using ::testing::NiceMock;
 
 class HamiltonianMonteCarloThreadedModel : public testfixtures::BaseThreaded {};
 
-/**
- * Notes for these unit tests.
- *
- * Because we're using an arctan transformation in the deltadiff minimiser we end up with quite
- * different values between Operating Systems. Each of these unit tests will #ifdef the Operating
- * System so we can check the values between them.
- *
- * Arguably, all answers are correct. The difference starts off <1e-16 but when we use this to inform
- * the gradient it does change the direction of the leap frog slightly. After some jumps we end up
- * in a place that will fail a unit test, even though it's arguably correct.
- *
- * Second note:
- *  The code I use to print the results
- */
-//  {
-//   cout << std::setprecision(16);
-//   for (unsigned i = 0; i < chain.size(); i += 10) cout << "EXPECT_DOUBLE_EQ(chain[" << i << "].score_, " << chain[i].score_ << ");" << endl;
-// }
+class TestHamiltonianMonteCarlo : public niwa::mcmcs::HamiltonianMonteCarlo {
+public:
+  TestHamiltonianMonteCarlo(shared_ptr<Model> model) : niwa::mcmcs::HamiltonianMonteCarlo(model) {}
+
+  // Test wrappers for protected methods
+  double TestNorm2(const std::vector<double>& target) { return this->norm2(target); }
+  double TestLogDensity(const std::vector<double>& x, const std::vector<double>& mean, const std::vector<std::vector<double>>& cov_l, double log_det, double constant) {
+    return this->logDensity(x, mean, cov_l, log_det, constant);
+  }
+  double TestComputeKineticEnergy(const std::vector<double>& momentum) { return this->computeKineticEnergy(momentum); }
+  double TestComputeHamiltonian(double potential_energy, double kinetic_energy) { return this->computeHamiltonian(potential_energy, kinetic_energy); }
+  double TestComputeAcceptanceProbability(double H_current, double H_proposed) { return this->computeAcceptanceProbability(H_current, H_proposed); }
+
+  void TestLeapfrogHalfMomentumStep(std::vector<double>& momentum, const std::vector<double>& gradient, double delta) { this->leapfrogHalfMomentumStep(momentum, gradient, delta); }
+  void TestLeapfrogFullPositionStep(std::vector<double>& position, const std::vector<double>& momentum, double delta) { this->leapfrogFullPositionStep(position, momentum, delta); }
+
+  // Set bounds for scale/unscale testing
+  void SetBounds(const std::vector<double>& lower, const std::vector<double>& upper) {
+    estimate_lower_bounds_ = lower;
+    estimate_upper_bounds_ = upper;
+  }
+  void TestScalePosition(std::vector<double>& position) { this->scalePosition(position); }
+  void TestUnscalePosition(std::vector<double>& position) { this->unscalePosition(position); }
+
+  // New method wrappers for momentum sampling and Jacobian
+  std::vector<double> TestSampleMomentum(size_t size) { return this->sampleMomentum(size); }
+  double              TestComputeLogJacobian(const std::vector<double>& position_unbounded) { return this->computeLogJacobian(position_unbounded); }
+};
+
+std::unique_ptr<TestHamiltonianMonteCarlo> CreateHMCForTesting() {
+  auto mock_model = std::make_shared<NiceMock<MockModel>>();
+
+  auto hmc = std::make_unique<TestHamiltonianMonteCarlo>(mock_model);
+  return hmc;
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, Norm2_Empty_Vector) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> test_vector = {};
+  double              result      = hmc->TestNorm2(test_vector);
+  EXPECT_DOUBLE_EQ(result, 0.0);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, Norm2) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> test_vector = {-0.4249, -0.2915};
+  double              result      = hmc->TestNorm2(test_vector);
+  EXPECT_DOUBLE_EQ(result, 0.26551226);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_1D_StandardNormal) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 1D standard normal: mean=0, variance=1
+  // Cholesky of [[1]] is [[1]]
+  std::vector<double>              x        = {0.0};
+  std::vector<double>              mean     = {0.0};
+  std::vector<std::vector<double>> cov_l    = {{1.0}};
+  double                           log_det  = 0.0;                        // log(1) = 0
+  double                           constant = -0.5 * std::log(2.0 * PI);  // -n/2 * log(2*pi) for n=1
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // At mean, log density = constant - log_det - 0.5 * 0 = -0.5 * log(2*pi)
+  double expected = -0.5 * std::log(2.0 * PI);
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_1D_AwayFromMean) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 1D normal at x=1, mean=0, variance=1
+  std::vector<double>              x        = {1.0};
+  std::vector<double>              mean     = {0.0};
+  std::vector<std::vector<double>> cov_l    = {{1.0}};
+  double                           log_det  = 0.0;
+  double                           constant = -0.5 * std::log(2.0 * PI);
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // At x=1, (x-mean)^2 = 1, so log density = constant - 0.5 * 1
+  double expected = -0.5 * std::log(2.0 * PI) - 0.5;
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_2D_IndependentNormal) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 2D independent normal: mean=[0,0], covariance=I (identity)
+  // Cholesky of I is I
+  std::vector<double>              x        = {0.0, 0.0};
+  std::vector<double>              mean     = {0.0, 0.0};
+  std::vector<std::vector<double>> cov_l    = {{1.0, 0.0}, {0.0, 1.0}};
+  double                           log_det  = 0.0;                        // log(det(I)) = log(1) = 0
+  double                           constant = -1.0 * std::log(2.0 * PI);  // -n/2 * log(2*pi) for n=2
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // At mean, Mahalanobis distance = 0
+  double expected = -std::log(2.0 * PI);
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_2D_AwayFromMean) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 2D at x=[1,1], mean=[0,0], covariance=I
+  std::vector<double>              x        = {1.0, 1.0};
+  std::vector<double>              mean     = {0.0, 0.0};
+  std::vector<std::vector<double>> cov_l    = {{1.0, 0.0}, {0.0, 1.0}};
+  double                           log_det  = 0.0;
+  double                           constant = -1.0 * std::log(2.0 * PI);
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // Mahalanobis distance = 1^2 + 1^2 = 2
+  double expected = -std::log(2.0 * PI) - 0.5 * 2.0;
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_2D_Correlated) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 2D correlated normal
+  // Covariance matrix: [[1, 0.5], [0.5, 1]]
+  // Cholesky decomposition L: [[1, 0], [0.5, sqrt(0.75)]]
+  std::vector<double>              x     = {0.0, 0.0};
+  std::vector<double>              mean  = {0.0, 0.0};
+  std::vector<std::vector<double>> cov_l = {{1.0, 0.0}, {0.5, std::sqrt(0.75)}};
+  // det(cov) = 1*1 - 0.5*0.5 = 0.75
+  double log_det  = std::log(0.75);
+  double constant = -1.0 * std::log(2.0 * PI);
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // At mean, Mahalanobis distance = 0
+  double expected = -std::log(2.0 * PI) - std::log(0.75);
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_2D_NonZeroMean) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 2D at mean=[2,3], x=[2,3], covariance=I
+  std::vector<double>              x        = {2.0, 3.0};
+  std::vector<double>              mean     = {2.0, 3.0};
+  std::vector<std::vector<double>> cov_l    = {{1.0, 0.0}, {0.0, 1.0}};
+  double                           log_det  = 0.0;
+  double                           constant = -1.0 * std::log(2.0 * PI);
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // At mean, distance = 0
+  double expected = -std::log(2.0 * PI);
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+TEST_F(HamiltonianMonteCarloThreadedModel, LogDensity_3D_Diagonal) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test 3D with diagonal covariance [[4,0,0],[0,1,0],[0,0,9]]
+  // Cholesky L = [[2,0,0],[0,1,0],[0,0,3]]
+  std::vector<double>              x     = {1.0, 1.0, 1.0};
+  std::vector<double>              mean  = {0.0, 0.0, 0.0};
+  std::vector<std::vector<double>> cov_l = {{2.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 3.0}};
+  // det(cov) = 4 * 1 * 9 = 36
+  double log_det  = std::log(36.0);
+  double constant = -1.5 * std::log(2.0 * PI);  // -n/2 * log(2*pi) for n=3
+
+  double result = hmc->TestLogDensity(x, mean, cov_l, log_det, constant);
+  // Mahalanobis: (1-0)^2/4 + (1-0)^2/1 + (1-0)^2/9 = 0.25 + 1 + 0.111... = 1.361...
+  double mahalanobis = 1.0 / 4.0 + 1.0 / 1.0 + 1.0 / 9.0;
+  double expected    = -1.5 * std::log(2.0 * PI) - std::log(36.0) - 0.5 * mahalanobis;
+  EXPECT_NEAR(result, expected, 1e-10);
+}
+
+// ============================================================================
+// Kinetic Energy Tests
+// ============================================================================
 
 /**
- * @brief Test the HMC MCMC algorithm with the TwoSex model doing Five Iterations
+ * @brief Test kinetic energy with zero momentum
  *
+ * K(p) = 0.5 * ||p||^2 = 0 when p = 0
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_TwoSex) {
-  string ammended_definition = testcases::test_cases_two_sex_model_population;
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, KineticEnergy_ZeroMomentum) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 5
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-5
-    leapfrog_steps 3
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(5u, chain.size());
-
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 1979.302049961175);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 1979.3017644429353);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 1979.301741240226);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 1979.3013843614176);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 1979.3011473702381);
-#elif __linux__
-  EXPECT_DOUBLE_EQ(chain[0].score_, 1979.31910941548);
-  EXPECT_DOUBLE_EQ(chain[1].score_, 1979.318837290028);
-  EXPECT_DOUBLE_EQ(chain[2].score_, 1979.318332128152);
-  EXPECT_DOUBLE_EQ(chain[3].score_, 1979.318110301643);
-  EXPECT_DOUBLE_EQ(chain[4].score_, 1979.317733207503);
-#endif
+  std::vector<double> momentum = {0.0, 0.0, 0.0};
+  double              result   = hmc->TestComputeKineticEnergy(momentum);
+  EXPECT_DOUBLE_EQ(result, 0.0);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test kinetic energy with unit momentum
  *
+ * K(p) = 0.5 * (1^2 + 1^2) = 1.0
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, TwentyFive_Iteration_With_TwoSex) {
-  string ammended_definition = testcases::test_cases_two_sex_model_population;
-  boost::replace_all(ammended_definition, "threads 1", "threads 2");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, KineticEnergy_UnitMomentum) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 25
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-7
-    leapfrog_steps 3
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(25u, chain.size());
-
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 1979.3020499611750438);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 1979.3020470915430451);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 1979.3020466862337798);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 1979.302043067030354);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 1979.3020404979447449);
-  // EXPECT_DOUBLE_EQ(chain[5].score_, 1979.3020351838388251);
-  // EXPECT_DOUBLE_EQ(chain[6].score_, 1979.3020313736797107);
-  // EXPECT_DOUBLE_EQ(chain[7].score_, 1979.3020055990491528);
-  // EXPECT_DOUBLE_EQ(chain[8].score_, 1979.3020004714137485);
-  // EXPECT_DOUBLE_EQ(chain[9].score_, 1979.3020006346400805);
-  // EXPECT_DOUBLE_EQ(chain[10].score_, 1979.3019944718671468);
-  // EXPECT_DOUBLE_EQ(chain[11].score_, 1979.3019930402597311);
-  // EXPECT_DOUBLE_EQ(chain[12].score_, 1979.3019832154277537);
-  // EXPECT_DOUBLE_EQ(chain[13].score_, 1979.3019805764106422);
-  // EXPECT_DOUBLE_EQ(chain[14].score_, 1979.3019825897238206);
-  // EXPECT_DOUBLE_EQ(chain[15].score_, 1979.3019794722013103);
-  // EXPECT_DOUBLE_EQ(chain[16].score_, 1979.3019780008462476);
-  // EXPECT_DOUBLE_EQ(chain[17].score_, 1979.3019738738180422);
-  // EXPECT_DOUBLE_EQ(chain[18].score_, 1979.3019707086896233);
-  // EXPECT_DOUBLE_EQ(chain[19].score_, 1979.3019640178647478);
-  // EXPECT_DOUBLE_EQ(chain[20].score_, 1979.3019596693270614);
-  // EXPECT_DOUBLE_EQ(chain[21].score_, 1979.3019707050871148);
-  // EXPECT_DOUBLE_EQ(chain[22].score_, 1979.3019688745027906);
-  // EXPECT_DOUBLE_EQ(chain[23].score_, 1979.3019645214221782);
-  // EXPECT_DOUBLE_EQ(chain[24].score_, 1979.301961154108767);
-#elif __linux__
-  EXPECT_DOUBLE_EQ(chain[0].score_, 1979.31910941548);
-  EXPECT_DOUBLE_EQ(chain[1].score_, 1979.31910667998);
-  EXPECT_DOUBLE_EQ(chain[2].score_, 1979.319101457041);
-  EXPECT_DOUBLE_EQ(chain[3].score_, 1979.319099189367);
-  EXPECT_DOUBLE_EQ(chain[4].score_, 1979.319095221592);
-  EXPECT_DOUBLE_EQ(chain[5].score_, 1979.319093918872);
-  EXPECT_DOUBLE_EQ(chain[6].score_, 1979.319090717183);
-  EXPECT_DOUBLE_EQ(chain[7].score_, 1979.319102191839);
-  EXPECT_DOUBLE_EQ(chain[8].score_, 1979.319099816649);
-  EXPECT_DOUBLE_EQ(chain[9].score_, 1979.319095325929);
-  EXPECT_DOUBLE_EQ(chain[10].score_, 1979.31909364716);
-  EXPECT_DOUBLE_EQ(chain[11].score_, 1979.319090029647);
-  EXPECT_DOUBLE_EQ(chain[12].score_, 1979.319090616442);
-  EXPECT_DOUBLE_EQ(chain[13].score_, 1979.319087741402);
-  EXPECT_DOUBLE_EQ(chain[14].score_, 1979.319081412827);
-  EXPECT_DOUBLE_EQ(chain[15].score_, 1979.319078851945);
-  EXPECT_DOUBLE_EQ(chain[16].score_, 1979.319074174579);
-  EXPECT_DOUBLE_EQ(chain[17].score_, 1979.319072148768);
-  EXPECT_DOUBLE_EQ(chain[18].score_, 1979.319068518904);
-  EXPECT_DOUBLE_EQ(chain[19].score_, 1979.319068194450);
-  EXPECT_DOUBLE_EQ(chain[20].score_, 1979.319065299380);
-  EXPECT_DOUBLE_EQ(chain[21].score_, 1979.319054701787);
-  EXPECT_DOUBLE_EQ(chain[22].score_, 1979.319051302200);
-  EXPECT_DOUBLE_EQ(chain[23].score_, 1979.319052394348);
-  EXPECT_DOUBLE_EQ(chain[24].score_, 1979.319049774818);
-#endif
+  std::vector<double> momentum = {1.0, 1.0};
+  double              result   = hmc->TestComputeKineticEnergy(momentum);
+  // K = 0.5 * (1 + 1) = 1.0
+  EXPECT_DOUBLE_EQ(result, 1.0);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test kinetic energy with arbitrary momentum values
  *
+ * K(p) = 0.5 * (2^2 + 3^2 + 4^2) = 0.5 * (4 + 9 + 16) = 14.5
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, OneHundred_Iteration_With_TwoSex) {
-  string ammended_definition = testcases::test_cases_two_sex_model_population;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, KineticEnergy_ArbitraryMomentum) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 100
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-7
-    leapfrog_steps 3
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(100u, chain.size());
-
-#ifdef _WIN64
-//   EXPECT_DOUBLE_EQ(chain[0].score_, 1979.3020499611750438);
-//   EXPECT_DOUBLE_EQ(chain[5].score_, 1979.3020351838388251);
-//   EXPECT_DOUBLE_EQ(chain[10].score_, 1979.3019944718671468);
-//   EXPECT_DOUBLE_EQ(chain[15].score_, 1979.3019794722013103);
-//   EXPECT_DOUBLE_EQ(chain[20].score_, 1979.3019596693270614);
-//   EXPECT_DOUBLE_EQ(chain[25].score_, 1979.3019537755765214);
-//   EXPECT_DOUBLE_EQ(chain[30].score_, 1979.3019440268008111);
-//   EXPECT_DOUBLE_EQ(chain[35].score_, 1979.301900354884765);
-//   EXPECT_DOUBLE_EQ(chain[40].score_, 1979.3018696129702221);
-//   EXPECT_DOUBLE_EQ(chain[45].score_, 1979.3018447067643137);
-//   EXPECT_DOUBLE_EQ(chain[50].score_, 1979.3018210052966879);
-//   EXPECT_DOUBLE_EQ(chain[55].score_, 1979.3018254737555708);
-//   EXPECT_DOUBLE_EQ(chain[60].score_, 1979.3018293503657787);
-//   EXPECT_DOUBLE_EQ(chain[65].score_, 1979.3018150599191358);
-//   EXPECT_DOUBLE_EQ(chain[70].score_, 1979.3017831024715179);
-//   EXPECT_DOUBLE_EQ(chain[75].score_, 1979.3017541797662489);
-//   EXPECT_DOUBLE_EQ(chain[80].score_, 1979.3017360959611324);
-//   EXPECT_DOUBLE_EQ(chain[85].score_, 1979.3017082443243453);
-//   EXPECT_DOUBLE_EQ(chain[90].score_, 1979.3017402898069577);
-//   EXPECT_DOUBLE_EQ(chain[95].score_, 1979.3017260680524032);
-#elif __linux__
-  EXPECT_DOUBLE_EQ(chain[0].score_, 1979.31910941548);
-  EXPECT_DOUBLE_EQ(chain[5].score_, 1979.319093918872);
-  EXPECT_DOUBLE_EQ(chain[10].score_, 1979.31909364716);
-  EXPECT_DOUBLE_EQ(chain[15].score_, 1979.319078851945);
-  EXPECT_DOUBLE_EQ(chain[20].score_, 1979.319065299380);
-  EXPECT_DOUBLE_EQ(chain[25].score_, 1979.319044240832);
-  EXPECT_DOUBLE_EQ(chain[30].score_, 1979.319036663623);
-  EXPECT_DOUBLE_EQ(chain[35].score_, 1979.319034464054);
-  EXPECT_DOUBLE_EQ(chain[40].score_, 1979.318998174726);
-  EXPECT_DOUBLE_EQ(chain[45].score_, 1979.318943927063);
-  EXPECT_DOUBLE_EQ(chain[50].score_, 1979.318915747170);
-  EXPECT_DOUBLE_EQ(chain[55].score_, 1979.318904312885);
-  EXPECT_DOUBLE_EQ(chain[60].score_, 1979.318878527860);
-  EXPECT_DOUBLE_EQ(chain[65].score_, 1979.318864735373);
-  EXPECT_DOUBLE_EQ(chain[70].score_, 1979.318853724756);
-  EXPECT_DOUBLE_EQ(chain[75].score_, 1979.318835980401);
-  EXPECT_DOUBLE_EQ(chain[80].score_, 1979.318821098520);
-  EXPECT_DOUBLE_EQ(chain[85].score_, 1979.318808220300);
-  EXPECT_DOUBLE_EQ(chain[90].score_, 1979.318785249656);
-  EXPECT_DOUBLE_EQ(chain[95].score_, 1979.318774356487);
-#endif
+  std::vector<double> momentum = {2.0, 3.0, 4.0};
+  double              result   = hmc->TestComputeKineticEnergy(momentum);
+  // K = 0.5 * (4 + 9 + 16) = 0.5 * 29 = 14.5
+  EXPECT_DOUBLE_EQ(result, 14.5);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test kinetic energy with negative momentum values
  *
+ * K(p) = 0.5 * ((-2)^2 + (-3)^2) = 0.5 * (4 + 9) = 6.5
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_CasalComplexOne) {
-  string ammended_definition = testcases::test_cases_casal_complex_1;
-  boost::replace_all(ammended_definition, "threads 1", "threads 8");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, KineticEnergy_NegativeMomentum) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 5
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-5
-    leapfrog_steps 3
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(5u, chain.size());
-
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 487.52063897213412247);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 487.53527528011829872);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 487.67106078210798614);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 487.67273570961077667);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 487.67273570961077667);
-#elif __linux__
-  // EXPECT_NEAR(chain[0].score_, 487.520638972034, 1e-7);
-  // EXPECT_NEAR(chain[1].score_, 487.5352752521567, 1e-7);
-  // EXPECT_NEAR(chain[2].score_, 487.6219696273498, 1e-7);
-  // EXPECT_NEAR(chain[3].score_, 487.6233820105855, 1e-7);
-  // EXPECT_NEAR(chain[4].score_, 487.6233820105855, 1e-7);
-#endif
+  std::vector<double> momentum = {-2.0, -3.0};
+  double              result   = hmc->TestComputeKineticEnergy(momentum);
+  // K = 0.5 * (4 + 9) = 6.5
+  EXPECT_DOUBLE_EQ(result, 6.5);
 }
 
 /**
- * @brief Construct a new test f object
- *
+ * @brief Test kinetic energy with empty momentum vector
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_CasalComplexOne_LeapFrog_Steps_Ten) {
-  string ammended_definition = testcases::test_cases_casal_complex_1;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, KineticEnergy_EmptyMomentum) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 5
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-5
-    leapfrog_steps 10
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
+  std::vector<double> momentum = {};
+  double              result   = hmc->TestComputeKineticEnergy(momentum);
+  EXPECT_DOUBLE_EQ(result, 0.0);
+}
 
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
+// ============================================================================
+// Hamiltonian Tests
+// ============================================================================
 
-  auto chain = mcmc->chain();
-  ASSERT_EQ(5u, chain.size());
+/**
+ * @brief Test Hamiltonian with zero energies
+ *
+ * H = U + K = 0 + 0 = 0
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, Hamiltonian_ZeroEnergies) {
+  auto hmc = CreateHMCForTesting();
 
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 487.52063897213412247);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 487.53964985454666703);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 487.68122585374317168);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 487.68810277217346538);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 487.68810277217346538);
-#elif __linux__
-// EXPECT_NEAR(chain[0].score_, 487.520638972034, 1e-5);
-// EXPECT_NEAR(chain[1].score_, 487.5396497473042, 1e-5);
-// EXPECT_NEAR(chain[2].score_, 487.6318753298668, 1e-5);
-// EXPECT_NEAR(chain[3].score_, 487.6383538202512, 1e-5);
-// EXPECT_NEAR(chain[4].score_, 487.6383538202512, 1e-5);
-#endif
+  double result = hmc->TestComputeHamiltonian(0.0, 0.0);
+  EXPECT_DOUBLE_EQ(result, 0.0);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test Hamiltonian computation
  *
+ * H = U + K = 5.5 + 3.2 = 8.7
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_CasalComplexOne_LeapFrog_Delta_OneESeven) {
-  string ammended_definition = testcases::test_cases_casal_complex_1;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, Hamiltonian_PositiveEnergies) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 5
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-7
-    leapfrog_steps 10
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(5u, chain.size());
-
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 487.52063897213412247);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 487.52082861950833603);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 487.52089792652054712);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 487.52095374163752695);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 487.52100918145538344);
-#elif __linux__
-  EXPECT_NEAR(chain[0].score_, 487.520638972034, 1e-5);
-  EXPECT_NEAR(chain[1].score_, 487.5208286193689, 1e-5);
-  EXPECT_NEAR(chain[2].score_, 487.5208929731917, 1e-5);
-  EXPECT_NEAR(chain[3].score_, 487.5209487497292, 1e-5);
-  EXPECT_NEAR(chain[4].score_, 487.5210056161228, 1e-5);
-#endif
+  double potential_energy = 5.5;
+  double kinetic_energy   = 3.2;
+  double result           = hmc->TestComputeHamiltonian(potential_energy, kinetic_energy);
+  EXPECT_DOUBLE_EQ(result, 8.7);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test Hamiltonian with negative potential (valid in log-posterior context)
  *
+ * H = U + K = -10.0 + 3.0 = -7.0
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_CasalComplexOne_LeapFrog_Delta_OneEThree_RandomStart) {
-  string ammended_definition = testcases::test_cases_casal_complex_1;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, Hamiltonian_NegativePotential) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 5
-    start 1
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-3
-    leapfrog_steps 10
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
+  double result = hmc->TestComputeHamiltonian(-10.0, 3.0);
+  EXPECT_DOUBLE_EQ(result, -7.0);
+}
 
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
+// ============================================================================
+// Acceptance Probability Tests
+// ============================================================================
 
-  auto chain = mcmc->chain();
-  ASSERT_EQ(5u, chain.size());
+/**
+ * @brief Test acceptance probability when Hamiltonians are equal
+ *
+ * alpha = min(1, exp(0)) = 1.0
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, AcceptanceProbability_EqualHamiltonians) {
+  auto hmc = CreateHMCForTesting();
 
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 11565.956258254713248);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 11565.956258254713248);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 11565.956258254713248);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 11539.212775746313127);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 11539.212775746313127);
-#elif __linux__
-// EXPECT_NEAR(chain[0].score_, 11622.04009177895, 1e-5);
-// EXPECT_NEAR(chain[1].score_, 11622.04009177895, 1e-5);
-// EXPECT_NEAR(chain[2].score_, 11622.04009177895, 1e-5);
-// EXPECT_NEAR(chain[3].score_, 11622.04009177895, 1e-5);
-// EXPECT_NEAR(chain[4].score_, 11622.04009177895, 1e-5);
-#endif
+  double result = hmc->TestComputeAcceptanceProbability(100.0, 100.0);
+  EXPECT_DOUBLE_EQ(result, 1.0);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test acceptance probability when proposed is lower (better)
  *
+ * H_proposed < H_current means delta_H < 0, so exp(-delta_H) > 1
+ * alpha = min(1, exp(-delta_H)) = 1.0
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, Five_Iteration_With_TwoSex_CustomGradientStepSize) {
-  string ammended_definition = testcases::test_cases_two_sex_model_population;
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, __LINE__);
+TEST_F(HamiltonianMonteCarloThreadedModel, AcceptanceProbability_ProposedLower) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 5
-    start 0
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-5
-    leapfrog_steps 3
-    gradient_step_size 1e-9
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, __LINE__);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(5u, chain.size());
-
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 1979.3020499611750438);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 1979.3017644429294251);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 1979.3017412402209629);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 1979.3013843614132838);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 1979.3011473702440526);
-#elif __linux__
-  EXPECT_NEAR(chain[0].score_, 1979.31910941548, 1e-5);
-  EXPECT_NEAR(chain[1].score_, 1979.318837290026, 1e-5);
-  EXPECT_NEAR(chain[2].score_, 1979.318332128151, 1e-5);
-  EXPECT_NEAR(chain[3].score_, 1979.318110301642, 1e-5);
-  EXPECT_NEAR(chain[4].score_, 1979.317733207502, 1e-5);
-#endif
+  // H_current = 100, H_proposed = 90, delta_H = -10
+  // alpha = min(1, exp(10)) = 1.0
+  double result = hmc->TestComputeAcceptanceProbability(100.0, 90.0);
+  EXPECT_DOUBLE_EQ(result, 1.0);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test acceptance probability when proposed is higher (worse)
  *
+ * H_proposed > H_current means delta_H > 0, so exp(-delta_H) < 1
+ * alpha = exp(-delta_H)
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, TwentyFive_Iteration_With_TwoSex_RandomStart_OneEFourStepSize) {
-  string ammended_definition = testcases::test_cases_two_sex_model_population;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, 76);
+TEST_F(HamiltonianMonteCarloThreadedModel, AcceptanceProbability_ProposedHigher) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 25
-    start 1
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-4
-    leapfrog_steps 5
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, 70);
-  LoadConfiguration();
-
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
-
-  auto chain = mcmc->chain();
-  ASSERT_EQ(25u, chain.size());
-
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 26439.620838100392575);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 26438.939148705259868);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 26436.716361595710623);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 26436.270875127793261);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 26434.976273072981712);
-  // EXPECT_DOUBLE_EQ(chain[5].score_, 26435.92486035615002);
-  // EXPECT_DOUBLE_EQ(chain[6].score_, 26433.400062890883419);
-  // EXPECT_DOUBLE_EQ(chain[7].score_, 26433.400062890883419);
-  // EXPECT_DOUBLE_EQ(chain[8].score_, 26433.553438238308445);
-  // EXPECT_DOUBLE_EQ(chain[9].score_, 26430.721650127838075);
-  // EXPECT_DOUBLE_EQ(chain[10].score_, 26429.992692499967234);
-  // EXPECT_DOUBLE_EQ(chain[11].score_, 26428.628996958799689);
-  // EXPECT_DOUBLE_EQ(chain[12].score_, 26428.349099746465072);
-  // EXPECT_DOUBLE_EQ(chain[13].score_, 26428.844178388575529);
-  // EXPECT_DOUBLE_EQ(chain[14].score_, 26360.168229553743004);
-  // EXPECT_DOUBLE_EQ(chain[15].score_, 26366.893333353003982);
-  // EXPECT_DOUBLE_EQ(chain[16].score_, 26366.568797878040641);
-  // EXPECT_DOUBLE_EQ(chain[17].score_, 26364.670679732371354);
-  // EXPECT_DOUBLE_EQ(chain[18].score_, 26364.56108402996324);
-  // EXPECT_DOUBLE_EQ(chain[19].score_, 26364.152701565632015);
-  // EXPECT_DOUBLE_EQ(chain[20].score_, 26369.560192795433977);
-  // EXPECT_DOUBLE_EQ(chain[21].score_, 26374.04230406428178);
-  // EXPECT_DOUBLE_EQ(chain[22].score_, 26364.52020825065847);
-  // EXPECT_DOUBLE_EQ(chain[23].score_, 26364.596421441088751);
-  // EXPECT_DOUBLE_EQ(chain[24].score_, 26362.487774858731427);
-#elif __linux__
-  EXPECT_NEAR(chain[0].score_, 36389.07677669402, 1e-5);
-  EXPECT_NEAR(chain[1].score_, 36389.07677669402, 1e-5);
-  EXPECT_NEAR(chain[2].score_, 36388.361465831, 1e-5);
-  EXPECT_NEAR(chain[3].score_, 36388.361465831, 1e-5);
-  EXPECT_NEAR(chain[4].score_, 36388.361465831, 1e-5);
-  EXPECT_NEAR(chain[5].score_, 36388.8173073483, 1e-5);
-  EXPECT_NEAR(chain[6].score_, 36388.8173073483, 1e-5);
-  EXPECT_NEAR(chain[7].score_, 36388.8173073483, 1e-5);
-  EXPECT_NEAR(chain[8].score_, 36388.8173073483, 1e-5);
-  EXPECT_NEAR(chain[9].score_, 36388.8173073483, 1e-5);
-  EXPECT_NEAR(chain[10].score_, 36388.8173073483, 1e-5);
-  EXPECT_NEAR(chain[11].score_, 36388.50090547473, 1e-5);
-  EXPECT_NEAR(chain[12].score_, 36374.96143373416, 1e-5);
-  EXPECT_NEAR(chain[13].score_, 36365.27657489545, 1e-5);
-  EXPECT_NEAR(chain[14].score_, 36322.78711909857, 1e-5);
-  EXPECT_NEAR(chain[15].score_, 36322.48103413592, 1e-5);
-  EXPECT_NEAR(chain[16].score_, 36322.90573281318, 1e-5);
-  EXPECT_NEAR(chain[17].score_, 36324.69622726875, 1e-5);
-  EXPECT_NEAR(chain[18].score_, 36322.25413765675, 1e-5);
-  EXPECT_NEAR(chain[19].score_, 36323.19781703433, 1e-5);
-  EXPECT_NEAR(chain[20].score_, 36312.8207311583, 1e-5);
-  EXPECT_NEAR(chain[21].score_, 36315.46101229153, 1e-5);
-  EXPECT_NEAR(chain[22].score_, 36311.54510717453, 1e-5);
-  EXPECT_NEAR(chain[23].score_, 36326.95904361141, 1e-5);
-  EXPECT_NEAR(chain[24].score_, 36320.59445996349, 1e-5);
-#endif
+  // H_current = 100, H_proposed = 102, delta_H = 2
+  // alpha = exp(-2) ≈ 0.1353
+  double result   = hmc->TestComputeAcceptanceProbability(100.0, 102.0);
+  double expected = std::exp(-2.0);
+  EXPECT_NEAR(result, expected, 1e-10);
 }
 
 /**
- * @brief Construct a new test f object
- *
+ * @brief Test acceptance probability with large energy difference
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, TwentyFive_Iteration_With_CasalComplexOne_RandomStart_OneEFourStepSize) {
-  string ammended_definition = testcases::test_cases_casal_complex_1;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, 76);
+TEST_F(HamiltonianMonteCarloThreadedModel, AcceptanceProbability_LargeDifference) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 25
-    start 1
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-4
-    leapfrog_steps 4
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, 70);
-  LoadConfiguration();
+  // H_current = 100, H_proposed = 150, delta_H = 50
+  // alpha = exp(-50) ≈ 1.93e-22
+  double result   = hmc->TestComputeAcceptanceProbability(100.0, 150.0);
+  double expected = std::exp(-50.0);
+  EXPECT_NEAR(result, expected, 1e-30);
+}
 
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
+// ============================================================================
+// Leapfrog Half Momentum Step Tests
+// ============================================================================
 
-  auto chain = mcmc->chain();
-  ASSERT_EQ(25u, chain.size());
+/**
+ * @brief Test half momentum step with zero gradient
+ *
+ * p = p - (dt/2) * 0 = p (no change)
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, LeapfrogHalfMomentum_ZeroGradient) {
+  auto hmc = CreateHMCForTesting();
 
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 11565.956258254713248);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 11563.945542542387557);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 11562.403964855100639);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 11556.223840474351164);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 11556.223840474351164);
-  // EXPECT_DOUBLE_EQ(chain[5].score_, 11538.665841878730134);
-  // EXPECT_DOUBLE_EQ(chain[6].score_, 11538.665841878730134);
-  // EXPECT_DOUBLE_EQ(chain[7].score_, 11542.452783154632925);
-  // EXPECT_DOUBLE_EQ(chain[8].score_, 11559.318709193883478);
-  // EXPECT_DOUBLE_EQ(chain[9].score_, 11563.362169696029014);
-  // EXPECT_DOUBLE_EQ(chain[10].score_, 11547.913278676778646);
-  // EXPECT_DOUBLE_EQ(chain[11].score_, 11542.315814010795293);
-  // EXPECT_DOUBLE_EQ(chain[12].score_, 11537.110225219963468);
-  // EXPECT_DOUBLE_EQ(chain[13].score_, 11536.834146950903232);
-  // EXPECT_DOUBLE_EQ(chain[14].score_, 11534.602795194192367);
-  // EXPECT_DOUBLE_EQ(chain[15].score_, 11523.536728180339196);
-  // EXPECT_DOUBLE_EQ(chain[16].score_, 11523.275861281310426);
-  // EXPECT_DOUBLE_EQ(chain[17].score_, 11544.741998528204931);
-  // EXPECT_DOUBLE_EQ(chain[18].score_, 11556.198860973217961);
-  // EXPECT_DOUBLE_EQ(chain[19].score_, 11556.198860973217961);
-  // EXPECT_DOUBLE_EQ(chain[20].score_, 11548.83913677889359);
-  // EXPECT_DOUBLE_EQ(chain[21].score_, 11542.115686500175798);
-  // EXPECT_DOUBLE_EQ(chain[22].score_, 11545.440962512842816);
-  // EXPECT_DOUBLE_EQ(chain[23].score_, 11535.675498516950029);
-  // EXPECT_DOUBLE_EQ(chain[24].score_, 11532.701532135375601);
-#elif __linux__
-  // EXPECT_NEAR(chain[0].score_, 11622.04009177895, 1e-5);
-  // EXPECT_NEAR(chain[1].score_, 11620.01985703409, 1e-5);
-  // EXPECT_NEAR(chain[2].score_, 11618.73341844001, 1e-5);
-  // EXPECT_NEAR(chain[3].score_, 11618.21271520679, 1e-5);
-  // EXPECT_NEAR(chain[4].score_, 11618.21271520679, 1e-5);
-  // EXPECT_NEAR(chain[5].score_, 11600.91618645375, 1e-5);
-  // EXPECT_NEAR(chain[6].score_, 11591.3493038226, 1e-5);
-  // EXPECT_NEAR(chain[7].score_, 11600.90538041638, 1e-5);
-  // EXPECT_NEAR(chain[8].score_, 11600.90538041638, 1e-5);
-  // EXPECT_NEAR(chain[9].score_, 11601.31245975959, 1e-5);
-  // EXPECT_NEAR(chain[10].score_, 11589.56936167276, 1e-5);
-  // EXPECT_NEAR(chain[11].score_, 11594.77573869354, 1e-5);
-  // EXPECT_NEAR(chain[12].score_, 11582.39226485891, 1e-5);
-  // EXPECT_NEAR(chain[13].score_, 11582.72638786315, 1e-5);
-  // EXPECT_NEAR(chain[14].score_, 11576.40774277365, 1e-5);
-  // EXPECT_NEAR(chain[15].score_, 11581.47904821901, 1e-5);
-  // EXPECT_NEAR(chain[16].score_, 11591.86020479118, 1e-5);
-  // EXPECT_NEAR(chain[17].score_, 11586.80098401977, 1e-5);
-  // EXPECT_NEAR(chain[18].score_, 11588.94000961911, 1e-5);
-  // EXPECT_NEAR(chain[19].score_, 11588.94000961911, 1e-5);
-  // EXPECT_NEAR(chain[20].score_, 11584.2109864414, 1e-5);
-  // EXPECT_NEAR(chain[21].score_, 11577.90015058309, 1e-5);
-  // EXPECT_NEAR(chain[22].score_, 11577.90015058309, 1e-5);
-  // EXPECT_NEAR(chain[23].score_, 11563.32968127872, 1e-5);
-  // EXPECT_NEAR(chain[24].score_, 11556.61019993286, 1e-5);
-#endif
+  std::vector<double> momentum = {1.0, 2.0, 3.0};
+  std::vector<double> gradient = {0.0, 0.0, 0.0};
+  double              delta    = 0.1;
+
+  hmc->TestLeapfrogHalfMomentumStep(momentum, gradient, delta);
+
+  EXPECT_DOUBLE_EQ(momentum[0], 1.0);
+  EXPECT_DOUBLE_EQ(momentum[1], 2.0);
+  EXPECT_DOUBLE_EQ(momentum[2], 3.0);
 }
 
 /**
- * @brief Construct a new test f object
+ * @brief Test half momentum step with unit gradient
  *
+ * p = p - (dt/2) * grad
+ * With dt = 0.1 and grad = [1, 1], p_new = [1 - 0.05, 2 - 0.05] = [0.95, 1.95]
  */
-TEST_F(HamiltonianMonteCarloThreadedModel, TwentyFive_Iteration_With_CasalComplexOne_RandomStart_OneEFourStepSize_LeapFrogs_Ten) {
-  string ammended_definition = testcases::test_cases_casal_complex_1;
-  boost::replace_all(ammended_definition, "threads 1", "threads 4");
-  boost::replace_all(ammended_definition, "numerical_differences", "deltadiff");
-  AddConfigurationLine(ammended_definition, __FILE__, 76);
+TEST_F(HamiltonianMonteCarloThreadedModel, LeapfrogHalfMomentum_UnitGradient) {
+  auto hmc = CreateHMCForTesting();
 
-  string mcmc_definition = R"(
-    @mcmc my_mcmc
-    type hamiltonian
-    length 25
-    start 1
-    step_size 0.02
-    keep 1
-    leapfrog_delta 1e-4
-    leapfrog_steps 10
-  )";
-  AddConfigurationLine(mcmc_definition, __FILE__, 70);
-  LoadConfiguration();
+  std::vector<double> momentum = {1.0, 2.0};
+  std::vector<double> gradient = {1.0, 1.0};
+  double              delta    = 0.1;
 
-  ASSERT_NO_THROW(runner_->GoWithRunMode(RunMode::kMCMC));
-  auto model = runner_->model();
-  auto mcmc  = model->managers()->mcmc()->active_mcmc();
-  ASSERT_TRUE(mcmc != nullptr);
+  hmc->TestLeapfrogHalfMomentumStep(momentum, gradient, delta);
 
-  auto chain = mcmc->chain();
-  ASSERT_EQ(25u, chain.size());
+  // half_delta = 0.1 / 2 = 0.05
+  // p[0] = 1.0 - 0.05 * 1.0 = 0.95
+  // p[1] = 2.0 - 0.05 * 1.0 = 1.95
+  EXPECT_DOUBLE_EQ(momentum[0], 0.95);
+  EXPECT_DOUBLE_EQ(momentum[1], 1.95);
+}
 
-#ifdef _WIN64
-  // EXPECT_DOUBLE_EQ(chain[0].score_, 11565.956258254713248);
-  // EXPECT_DOUBLE_EQ(chain[1].score_, 11560.925391541399222);
-  // EXPECT_DOUBLE_EQ(chain[2].score_, 11556.358222655624559);
-  // EXPECT_DOUBLE_EQ(chain[3].score_, 11547.160905872500734);
-  // EXPECT_DOUBLE_EQ(chain[4].score_, 11547.160905872500734);
-  // EXPECT_DOUBLE_EQ(chain[5].score_, 11526.616702604178499);
-  // EXPECT_DOUBLE_EQ(chain[6].score_, 11526.616702604178499);
-  // EXPECT_DOUBLE_EQ(chain[7].score_, 11527.36910459252249);
-  // EXPECT_DOUBLE_EQ(chain[8].score_, 11541.173675399866625);
-  // EXPECT_DOUBLE_EQ(chain[9].score_, 11542.176350763020309);
-  // EXPECT_DOUBLE_EQ(chain[10].score_, 11523.785378120803216);
-  // EXPECT_DOUBLE_EQ(chain[11].score_, 11515.203344504101551);
-  // EXPECT_DOUBLE_EQ(chain[12].score_, 11506.993057282208611);
-  // EXPECT_DOUBLE_EQ(chain[13].score_, 11503.69681019298514);
-  // EXPECT_DOUBLE_EQ(chain[14].score_, 11498.440172131728104);
-  // EXPECT_DOUBLE_EQ(chain[15].score_, 11484.458059830782076);
-  // EXPECT_DOUBLE_EQ(chain[16].score_, 11481.239832735902382);
-  // EXPECT_DOUBLE_EQ(chain[17].score_, 11499.426411198786809);
-  // EXPECT_DOUBLE_EQ(chain[18].score_, 11507.756054537794626);
-  // EXPECT_DOUBLE_EQ(chain[19].score_, 11507.756054537794626);
-  // EXPECT_DOUBLE_EQ(chain[20].score_, 11497.442242054468807);
-  // EXPECT_DOUBLE_EQ(chain[21].score_, 11487.765671450759328);
-  // EXPECT_DOUBLE_EQ(chain[22].score_, 11488.138485860403307);
-  // EXPECT_DOUBLE_EQ(chain[23].score_, 11475.37891402193236);
-  // EXPECT_DOUBLE_EQ(chain[24].score_, 11469.454839964448183);
-#elif __linux__
-  // EXPECT_NEAR(chain[0].score_, 11622.04009177895, 1e-5);
-  // EXPECT_NEAR(chain[1].score_, 11616.98912320913, 1e-5);
-  // EXPECT_NEAR(chain[2].score_, 11612.66679924271, 1e-5);
-  // EXPECT_NEAR(chain[3].score_, 11609.11006547069, 1e-5);
-  // EXPECT_NEAR(chain[4].score_, 11609.11006547069, 1e-5);
-  // EXPECT_NEAR(chain[5].score_, 11588.81821244274, 1e-5);
-  // EXPECT_NEAR(chain[6].score_, 11576.18072649907, 1e-5);
-  // EXPECT_NEAR(chain[7].score_, 11582.66232534397, 1e-5);
-  // EXPECT_NEAR(chain[8].score_, 11602.24104623353, 1e-5);
-  // EXPECT_NEAR(chain[9].score_, 11599.60566906656, 1e-5);
-  // EXPECT_NEAR(chain[10].score_, 11584.84484506599, 1e-5);
-  // EXPECT_NEAR(chain[11].score_, 11587.00651477895, 1e-5);
-  // EXPECT_NEAR(chain[12].score_, 11571.63800588351, 1e-5);
-  // EXPECT_NEAR(chain[13].score_, 11568.92469216468, 1e-5);
-  // EXPECT_NEAR(chain[14].score_, 11559.61656781061, 1e-5);
-  // EXPECT_NEAR(chain[15].score_, 11561.62636514807, 1e-5);
-  // EXPECT_NEAR(chain[16].score_, 11568.94428881099, 1e-5);
-  // EXPECT_NEAR(chain[17].score_, 11560.86209234402, 1e-5);
-  // EXPECT_NEAR(chain[18].score_, 11559.94823220482, 1e-5);
-  // EXPECT_NEAR(chain[19].score_, 11622.22043635682, 1e-5);
-  // EXPECT_NEAR(chain[20].score_, 11614.3868750975, 1e-5);
-  // EXPECT_NEAR(chain[21].score_, 11604.94834979492, 1e-5);
-  // EXPECT_NEAR(chain[22].score_, 11604.94834979492, 1e-5);
-  // EXPECT_NEAR(chain[23].score_, 11587.16841312723, 1e-5);
-  // EXPECT_NEAR(chain[24].score_, 11577.35793797639, 1e-5);
-#endif
+/**
+ * @brief Test half momentum step with arbitrary values
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, LeapfrogHalfMomentum_ArbitraryValues) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> momentum = {5.0, -3.0, 2.5};
+  std::vector<double> gradient = {2.0, -4.0, 1.0};
+  double              delta    = 0.2;  // half_delta = 0.1
+
+  hmc->TestLeapfrogHalfMomentumStep(momentum, gradient, delta);
+
+  // p[0] = 5.0 - 0.1 * 2.0 = 4.8
+  // p[1] = -3.0 - 0.1 * (-4.0) = -3.0 + 0.4 = -2.6
+  // p[2] = 2.5 - 0.1 * 1.0 = 2.4
+  EXPECT_DOUBLE_EQ(momentum[0], 4.8);
+  EXPECT_DOUBLE_EQ(momentum[1], -2.6);
+  EXPECT_DOUBLE_EQ(momentum[2], 2.4);
+}
+
+// ============================================================================
+// Leapfrog Full Position Step Tests
+// ============================================================================
+
+/**
+ * @brief Test full position step with zero momentum
+ *
+ * q = q + dt * 0 = q (no change)
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, LeapfrogFullPosition_ZeroMomentum) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> position = {1.0, 2.0, 3.0};
+  std::vector<double> momentum = {0.0, 0.0, 0.0};
+  double              delta    = 0.1;
+
+  hmc->TestLeapfrogFullPositionStep(position, momentum, delta);
+
+  EXPECT_DOUBLE_EQ(position[0], 1.0);
+  EXPECT_DOUBLE_EQ(position[1], 2.0);
+  EXPECT_DOUBLE_EQ(position[2], 3.0);
+}
+
+/**
+ * @brief Test full position step with unit momentum
+ *
+ * q = q + dt * p
+ * With dt = 0.1 and p = [1, 1], q_new = [1 + 0.1, 2 + 0.1] = [1.1, 2.1]
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, LeapfrogFullPosition_UnitMomentum) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> position = {1.0, 2.0};
+  std::vector<double> momentum = {1.0, 1.0};
+  double              delta    = 0.1;
+
+  hmc->TestLeapfrogFullPositionStep(position, momentum, delta);
+
+  EXPECT_DOUBLE_EQ(position[0], 1.1);
+  EXPECT_DOUBLE_EQ(position[1], 2.1);
+}
+
+/**
+ * @brief Test full position step with arbitrary values
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, LeapfrogFullPosition_ArbitraryValues) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> position = {0.0, 5.0, -2.5};
+  std::vector<double> momentum = {3.0, -2.0, 4.0};
+  double              delta    = 0.5;
+
+  hmc->TestLeapfrogFullPositionStep(position, momentum, delta);
+
+  // q[0] = 0.0 + 0.5 * 3.0 = 1.5
+  // q[1] = 5.0 + 0.5 * (-2.0) = 4.0
+  // q[2] = -2.5 + 0.5 * 4.0 = -0.5
+  EXPECT_DOUBLE_EQ(position[0], 1.5);
+  EXPECT_DOUBLE_EQ(position[1], 4.0);
+  EXPECT_DOUBLE_EQ(position[2], -0.5);
+}
+
+// ============================================================================
+// Scale/Unscale Position Tests
+// ============================================================================
+
+/**
+ * @brief Test that scale followed by unscale returns original value
+ *
+ * Tests the round-trip property: unscale(scale(x)) ≈ x
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, ScaleUnscale_RoundTrip) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> lower = {0.0, -10.0, 1.0};
+  std::vector<double> upper = {1.0, 10.0, 100.0};
+  hmc->SetBounds(lower, upper);
+
+  // Test point in the middle of bounds
+  std::vector<double> position = {0.5, 0.0, 50.0};
+  std::vector<double> original = position;
+
+  hmc->TestScalePosition(position);
+  hmc->TestUnscalePosition(position);
+
+  for (size_t i = 0; i < original.size(); ++i) {
+    EXPECT_NEAR(position[i], original[i], 1e-10);
+  }
+}
+
+/**
+ * @brief Test scale at midpoint of bounds
+ *
+ * At the midpoint, scaled value should be 0 (since tan(0) = 0)
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, Scale_Midpoint) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> lower = {0.0};
+  std::vector<double> upper = {10.0};
+  hmc->SetBounds(lower, upper);
+
+  std::vector<double> position = {5.0};  // midpoint of [0, 10]
+  hmc->TestScalePosition(position);
+
+  // At midpoint, (x - min) / (max - min) = 0.5, so arg to tan is 0
+  EXPECT_NEAR(position[0], 0.0, 1e-10);
+}
+
+/**
+ * @brief Test unscale at zero (scaled midpoint)
+ *
+ * Unscaling 0 should return the midpoint of bounds
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, Unscale_Zero) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> lower = {0.0};
+  std::vector<double> upper = {10.0};
+  hmc->SetBounds(lower, upper);
+
+  std::vector<double> position = {0.0};  // scaled midpoint
+  hmc->TestUnscalePosition(position);
+
+  // Should return midpoint
+  EXPECT_NEAR(position[0], 5.0, 1e-10);
+}
+
+/**
+ * @brief Test scaling near bounds
+ *
+ * Values near bounds should scale to large positive/negative values
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, Scale_NearBounds) {
+  auto hmc = CreateHMCForTesting();
+
+  std::vector<double> lower = {0.0, 0.0};
+  std::vector<double> upper = {1.0, 1.0};
+  hmc->SetBounds(lower, upper);
+
+  // Test near lower and upper bounds
+  std::vector<double> position = {0.1, 0.9};
+  hmc->TestScalePosition(position);
+
+  // Near lower bound (0.1) should give negative scaled value
+  EXPECT_LT(position[0], 0.0);
+  // Near upper bound (0.9) should give positive scaled value
+  EXPECT_GT(position[1], 0.0);
+}
+
+// ============================================================================
+// Combined Leapfrog Integration Tests
+// ============================================================================
+
+/**
+ * @brief Test a complete leapfrog step (half momentum + full position + half momentum)
+ *
+ * This tests the symplectic integrator property by performing one complete step
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, Leapfrog_CompleteStep) {
+  auto hmc = CreateHMCForTesting();
+
+  // Initial conditions
+  std::vector<double> position = {0.0, 0.0};
+  std::vector<double> momentum = {1.0, 0.5};
+  double              delta    = 0.1;
+
+  // Gradient at origin (assume constant for this test)
+  std::vector<double> gradient1 = {0.2, 0.1};
+
+  // First half momentum step
+  hmc->TestLeapfrogHalfMomentumStep(momentum, gradient1, delta);
+  // p = [1.0 - 0.05*0.2, 0.5 - 0.05*0.1] = [0.99, 0.495]
+  EXPECT_NEAR(momentum[0], 0.99, 1e-10);
+  EXPECT_NEAR(momentum[1], 0.495, 1e-10);
+
+  // Full position step
+  hmc->TestLeapfrogFullPositionStep(position, momentum, delta);
+  // q = [0 + 0.1*0.99, 0 + 0.1*0.495] = [0.099, 0.0495]
+  EXPECT_NEAR(position[0], 0.099, 1e-10);
+  EXPECT_NEAR(position[1], 0.0495, 1e-10);
+
+  // Second gradient (would normally be re-evaluated; use same for simplicity)
+  std::vector<double> gradient2 = {0.2, 0.1};
+
+  // Second half momentum step
+  hmc->TestLeapfrogHalfMomentumStep(momentum, gradient2, delta);
+  // p = [0.99 - 0.05*0.2, 0.495 - 0.05*0.1] = [0.98, 0.49]
+  EXPECT_NEAR(momentum[0], 0.98, 1e-10);
+  EXPECT_NEAR(momentum[1], 0.49, 1e-10);
+}
+
+/**
+ * @brief Test energy conservation property of leapfrog (approximate)
+ *
+ * For a simple harmonic oscillator H = 0.5*q^2 + 0.5*p^2,
+ * the Hamiltonian should be approximately conserved after many leapfrog steps.
+ * Here we just verify the kinetic + "potential" (norm2(q)/2) stays similar.
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, Leapfrog_EnergyConservation) {
+  auto hmc = CreateHMCForTesting();
+
+  // Simple harmonic oscillator: U(q) = 0.5 * ||q||^2, grad(U) = q
+  std::vector<double> position = {1.0, 0.0};  // Start at (1, 0)
+  std::vector<double> momentum = {0.0, 1.0};  // Moving in y direction
+  double              delta    = 0.1;
+
+  // Initial energy: U = 0.5 * 1 = 0.5, K = 0.5 * 1 = 0.5, H = 1.0
+  auto calc_energy = [&hmc](const std::vector<double>& q, const std::vector<double>& p) {
+    double U = 0.5 * hmc->TestNorm2(q);  // Simple harmonic potential
+    double K = hmc->TestComputeKineticEnergy(p);
+    return hmc->TestComputeHamiltonian(U, K);
+  };
+
+  double H_initial = calc_energy(position, momentum);
+  EXPECT_NEAR(H_initial, 1.0, 1e-10);
+
+  // Perform 10 leapfrog steps
+  for (int step = 0; step < 10; ++step) {
+    // For SHO, gradient = position
+    std::vector<double> gradient = position;
+
+    // Half momentum step
+    hmc->TestLeapfrogHalfMomentumStep(momentum, gradient, delta);
+
+    // Full position step
+    hmc->TestLeapfrogFullPositionStep(position, momentum, delta);
+
+    // Recompute gradient at new position
+    gradient = position;
+
+    // Second half momentum step
+    hmc->TestLeapfrogHalfMomentumStep(momentum, gradient, delta);
+  }
+
+  double H_final = calc_energy(position, momentum);
+
+  // Energy should be approximately conserved (small drift due to discretization)
+  // For dt = 0.1, expect < 1% drift over 10 steps
+  EXPECT_NEAR(H_final, H_initial, 0.01 * H_initial);
+}
+
+/**
+ * @brief Test that sampleMomentum returns a vector of the correct size
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, SampleMomentum_CorrectSize) {
+  auto hmc = CreateHMCForTesting();
+
+  // Test different sizes
+  std::vector<double> momentum3 = hmc->TestSampleMomentum(3);
+  EXPECT_EQ(momentum3.size(), 3u);
+
+  std::vector<double> momentum10 = hmc->TestSampleMomentum(10);
+  EXPECT_EQ(momentum10.size(), 10u);
+
+  std::vector<double> momentum1 = hmc->TestSampleMomentum(1);
+  EXPECT_EQ(momentum1.size(), 1u);
+}
+
+/**
+ * @brief Test that sampleMomentum returns values with reasonable statistical properties
+ *        (not all zeros, varied values across multiple calls)
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, SampleMomentum_StatisticalProperties) {
+  auto hmc = CreateHMCForTesting();
+
+  // Sample multiple times and verify:
+  // 1. Values are not all the same
+  // 2. Different calls produce different results
+  const size_t dim         = 5;
+  const int    num_samples = 100;
+
+  std::vector<std::vector<double>> samples;
+  for (int i = 0; i < num_samples; ++i) {
+    samples.push_back(hmc->TestSampleMomentum(dim));
+  }
+
+  // Check that not all values in a sample are identical
+  bool has_variation_within = false;
+  for (const auto& sample : samples) {
+    for (size_t i = 1; i < sample.size(); ++i) {
+      if (sample[i] != sample[0]) {
+        has_variation_within = true;
+        break;
+      }
+    }
+    if (has_variation_within)
+      break;
+  }
+  EXPECT_TRUE(has_variation_within) << "All momentum values within samples are identical";
+
+  // Check that different samples are not identical
+  bool has_variation_between = false;
+  for (int i = 1; i < num_samples; ++i) {
+    for (size_t j = 0; j < dim; ++j) {
+      if (samples[i][j] != samples[0][j]) {
+        has_variation_between = true;
+        break;
+      }
+    }
+    if (has_variation_between)
+      break;
+  }
+  EXPECT_TRUE(has_variation_between) << "All samples are identical across calls";
+
+  // Check mean is approximately 0 (with large tolerance due to RNG)
+  double sum = 0.0;
+  for (const auto& sample : samples) {
+    for (double val : sample) {
+      sum += val;
+    }
+  }
+  double mean = sum / (num_samples * dim);
+  EXPECT_NEAR(mean, 0.0, 0.5) << "Mean of samples deviates significantly from 0";
+}
+
+/**
+ * @brief Test computeLogJacobian at the midpoint (q*=0) where formula simplifies
+ *        log|dq/dq*| = log(range/PI) - log(1 + q*^2) = log(range/PI) when q*=0
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, ComputeLogJacobian_AtMidpoint) {
+  auto hmc = CreateHMCForTesting();
+
+  // Set up bounds: 2 parameters with ranges [0, 1] and [0, 2]
+  hmc->SetBounds({0.0, 0.0}, {1.0, 2.0});
+
+  // At q*=0 (midpoint of the bounded range):
+  // log|dq/dq*| = log(range/PI) - log(1 + 0) = log(range/PI)
+  // Expected: log(1/PI) + log(2/PI) = log(2/PI^2)
+  std::vector<double> q_star_zeros = {0.0, 0.0};
+
+  double log_jacobian = hmc->TestComputeLogJacobian(q_star_zeros);
+
+  // Expected value: log(1/PI) + log(2/PI) = log(1) - log(PI) + log(2) - log(PI) = log(2) - 2*log(PI)
+  double expected = std::log(1.0 / PI) + std::log(2.0 / PI);
+  EXPECT_NEAR(log_jacobian, expected, 1e-10) << "Log Jacobian at midpoint should equal log(range/PI) summed";
+}
+
+/**
+ * @brief Test computeLogJacobian symmetry: |q*| should give same result due to q*^2 term
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, ComputeLogJacobian_Symmetry) {
+  auto hmc = CreateHMCForTesting();
+
+  // Set up bounds: 2 parameters with ranges [0, 1] and [0, 2]
+  hmc->SetBounds({0.0, 0.0}, {1.0, 2.0});
+
+  // Test symmetry: log|dq/dq*| should be same for +q* and -q*
+  // because the formula has q*^2
+  std::vector<double> q_star_positive = {1.0, 0.5};
+  std::vector<double> q_star_negative = {-1.0, -0.5};
+
+  double log_jac_positive = hmc->TestComputeLogJacobian(q_star_positive);
+  double log_jac_negative = hmc->TestComputeLogJacobian(q_star_negative);
+
+  EXPECT_DOUBLE_EQ(log_jac_positive, log_jac_negative) << "Log Jacobian should be symmetric in q*";
+}
+
+/**
+ * @brief Test computeLogJacobian decreases as |q*| increases (gets closer to bounds)
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, ComputeLogJacobian_DecreasesAtBounds) {
+  auto hmc = CreateHMCForTesting();
+
+  // Set up bounds: 2 parameters with ranges [0, 1] and [0, 2]
+  hmc->SetBounds({0.0, 0.0}, {1.0, 2.0});
+
+  // As |q*| increases (approaching bounds), log(1 + q*^2) increases,
+  // so log|dq/dq*| = log(range/PI) - log(1 + q*^2) decreases
+  std::vector<double> q_star_center = {0.0, 0.0};
+  std::vector<double> q_star_mid    = {1.0, 1.0};
+  std::vector<double> q_star_far    = {3.0, 3.0};
+
+  double log_jac_center = hmc->TestComputeLogJacobian(q_star_center);
+  double log_jac_mid    = hmc->TestComputeLogJacobian(q_star_mid);
+  double log_jac_far    = hmc->TestComputeLogJacobian(q_star_far);
+
+  EXPECT_GT(log_jac_center, log_jac_mid) << "Log Jacobian should decrease as |q*| increases";
+  EXPECT_GT(log_jac_mid, log_jac_far) << "Log Jacobian should continue decreasing as |q*| increases further";
+}
+
+/**
+ * @brief Test computeLogJacobian with empty input (edge case)
+ */
+TEST_F(HamiltonianMonteCarloThreadedModel, ComputeLogJacobian_EmptyInput) {
+  auto hmc = CreateHMCForTesting();
+
+  // Set up empty bounds
+  hmc->SetBounds({}, {});
+
+  // Verify the function handles empty input gracefully
+  std::vector<double> empty_q_star  = {};
+  double              log_jac_empty = hmc->TestComputeLogJacobian(empty_q_star);
+  EXPECT_DOUBLE_EQ(log_jac_empty, 0.0) << "Empty q* should give log Jacobian of 0";
 }
 
 }  // namespace niwa

@@ -307,8 +307,8 @@ void MCMC::GenerateNewCandidates() {
   else if (proposal_distribution_ == PARAM_T)
     FillMultivariateT(step_size_);
 
-  LOG_MEDIUM() << "New Candidates";
-  for (auto v : candidates_) LOG_MEDIUM() << v;
+  LOG_FINE() << "New Candidates";
+  for (auto v : candidates_) LOG_FINE() << v;
 }
 
 /**
@@ -345,7 +345,7 @@ void MCMC::FillMultivariateT(double step_size) {
   for (unsigned i = 0; i < estimate_count_; ++i) {
     double rng_normal = rng.normal();
     normals[i]        = rng_normal;
-    LOG_MEDIUM() << "rng_normal: " << rng_normal;
+    LOG_FINE() << "rng_normal: " << rng_normal;
     chisquares[i] = 1 / (rng.chi_squared(df_) / df_);
   }
 

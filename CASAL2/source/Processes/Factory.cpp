@@ -18,9 +18,6 @@
 #include "../Processes/Age/Ageing.h"
 #include "../Processes/Age/MarkovianMovement.h"
 #include "../Processes/Age/Maturation.h"
-#include "../Processes/Age/Mortality/MortalityConstantExploitation.h"
-#include "../Processes/Age/Mortality/MortalityConstantRate.h"
-#include "../Processes/Age/Mortality/MortalityDiseaseRate.h"
 #include "../Processes/Age/Mortality/MortalityEvent.h"
 #include "../Processes/Age/Mortality/MortalityEventBiomass.h"
 #include "../Processes/Age/Mortality/MortalityHollingRate.h"
@@ -28,31 +25,26 @@
 #include "../Processes/Age/Mortality/MortalityInitialisationBaranov.h"
 #include "../Processes/Age/Mortality/MortalityInitialisationEvent.h"
 #include "../Processes/Age/Mortality/MortalityInitialisationEventBiomass.h"
-#include "../Processes/Age/Mortality/MortalityInstantaneous.h"
 #include "../Processes/Age/Mortality/MortalityInstantaneousRetained.h"
 #include "../Processes/Age/Mortality/MortalityPreySuitability.h"
 #include "../Processes/Age/Mortality/SurvivalConstantRate.h"
-#include "../Processes/Age/RecruitmentBevertonHolt.h"
 #include "../Processes/Age/RecruitmentBevertonHoltWithDeviations.h"
-#include "../Processes/Age/RecruitmentConstant.h"
 #include "../Processes/Age/RecruitmentRicker.h"
-#include "../Processes/Age/TagByAge.h"
 #include "../Processes/Age/TagByLength.h"
 #include "../Processes/Age/TagLoss.h"
 #include "../Processes/Age/TagLossEmpirical.h"
-#include "../Processes/Age/TransitionCategory.h"
 #include "../Processes/Age/TransitionCategoryByAge.h"
 #include "../Processes/Common/LoadPartition.h"
+#include "../Processes/Common/Mortality/MortalityConstantExploitation.h"
+#include "../Processes/Common/Mortality/MortalityConstantRate.h"
+#include "../Processes/Common/Mortality/MortalityDiseaseRate.h"
+#include "../Processes/Common/Mortality/MortalityInstantaneous.h"
 #include "../Processes/Common/Nop.h"
+#include "../Processes/Common/Recruitment/RecruitmentBevertonHolt.h"
+#include "../Processes/Common/Recruitment/RecruitmentConstant.h"
+#include "../Processes/Common/Tagging.h"
+#include "../Processes/Common/TransitionCategory.h"
 #include "../Processes/Length/Growth.h"
-#include "../Processes/Length/MortalityConstantExploitation.h"
-#include "../Processes/Length/MortalityConstantRate.h"
-#include "../Processes/Length/MortalityDiseaseRate.h"
-#include "../Processes/Length/MortalityInstantaneous.h"
-#include "../Processes/Length/RecruitmentBevertonHolt.h"
-#include "../Processes/Length/RecruitmentConstant.h"
-#include "../Processes/Length/Tagging.h"
-#include "../Processes/Length/TransitionCategory.h"
 #include "../Processes/Manager.h"
 
 // Namespaces
@@ -96,23 +88,23 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_LOAD_PARTITION)
         result = new processes::LoadPartition(model);
       else if (sub == PARAM_RECRUITMENT_BEVERTON_HOLT)
-        result = new age::RecruitmentBevertonHolt(model);
+        result = new common::RecruitmentBevertonHolt(model);
       else if (sub == PARAM_RECRUITMENT_BEVERTON_HOLT_WITH_DEVIATIONS)
         result = new age::RecruitmentBevertonHoltWithDeviations(model);
       else if (sub == PARAM_RECRUITMENT_CONSTANT)
-        result = new age::RecruitmentConstant(model);
+        result = new common::RecruitmentConstant(model);
       else if (sub == PARAM_RECRUITMENT_RICKER)
         result = new age::RecruitmentRicker(model);
       else if (sub == PARAM_MATURATION)
         result = new age::Maturation(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_RATE)
-        result = new age::MortalityConstantRate(model);
+        result = new common::MortalityConstantRate(model);
       else if (sub == PARAM_SURVIVAL_CONSTANT_RATE)
         result = new age::SurvivalConstantRate(model);
       else if (sub == PARAM_MORTALITY_DISEASE_RATE)
-        result = new age::MortalityDiseaseRate(model);
+        result = new common::MortalityDiseaseRate(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_EXPLOITATION)
-        result = new age::MortalityConstantExploitation(model);
+        result = new common::MortalityConstantExploitation(model);
       else if (sub == PARAM_MORTALITY_INITIALISATION_EVENT)
         result = new age::MortalityInitialisationEvent(model);
       else if (sub == PARAM_MORTALITY_INITIALISATION_EVENT_BIOMSS)
@@ -126,7 +118,7 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_MORTALITY_EVENT_BIOMASS)
         result = new age::MortalityEventBiomass(model);
       else if (sub == PARAM_MORTALITY_INSTANTANEOUS)
-        result = new age::MortalityInstantaneous(model);
+        result = new common::MortalityInstantaneous(model);
       else if (sub == PARAM_MORTALITY_INSTANTANEOUS_RETAINED)
         result = new age::MortalityInstantaneousRetained(model);
       else if (sub == PARAM_MORTALITY_HOLLING_RATE)
@@ -138,7 +130,7 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_NOP)
         result = new processes::NullProcess(model);
       else if (sub == PARAM_TAG_BY_AGE)
-        result = new age::TagByAge(model);
+        result = new common::Tagging(model);
       else if (sub == PARAM_TAG_BY_LENGTH)
         result = new age::TagByLength(model);
       else if (sub == PARAM_TAG_LOSS)
@@ -146,32 +138,38 @@ Process* Factory::Create(shared_ptr<Model> model, const string& object_type, con
       else if (sub == PARAM_TAG_LOSS_EMPIRICAL)
         result = new age::TagLossEmpirical(model);
       else if (sub == PARAM_TRANSITION_CATEGORY)
-        result = new age::TransitionCategory(model);
+        result = new common::TransitionCategory(model);
       else if (sub == PARAM_TRANSITION_CATEGORY_BY_AGE)
         result = new age::TransitionCategoryByAge(model);
+
+      if (result)
+        result->set_process_profile(ProcessProfile::kAge);
     }
   if (model->partition_type() == PartitionType::kLength || (partition_type == PartitionType::kModel && model->partition_type() == PartitionType::kLength)) {
     if (object == PARAM_PROCESS || object == PARAM_PROCESSES) {
       if (sub == PARAM_GROWTH)
         result = new length::Growth(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_RATE)
-        result = new length::MortalityConstantRate(model);
+        result = new common::MortalityConstantRate(model);
       else if (sub == PARAM_MORTALITY_CONSTANT_EXPLOITATION)
-        result = new length::MortalityConstantExploitation(model);
+        result = new common::MortalityConstantExploitation(model);
       else if (sub == PARAM_RECRUITMENT_CONSTANT)
-        result = new length::RecruitmentConstant(model);
+        result = new common::RecruitmentConstant(model);
       else if (sub == PARAM_RECRUITMENT_BEVERTON_HOLT)
-        result = new length::RecruitmentBevertonHolt(model);
+        result = new common::RecruitmentBevertonHolt(model);
       else if (sub == PARAM_NOP)
         result = new processes::NullProcess(model);
       else if (sub == PARAM_MORTALITY_INSTANTANEOUS)
-        result = new length::MortalityInstantaneous(model);
+        result = new common::MortalityInstantaneous(model);
       else if (sub == PARAM_MORTALITY_DISEASE_RATE)
-        result = new length::MortalityDiseaseRate(model);
+        result = new common::MortalityDiseaseRate(model);
       else if (sub == PARAM_TAGGING)
-        result = new length::Tagging(model);
+        result = new common::Tagging(model);
       else if (sub == PARAM_TRANSITION_CATEGORY)
-        result = new length::TransitionCategory(model);
+        result = new common::TransitionCategory(model);
+
+      if (result)
+        result->set_process_profile(ProcessProfile::kLength);
     }
   }
 

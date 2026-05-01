@@ -58,8 +58,48 @@ class ModelRunner:
         self.executionTypeList.append(["SingleSexTagByLength_input", "run_dash_I"])
         self.executionTypeList.append(["SingleSexTagByLength_n", "run_dash_I"])
         self.executionTypeList.append(["Simple", "projections"])
+        # self.executionTypeList.append(["MultiSelectivity", "betadiff"])
+        # self.executionTypeList.append(["SimpleExploitationRates", "projections"])
+        self.executionTypeList.append(["SimpleNoStdYcs", "adolc"])
+        self.executionTypeList.append(["SimpleNoStdYcs", "betadiff"])
+        self.executionTypeList.append(["SimpleNoStdYcs", "projections"])
 
         self.adolcLock = threading.Lock()
+
+
+    def _print_log_tail(self, folder_path, execution_type, lines=100):
+        """Print the last N lines of log/error files for a failed run."""
+        log_files = []
+        if execution_type == "betadiff":
+            log_files = ["estimate_betadiff.log", "estimate_betadiff.err"]
+        elif execution_type == "gammadiff":
+            log_files = ["estimate_gammadiff.log", "estimate_gammadiff.err"]
+        elif execution_type == "adolc":
+            log_files = ["estimate_adolc.log", "estimate_adolc.err"]
+        elif execution_type == "resume_mcmc_from_mpd":
+            log_files = ["estimate.log", "esimate.err", "mcmc.log", "mcmc.err"]
+        elif execution_type == "resume_mcmc":
+            log_files = ["mcmc.log"]
+        elif execution_type == "simulate_dash_i":
+            log_files = ["multi_sim.log", "multi_sim.err"]
+        elif execution_type in ["run_dash_i", "run_dash_I"]:
+            log_files = ["run.log", "run.err"]
+        elif execution_type == "projections":
+            log_files = ["projections.log", "projections.err"]
+        else:
+            log_files = ["run.log", "run.err"]
+
+        for log_file in log_files:
+            file_path = os.path.join(folder_path, log_file)
+            if os.path.exists(file_path):
+                with open(file_path, "r", errors="replace") as f:
+                    all_lines = f.readlines()
+                tail = all_lines[-lines:]
+                if tail:
+                    print(f"  --- Last {len(tail)} lines of {log_file} ---")
+                    for line in tail:
+                        print(f"  {line}", end="")
+                    print()
 
 
     def thread_target(self, folder, executionType, threadCwd, threadCommands, checkForFile=None):
@@ -209,20 +249,21 @@ class ModelRunner:
         for i, thread in enumerate(threads):
             thread.join()
         
-        for folder, (output, error, exit_code, elapsed, _) in self.result_container.items():
-            # Re-run the command synchronously to get the result (not ideal, but matches your current logic)
+        for key, (output, error, exit_code, elapsed, folder_path) in self.result_container.items():
             if exit_code != EX_OK:
                 print(
                     "[FAILED] - "
-                    + folder
+                    + key
                     + " in "
                     + str(round(elapsed, 2))
                     + " seconds"
                 )
+                exec_type = key.split(" - ", 1)[1] if " - " in key else ""
+                self._print_log_tail(folder_path, exec_type)
                 fail_count += 1
             else:
                 print(
-                    "[OK] - " + folder + " in " + str(round(elapsed, 2)) + " seconds"
+                    "[OK] - " + key + " in " + str(round(elapsed, 2)) + " seconds"
                 )
                 success_count += 1
 

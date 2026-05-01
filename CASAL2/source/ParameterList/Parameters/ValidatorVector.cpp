@@ -527,6 +527,49 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
 }
 
 /**
+ * @brief This method will expand the current parameter to have the number of elements specified by count.
+ * If the parameter already has the expected count, it will do nothing.
+ * If the parameter has a single value, it will duplicate that value to match the expected count
+ * @param count The number of elements to expand to.
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::ExpandToNumberOfElements(unsigned count) {
+  LOG_TRACE();
+  if (!parameter_->has_been_defined() && parameter_->is_optional()) {
+    return shared_from_this();
+  }
+
+  // Set up a lambda to expand the parameter to the expected count
+  // if it is not already the expected count.
+  auto expand = [&](auto* param) {
+    auto& src = *param->target();
+    if (src.size() != 1 && src.size() != count) {
+      LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " requires either 1 element or " << count << " elements, but has " << src.size()
+                  << " elements";
+      return;
+    }
+    if (src.size() == 1) {
+      auto temp = src[0];
+      src.assign(count, temp);
+    }
+  };
+
+  // Call the lambda based on the type of the parameter
+  // We can use dynamic_cast here because we know the parameter is a BindableVector type.
+  if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
+    expand(param);
+  } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    expand(param);
+  } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
+    expand(param);
+  } else {
+    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToNumberOfElements " << parameter_->label() << " is not a vector<double/unsigned> type";
+  }
+
+  return shared_from_this();
+}
+
+/**
  *
  */
 shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(const string& label) {
