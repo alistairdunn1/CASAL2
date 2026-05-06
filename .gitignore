@@ -281,3 +281,5 @@ Documentation/ContributorsGuide/ContributorsGuide.synctex.gz
 TestModels/**/*.log
 TestModels/**/*.err
 
+.github/copilot-instructions.md
+.github/prompts/update_shared_ptr.prompt.md
