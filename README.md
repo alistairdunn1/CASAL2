@@ -11,6 +11,6 @@ This repository contains the required libraries and source code to compile and r
 
 The most recent production version of Casal2 is available [here](https://github.com/Casal2/CASAL2/releases). 
 
-## Community
+## Contact
 
-Casal2 has a dedicated Slack server available [here](https://join.slack.com/t/casal2workspace/shared_invite/zt-34x3s925h-INlNdKhsfataAZB8J34ceA). You're free to join the Slack community and ask questions or provide feedback.
+For more information about Casal2, please see the Casal2 user manual. You can contact the Casal2 development team at casal2@zaita.com
