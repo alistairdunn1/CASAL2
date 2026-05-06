@@ -65,6 +65,15 @@ class MainCode:
 
         if Globals.build_parameters_ != "":
             build_string += ' -D' + Globals.build_parameters_.upper() + '=1'
+
+        casal2_san = os.environ.get('CASAL2_SAN', '').strip().upper()
+        valid_sanitizers = {'ASAN', 'TSAN', 'MSAN', 'UBSAN'}
+        if casal2_san:
+            if casal2_san not in valid_sanitizers:
+                return Globals.PrintError(f"Invalid CASAL2_SAN value '{casal2_san}'. Must be one of: {', '.join(sorted(valid_sanitizers))}")
+            print(f"--> Sanitizer enabled: {casal2_san}")
+            build_string += f' -D{casal2_san}=1'
+
         build_string += ' ../../../../CASAL2/'
 
         print("--> CMake command: " + build_string)
