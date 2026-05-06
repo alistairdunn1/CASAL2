@@ -33,7 +33,7 @@ Project::Project(shared_ptr<Model> model) : model_(model) {
  * Validate the objects
  */
 void Project::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
 
   DoValidate();
@@ -43,12 +43,13 @@ void Project::Validate() {
  * Build the objects
  */
 void Project::Build() {
-  string error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kProject, error)) {
+  auto   current_model = model();
+  string error         = "";
+  if (!current_model->objects().VerifyAddressableForUse(parameter_, addressable::kProject, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "could not be verified for use in a @project block. Error: " << error;
   }
 
-  addressable::Type addressable_type = model_->objects().GetAddressableType(parameter_);
+  addressable::Type addressable_type = current_model->objects().GetAddressableType(parameter_);
   switch (addressable_type) {
     case addressable::kInvalid:
       LOG_CODE_ERROR() << "Invalid addressable type: " << parameter_;
@@ -56,18 +57,18 @@ void Project::Build() {
     case addressable::kSingle:
       LOG_FINEST() << "applying projection for parameter " << parameter_ << " is a single value";
       DoUpdateFunc_   = &Project::SetSingleValue;
-      addressable_    = model_->objects().GetAddressable(parameter_);
+      addressable_    = current_model->objects().GetAddressable(parameter_);
       original_value_ = *addressable_;
       break;
     case addressable::kVector:
       LOG_FINEST() << "applying projection for parameter " << parameter_ << " is a vector";
-      addressable_vector_ = model_->objects().GetAddressableVector(parameter_);
+      addressable_vector_ = current_model->objects().GetAddressableVector(parameter_);
       DoUpdateFunc_       = &Project::SetVectorValue;
       break;
     case addressable::kUnsignedMap:
       LOG_FINEST() << "applying projection for parameter " << parameter_ << " is an unsigned map";
       DoUpdateFunc_    = &Project::SetMapValue;
-      addressable_map_ = model_->objects().GetAddressableUMap(parameter_);
+      addressable_map_ = current_model->objects().GetAddressableUMap(parameter_);
       break;
     default:
       LOG_ERROR() << "The addressable provided for use in a projection: " << parameter_ << " is not a type that is supported for projection modification";
@@ -84,7 +85,7 @@ void Project::Reset() {
     original_value_ = *addressable_;
   }
 
-  if (model_->projection_final_phase())
+  if (model()->projection_final_phase())
     DoReset();
 }
 
@@ -164,7 +165,7 @@ void Project::StoreValue(unsigned current_year) {
   else if (addressable_map_ != nullptr)
     stored_values_[current_year] = (*addressable_map_)[current_year];
   else if (addressable_vector_ != nullptr) {
-    unsigned index = current_year - model_->start_year();
+    unsigned index = current_year - model()->start_year();
     if (index >= addressable_vector_->size()) {
       LOG_CODE_ERROR() << "Could not store value for @project parameter " << parameter_ << " in year " << current_year << " because index exceeded size of vector " << index
                        << " : " << addressable_vector_->size();
@@ -184,8 +185,8 @@ void Project::Verify(shared_ptr<Model> model) {
  * Verify that there is not @time_varying block as well on this parameter
  */
 void Project::SetObjectForNextIteration() {
-  LOG_FINE() << "Setting value to: " << stored_values_[model_->start_year()];
-  (this->*DoUpdateFunc_)(stored_values_[model_->start_year()], false, model_->start_year());
+  LOG_FINE() << "Setting value to: " << stored_values_[model()->start_year()];
+  (this->*DoUpdateFunc_)(stored_values_[model()->start_year()], false, model()->start_year());
 }
 
 } /* namespace niwa */

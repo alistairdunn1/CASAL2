@@ -40,7 +40,7 @@ TimeVarying::TimeVarying(shared_ptr<Model> model) : model_(model) {
  * then call DoValidate() on the child class
  */
 void TimeVarying::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear();
 
   parameter_ = parameters_.Get(PARAM_PARAMETER)->has_been_defined() ? parameter_ : label_;
@@ -51,15 +51,16 @@ void TimeVarying::Validate() {
  * Build the TimeVarying object
  */
 void TimeVarying::Build() {
+  auto current_model = model();
   // Verify our addressable is allowed to be used for TimeVarying
   string error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kTimeVarying, error)) {
+  if (!current_model->objects().VerifyAddressableForUse(parameter_, addressable::kTimeVarying, error)) {
     LOG_FATAL_Q(PARAM_PARAMETER) << "the parameter " << parameter_ << " could not be verified for use in an @time_varying block. Error: " << error;
   }
 
   // Split parameter label up
   // I added this so if the user supplies a string map we can get the string key.
-  auto           pair      = model_->objects().ExplodeParameterAndIndex(parameter_);
+  auto           pair      = current_model->objects().ExplodeParameterAndIndex(parameter_);
   string         parameter = pair.first;
   string         index     = pair.second;
   vector<string> indexes;
@@ -73,7 +74,7 @@ void TimeVarying::Build() {
   LOG_FINE() << "sizes = " << indexes.size() << " parameter = " << parameter << " index = " << index << " param " << parameter_;
 
   // bind our function pointer for the update function, original value and addressible pointer
-  addressable::Type addressable_type = model_->objects().GetAddressableType(parameter_);
+  addressable::Type addressable_type = current_model->objects().GetAddressableType(parameter_);
   LOG_FINE() << "addressable type = " << addressable_type;
   switch (addressable_type) {
     case addressable::kInvalid:
@@ -82,18 +83,18 @@ void TimeVarying::Build() {
     case addressable::kSingle:
       LOG_FINE() << "get time-vary kSingle";
       update_function_ = &TimeVarying::set_single_value;
-      addressable_     = model_->objects().GetAddressable(parameter_);
+      addressable_     = current_model->objects().GetAddressable(parameter_);
       original_value_  = *addressable_;
       break;
     case addressable::kVector:
       LOG_FINE() << "get time-vary kVector";
       update_function_    = &TimeVarying::set_vector_value;
-      addressable_vector_ = model_->objects().GetAddressableVector(parameter_);
+      addressable_vector_ = current_model->objects().GetAddressableVector(parameter_);
       break;
     case addressable::kUnsignedMap:
       LOG_FINE() << "get time-vary kUnsignedMap";
       update_function_ = &TimeVarying::set_map_value;
-      addressable_map_ = model_->objects().GetAddressableUMap(parameter_);
+      addressable_map_ = current_model->objects().GetAddressableUMap(parameter_);
       break;
     case addressable::kStringMap:
       LOG_FINE() << "get time-vary kStringMap";
@@ -104,7 +105,7 @@ void TimeVarying::Build() {
       if (indexes.size() != 1)
         LOG_FATAL_P(PARAM_PARAMETER) << "Can only time-vary string maps with a single index i.e., one category label. The parameter supplied has " << indexes.size();
       string_map_key_        = index;
-      addressable_sting_map_ = model_->objects().GetAddressableSMap(parameter_);
+      addressable_sting_map_ = current_model->objects().GetAddressableSMap(parameter_);
       break;
     default:
       LOG_ERROR() << "The addressable provided for use in the @time_varying block: " << parameter_ << " is not a parameter of a type that is supported";
@@ -112,7 +113,7 @@ void TimeVarying::Build() {
   }
 
   // Get Target Object variable.
-  target_object_ = model_->objects().FindObject(parameter_);
+  target_object_ = current_model->objects().FindObject(parameter_);
 
   DoBuild();
 }
@@ -175,7 +176,7 @@ void TimeVarying::set_vector_value(Double value) {
  * @param value The value to put into the addressable map
  */
 void TimeVarying::set_map_value(Double value) {
-  (*addressable_map_)[model_->current_year()] = value;
+  (*addressable_map_)[model()->current_year()] = value;
 }
 
 /**

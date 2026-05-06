@@ -72,7 +72,7 @@ class MortalityHybrid : public Mortality {
     vector<Double>       selectivity_values_;
     AgeWeight*           age_weight_ = nullptr;
     string               age_weight_label_;
-    bool                 used_in_current_timestep_;
+    bool                 used_in_current_timestep_ = false;
     unsigned             category_ndx_;  // used for a look up to store info in containers
   };
   /**

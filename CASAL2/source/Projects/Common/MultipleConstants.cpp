@@ -47,10 +47,10 @@ void MultipleConstants::DoBuild() {
   LOG_TRACE();
   // basic validation
   vector<vector<string>>& data = data_table_->data();
-  LOG_FINE() << "In MultipleConstants projections: -i count " << model_->get_addressable_values_count();
+  LOG_FINE() << "In MultipleConstants projections: -i count " << model()->get_addressable_values_count();
 
-  if (data.size() != (model_->get_addressable_values_count()))
-    LOG_ERROR_P(PARAM_VALUES) << "- the number of rows supplied was " << data.size() << ", but " << model_->get_addressable_values_count()
+  if (data.size() != (model()->get_addressable_values_count()))
+    LOG_ERROR_P(PARAM_VALUES) << "- the number of rows supplied was " << data.size() << ", but " << model()->get_addressable_values_count()
                               << " were expected. There should be a row for each row of data in supplied free parameter (the -i/-I file)";
 
   projection_values_.resize(data.size());
@@ -81,10 +81,10 @@ void MultipleConstants::DoReset() {}
  * Update
  */
 void MultipleConstants::DoUpdate() {
-  value_ = projection_values_[model_->get_current_addressable_value()][model_->current_year()] * multiplier_by_year_[model_->current_year()];
-  LOG_FINE() << "In MultipleConstants projections: setting Value to: " << value_ << ", with multiplier: " << multiplier_by_year_[model_->current_year()] << " and dash -i index "
-             << model_->get_current_addressable_value() + 1 << " for year = " << model_->current_year();
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  value_ = projection_values_[model()->get_current_addressable_value()][model()->current_year()] * multiplier_by_year_[model()->current_year()];
+  LOG_FINE() << "In MultipleConstants projections: setting Value to: " << value_ << ", with multiplier: " << multiplier_by_year_[model()->current_year()] << " and dash -i index "
+             << model()->get_current_addressable_value() + 1 << " for year = " << model()->current_year();
+  (this->*DoUpdateFunc_)(value_, true, model()->current_year());
 }
 
 } /* namespace projects */

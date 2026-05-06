@@ -46,7 +46,7 @@ public:
   virtual ~Partition();
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){};
+  void Verify(shared_ptr<Model> model) {};
   void Reset();
   void Clear() { partition_.clear(); }
 
@@ -55,10 +55,12 @@ public:
 
 protected:
   // Methods
-  Partition(shared_ptr<Model> model) : model_(model){};
+  Partition(shared_ptr<Model> model) : model_(model) {};
 
   // Members
-  shared_ptr<Model>                 model_ = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>                 model() const { return base::Object::LockWeakPtr(model_, "Partition"); }
   map<string, partition::Category*> partition_;  // map<category label, partition::Category Struct>
 
   DISALLOW_COPY_AND_ASSIGN(Partition);

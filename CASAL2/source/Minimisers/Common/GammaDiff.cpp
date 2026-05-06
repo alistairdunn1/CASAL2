@@ -45,12 +45,13 @@ void GammaDiff::DoValidate() {
 void GammaDiff::Execute() {
   LOG_TRACE();
   // Variables
-  LOG_FINE() << "model_: " << model_;
+  auto current_model = model();
+  LOG_FINE() << "model_: " << current_model.get();
 
   LOG_INFO() << "Estimation with the " << PARAM_GAMMADIFF << " minimiser";
 
-  gammadiff::CallBack call_back(model_);
-  estimates::Manager* estimate_manager = model_->managers()->estimate();
+  gammadiff::CallBack call_back(current_model);
+  estimates::Manager* estimate_manager = current_model->managers()->estimate();
   LOG_FINE() << "estimate_manager: " << estimate_manager;
 
   vector<double> lower_bounds;

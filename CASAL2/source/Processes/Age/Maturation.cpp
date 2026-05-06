@@ -59,14 +59,14 @@ void Maturation::DoValidate() {
   parameters_.Validate(PARAM_PROJECTION_YEARS_METHOD)->IsInList({PARAM_ZERO, PARAM_FINAL_YEAR});
 
   if (missing_years_method_ == PARAM_ERROR) {
-    parameters_.ValidateVector(PARAM_YEARS)->NumberOfElements(model_->years().size());
+    parameters_.ValidateVector(PARAM_YEARS)->NumberOfElements(model()->years().size());
   }
 
   rates_by_years_     = utilities::Map::create(years_, rates_);
   missing_years_zero_ = missing_years_method_ == PARAM_ZERO;
 
   //  // Validate Categories
-  niwa::Categories* categories = model_->categories();
+  niwa::Categories* categories = model()->categories();
 
   // Validate that each from and to category have the same age range.
   for (unsigned i = 0; i < from_category_names_.size(); ++i) {
@@ -95,24 +95,24 @@ void Maturation::DoBuild() {
   to_partition_.Init(to_category_names_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
   }
 
   // check there is a year for all model years
-  for (auto this_year : model_->years()) {
+  for (auto this_year : model()->years()) {
     if (find(years_.begin(), years_.end(), this_year) == years_.end())
       LOG_WARNING() << "At " << location() << " the model year " << this_year << " was not found in " << PARAM_YEARS
                     << ". This is potentially an error. Please check the input configuration files";
   }
 
   // We have some missing years, fill them in based on the method
-  if (model_->years().size() != years_.size() && !missing_years_zero_) {
+  if (model()->years().size() != years_.size() && !missing_years_zero_) {
     Double final_year_rate = rates_by_years_.rbegin()->second;
 
-    for (auto this_year : model_->years()) {
+    for (auto this_year : model()->years()) {
       if (find(years_.begin(), years_.end(), this_year) == years_.end()) {
         rates_by_years_[this_year] = final_year_rate;
       }
@@ -130,7 +130,7 @@ void Maturation::DoExecute() {
   auto   to_iter   = to_partition_.begin();
   Double amount    = 0.0;
 
-  unsigned current_year = model_->current_year();
+  unsigned current_year = model()->current_year();
   Double   rate         = 0.0;
 
   // if year is missing for projection then we grab the last one

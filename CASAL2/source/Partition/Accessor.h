@@ -72,7 +72,9 @@ public:
 
 protected:
   // members
-  shared_ptr<Model>                 model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>                 model() const { return base::Object::LockWeakPtr(model_, "Partition::Accessor"); }
   map<unsigned, Accessor::DataType> categories_;
 };
 

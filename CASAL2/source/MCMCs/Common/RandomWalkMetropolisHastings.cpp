@@ -49,7 +49,7 @@ void RandomWalkMetropolisHastings::DoExecute(shared_ptr<ThreadPool> thread_pool)
   LOG_MEDIUM() << "Estimate Count: " << estimate_count_;
 
   vector<double>     current_candidates = candidates_;
-  ObjectiveFunction& obj_function       = model_->objective_function();
+  ObjectiveFunction& obj_function       = model()->objective_function();
   double             current_score      = obj_function.score();
 
   mcmc::ChainLink last_link;
@@ -81,7 +81,7 @@ void RandomWalkMetropolisHastings::DoExecute(shared_ptr<ThreadPool> thread_pool)
           estimates_[i]->set_value(candidates_[i]);
       }
 
-      model_->FullIteration();
+      model()->FullIteration();
       obj_function.CalculateScore();
       proposed_score = obj_function.score();
 
@@ -129,7 +129,7 @@ void RandomWalkMetropolisHastings::DoExecute(shared_ptr<ThreadPool> thread_pool)
 
         chain_.push_back(new_link);
         // LOG_MEDIUM() << "Storing: Successful Jumps " << successful_jumps_ << " Jumps : " << jumps_;
-        model_->managers()->report()->Execute(model_, State::kIterationComplete);
+        model()->managers()->report()->Execute(model(), State::kIterationComplete);
       }
     } else {  // Attempt was out of bounds, and hence reset to last in-bounds candidate, as used by GenerateNewCandidates
       ++invalid_counter;

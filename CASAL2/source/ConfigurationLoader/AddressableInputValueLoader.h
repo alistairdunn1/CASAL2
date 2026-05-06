@@ -22,6 +22,7 @@
 // headers
 #include <string>
 
+#include "../BaseClasses/Object.h"
 #include "../Model/Model.h"
 
 // namespaces
@@ -40,7 +41,8 @@ public:
 
 private:
   // members
-  shared_ptr<Model> model_ = nullptr;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "AddressableInputValueLoader"); }
+  weak_ptr<Model>   model_ = {};
 };
 
 } /* namespace configuration */

@@ -62,7 +62,7 @@ void RecruitmentConstant::DoValidate() {
 
   // Age-specific validation
   if (process_profile_ == ProcessProfile::kAge) {
-    parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model_->min_age());
+    parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model()->min_age());
   }
 
   // Length-specific validation
@@ -94,7 +94,7 @@ void RecruitmentConstant::DoBuild() {
   LOG_TRACE();
 
   if (process_profile_ == ProcessProfile::kAge) {
-    partition_age_ = CategoriesWithAgePtr(new CategoriesWithAge(model_, category_labels_, age_));
+    partition_age_ = CategoriesWithAgePtr(new CategoriesWithAge(model(), category_labels_, age_));
   } else {
     partition_length_.Init(category_labels_);
   }
@@ -134,23 +134,23 @@ void RecruitmentConstant::DoExecute() {
 
     // Update our partition with new recruitment values
     for (auto category : partition_length_) {
-      if (category->data_.size() != model_->length_bins().size())
+      if (category->data_.size() != model()->length_bins().size())
         LOG_CODE_ERROR() << "This function was written when categories were forced to have the same length bins as models. This is no longer the case.";
 
       r0_by_length_bin_     = (r0_ * (proportions_categories_[category->name_]) / total_proportions) / length_bins_.size();
       unsigned length_index = 0;
       for (auto length_bin : length_bins_) {
-        auto model_length_iter = std::find(model_->length_bins().begin(), model_->length_bins().end(), length_bin);
-        if (model_length_iter == model_->length_bins().end()) {
+        auto model_length_iter = std::find(model()->length_bins().begin(), model()->length_bins().end(), length_bin);
+        if (model_length_iter == model()->length_bins().end()) {
           LOG_ERROR_P(PARAM_LENGTH_BINS) << "Length bin " << length_bin << " is not defined in the model length bins";
           continue;
         }
-        length_index = std::distance(model_->length_bins().begin(), model_length_iter);
+        length_index = std::distance(model()->length_bins().begin(), model_length_iter);
         if (length_index >= category->data_.size()) {
           LOG_CODE_ERROR() << "Length index " << length_index << " is out of range for category " << category->name_;
           continue;
         }
-        LOG_FINEST() << "putting " << r0_by_length_bin_ << " in category " << category->name_ << " in length bin " << model_->length_bins()[length_index];
+        LOG_FINEST() << "putting " << r0_by_length_bin_ << " in category " << category->name_ << " in length bin " << model()->length_bins()[length_index];
         category->data_[length_index] += r0_by_length_bin_;
       }
     }

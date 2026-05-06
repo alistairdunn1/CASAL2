@@ -36,15 +36,16 @@ TimeStep::TimeStep(shared_ptr<Model> model) : model_(model) {
  * Validate the time step
  */
 void TimeStep::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
 }
 
 /**
  * Build the time step
  */
 void TimeStep::Build() {
+  auto current_model = model();
   // Get the pointers to our processes
-  processes::Manager& process_manager = *model_->managers()->process();
+  processes::Manager& process_manager = *current_model->managers()->process();
   for (string process_name : process_names_) {
     Process* process = process_manager.GetProcess(process_name);
     if (!process) {
@@ -56,7 +57,7 @@ void TimeStep::Build() {
 
   // Check if this time-step was in the annual cycle.
   // if not flag an info to user
-  vector<string> model_time_steps = model_->time_steps();
+  vector<string> model_time_steps = current_model->time_steps();
   if (find(model_time_steps.begin(), model_time_steps.end(), label_) == model_time_steps.end()) {
     LOG_INFO() << "time_step " << label_ << " was defined but not included in the annual cycle.";
   }
@@ -156,7 +157,7 @@ void TimeStep::Execute(unsigned year) {
  * @param executor The pointer to the Executor
  */
 void TimeStep::SubscribeToBlock(Executor* executor) {
-  vector<unsigned> years = model_->years();
+  vector<unsigned> years = model()->years();
   for (unsigned year : years) block_executors_[year].push_back(executor);
 }
 
@@ -224,7 +225,7 @@ void TimeStep::BuildInitialisationProcesses() {
   for (auto iter : initialisation_process_labels_) {
     for (string process_label : iter.second) {
       LOG_FINEST() << "Including " << process_label << " process in initialisation phase";
-      auto process = model_->managers()->process()->GetProcess(process_label);
+      auto process = model()->managers()->process()->GetProcess(process_label);
       if (!process)
         return;
       initialisation_processes_[iter.first].push_back(process);

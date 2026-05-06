@@ -85,15 +85,15 @@ void MortalityPreySuitability::DoValidate() {
  * in the system
  */
 void MortalityPreySuitability::DoBuild() {
-  prey_partition_     = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, prey_category_labels_));
-  predator_partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, predator_category_labels_));
+  prey_partition_     = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), prey_category_labels_));
+  predator_partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), predator_category_labels_));
 
   /**
    * Assign the selectivity, penalty and time step index to each fisher data object
    */
   unsigned category_offset = 0;
   for (string selectivity : prey_selectivity_labels_) {
-    prey_selectivities_.push_back(model_->managers()->selectivity()->GetSelectivity(selectivity));
+    prey_selectivities_.push_back(model()->managers()->selectivity()->GetSelectivity(selectivity));
     if (!prey_selectivities_[category_offset])
       LOG_ERROR_P(PARAM_PREY_SELECTIVITIES) << "Prey selectivity " << selectivity << " was not found.";
     ++category_offset;
@@ -101,14 +101,14 @@ void MortalityPreySuitability::DoBuild() {
 
   category_offset = 0;
   for (string selectivity : predator_selectivity_labels_) {
-    predator_selectivities_.push_back(model_->managers()->selectivity()->GetSelectivity(selectivity));
+    predator_selectivities_.push_back(model()->managers()->selectivity()->GetSelectivity(selectivity));
     if (!predator_selectivities_[category_offset])
       LOG_ERROR_P(PARAM_PREDATOR_SELECTIVITIES) << "Predator selectivity " << selectivity << " was not found.";
     ++category_offset;
   }
 
   if (penalty_label_ != "none") {
-    penalty_ = model_->managers()->penalty()->GetProcessPenalty(penalty_label_);
+    penalty_ = model()->managers()->penalty()->GetProcessPenalty(penalty_label_);
     if (!penalty_)
       LOG_ERROR_P(PARAM_PENALTY) << ": Penalty label " << penalty_label_ << " was not found.";
   }
@@ -117,11 +117,11 @@ void MortalityPreySuitability::DoBuild() {
      * Check All the categories are valid
 
     for (const string& label : prey_category_labels_) {
-      if (!model_->categories()->IsValid(label))
+      if (!model()->categories()->IsValid(label))
         LOG_ERROR_P(PARAM_PREY_CATEGORIES) << ": category " << label << " was not found.";
     }
     for (const string& label : predator_category_labels_) {
-      if (!model_->categories()->IsValid(label))
+      if (!model()->categories()->IsValid(label))
         LOG_ERROR_P(PARAM_PREDATOR_CATEGORIES) << ": category " << label << " was not found.";
     }*/
 }
@@ -131,7 +131,7 @@ void MortalityPreySuitability::DoBuild() {
  */
 void MortalityPreySuitability::DoExecute() {
   // Check if we are executing this process in current year
-  if (std::find(years_.begin(), years_.end(), model_->current_year()) != years_.end()) {
+  if (std::find(years_.begin(), years_.end(), model()->current_year()) != years_.end()) {
     Double TotalPreyVulnerable     = 0;
     Double TotalPreyAvailability   = 0;
     Double TotalPredatorVulnerable = 0;

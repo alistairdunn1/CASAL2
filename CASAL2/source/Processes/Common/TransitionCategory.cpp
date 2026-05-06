@@ -67,7 +67,7 @@ void TransitionCategory::DoValidate() {
   proportions_by_category_ = utilities::OrderedMap<string, Double>::create(to_category_names_, proportions_);
 
   //  // Validate Categories
-  auto categories = model_->categories();
+  auto categories = model()->categories();
 
   if (process_profile_ == ProcessProfile::kAge) {
     // Validate that each from and to category have the same age range.
@@ -99,25 +99,25 @@ void TransitionCategory::DoBuild() {
   to_partition_.Init(to_category_names_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
   }
 
   if (from_partition_.size() != to_partition_.size()) {
-    LOG_FATAL() << "The list of categories for the transition category process are not of equal size in year " << model_->current_year() << ". Number of 'From' "
+    LOG_FATAL() << "The list of categories for the transition category process are not of equal size in year " << model()->current_year() << ". Number of 'From' "
                 << from_partition_.size() << " and 'To' " << to_partition_.size() << " categories to transition between";
   }
 
   abundance_to_move_categories_.resize(from_category_names_.size());
-  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model_->age_spread() : model_->get_number_of_length_bins();
+  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model()->age_spread() : model()->get_number_of_length_bins();
   for (unsigned i = 0; i < from_category_names_.size(); i++) {
     abundance_to_move_categories_[i].resize(num_bins, 0.0);
   }
 
   if (process_profile_ == ProcessProfile::kAge) {
-    min_age_ = model_->min_age();
+    min_age_ = model()->min_age();
   }
 }
 
@@ -156,7 +156,7 @@ void TransitionCategory::DoExecute() {
         LOG_FATAL() << "TransitionCategory rate caused a negative partition if ((*from_iter)->data_[offset] < 0.0) ";
     }
   }
-  proportions_by_year_[model_->current_year()] = proportions_by_category_;
+  proportions_by_year_[model()->current_year()] = proportions_by_category_;
 }
 
 /**

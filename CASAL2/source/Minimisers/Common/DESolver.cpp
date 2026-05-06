@@ -60,7 +60,8 @@ void DESolver::DoValidate() {
  * Execute our DE Solver minimiser engine
  */
 void DESolver::Execute() {
-  estimates::Manager& estimate_manager = *model_->managers()->estimate();
+  auto                current_model    = model();
+  estimates::Manager& estimate_manager = *current_model->managers()->estimate();
 
   vector<double> lower_bounds;
   vector<double> upper_bounds;
@@ -87,7 +88,7 @@ void DESolver::Execute() {
   }
 
   // Setup Engine
-  desolver::CallBack solver = desolver::CallBack(model_, start_values.size(), population_size_, tolerance_);
+  desolver::CallBack solver = desolver::CallBack(current_model, start_values.size(), population_size_, tolerance_);
   solver.Setup(start_values, lower_bounds, upper_bounds, kBest1Exp, difference_scale_, crossover_probability_);
   LOG_MEDIUM() << "start values now ";
   for (unsigned j = 0; j < start_values.size(); ++j) {

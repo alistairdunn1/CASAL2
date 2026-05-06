@@ -18,6 +18,8 @@
 #include <memory>
 #include <string>
 
+#include "../BaseClasses/Object.h"
+
 // namespaces
 namespace niwa {
 class Model;
@@ -37,7 +39,8 @@ public:
 
 private:
   // members
-  shared_ptr<Model> model_;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "MCMCSample"); }
+  weak_ptr<Model>   model_;
 };
 
 } /* namespace configuration */

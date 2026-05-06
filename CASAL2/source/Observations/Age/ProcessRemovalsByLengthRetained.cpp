@@ -68,7 +68,7 @@ void ProcessRemovalsByLengthRetained::DoValidate() {
   unsigned expected_column_count = (length_bins_.size() - 1) * category_labels_.size() + 1;  // +1 for the year column
 
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
-  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model()->length_plus());
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
   parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
       ->GreaterThanOrEqualTo(0.0)
@@ -91,11 +91,11 @@ void ProcessRemovalsByLengthRetained::DoValidate() {
       ->GreaterThanOrEqualToForRange(1, category_labels_.size(), 0.0);
 
   // Do some checks if we're not using all of the model length bins
-  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  using_model_length_bins = length_bins_.size() == model()->length_bins().size();
   if (!using_model_length_bins)
-    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
+    map_local_length_bins_to_global_length_bins_ = model()->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
-  if (length_plus_ & !model_->length_plus())
+  if (length_plus_ & !model()->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
@@ -115,7 +115,7 @@ void ProcessRemovalsByLengthRetained::DoValidate() {
  * Build any runtime relationships and ensure that the labels for other objects are valid.
  */
 void ProcessRemovalsByLengthRetained::DoBuild() {
-  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
+  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
   // flag age-length to Build age-length matrix
   auto partition_iter = partition_->Begin();
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
@@ -127,7 +127,7 @@ void ProcessRemovalsByLengthRetained::DoBuild() {
 
   length_results_.resize(number_bins_ * category_labels_.size(), 0.0);
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -164,7 +164,7 @@ void ProcessRemovalsByLengthRetained::DoBuild() {
     LOG_ERROR_P(PARAM_YEARS) << "could not find catches in all years in the instantaneous_mortality process labeled " << process_label_
                              << ". Check that the years are compatible with this process";
 
-  numbers_at_age_.resize(model_->age_spread(), 0.0);
+  numbers_at_age_.resize(model()->age_spread(), 0.0);
   numbers_at_length_.resize(number_bins_, 0.0);
   expected_values_.resize(number_bins_, 0.0);
 }
@@ -179,7 +179,7 @@ void ProcessRemovalsByLengthRetained::DoBuild() {
 void ProcessRemovalsByLengthRetained::PreExecute() {
   LOG_FINEST() << "Entering PREExecute " << label_;
 
-  if (partition_->Size() != proportions_[model_->current_year()].size())
+  if (partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_[model->current_year()].size()";
 }
 
@@ -192,7 +192,7 @@ void ProcessRemovalsByLengthRetained::Execute() {
    * Verify our cached partition and partition sizes are correct
    */
   //  auto categories = model_->categories();
-  unsigned                                                 year            = model_->current_year();
+  unsigned                                                 year            = model()->current_year();
   auto                                                     partition_iter  = partition_->Begin();  // vector<vector<partition::Category> >
   map<unsigned, map<string, map<string, vector<Double>>>>& Removals_at_age = mortality_instantaneous_retained_->retained_data();
   /**
@@ -238,16 +238,16 @@ void ProcessRemovalsByLengthRetained::Execute() {
       }
     }
 
-    if (expected_values_.size() != proportions_[model_->current_year()][category_labels_[category_offset]].size())
+    if (expected_values_.size() != proportions_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values_.size(" << expected_values_.size() << ") != proportions_[category_offset].size("
-                       << proportions_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << proportions_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     /**
      * save our comparisons so we can use them to generate the score from the likelihoods later
      */
     for (unsigned i = 0; i < expected_values_.size(); ++i) {
-      SaveComparison(category_labels_[category_offset], 0, length_bins_[i], expected_values_[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
+      SaveComparison(category_labels_[category_offset], 0, length_bins_[i], expected_values_[i], proportions_[model()->current_year()][category_labels_[category_offset]][i],
+                     process_errors_by_year_[model()->current_year()], error_values_[model()->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
     }
   }
 }
@@ -263,7 +263,7 @@ void ProcessRemovalsByLengthRetained::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
     for (auto& iter : comparisons_) {
       double total = 0.0;

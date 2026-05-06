@@ -73,7 +73,9 @@ public:
 
 protected:
   // members
-  shared_ptr<Model>                             model_               = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>                             model() const { return LockWeakPtr(model_, "Process"); }
   ProcessType                                   process_type_        = ProcessType::kUnknown;
   PartitionType                                 partition_structure_ = PartitionType::kInvalid;
   map<unsigned, map<string, vector<Executor*>>> executors_;

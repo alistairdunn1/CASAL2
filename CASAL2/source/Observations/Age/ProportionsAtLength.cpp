@@ -62,7 +62,7 @@ void ProportionsAtLength::DoValidate() {
       ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
       ->SameNumberOfElementsAs(PARAM_YEARS)
       ->DefaultValue(0.0, years_.size());
-  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model()->length_plus());
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
 
   number_bins_                   = length_plus_ ? length_bins_.size() : length_bins_.size() - 1;
@@ -85,11 +85,11 @@ void ProportionsAtLength::DoValidate() {
       ->GreaterThanForRange(1, category_labels_.size(), 0.0);
 
   // Do some checks if we're not using all of the model length bins
-  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  using_model_length_bins = length_bins_.size() == model()->length_bins().size();
   if (!using_model_length_bins)
-    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
+    map_local_length_bins_to_global_length_bins_ = model()->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
-  if (length_plus_ & !model_->length_plus())
+  if (length_plus_ & !model()->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
@@ -109,8 +109,8 @@ void ProportionsAtLength::DoValidate() {
  * Build any runtime relationships and ensure that the labels for other objects are valid.
  */
 void ProportionsAtLength::DoBuild() {
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
   // flag age-length to Build age-length matrix
   auto partition_iter = partition_->Begin();
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
@@ -119,7 +119,7 @@ void ProportionsAtLength::DoBuild() {
   }
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -145,9 +145,9 @@ void ProportionsAtLength::DoBuild() {
 void ProportionsAtLength::PreExecute() {
   cached_partition_->BuildCache();
 
-  if (cached_partition_->Size() != proportions_[model_->current_year()].size())
+  if (cached_partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "cached_partition_->Size() != proportions_[model->current_year()].size()";
-  if (partition_->Size() != proportions_[model_->current_year()].size())
+  if (partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_[model->current_year()].size()";
 }
 
@@ -231,17 +231,17 @@ void ProportionsAtLength::Execute() {
       }
     }
 
-    if (expected_values_.size() != proportions_[model_->current_year()][category_labels_[category_offset]].size())
+    if (expected_values_.size() != proportions_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values.size(" << expected_values_.size() << ") != proportions_[category_offset].size("
-                       << proportions_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << proportions_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     /**
      * save our comparisons so we can use them to generate the score from the likelihoods later
      */
     for (unsigned i = 0; i < expected_values_.size(); ++i) {
       SaveComparison(category_labels_[category_offset], selectivity_labels, 0, length_bins_[i], expected_values_[i],
-                     proportions_[model_->current_year()][category_labels_[category_offset]][i], process_errors_by_year_[model_->current_year()],
-                     error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
+                     proportions_[model()->current_year()][category_labels_[category_offset]][i], process_errors_by_year_[model()->current_year()],
+                     error_values_[model()->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
     }
   }  // end of category loop
 }
@@ -257,7 +257,7 @@ void ProportionsAtLength::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
     for (auto& iter : comparisons_) {
       double total = 0.0;

@@ -55,7 +55,7 @@ private:
   vector<vector<Double>>     abundance_to_move_categories_;
   vector<string>             category_lookup_table_;
 
-  unsigned                   min_age_ = model_->min_age();
+  unsigned min_age_ = 0;
 
   map<string, map<string, Double>> from_to_proportions_;
 };

@@ -74,7 +74,7 @@ void MortalityConstantRate::DoBuild() {
   partition_.Init(category_labels_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_RELATIVE_M_BY_AGE) << ": M-by-age ogive label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -85,7 +85,7 @@ void MortalityConstantRate::DoBuild() {
    * apply a different ratio of M so here verify that
    * there are enough and re-scale them to 1.0
    */
-  vector<TimeStep*> time_steps = model_->managers()->time_step()->ordered_time_steps();
+  vector<TimeStep*> time_steps = model()->managers()->time_step()->ordered_time_steps();
   LOG_FINEST() << "time_steps.size(): " << time_steps.size();
   vector<unsigned> active_time_steps;
   for (unsigned i = 0; i < time_steps.size(); ++i) {
@@ -110,10 +110,10 @@ void MortalityConstantRate::DoBuild() {
 
   // Pre allocate memory to reporting containers, this process is run every year so the beauty of this is we can push back and it wont be
   // dealing with memory allocation during the execute
-  unsigned n_years = model_->years().size();
+  unsigned n_years = model()->years().size();
   total_removals_by_year_.reserve(n_years);
 
-  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model_->age_spread() : model_->get_number_of_length_bins();
+  unsigned num_bins = (process_profile_ == ProcessProfile::kAge) ? model()->age_spread() : model()->get_number_of_length_bins();
   mortality_rates_.resize(category_labels_.size());
   for (unsigned i = 0; i < category_labels_.size(); ++i) {
     mortality_rates_[i].resize(num_bins, 0.0);
@@ -124,10 +124,10 @@ void MortalityConstantRate::DoBuild() {
  * Execute the process
  */
 void MortalityConstantRate::DoExecute() {
-  LOG_FINEST() << "year: " << model_->current_year();
+  LOG_FINEST() << "year: " << model()->current_year();
 
   // get the ratio to apply first
-  unsigned time_step = model_->managers()->time_step()->current_time_step();
+  unsigned time_step = model()->managers()->time_step()->current_time_step();
 
   LOG_FINEST() << "Ratios.size() " << time_step_ratios_.size() << " : time_step: " << time_step << "; ratio: " << time_step_ratios_[time_step];
   double ratio = time_step_ratios_[time_step];
@@ -168,7 +168,7 @@ void MortalityConstantRate::DoReset() {
  */
 void MortalityConstantRate::FillReportCache(ostringstream& cache) {
   cache << "years: ";
-  for (auto year : model_->years()) cache << year << " ";
+  for (auto year : model()->years()) cache << year << " ";
   cache << "\ntotal_removals: ";
   for (auto removal : total_removals_by_year_) cache << AS_DOUBLE(removal) << " ";
   cache << REPORT_EOL;
@@ -183,7 +183,7 @@ void MortalityConstantRate::FillReportCache(ostringstream& cache) {
  */
 void MortalityConstantRate::FillTabularReportCache(ostringstream& cache, bool first_run) {
   if (first_run) {
-    vector<unsigned> years = model_->years();
+    vector<unsigned> years = model()->years();
     for (auto year : years) {
       cache << "removals[" << label_ << "][" << year << "] ";
     }

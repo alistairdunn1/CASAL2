@@ -47,7 +47,7 @@ void ProcessProportionsAtLength::DoBuild() {
     LOG_ERROR_P(PARAM_PROCESS_PROPORTION) << ": process_proportion (" << process_proportion_ << ") must be between 0.0 and 1.0 inclusive";
   proportion_of_time_ = process_proportion_;
 
-  TimeStep* time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  TimeStep* time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {

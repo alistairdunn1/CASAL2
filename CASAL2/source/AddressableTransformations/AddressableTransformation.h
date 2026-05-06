@@ -41,8 +41,8 @@ public:
   virtual Double GetScore() = 0;
 
   // For reporting EstimableTransformation
-  virtual void FillReportCache(ostringstream& cache){};
-  virtual void FillTabularReportCache(ostringstream& cache, bool first_run){};
+  virtual void FillReportCache(ostringstream& cache) {};
+  virtual void FillTabularReportCache(ostringstream& cache, bool first_run) {};
 
   virtual void PrepareForObjectiveFunction() = 0;
   virtual void RestoreForObjectiveFunction() = 0;
@@ -75,7 +75,10 @@ protected:
   RestoreFunction restore_function_ = 0;
 
   // members
-  shared_ptr<Model> model_                                = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model> model() const { return model_.lock(); }
   bool              prior_applies_to_restored_parameters_ = false;
   Double            jacobian_                             = 0.0;
   vector<string>    parameter_labels_;

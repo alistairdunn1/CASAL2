@@ -40,32 +40,32 @@ void ElementDifference::DoValidate() {}
 void ElementDifference::DoBuild() {
   LOG_TRACE();
   string error = "";
-  if (!model_->objects().VerifyAddressableForUse(second_parameter_, addressable::kLookup, error)) {
+  if (!model()->objects().VerifyAddressableForUse(second_parameter_, addressable::kLookup, error)) {
     LOG_FATAL_P(PARAM_SECOND_PARAMETER) << "could not be found. Error: " << error;
   }
   error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
+  if (!model()->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "could not be found. Error: " << error;
   }
 
   // first parameter
-  addressable::Type addressable_type = model_->objects().GetAddressableType(parameter_);
+  addressable::Type addressable_type = model()->objects().GetAddressableType(parameter_);
   LOG_FINEST() << "addressable type = " << addressable_type;
   switch (addressable_type) {
     case addressable::kInvalid:
       LOG_CODE_ERROR() << "Invalid addressable type: " << parameter_;
       break;
     case addressable::kMultiple:
-      addressable_ptr_vector_ = model_->objects().GetAddressables(parameter_);
+      addressable_ptr_vector_ = model()->objects().GetAddressables(parameter_);
       break;
     case addressable::kVector:
-      addressable_vector_ = model_->objects().GetAddressableVector(parameter_);
+      addressable_vector_ = model()->objects().GetAddressableVector(parameter_);
       break;
     case addressable::kUnsignedMap:
-      addressable_map_ = model_->objects().GetAddressableUMap(parameter_);
+      addressable_map_ = model()->objects().GetAddressableUMap(parameter_);
       break;
     case addressable::kSingle:
-      addressable_ = model_->objects().GetAddressable(parameter_);
+      addressable_ = model()->objects().GetAddressable(parameter_);
       break;
     default:
       LOG_ERROR() << "The addressable provided '" << parameter_ << "' has a type that is not supported for element difference additional priors";
@@ -73,23 +73,23 @@ void ElementDifference::DoBuild() {
   }
 
   // Get second parameter estimates
-  addressable_type = model_->objects().GetAddressableType(second_parameter_);
+  addressable_type = model()->objects().GetAddressableType(second_parameter_);
   LOG_FINEST() << "addressable type = " << addressable_type;
   switch (addressable_type) {
     case addressable::kInvalid:
       LOG_CODE_ERROR() << "Invalid addressable type: " << second_parameter_;
       break;
     case addressable::kMultiple:
-      second_addressable_ptr_vector_ = model_->objects().GetAddressables(second_parameter_);
+      second_addressable_ptr_vector_ = model()->objects().GetAddressables(second_parameter_);
       break;
     case addressable::kVector:
-      second_addressable_vector_ = model_->objects().GetAddressableVector(second_parameter_);
+      second_addressable_vector_ = model()->objects().GetAddressableVector(second_parameter_);
       break;
     case addressable::kUnsignedMap:
-      second_addressable_map_ = model_->objects().GetAddressableUMap(second_parameter_);
+      second_addressable_map_ = model()->objects().GetAddressableUMap(second_parameter_);
       break;
     case addressable::kSingle:
-      second_addressable_ = model_->objects().GetAddressable(second_parameter_);
+      second_addressable_ = model()->objects().GetAddressable(second_parameter_);
       break;
     default:
       LOG_ERROR() << "The addressable provided '" << second_parameter_ << "' has a type that is not supported for element difference additional priors";

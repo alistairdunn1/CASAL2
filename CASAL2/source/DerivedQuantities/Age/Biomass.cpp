@@ -49,7 +49,7 @@ void Biomass::DoBuild() {
     use_age_weights_ = true;
     LOG_FINE() << "Age-weight has been defined";
     for (string label : age_weight_labels_) {
-      AgeWeight* age_weight = model_->managers()->age_weight()->FindAgeWeight(label);
+      AgeWeight* age_weight = model()->managers()->age_weight()->FindAgeWeight(label);
       if (!age_weight)
         LOG_ERROR_P(PARAM_AGE_WEIGHT_LABELS) << "Age-weight label (" << label << ") was not found.";
       age_weights_.push_back(age_weight);
@@ -63,9 +63,9 @@ void Biomass::DoBuild() {
  */
 void Biomass::PreExecute() {
   cache_value_             = 0.0;
-  unsigned year            = model_->current_year();
+  unsigned year            = model()->current_year();
   auto     iterator        = partition_.begin();
-  unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  unsigned time_step_index = model()->managers()->time_step()->current_time_step();
   LOG_FINE() << "The time-step when calculating biomass = " << time_step_index;
 
   // iterate over each category
@@ -105,11 +105,11 @@ void Biomass::PreExecute() {
  */
 void Biomass::Execute() {
   LOG_TRACE();
-  unsigned year            = model_->current_year();
+  unsigned year            = model()->current_year();
   Double   value           = 0.0;
-  unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  unsigned time_step_index = model()->managers()->time_step()->current_time_step();
   LOG_FINE() << "Time step for calculating biomass = " << time_step_index;
-  if (model_->state() == State::kInitialise) {
+  if (model()->state() == State::kInitialise) {
     auto iterator = partition_.begin();
     LOG_FINEST() << "Partition size = " << partition_.size();
     if (!use_age_weights_) {
@@ -134,7 +134,7 @@ void Biomass::Execute() {
       }
     }
 
-    unsigned initialisation_phase = model_->managers()->initialisation_phase()->current_initialisation_phase();
+    unsigned initialisation_phase = model()->managers()->initialisation_phase()->current_initialisation_phase();
     if (initialisation_values_.size() <= initialisation_phase)
       initialisation_values_.resize(initialisation_phase + 1);
 
@@ -175,16 +175,16 @@ void Biomass::Execute() {
     }
 
     if (time_step_proportion_ == 0.0)
-      values_[model_->current_year()] = cache_value_;
+      values_[model()->current_year()] = cache_value_;
     else if (math::IsOne(time_step_proportion_))
-      values_[model_->current_year()] = value;
+      values_[model()->current_year()] = value;
     if (mean_proportion_method_)
-      values_[model_->current_year()] = cache_value_ + ((value - cache_value_) * time_step_proportion_);
+      values_[model()->current_year()] = cache_value_ + ((value - cache_value_) * time_step_proportion_);
     else
-      values_[model_->current_year()] = pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_);
+      values_[model()->current_year()] = pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_);
   }
   LOG_FINE() << " Pre Exploitation value " << cache_value_ << " time step proportion " << time_step_proportion_ << " Post exploitation " << value << " Final value "
-             << values_[model_->current_year()];
+             << values_[model()->current_year()];
 }
 
 }  // namespace niwa::derivedquantities::age

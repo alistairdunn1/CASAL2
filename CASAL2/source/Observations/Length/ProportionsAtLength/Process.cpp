@@ -44,7 +44,7 @@ void ProcessProportionsAtLength::DoBuild() {
   length::ProportionsAtLength::DoBuild();
   proportion_of_time_ = process_proportion_;
 
-  TimeStep* time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  TimeStep* time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {

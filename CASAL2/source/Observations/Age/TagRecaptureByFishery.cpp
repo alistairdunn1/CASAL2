@@ -86,17 +86,17 @@ void TagRecaptureByFishery::DoValidate() {
  * Build any runtime relationships and ensure that the labels for other objects are valid.
  */
 void TagRecaptureByFishery::DoBuild() {
-  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, tagged_category_labels_));
+  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), tagged_category_labels_));
 
   for (string time_label : time_step_label_) {
-    auto time_step = model_->managers()->time_step()->GetTimeStep(time_label);
+    auto time_step = model()->managers()->time_step()->GetTimeStep(time_label);
     if (!time_step) {
       LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_label << " was not found.";
     } else {
       auto process = time_step->SubscribeToProcess(this, years_, process_label_);
       if (!process)
         LOG_FATAL_P(PARAM_MORTALITY_PROCESS) << "could not find process " << process_label_;
-      mortality_process_ = model_->managers()->process()->GetAgeBasedMortalityProcess(process_label_);
+      mortality_process_ = model()->managers()->process()->GetAgeBasedMortalityProcess(process_label_);
     }
   }
 
@@ -143,7 +143,7 @@ void TagRecaptureByFishery::DoBuild() {
 
   // If this observation is made up of multiple methods lets find out the last one, because that is when we execute the process
   vector<unsigned> time_step_index;
-  for (string label : time_step_label_) time_step_index.push_back(model_->managers()->time_step()->GetTimeStepIndex(label));
+  for (string label : time_step_label_) time_step_index.push_back(model()->managers()->time_step()->GetTimeStepIndex(label));
 
   unsigned last_method_time_step = 9999;
   if (time_step_index.size() > 1) {
@@ -174,13 +174,13 @@ void TagRecaptureByFishery::PreExecute() {}
  */
 void TagRecaptureByFishery::Execute() {
   LOG_FINEST() << "Entering observation " << label_;
-  unsigned             year           = model_->current_year();
+  unsigned             year           = model()->current_year();
   std::pair<bool, int> this_year_iter = utilities::findInVector(years_, year);
   if (!this_year_iter.first)
     LOG_CODE_ERROR() << "if(!this_year_iter.first)";
   LOG_FINEST() << "current year " << year;
   // Check if we are in the final time_step so we have all the relevent information from the Mortaltiy process
-  unsigned current_time_step = model_->managers()->time_step()->current_time_step();
+  unsigned current_time_step = model()->managers()->time_step()->current_time_step();
   LOG_FINEST() << "current time-step = " << current_time_step;
   if (time_step_to_execute_ == current_time_step) {
     auto partition_iter = partition_->Begin();  // vector<vector<partition::Category> >
@@ -207,9 +207,9 @@ void TagRecaptureByFishery::Execute() {
             expected_recaptures_[year][0] += Removals_at_age[k] * reporting_rate_;  // recoveries x reporting rate
           }
 
-          if (expected_recaptures_[year].size() != observed_recaptures_[model_->current_year()].size())
+          if (expected_recaptures_[year].size() != observed_recaptures_[model()->current_year()].size())
             LOG_CODE_ERROR() << "expected_recaptures_[year].size(" << expected_recaptures_[year].size() << ") != observed_recaptures_[year].size("
-                             << observed_recaptures_[model_->current_year()].size() << ")";
+                             << observed_recaptures_[model()->current_year()].size() << ")";
 
           method_offset++;
         }  // for (string fishery : method_) {
@@ -237,7 +237,7 @@ void TagRecaptureByFishery::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
   } else {
     likelihood_->GetScores(comparisons_);

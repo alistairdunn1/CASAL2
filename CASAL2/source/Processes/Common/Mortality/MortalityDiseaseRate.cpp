@@ -72,7 +72,7 @@ void MortalityDiseaseRate::DoBuild() {
   LOG_FINE() << "MortalityDiseaseRate::DoBuild()";
   partition_.Init(category_labels_);
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": The selectivity with label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -98,8 +98,8 @@ void MortalityDiseaseRate::DoBuild() {
  */
 void MortalityDiseaseRate::DoExecute() {
   LOG_FINE() << "MortalityDiseaseRate::DoExecute()";
-  if (model_->state() != State::kInitialise) {
-    unsigned year = model_->current_year();
+  if (model()->state() != State::kInitialise) {
+    unsigned year = model()->current_year();
     if (find(process_years_.begin(), process_years_.end(), year) != process_years_.end()) {
       auto     it       = std::find(process_years_.begin(), process_years_.end(), year);
       unsigned year_ndx = 0;
@@ -173,9 +173,9 @@ void MortalityDiseaseRate::FillReportCache(ostringstream& cache) {
     // header
     cache << "category ";
     if (process_profile_ == ProcessProfile::kAge) {
-      for (unsigned i = 0; i < model_->age_spread(); i++) cache << model_->min_age() + i << " ";
+      for (unsigned i = 0; i < model()->age_spread(); i++) cache << model()->min_age() + i << " ";
     } else {
-      for (unsigned i = 0; i < model_->get_number_of_length_bins(); i++) cache << model_->length_bin_mid_points()[i] << " ";
+      for (unsigned i = 0; i < model()->get_number_of_length_bins(); i++) cache << model()->length_bin_mid_points()[i] << " ";
     }
     cache << REPORT_EOL;
     // into it

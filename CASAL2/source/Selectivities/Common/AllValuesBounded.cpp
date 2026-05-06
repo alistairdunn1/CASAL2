@@ -45,23 +45,23 @@ AllValuesBounded::AllValuesBounded(shared_ptr<Model> model) : Selectivity(model)
  * rules for the model.
  */
 void AllValuesBounded::DoValidate() {
-  if (model_->partition_type() == PartitionType::kAge) {
-    unsigned min_age = model_->min_age();
-    unsigned max_age = model_->max_age();
+  if (model()->partition_type() == PartitionType::kAge) {
+    unsigned min_age = model()->min_age();
+    unsigned max_age = model()->max_age();
 
     parameters_.Validate(PARAM_L)->GreaterThanOrEqualTo(min_age);
     parameters_.Validate(PARAM_H)->LessThanOrEqualTo(max_age);
     parameters_.ValidateVector(PARAM_V)->NumberOfElements((high_ - low_) + 1)->GreaterThanOrEqualTo(0.0);
 
-  } else if (model_->partition_type() == PartitionType::kLength) {
-    vector<double> length_bins     = model_->length_bin_mid_points();
-    unsigned       length_low_ndx  = model_->get_length_bin_ndx(low_);
-    unsigned       length_high_ndx = model_->get_length_bin_ndx(high_);
+  } else if (model()->partition_type() == PartitionType::kLength) {
+    vector<double> length_bins     = model()->length_bin_mid_points();
+    unsigned       length_low_ndx  = model()->get_length_bin_ndx(low_);
+    unsigned       length_high_ndx = model()->get_length_bin_ndx(high_);
     parameters_.ValidateVector(PARAM_V)->NumberOfElements((length_high_ndx - length_low_ndx) + 1)->GreaterThanOrEqualTo(0.0);
   }
 
   parameters_.Validate(PARAM_L)->LessThanParameter(PARAM_H);
-  lower_length_bin_ = model_->get_length_bin_ndx(low_);
+  lower_length_bin_ = model()->get_length_bin_ndx(low_);
   LOG_FINE() << "lower_length_bin_ = " << lower_length_bin_;
 }
 
@@ -74,11 +74,11 @@ Double AllValuesBounded::get_value(Double value) {
   } else if (value > high_) {
     return *v_.rbegin();
   } else {
-    if (model_->partition_type() == PartitionType::kAge) {
+    if (model()->partition_type() == PartitionType::kAge) {
       LOG_CODE_ERROR() << "model_->partition_type() == PartitionType::kAge";
     } else {
       // Length based a little more tricky
-      unsigned len_ndx = model_->get_length_bin_ndx(value);
+      unsigned len_ndx = model()->get_length_bin_ndx(value);
       LOG_FINE() << "len " << len_ndx;
       return v_[len_ndx - lower_length_bin_];
     }
@@ -96,7 +96,7 @@ Double AllValuesBounded::get_value(unsigned value) {
   } else if (value > high_) {
     return *v_.rbegin();
   } else {
-    if (model_->partition_type() == PartitionType::kAge) {
+    if (model()->partition_type() == PartitionType::kAge) {
       return v_[value - low_];
     } else {
       // Length based a little more tricky

@@ -63,6 +63,7 @@
 #include <variant>
 #include <vector>
 
+#include "../Logging/Logging.h"
 #include "Parameter.h"
 #include "Parameters/Bindable.h"
 #include "Parameters/BindableVector.h"
@@ -87,6 +88,7 @@ using std::map;
 using std::shared_ptr;
 using std::string;
 using std::vector;
+using std::weak_ptr;
 class Model;
 class Object;
 
@@ -129,6 +131,12 @@ public:
   void Populate(shared_ptr<Model> model);
 
   // accessors
+  shared_ptr<Model> model() const {
+    auto locked = model_.lock();
+    if (!locked)
+      LOG_CODE_ERROR() << "ParameterList weak_ptr expired";
+    return locked;
+  }
   string                   location(const string& label);
   string                   quiet_location(const string& label);
   void                     set_parent_block_type(const string& block_type) { parent_block_type_ = block_type; }
@@ -143,7 +151,7 @@ public:
 
 private:
   // members
-  shared_ptr<Model>          model_;
+  weak_ptr<Model>            model_;
   bool                       already_populated_   = false;
   string                     parent_block_type_   = "<unknown>";
   string                     defined_file_name_   = "<unknown>";

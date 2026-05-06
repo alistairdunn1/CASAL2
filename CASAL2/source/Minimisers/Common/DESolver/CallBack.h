@@ -18,6 +18,7 @@
 #define MINIMISERS_DESOLVER_CALLBACK_H_
 
 // Headers
+#include "../../../BaseClasses/Object.h"
 #include "../../../Minimisers/Common/DESolver/Engine.h"
 #include "../../../Model/Model.h"
 #include "../../../Utilities/Types.h"
@@ -39,7 +40,8 @@ public:
 
 private:
   // Members
-  shared_ptr<Model> model_;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "DESolver::CallBack"); }
+  weak_ptr<Model>   model_;
 };
 
 } /* namespace desolver */

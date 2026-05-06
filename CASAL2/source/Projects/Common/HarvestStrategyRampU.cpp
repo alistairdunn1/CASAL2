@@ -55,6 +55,7 @@ HarvestStrategyRampU::HarvestStrategyRampU(shared_ptr<Model> model) : Project(mo
  * Validate
  */
 void HarvestStrategyRampU::DoValidate() {
+  auto current_model = model();
   // if reference_index_years_ not defined then set equal to zero
   if (reference_index_years_.size() == 0) {
     // i.e., the default and hence the last initialisation_phase value
@@ -63,12 +64,12 @@ void HarvestStrategyRampU::DoValidate() {
   } else {
     // check that the reference_index_years_ are valid years based on model year range
     for (unsigned i = 0; i < reference_index_years_.size(); ++i) {
-      if (reference_index_years_[i] < model_->start_year()) {
+      if (reference_index_years_[i] < current_model->start_year()) {
         LOG_ERROR_P(PARAM_REFERENCE_INDEX_YEARS) << ": The years for the reference index (" << reference_index_years_[i] << ") cannot be less than the model start year ("
-                                                 << model_->start_year() << ")";
-      } else if (reference_index_years_[i] > model_->final_year()) {
+                                                 << current_model->start_year() << ")";
+      } else if (reference_index_years_[i] > current_model->final_year()) {
         LOG_ERROR_P(PARAM_REFERENCE_INDEX_YEARS) << ": The years for the reference index (" << reference_index_years_[i] << ") cannot be greater than the model final year ("
-                                                 << model_->final_year() << ")";
+                                                 << current_model->final_year() << ")";
       }
     }
     // Check to validate each reference_index_years value specifies a unique year
@@ -96,7 +97,7 @@ void HarvestStrategyRampU::DoValidate() {
     multiplier_by_year_ = utilities::Map::create(years_, val);
   }
 
-  if (first_year_ > model_->projection_final_year()) {
+  if (first_year_ > current_model->projection_final_year()) {
     LOG_ERROR_P(PARAM_FIRST_YEAR) << ": The first_year cannot be greater than the projection_final year";
   }
   // check us = index
@@ -125,8 +126,9 @@ void HarvestStrategyRampU::DoValidate() {
  * Build
  */
 void HarvestStrategyRampU::DoBuild() {
-  biomass_index_   = model_->managers()->derived_quantity()->GetDerivedQuantity(biomass_index_label_);
-  reference_index_ = model_->managers()->derived_quantity()->GetDerivedQuantity(reference_index_label_);
+  auto current_model = model();
+  biomass_index_     = current_model->managers()->derived_quantity()->GetDerivedQuantity(biomass_index_label_);
+  reference_index_   = current_model->managers()->derived_quantity()->GetDerivedQuantity(reference_index_label_);
 
   if (!biomass_index_) {
     LOG_ERROR_P(PARAM_BIOMASS_INDEX) << "The " << PARAM_BIOMASS_INDEX << " derived_quantity (" << biomass_index_label_ << ") was not found.";
@@ -150,7 +152,8 @@ void HarvestStrategyRampU::DoReset() {
  *  Update the parameter with the harvest control rule
  */
 void HarvestStrategyRampU::DoUpdate() {
-  unsigned index_year = model_->current_year() - year_lag_;
+  auto     current_model = model();
+  unsigned index_year    = current_model->current_year() - year_lag_;
   // Get ref_biomass from either initialisation phase or from mean of reference_index_years_
   // TODO: Needs updating to get the reference_index_years_ from an optional initialisation_phase, rather than the last one
   Double ref_biomass = 0;
@@ -173,10 +176,10 @@ void HarvestStrategyRampU::DoUpdate() {
   double u       = 0.0;
   value_         = last_catch_;
 
-  if (model_->current_year() >= first_year_)
+  if (current_model->current_year() >= first_year_)
     update_counter_++;
 
-  bool do_update = ((model_->current_year() == first_year_) || ((model_->current_year() > first_year_) && (update_counter_ % (int)year_delta_) == 0));
+  bool do_update = ((current_model->current_year() == first_year_) || ((current_model->current_year() > first_year_) && (update_counter_ % (int)year_delta_) == 0));
 
   if (do_update) {  // its in year_delta, so do an update
     // get u, given the reference biomass
@@ -203,10 +206,10 @@ void HarvestStrategyRampU::DoUpdate() {
 
     LOG_FINE() << "HarvestStrategyRampU: u=" << u << ", biomass=" << biomass << " reference_index=" << ref_biomass
                << "[b0=" << reference_index_->GetLastValueFromInitialisation(initialisation_phase_) << " Bcurrent=" << reference_index_->GetValue(index_year)
-               << "] in year=" << model_->current_year() << " using index_year=" << index_year << " with update_counter=" << update_counter_ << ", year_delta=" << year_delta_
-               << ", and result of do_update=" << do_update;
+               << "] in year=" << current_model->current_year() << " using index_year=" << index_year << " with update_counter=" << update_counter_
+               << ", year_delta=" << year_delta_ << ", and result of do_update=" << do_update;
 
-    Double temp_catch = (biomass * biomass_index_scalar_) * u * multiplier_by_year_[model_->current_year()];
+    Double temp_catch = (biomass * biomass_index_scalar_) * u * multiplier_by_year_[current_model->current_year()];
     this_catch_       = AS_DOUBLE(temp_catch);
     double delta      = (this_catch_ - last_catch_) / math::ZeroFun(last_catch_, math::ZERO);
     double sign       = (delta >= 0) ? 1.0 : -1.0;
@@ -230,10 +233,10 @@ void HarvestStrategyRampU::DoUpdate() {
     }
   }
 
-  LOG_FINE() << "HarvestStrategyRampU: DoUpdateFunc in year=" << model_->current_year() << ", and with biomass_index=" << biomass << ", scalar=" << biomass_index_scalar_
+  LOG_FINE() << "HarvestStrategyRampU: DoUpdateFunc in year=" << current_model->current_year() << ", and with biomass_index=" << biomass << ", scalar=" << biomass_index_scalar_
              << " and catch value = " << value_;
 
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  (this->*DoUpdateFunc_)(value_, true, current_model->current_year());
 }
 
 } /* namespace projects */

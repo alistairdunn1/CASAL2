@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 
+#include "../BaseClasses/Object.h"
 #include "../Utilities/PartitionType.h"
 
 using std::shared_ptr;
@@ -46,9 +47,10 @@ private:
   // methods
   Factory(shared_ptr<Model> model);
   virtual ~Factory() = default;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "Factory"); }
 
   // members
-  shared_ptr<Model> model_;
+  weak_ptr<Model> model_;
 };
 
 } /* namespace niwa */

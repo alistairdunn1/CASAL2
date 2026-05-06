@@ -110,7 +110,7 @@ void ProcessRemovalsByWeight::DoValidate() {
       ->DoubleDataRange(1, category_labels_.size(), "All columns except the first must be a double value (error values) for the observation")
       ->GreaterThanOrEqualToForRange(1, category_labels_.size(), 0.0);
 
-  if (length_plus_ & !model_->length_plus())
+  if (length_plus_ & !model()->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
@@ -124,7 +124,7 @@ void ProcessRemovalsByWeight::DoValidate() {
  * the labels for other objects are valid.
  */
 void ProcessRemovalsByWeight::DoBuild() {
-  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
+  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
   // flag age-length to Build age-length matrix for these years
   auto partition_iter = partition_->Begin();
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
@@ -135,7 +135,7 @@ void ProcessRemovalsByWeight::DoBuild() {
   length_results_.resize(number_length_bins_ * category_labels_.size(), 0.0);
   weight_results_.resize(number_weight_bins_ * category_labels_.size(), 0.0);
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -193,7 +193,7 @@ void ProcessRemovalsByWeight::DoBuild() {
   weight_bins_plus_ = weight_bins_;
   weight_bins_plus_.push_back(weight_bins_[number_weight_bins_ - 1] + (weight_bins_[number_weight_bins_ - 1] - weight_bins_[number_weight_bins_ - 2]));
 
-  auto age_data_size = model_->age_spread();
+  auto age_data_size = model()->age_spread();
   partition_iter     = partition_->Begin();  // vector<vector<partition::Category> >
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
     LOG_FINE() << "category: " << category_labels_[category_offset];
@@ -223,7 +223,7 @@ void ProcessRemovalsByWeight::DoBuild() {
 
   // get the units specified in the age-length relationship (returns length_weight_->weight_units())
   // weight_units    = age_length->weight_units();
-  string weight_units = model_->base_weight_units();  // since age_length->GetMeanWeight() returns the model weight units, per Craig Marsh 2021-07-07
+  string weight_units = model()->base_weight_units();  // since age_length->GetMeanWeight() returns the model weight units, per Craig Marsh 2021-07-07
   unit_multiplier_    = 1.0;
   // what value to multiply weight_units by to get units_
   if ((units_ == PARAM_TONNES) && (weight_units == PARAM_KGS || weight_units == PARAM_KILOGRAMS))
@@ -251,7 +251,7 @@ void ProcessRemovalsByWeight::DoBuild() {
  */
 void ProcessRemovalsByWeight::PreExecute() {
   LOG_FINEST() << "Entering observation " << label_;
-  if (partition_->Size() != proportions_[model_->current_year()].size())
+  if (partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_[model->current_year()].size()";
 }
 
@@ -264,12 +264,12 @@ void ProcessRemovalsByWeight::Execute() {
    * Verify our cached partition and partition sizes are correct
    */
   //  auto categories = model_->categories();
-  unsigned             year           = model_->current_year();
+  unsigned             year           = model()->current_year();
   std::pair<bool, int> this_year_iter = utilities::findInVector(years_, year);
   if (!this_year_iter.first)
     LOG_CODE_ERROR() << "if(!this_year_iter.first)";
 
-  unsigned time_step      = model_->managers()->time_step()->current_time_step();
+  unsigned time_step      = model()->managers()->time_step()->current_time_step();
   auto     partition_iter = partition_->Begin();  // vector<vector<partition::Category> >
 
   Double mean_length;
@@ -328,7 +328,7 @@ void ProcessRemovalsByWeight::Execute() {
         }
       }
 
-      LOG_FINE() << "number_length_bins_ " << number_length_bins_ << " number_weight_bins_ " << number_weight_bins_ << " age spread " << model_->age_spread();
+      LOG_FINE() << "number_length_bins_ " << number_length_bins_ << " number_weight_bins_ " << number_weight_bins_ << " age spread " << model()->age_spread();
       LOG_FINE() << "category data size (number of ages) " << (*category_iter)->data_.size();
 
       Double total_number_at_age = utilities::math::Sum(Removals_at_age);
@@ -407,13 +407,13 @@ void ProcessRemovalsByWeight::Execute() {
       }
     }
 
-    if (expected_values_weight.size() != proportions_[model_->current_year()][category_labels_[category_offset]].size())
+    if (expected_values_weight.size() != proportions_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values_weight.size(" << expected_values_weight.size() << ") != proportions_[category_offset].size("
-                       << proportions_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << proportions_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     for (unsigned i = 0; i < expected_values_weight.size(); ++i) {
-      SaveComparison(category_labels_[category_offset], 0, weight_bins_[i], expected_values_weight[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
+      SaveComparison(category_labels_[category_offset], 0, weight_bins_[i], expected_values_weight[i], proportions_[model()->current_year()][category_labels_[category_offset]][i],
+                     process_errors_by_year_[model()->current_year()], error_values_[model()->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
     }
   }
 }
@@ -429,7 +429,7 @@ void ProcessRemovalsByWeight::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
     for (auto& iter : comparisons_) {
       double total = 0.0;

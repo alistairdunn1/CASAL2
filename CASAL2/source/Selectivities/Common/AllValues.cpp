@@ -43,7 +43,7 @@ AllValues::AllValues(shared_ptr<Model> model) : Selectivity(model) {
  * rules for the model.
  */
 void AllValues::DoValidate() {
-  switch (model_->partition_type()) {
+  switch (model()->partition_type()) {
     case PartitionType::kAge:
       parameters_.ValidateVector(PARAM_V)->SameNumberOfElementsModelAgeSpread();
       break;
@@ -62,8 +62,8 @@ void AllValues::DoValidate() {
  * The core function
  */
 Double AllValues::get_value(Double value) {
-  if (model_->partition_type() == PartitionType::kLength) {
-    return v_[model_->get_length_bin_ndx(value)];
+  if (model()->partition_type() == PartitionType::kLength) {
+    return v_[model()->get_length_bin_ndx(value)];
   }
   LOG_CODE_ERROR() << "AllValues::get_value(Double value) value = " << value;
   return 1.0;
@@ -73,8 +73,8 @@ Double AllValues::get_value(Double value) {
  * The core function
  */
 Double AllValues::get_value(unsigned value) {
-  if (model_->partition_type() == PartitionType::kAge) {
-    return v_[value - model_->min_age()];
+  if (model()->partition_type() == PartitionType::kAge) {
+    return v_[value - model()->min_age()];
   } else {
   }
   LOG_CODE_ERROR() << "AllValues::get_value(unsigned value) value = " << value;

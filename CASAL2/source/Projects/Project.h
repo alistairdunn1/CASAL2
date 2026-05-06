@@ -66,7 +66,9 @@ protected:
   UpdateFunction DoUpdateFunc_ = nullptr;
 
   // members
-  shared_ptr<Model>      model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>      model() const { return LockWeakPtr(model_, "Project"); }
   vector<Double>         multiplier_;
   string                 type_ = "";
   vector<unsigned>       years_;

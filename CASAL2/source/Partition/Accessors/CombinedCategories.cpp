@@ -30,16 +30,15 @@ namespace accessors {
 CombinedCategories::CombinedCategories(shared_ptr<Model> model, const vector<string>& category_labels) : model_(model) {
   LOG_TRACE();
 
-  unsigned start_year = model_->start_year();
-  unsigned final_year = model_->final_year();
+  unsigned start_year = model->start_year();
+  unsigned final_year = model->final_year();
   LOG_FINEST() << "Model details: start_year: " << start_year << "; final_year: " << final_year;
   LOG_FINEST() << "Categories: " << category_labels.size();
 
-  Partition&     partition = model_->partition();
+  Partition&     partition = model->partition();
   vector<string> split_category_labels;
 
   for (unsigned year = start_year; year <= final_year; ++year) data_[year].resize(category_labels.size());
-
 
   /**
    * Loop through the category labels
@@ -63,7 +62,6 @@ CombinedCategories::CombinedCategories(shared_ptr<Model> model, const vector<str
         if (std::find(category.years_.begin(), category.years_.end(), year) == category.years_.end())
           continue;  // Not valid in this year
 
-
         data_[year][i].push_back(&category);
       }
       combined_index++;
@@ -76,7 +74,7 @@ CombinedCategories::CombinedCategories(shared_ptr<Model> model, const vector<str
  * for the current model year
  */
 CombinedCategories::DataType::iterator CombinedCategories::Begin() {
-  return data_[model_->current_year()].begin();
+  return data_[model()->current_year()].begin();
 }
 
 /**
@@ -86,7 +84,7 @@ CombinedCategories::DataType::iterator CombinedCategories::Begin() {
  * @return iterator to end
  */
 CombinedCategories::DataType::iterator CombinedCategories::End() {
-  return data_[model_->current_year()].end();
+  return data_[model()->current_year()].end();
 }
 
 /**
@@ -96,7 +94,7 @@ CombinedCategories::DataType::iterator CombinedCategories::End() {
  * @return number of category collections for current year
  */
 unsigned CombinedCategories::Size() {
-  return data_[model_->current_year()].size();
+  return data_[model()->current_year()].size();
 }
 
 /**
@@ -106,11 +104,11 @@ unsigned CombinedCategories::Size() {
  * @return a pointer to a specific category for current year
  */
 partition::Category* CombinedCategories::GetCategoryFromCombinedCategoryByIndex(unsigned group_index, unsigned combined_index) {
-  return data_[model_->current_year()][group_index][combined_index];
+  return data_[model()->current_year()][group_index][combined_index];
 }
 
 /**
- * Get a group index and combined index for a specific category label. This is so other classes 
+ * Get a group index and combined index for a specific category label. This is so other classes
  * can cache the index to do specific lookups
  * on a category during Execute or PreExecute.
  * @param category_label a specific category label
@@ -121,12 +119,11 @@ vector<unsigned> CombinedCategories::get_category_index(string category_label) {
   // could if this category is available
   if (it == category_labels_.end()) {
     LOG_FINEST() << "category_label = " << category_label;
-    for(unsigned i = 0; i < category_labels_.size(); ++i)
-      LOG_FINEST() << category_labels_[i];
+    for (unsigned i = 0; i < category_labels_.size(); ++i) LOG_FINEST() << category_labels_[i];
     LOG_CODE_ERROR() << "std::find(category_labels_.begin(), category_labels_.end(), category_label) == category_labels_.end()";
   }
-  unsigned category_ndx = distance(category_labels_.begin(), it);
-  vector<unsigned> result = {group_index_[category_ndx], combined_index_[category_ndx]};
+  unsigned         category_ndx = distance(category_labels_.begin(), it);
+  vector<unsigned> result       = {group_index_[category_ndx], combined_index_[category_ndx]};
   return result;
 }
 

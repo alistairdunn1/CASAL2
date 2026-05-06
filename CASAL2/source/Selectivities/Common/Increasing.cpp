@@ -46,11 +46,11 @@ void Increasing::DoValidate() {
   parameters_.Validate(PARAM_ALPHA)->GreaterThan(0.0);
   parameters_.ValidateVector(PARAM_V)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
 
-  if (model_->partition_type() == PartitionType::kAge) {
+  if (model()->partition_type() == PartitionType::kAge) {
     parameters_.Validate(PARAM_L)->GreaterThanModelMinAge()->LessThanModelMaxAge();
     parameters_.ValidateVector(PARAM_V)->NumberOfElements((high_ - low_ + 1));
 
-  } else if (model_->partition_type() == PartitionType::kLength) {
+  } else if (model()->partition_type() == PartitionType::kLength) {
     LOG_ERROR_P(PARAM_LABEL) << " this selectivity type not allowed in length patition models";
   }
 }

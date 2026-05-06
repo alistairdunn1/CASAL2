@@ -67,7 +67,7 @@ Managers::Managers(shared_ptr<Model> model) {
   catchability_               = new catchabilities::Manager();
   derived_quantity_           = new derivedquantities::Manager();
   growth_increment_           = new growthincrements::Manager();
-  addressable_input_loader_   = new AddressableInputLoader(model_);
+  addressable_input_loader_   = new AddressableInputLoader(model);
   estimate_                   = new estimates::Manager();
   addressable_transformation_ = new addressabletransformations::Manager();
   initialisation_phase_       = new initialisationphases::Manager();
@@ -81,6 +81,14 @@ Managers::Managers(shared_ptr<Model> model) {
   selectivity_                = new selectivities::Manager();
   time_step_                  = new timesteps::Manager();
   time_varying_               = new timevarying::Manager();
+}
+
+shared_ptr<Model> Managers::model() const {
+  auto locked = model_.lock();
+  if (!locked)
+    LOG_CODE_ERROR() << "Managers model weak_ptr expired";
+
+  return locked;
 }
 
 /**
@@ -159,11 +167,12 @@ shared_ptr<reports::Manager> Managers::report() {
 
 void Managers::Validate() {
   //	std::scoped_lock l(lock_);
-  auto run_mode = model_->run_mode();
+  auto current_model = model();
+  auto run_mode      = current_model->run_mode();
   LOG_TRACE();
-  time_step_->Validate(model_);
+  time_step_->Validate(current_model);
   initialisation_phase_->Validate();
-  process_->Validate(model_);  // Needs to go before estimate for the situation where there is an @estimate block
+  process_->Validate(current_model);  // Needs to go before estimate for the situation where there is an @estimate block
 
   addressable_input_loader_->Validate();
   additional_prior_->Validate();
@@ -177,30 +186,31 @@ void Managers::Validate() {
   length_weight_->Validate();
   likelihood_->Validate();
   if (mcmc_ && (run_mode == RunMode::kMCMC || run_mode == RunMode::kTesting))
-    mcmc_->Validate(model_);
+    mcmc_->Validate(current_model);
   if (minimiser_)
-    minimiser_->Validate(model_);
+    minimiser_->Validate(current_model);
   observation_->Validate();
   penalty_->Validate();
-  profile_->Validate(model_);
+  profile_->Validate(current_model);
   project_->Validate();
   LOG_FINE() << "Validating Reports";
-  report_->Validate(model_);
+  report_->Validate(current_model);
   LOG_FINE() << "Validating Reports..Done";
   selectivity_->Validate();
   time_varying_->Validate();
 
   addressable_transformation_->Validate();  // needs to be at the after all other classes, but before Estimates
-  estimate_->Validate(model_);
+  estimate_->Validate(current_model);
   LOG_TRACE();
 }
 
 void Managers::Build() {
-  auto run_mode = model_->run_mode();
+  auto current_model = model();
+  auto run_mode      = current_model->run_mode();
   //	std::scoped_lock l(lock_);
   LOG_TRACE();
   time_step_->Build();
-  initialisation_phase_->Build(model_);
+  initialisation_phase_->Build(current_model);
   process_->Build();  // To handle BH Recruitment having ssb_offset available
 
   addressable_input_loader_->Build();
@@ -222,12 +232,12 @@ void Managers::Build() {
 
   penalty_->Build();
   profile_->Build();
-  project_->Build(model_);
+  project_->Build(current_model);
   selectivity_->Build();
   time_varying_->Build();
 
   LOG_FINE() << "Building estimates and transformations...";
-  estimate_->Build(model_);
+  estimate_->Build(current_model);
   addressable_transformation_->Build();
   LOG_FINE() << "Building estimates and transformations...Done";
 
@@ -237,7 +247,7 @@ void Managers::Build() {
     minimiser_->Build();
 
   if (report_)
-    report_->Build(model_->pointer());
+    report_->Build(current_model->pointer());
   LOG_TRACE();
 }
 

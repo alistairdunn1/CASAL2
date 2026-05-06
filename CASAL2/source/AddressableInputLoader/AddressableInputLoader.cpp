@@ -22,8 +22,8 @@
 namespace niwa {
 
 void AddressableInputLoader::Validate() {
-  if (model_->global_configuration().get_free_parameter_input_file() != "") {
-    LOG_INFO() << "Estimable parameters were set from the free parameter file: " << model_->global_configuration().get_free_parameter_input_file();
+  if (model()->global_configuration().get_free_parameter_input_file() != "") {
+    LOG_INFO() << "Estimable parameters were set from the free parameter file: " << model()->global_configuration().get_free_parameter_input_file();
   } else {
     LOG_INFO() << "Estimable parameters were set from the input configuration files";
   }
@@ -96,10 +96,10 @@ void AddressableInputLoader::LoadValues(unsigned index) {
   if (addressables_.size() == 0) {
     string error = "";
     for (auto iter : addressable_values_) {
-      if (!model_->objects().VerifyAddressableForUse(iter.first, addressable::kInputRun, error)) {
+      if (!model()->objects().VerifyAddressableForUse(iter.first, addressable::kInputRun, error)) {
         LOG_FATAL() << "The addressable " << iter.first << " could not be verified for use in -i run. Error: " << error;
       }
-      Double* ptr               = model_->objects().GetAddressable(iter.first);
+      Double* ptr               = model()->objects().GetAddressable(iter.first);
       addressables_[iter.first] = ptr;
     }
   }
@@ -107,8 +107,8 @@ void AddressableInputLoader::LoadValues(unsigned index) {
   /**
    * Verify that we're only using @estimate parameters if this has been defined
    */
-  if (!model_->global_configuration().force_overwrite_of_addressables()) {
-    vector<Estimate*> estimates = model_->managers()->estimate()->GetIsEstimated();
+  if (!model()->global_configuration().force_overwrite_of_addressables()) {
+    vector<Estimate*> estimates = model()->managers()->estimate()->GetIsEstimated();
     for (auto estimate : estimates) {
       if (addressable_values_.find(estimate->parameter()) == addressable_values_.end())
         LOG_FATAL() << "The estimable parameter '" << estimate->parameter() << "' was not found in the free parameter file. "
@@ -127,7 +127,7 @@ void AddressableInputLoader::LoadValues(unsigned index) {
 
     // Update estimate with new value if it exists
     // so that we can automatically update the 'same' targets
-    auto estimate = model_->managers()->estimate()->GetEstimate(iter.first);
+    auto estimate = model()->managers()->estimate()->GetEstimate(iter.first);
     if (estimate != nullptr) {
       estimate->set_value(*iter.second);
       estimate->set_initial_value(*iter.second);
@@ -136,10 +136,10 @@ void AddressableInputLoader::LoadValues(unsigned index) {
     }
   }
 
-  if (model_->global_configuration().force_overwrite_of_addressables()) {
+  if (model()->global_configuration().force_overwrite_of_addressables()) {
     int AdditionalAddressables = addressable_values_.size() - estimate_count;
     LOG_IMPORTANT() << AdditionalAddressables << " additional non-estimated addressable parameters were found in the free parameter file '"
-                    << model_->global_configuration().get_free_parameter_input_file() << "'. These will overwrite the values in the input configuration file";
+                    << model()->global_configuration().get_free_parameter_input_file() << "'. These will overwrite the values in the input configuration file";
   }
 }
 

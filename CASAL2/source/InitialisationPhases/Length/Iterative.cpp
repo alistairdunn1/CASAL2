@@ -66,7 +66,8 @@ void Iterative::DoValidate() {
  */
 void Iterative::DoBuild() {
   LOG_TRACE();
-  time_steps_ = model_->managers()->time_step()->ordered_time_steps();
+  auto current_model = model();
+  time_steps_        = current_model->managers()->time_step()->ordered_time_steps();
 
   // Set the default process labels for the time step for this phase
   for (auto time_step : time_steps_) time_step->SetInitialisationProcessLabels(label_, time_step->process_labels());
@@ -79,7 +80,7 @@ void Iterative::DoBuild() {
     string target_process = pieces.size() == 3 ? pieces[1] : "";
     string new_process    = pieces.size() == 3 ? pieces[2] : pieces[1];
 
-    auto time_step = model_->managers()->time_step()->GetTimeStep(pieces[0]);
+    auto time_step = current_model->managers()->time_step()->GetTimeStep(pieces[0]);
     LOG_FINE() << "inserting " << new_process << " into time-step " << pieces[0] << " before the process " << target_process;
     vector<string> process_labels = time_step->initialisation_process_labels(label_);
 
@@ -133,13 +134,13 @@ void Iterative::DoBuild() {
   test_convergence_lambda_.resize(convergence_years_.size(), -1.0);  // -1.0 is interpreted in the Initialisation report as not evaluated
 
   // Build our partition
-  vector<string> categories = model_->categories()->category_names();
+  vector<string> categories = current_model->categories()->category_names();
   partition_.Init(categories);
   cached_partition_.Init(categories);
 
   // Find any BH_recruitment process in the annual cycle
   unsigned i = 0;
-  for (auto time_step : model_->managers()->time_step()->ordered_time_steps()) {
+  for (auto time_step : current_model->managers()->time_step()->ordered_time_steps()) {
     for (auto process : time_step->processes()) {
       if (process->process_type() == ProcessType::kRecruitment && process->type() == PARAM_RECRUITMENT_BEVERTON_HOLT) {
         LOG_FINEST() << "Found a BevertonHolt process";
@@ -158,7 +159,8 @@ void Iterative::DoBuild() {
 void Iterative::DoExecute() {
   LOG_TRACE();
 
-  timesteps::Manager& time_step_manager = *model_->managers()->time_step();
+  auto                current_model     = model();
+  timesteps::Manager& time_step_manager = *current_model->managers()->time_step();
   if (convergence_years_.size() == 0) {
     LOG_CODE_ERROR() << "In iterative convergence, convergence years have not been defined. This should have been done in code if it was not supplied by the user";
   } else {

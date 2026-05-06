@@ -51,7 +51,7 @@ void Addressable::DoValidate() {
   if (years_.size() != values_.size())
     LOG_ERROR_P(PARAM_YEARS) << " year count (" << years_.size() << ") must match the number of values provided (" << values_.size() << ")";
 
-  vector<unsigned> model_years = model_->years();
+  vector<unsigned> model_years = model()->years();
   for (unsigned year : years_) {
     if (std::find(model_years.begin(), model_years.end(), year) == model_years.end())
       LOG_ERROR_P(PARAM_YEARS) << "year (" << year << ") is not a valid year in the model";
@@ -65,20 +65,21 @@ void Addressable::DoValidate() {
  * Obtain smart_pointers to any objects that will be used by this object.
  */
 void Addressable::DoBuild() {
+  auto current_model = model();
   /**
    * subscribe this assert to the target time step in all years that were specified.
    */
-  TimeStep* time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  TimeStep* time_step = current_model->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step)
     LOG_ERROR_P(PARAM_TIME_STEP) << "time step label (" << time_step_label_ << ") was not found";
   for (unsigned year : years_) time_step->Subscribe(this, year);
 
   string error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
+  if (!current_model->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "could not be found. Error: " << error;
   }
 
-  addressable_ = model_->objects().GetAddressable(parameter_);
+  addressable_ = current_model->objects().GetAddressable(parameter_);
 }
 
 /**
@@ -88,8 +89,9 @@ void Addressable::Execute() {
   std::streamsize prec = std::cout.precision();
   std::cout.precision(12);
 
-  if (model_->run_mode() == RunMode::kBasic) {
-    Double expected = year_values_[model_->current_year()];
+  auto current_model = model();
+  if (current_model->run_mode() == RunMode::kBasic) {
+    Double expected = year_values_[current_model->current_year()];
     Double diff     = *addressable_ - expected;
     if (error_type_ == PARAM_ERROR && !utilities::math::IsBasicallyEqual(*addressable_, expected, tol_)) {
       LOG_ERROR() << "Assert Failure: The Addressable with label '" << label_ << "' and parameter " << parameter_ << " has value " << *addressable_ << " and " << expected

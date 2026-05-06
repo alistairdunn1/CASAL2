@@ -53,7 +53,9 @@ public:
 
 private:
   // Members
-  shared_ptr<Model>       model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>       model() const { return base::Object::LockWeakPtr(model_, "Partition::Accessors::CategoriesWithAge"); }
   map<unsigned, DataType> data_;  // map<year, vector<pair<category, Double*> > >
 };
 

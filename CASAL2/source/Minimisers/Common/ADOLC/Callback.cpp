@@ -34,7 +34,8 @@ CallBack::CallBack(shared_ptr<Model> model) : model_(model) {}
 adouble CallBack::operator()(const vector<adouble>& Parameters) {
   LOG_MEDIUM() << "ADOL-C Casal2 Callback Called";
   // Update our Components with the New Parameters
-  auto estimates = model_->managers()->estimate()->GetIsEstimated();
+  auto current_model = model();
+  auto estimates     = current_model->managers()->estimate()->GetIsEstimated();
 
   if (Parameters.size() != estimates.size()) {
     LOG_CODE_ERROR() << "The number of enabled estimates does not match the number of test solution values";
@@ -42,9 +43,9 @@ adouble CallBack::operator()(const vector<adouble>& Parameters) {
 
   for (unsigned i = 0; i < Parameters.size(); ++i) estimates[i]->set_value(Parameters[i]);
 
-  model_->FullIteration();
+  current_model->FullIteration();
 
-  ObjectiveFunction& objective = model_->objective_function();
+  ObjectiveFunction& objective = current_model->objective_function();
   objective.CalculateScore();
 
   return objective.score();

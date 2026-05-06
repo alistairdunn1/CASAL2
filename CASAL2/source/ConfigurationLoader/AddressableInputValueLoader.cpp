@@ -42,6 +42,7 @@ using std::vector;
  */
 void AddressableInputValueLoader::LoadValues(const string& file_name) {
   LOG_FINE() << "Load values from file " << file_name;
+  auto     current_model = model();
   ifstream file_;
   file_.open(file_name.c_str());
   if (file_.fail() || !file_.is_open())
@@ -74,7 +75,7 @@ void AddressableInputValueLoader::LoadValues(const string& file_name) {
    * Iterate through file
    */
   vector<string>          values;
-  AddressableInputLoader& addressable_input_loader = *model_->managers()->addressable_input_loader();
+  AddressableInputLoader& addressable_input_loader = *current_model->managers()->addressable_input_loader();
   ++line_number;
   while (getline(file_, current_line)) {
     ++line_number;

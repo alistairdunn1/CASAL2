@@ -18,6 +18,10 @@
 #include <boost/algorithm/string/trim_all.hpp>
 #include <fstream>
 #include <iostream>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#include <regex>
+#pragma GCC diagnostic pop
 
 #include "../ConfigurationLoader/File.h"
 #include "../Logging/Logging.h"

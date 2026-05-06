@@ -58,7 +58,7 @@ TagRecaptureByLengthForGrowth::TagRecaptureByLengthForGrowth(shared_ptr<Model> m
  */
 void TagRecaptureByLengthForGrowth::DoValidate() {
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
-  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model()->length_plus());
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
@@ -80,17 +80,17 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
 
   recaptures_ = recaptures_table_->MapColumnsToYear<double>(0u, 1u, expected_column_count - 1);
 
-  if (length_plus_ & !model_->length_plus())
+  if (length_plus_ & !model()->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
   // Do some checks if we're not using all of the model length bins
-  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  using_model_length_bins = length_bins_.size() == model()->length_bins().size();
   if (!using_model_length_bins)
-    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
+    map_local_length_bins_to_global_length_bins_ = model()->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
   process_errors_by_year_ = utilities::Map::create(years_, process_error_values_);
-  category_split_labels_  = model_->categories()->total_categories(category_labels_);
+  category_split_labels_  = model()->categories()->total_categories(category_labels_);
 
   for (auto& year_pair : recaptures_) {
     n_[year_pair.first] = std::accumulate(year_pair.second.begin(), year_pair.second.end(), 0.0);
@@ -101,12 +101,12 @@ void TagRecaptureByLengthForGrowth::DoValidate() {
  * Build any runtime relationships and ensure that the labels for other objects are valid.
  */
 void TagRecaptureByLengthForGrowth::DoBuild() {
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
 
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity " << label << " does not exist.";
     selectivities_.push_back(selectivity);
@@ -114,7 +114,7 @@ void TagRecaptureByLengthForGrowth::DoBuild() {
 
   proportion_of_time_ = time_step_proportion_;
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_ERROR_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -192,7 +192,7 @@ void TagRecaptureByLengthForGrowth::Execute() {
 
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_numbers_at_length_[category_offset][model_length_offset]
               += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_index]->GetLengthResult(model_length_offset);
@@ -201,7 +201,7 @@ void TagRecaptureByLengthForGrowth::Execute() {
         }
       } else {
         LOG_FINE() << "using bespoke length bins";
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
             // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
             cached_numbers_at_length_[category_offset][map_local_length_bins_to_global_length_bins_[model_length_offset]]
@@ -242,11 +242,11 @@ void TagRecaptureByLengthForGrowth::Execute() {
     expected = length_results_[i] / total_expected;
     LOG_FINEST() << " total numbers at length " << length_bins_for_comparison_[i] << " = " << length_results_[i] << ", denominator = " << total_expected
                  << " category = " << categories_for_comparison_[i];
-    observed = recaptures_[model_->current_year()][i] / n_[model_->current_year()];
+    observed = recaptures_[model()->current_year()][i] / n_[model()->current_year()];
     assert(i <= selectivity_labels_for_comparison.size());
 
     SaveComparison(categories_for_comparison_[i], selectivity_labels_for_comparison[i], 0, length_bins_for_comparison_[i], expected, observed,
-                   process_errors_by_year_[model_->current_year()], n_[model_->current_year()], 0.0, delta_, 0.0);
+                   process_errors_by_year_[model()->current_year()], n_[model()->current_year()], 0.0, delta_, 0.0);
   }
 }
 
@@ -261,7 +261,7 @@ void TagRecaptureByLengthForGrowth::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
   } else {
     likelihood_->GetScores(comparisons_);

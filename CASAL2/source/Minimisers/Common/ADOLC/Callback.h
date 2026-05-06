@@ -21,6 +21,7 @@
 // Headers
 #include <vector>
 
+#include "../../../BaseClasses/Object.h"
 #include "../../../Model/Model.h"
 
 // namespaces
@@ -43,7 +44,8 @@ public:
 
 private:
   // members
-  shared_ptr<Model> model_;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "ADOLC::CallBack"); }
+  weak_ptr<Model>   model_;
 };
 
 }  // namespace adolc

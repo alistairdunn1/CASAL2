@@ -68,9 +68,10 @@ void AnnualShift::DoReset() {}
  * Update
  */
 void AnnualShift::DoUpdate() {
-  LOG_FINE() << "Setting Value to: " << values_by_year_[model_->current_year()];
-  (this->*update_function_)(values_by_year_[model_->current_year()]);
-  parameter_by_year_[model_->current_year()] = values_by_year_[model_->current_year()];
+  auto current_model = model();
+  LOG_FINE() << "Setting Value to: " << values_by_year_[current_model->current_year()];
+  (this->*update_function_)(values_by_year_[current_model->current_year()]);
+  parameter_by_year_[current_model->current_year()] = values_by_year_[current_model->current_year()];
 }
 
 } /* namespace timevarying */

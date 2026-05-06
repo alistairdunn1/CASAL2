@@ -42,7 +42,7 @@ void Sum::DoBuild() {
   LOG_TRACE();
   string error = "";
   for (unsigned i = 0; i < parameter_list_.size(); ++i)
-    if (!model_->objects().VerifyAddressableForUse(parameter_list_[i], addressable::kLookup, error)) {
+    if (!model()->objects().VerifyAddressableForUse(parameter_list_[i], addressable::kLookup, error)) {
       LOG_FATAL_P(PARAM_PARAMETERS) << "the parameter '" << parameter_list_[i] << "' could not be found.";
     }
 
@@ -50,7 +50,7 @@ void Sum::DoBuild() {
   vector<Double> values;
 
   for (unsigned i = 0; i < parameter_list_.size(); ++i) {
-    addressable::Type addressable_type = model_->objects().GetAddressableType(parameter_list_[i]);
+    addressable::Type addressable_type = model()->objects().GetAddressableType(parameter_list_[i]);
     LOG_FINEST() << "addressable type = " << addressable_type;
     switch (addressable_type) {
       case addressable::kInvalid:
@@ -66,7 +66,7 @@ void Sum::DoBuild() {
         LOG_CODE_ERROR() << "Invalid addressable type. The addressable cannot be a vector: " << parameter_list_[i];
         break;
       case addressable::kSingle:
-        addressable_ = model_->objects().GetAddressable(parameter_list_[i]);
+        addressable_ = model()->objects().GetAddressable(parameter_list_[i]);
         values.push_back((*addressable_));
         break;
       default:
@@ -86,7 +86,7 @@ Double Sum::GetScore() {
 
   // first parameter
   for (unsigned i = 0; i < parameter_list_.size(); ++i) {
-    addressable_ = model_->objects().GetAddressable(parameter_list_[i]);
+    addressable_ = model()->objects().GetAddressable(parameter_list_[i]);
     values.push_back((*addressable_));
   }
 

@@ -57,7 +57,9 @@ public:
 
 private:
   // Members
-  shared_ptr<Model> model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "Partition::Accessors::Cached::Categories"); }
   vector<string>    category_labels_;
   DataType          data_;
 };

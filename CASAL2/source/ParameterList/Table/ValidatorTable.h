@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 
+#include "../../Logging/Logging.h"
 #include "Table.h"
 #include "Utilities/Types.h"
 
@@ -28,6 +29,7 @@ using niwa::utilities::Double;
 using std::initializer_list;
 using std::shared_ptr;
 using std::string;
+using std::weak_ptr;
 
 /**
  * Class Definition
@@ -81,7 +83,14 @@ protected:
   // BindableVector<unsigned>*    GetParameterAsVectorUnsigned(bool null_on_error = false);
   // BindableVector<std::string>* GetParameterAsVectorString(bool null_on_error = false);
 
-  shared_ptr<Model>               model_;
+  shared_ptr<Model> model() const {
+    auto locked = model_.lock();
+    if (!locked)
+      LOG_CODE_ERROR() << "ValidatorTable weak_ptr expired";
+    return locked;
+  }
+
+  weak_ptr<Model>                 model_;
   niwa::ParameterList*            parameters_;
   niwa::parameters::table::Table* table_;
 };

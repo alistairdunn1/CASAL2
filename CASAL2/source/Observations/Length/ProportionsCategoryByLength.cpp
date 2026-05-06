@@ -66,7 +66,7 @@ ProportionsCategoryByLength::ProportionsCategoryByLength(shared_ptr<Model> model
 void ProportionsCategoryByLength::DoValidate() {
   LOG_TRACE();
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->DefaultToAllModelLengthBins();
-  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model()->length_plus());
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.ValidateVector(PARAM_TOTAL_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES, false);
@@ -98,11 +98,11 @@ void ProportionsCategoryByLength::DoValidate() {
       ->GreaterThanOrEqualToForRange(1, expected_column_count - 1, 0.0);
 
   // Do some checks if we're not using all of the model length bins
-  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  using_model_length_bins = length_bins_.size() == model()->length_bins().size();
   if (!using_model_length_bins)
-    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
+    map_local_length_bins_to_global_length_bins_ = model()->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
-  if (length_plus_ & !model_->length_plus())
+  if (length_plus_ & !model()->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
@@ -119,12 +119,12 @@ void ProportionsCategoryByLength::DoValidate() {
 void ProportionsCategoryByLength::DoBuild() {
   LOG_TRACE();
   // Get all categories in the system.
-  total_partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, total_category_labels_));
-  total_cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, total_category_labels_));
+  total_partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), total_category_labels_));
+  total_cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), total_category_labels_));
 
   // all categories
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
 
   LOG_FINE() << "number of bins " << number_bins_;
   total_numbers_at_length_.resize(number_bins_, 0.0);
@@ -136,7 +136,7 @@ void ProportionsCategoryByLength::DoBuild() {
   categories_for_comparison_.resize(number_bins_ * category_labels_.size());
   length_bins_for_comparison_.resize(number_bins_ * category_labels_.size(), 0.0);
 
-  TimeStep* time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  TimeStep* time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -146,7 +146,7 @@ void ProportionsCategoryByLength::DoBuild() {
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
     LOG_FINE() << "getting selectivity = " << label;
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -154,7 +154,7 @@ void ProportionsCategoryByLength::DoBuild() {
 
   for (string label : total_selectivity_labels_) {
     LOG_FINE() << "getting selectivity = " << label;
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES_FOR_TOTAL_CATEGORIES) << ": Selectivity label " << label << " was not found.";
     total_selectivities_.push_back(selectivity);
@@ -226,7 +226,7 @@ void ProportionsCategoryByLength::Execute() {
 
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_total_numbers_at_length_[model_length_offset]
               += (*total_category_iter)->cached_data_[model_length_offset] * total_selectivities_[total_selectivity_offset]->GetLengthResult(model_length_offset);
@@ -237,7 +237,7 @@ void ProportionsCategoryByLength::Execute() {
         LOG_FINE() << "using bespoke length bins length " << map_local_length_bins_to_global_length_bins_.size() << " " << cached_total_numbers_at_length_.size() << " "
                    << total_numbers_at_length_.size();
 
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           LOG_FINEST() << "length bin " << model_length_offset << " ndx = " << map_local_length_bins_to_global_length_bins_[model_length_offset] << " category offset "
                        << category_offset;
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
@@ -259,7 +259,7 @@ void ProportionsCategoryByLength::Execute() {
       selectivity_labels_set.insert(selectivities_[selectivity_offset]->GetLabel());
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           cached_numbers_at_length_[model_length_offset]
               += (*category_iter)->cached_data_[model_length_offset] * selectivities_[selectivity_offset]->GetLengthResult(model_length_offset);
@@ -267,7 +267,7 @@ void ProportionsCategoryByLength::Execute() {
         }
       } else {
         LOG_FINE() << "using bespoke length bins";
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           LOG_FINEST() << "length bin " << model_length_offset << " ndx = " << map_local_length_bins_to_global_length_bins_[model_length_offset] << " category offset "
                        << category_offset;
           if (map_local_length_bins_to_global_length_bins_[model_length_offset] >= 0) {
@@ -309,9 +309,9 @@ void ProportionsCategoryByLength::Execute() {
    */
   for (unsigned i = 0; i < length_results_.size(); ++i) {
     LOG_FINEST() << "proportions mature at ndx " << i << " = " << length_results_[i];
-    assert(error_values_[model_->current_year()].size() > i);
-    SaveComparison(categories_for_comparison_[i], selectivity_labels[i], 0, length_bins_for_comparison_[i], length_results_[i], proportions_[model_->current_year()][i],
-                   process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][i], 0.0, delta_, 0.0);
+    assert(error_values_[model()->current_year()].size() > i);
+    SaveComparison(categories_for_comparison_[i], selectivity_labels[i], 0, length_bins_for_comparison_[i], length_results_[i], proportions_[model()->current_year()][i],
+                   process_errors_by_year_[model()->current_year()], error_values_[model()->current_year()][i], 0.0, delta_, 0.0);
   }
 }
 
@@ -326,7 +326,7 @@ void ProportionsCategoryByLength::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
   } else {
     /**

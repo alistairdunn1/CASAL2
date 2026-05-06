@@ -75,13 +75,13 @@ void LogNormal::DoUpdate() {
 
   //} else {
   // Just a standard normal deviation
-  value_ = exp(normal_draw_by_year_[model_->current_year()] - 0.5 * sigma_ * sigma_);
+  value_ = exp(normal_draw_by_year_[model()->current_year()] - 0.5 * sigma_ * sigma_);
   // }
   // Store this value to be pulled out next projection year
-  value_ = value_ * multiplier_by_year_[model_->current_year()];
+  value_ = value_ * multiplier_by_year_[model()->current_year()];
 
   LOG_FINE() << "Setting Value to: " << value_;
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  (this->*DoUpdateFunc_)(value_, true, model()->current_year());
 }
 
 } /* namespace projects */

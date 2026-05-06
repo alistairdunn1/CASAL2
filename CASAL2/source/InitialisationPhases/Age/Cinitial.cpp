@@ -48,9 +48,10 @@ Cinitial::Cinitial(shared_ptr<Model> model) : InitialisationPhase(model) {
  */
 void Cinitial::DoValidate() {
   LOG_TRACE();
+  auto current_model = model();
 
-  min_age_ = model_->min_age();
-  max_age_ = model_->max_age();
+  min_age_ = current_model->min_age();
+  max_age_ = current_model->max_age();
 
   if (max_age_ < min_age_)
     LOG_ERROR_P(PARAM_MIN_AGE) << " The minimum age (" << min_age_ << ") cannot be greater than the maximum age (" << max_age_ << ")";
@@ -66,7 +67,7 @@ void Cinitial::DoValidate() {
   for (auto row : data) {
     string row_label = row[0];
     // CHeck that it is a valid category
-    bool check_combined = model_->categories()->IsCombinedLabels(row_label);
+    bool check_combined = current_model->categories()->IsCombinedLabels(row_label);
     LOG_FINEST() << "Checking row with label = " << row_label;
     if (find(category_labels_.begin(), category_labels_.end(), row_label) == category_labels_.end())
       LOG_FATAL_P(PARAM_N) << " Could not find '" << row_label << "' in the categories supplied. The categories should be the same as the row labels.";
@@ -76,13 +77,13 @@ void Cinitial::DoValidate() {
       boost::split(split_category_labels, row_label, boost::is_any_of("+"));
       unsigned category_iter = 0;
       for (const string& split_category_label : split_category_labels) {
-        if (!model_->categories()->IsValid(split_category_label)) {
+        if (!current_model->categories()->IsValid(split_category_label)) {
           LOG_FATAL_P(PARAM_N) << ": The category " << split_category_label << " is not a valid category.";
         }
         ++category_iter;
       }
     } else {
-      if (!model_->categories()->IsValid(row_label))
+      if (!current_model->categories()->IsValid(row_label))
         LOG_FATAL_P(PARAM_N) << ": The category " << row_label << " is not a valid category.";
     }
     // convert to lower case
@@ -108,16 +109,17 @@ void Cinitial::DoValidate() {
  */
 void Cinitial::DoBuild() {
   LOG_TRACE();
-  time_steps_ = model_->managers()->time_step()->ordered_time_steps();
+  auto current_model = model();
+  time_steps_        = current_model->managers()->time_step()->ordered_time_steps();
 
   // Create Category and cached category pointers
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(current_model, category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(current_model, category_labels_));
   // Create derived quantity pointers
   unsigned i = 0;
   for (auto derived_quantities : derived_quanitity_) {
     if (derived_quantities != "") {
-      derived_ptr_.push_back(model_->managers()->derived_quantity()->GetDerivedQuantity(derived_quantities));
+      derived_ptr_.push_back(current_model->managers()->derived_quantity()->GetDerivedQuantity(derived_quantities));
       if (!derived_ptr_[i]) {
         LOG_ERROR() << "Cannot find derived quantity " << derived_quantities;
       }
@@ -131,6 +133,7 @@ void Cinitial::DoBuild() {
  */
 void Cinitial::DoExecute() {
   LOG_TRACE();
+  auto                        current_model = model();
   map<string, vector<Double>> category_by_age_total;
   auto                        partition_iter = partition_->Begin();
   for (unsigned category_offset = 0; category_offset < category_labels_.size(); ++category_offset, ++partition_iter) {
@@ -187,14 +190,14 @@ void Cinitial::DoExecute() {
   LOG_FINEST() << "finished calculating Cinitial";
   cached_partition_->BuildCache();
   // Execute the annual cycle for one year to calculate Cinitial
-  timesteps::Manager* time_step_manager = model_->managers()->time_step();
+  timesteps::Manager* time_step_manager = current_model->managers()->time_step();
   time_step_manager->ExecuteInitialisation(label_, 1);
 
   // Store that SSB value ssb_offset times in the Cintiial phase GetPhaseIndex
   LOG_FINE() << "derived_ptr_.size(): " << derived_ptr_.size();
   for (auto derived_quantities : derived_ptr_) {
     vector<vector<Double>>& initialisation_values = derived_quantities->initialisation_values();
-    unsigned                cinit_phase_index     = model_->managers()->initialisation_phase()->GetPhaseIndex(label_);
+    unsigned                cinit_phase_index     = current_model->managers()->initialisation_phase()->GetPhaseIndex(label_);
     LOG_FINE() << "initialisation_values size: " << initialisation_values.size();
     LOG_FINE() << "ssb_offset: " << ssb_offset_;
     LOG_FINE() << "cinit_phase_index: " << cinit_phase_index;

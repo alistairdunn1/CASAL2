@@ -55,14 +55,14 @@ Categories::Categories(shared_ptr<Model> model) : model_(model) {
  * Note: all parameters are populated from configuration files
  */
 void Categories::Validate() {
-  if (model_->partition_type() == PartitionType::kPiApprox)
+  if (model()->partition_type() == PartitionType::kPiApprox)
     return;
 
   // Check that we actually had a categories block
   if (block_type_ == "")
     LOG_ERROR() << "The @categories command is missing from the input configuration file. This is required";
 
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
 
   /**
    * Parameter: Names
@@ -75,9 +75,9 @@ void Categories::Validate() {
   // Parameter: Names
   // build the default years
   vector<unsigned> default_years;
-  for (auto year : model_->years()) default_years.push_back(year);
+  for (auto year : model()->years()) default_years.push_back(year);
 
-  if (model_->partition_type() == PartitionType::kAge) {
+  if (model()->partition_type() == PartitionType::kAge) {
     // Check the user hasn't specified both age_length and age_weight subcommands
     /*
     if (parameters_.Get(PARAM_AGE_WEIGHT)->has_been_defined() && parameters_.Get(PARAM_AGE_LENGTHS)->has_been_defined())
@@ -116,14 +116,14 @@ void Categories::Validate() {
       // Create a new CategoryInfo object
       CategoryInfo new_category_info;
       new_category_info.name_    = names_[i];
-      new_category_info.min_age_ = model_->min_age();
-      new_category_info.max_age_ = model_->max_age();
+      new_category_info.min_age_ = model()->min_age();
+      new_category_info.max_age_ = model()->max_age();
       new_category_info.years_   = default_years;
       categories_[names_[i]]     = new_category_info;
 
       category_names_.push_back(names_[i]);
     }
-  } else if (model_->partition_type() == PartitionType::kLength) {
+  } else if (model()->partition_type() == PartitionType::kLength) {
     // get the age sizes
     if (growth_increment_labels_.size() > 0 && growth_increment_labels_.size() != names_.size())
       LOG_ERROR_P(PARAM_GROWTH_INCREMENT) << " number of length-weight labels (" << growth_increment_labels_.size()
@@ -150,8 +150,8 @@ void Categories::Validate() {
       // Create a new CategoryInfo object
       CategoryInfo new_category_info;
       new_category_info.name_    = names_[i];
-      new_category_info.min_age_ = model_->min_age();
-      new_category_info.max_age_ = model_->max_age();
+      new_category_info.min_age_ = model()->min_age();
+      new_category_info.max_age_ = model()->max_age();
       new_category_info.years_   = default_years;
       categories_[names_[i]]     = new_category_info;
 
@@ -172,7 +172,7 @@ void Categories::Validate() {
    */
   map<string, string> category_values;
   vector<string>      years_split;
-  auto                model_years = model_->years();
+  auto                model_years = model()->years();
   for (auto year_lookup : years_) {
     category_values = GetCategoryLabelsAndValues(year_lookup, parameters_.Get(PARAM_YEARS)->location());
     for (auto iter : category_values) {
@@ -208,11 +208,11 @@ void Categories::Validate() {
  */
 
 void Categories::Build() {
-  if (model_->partition_type() == PartitionType::kAge) {
+  if (model()->partition_type() == PartitionType::kAge) {
     /**
      * Get our age length objects if age based partition model
      */
-    agelengths::Manager* age_sizes_manager = model_->managers()->age_length();
+    agelengths::Manager* age_sizes_manager = model()->managers()->age_length();
     auto                 iter              = category_age_length_labels_.begin();
     for (; iter != category_age_length_labels_.end(); ++iter) {
       AgeLength* age_size = age_sizes_manager->FindAgeLength(iter->second);
@@ -221,8 +221,8 @@ void Categories::Build() {
 
       categories_[iter->first].age_length_ = age_size;
     }
-  } else if (model_->partition_type() == PartitionType::kLength) {
-    growthincrements::Manager* growth_increment_manager = model_->managers()->growth_increment();
+  } else if (model()->partition_type() == PartitionType::kLength) {
+    growthincrements::Manager* growth_increment_manager = model()->managers()->growth_increment();
     auto                       iter                     = category_growth_increment_labels_.begin();
     for (; iter != category_growth_increment_labels_.end(); ++iter) {
       GrowthIncrement* growth_increment = growth_increment_manager->GetGrowthIncrement(iter->second);
@@ -616,7 +616,7 @@ GrowthIncrement* Categories::growth_increment(const string& category_name) {
  * @return The total number of individual categories that are defined in the model
  */
 unsigned Categories::total_categories_defined(const vector<string>& category_names) {
-  if (model_->partition_type() == PartitionType::kPiApprox) {
+  if (model()->partition_type() == PartitionType::kPiApprox) {
     LOG_FATAL() << "There is no functionality for model types that are not age or length";
   }
 
@@ -644,7 +644,7 @@ unsigned Categories::total_categories_defined(const vector<string>& category_nam
  * @return A vector of vector of all individual categories that are defined in the model
  */
 vector<vector<string>> Categories::total_categories(const vector<string>& category_names) {
-  if (model_->partition_type() == PartitionType::kPiApprox) {
+  if (model()->partition_type() == PartitionType::kPiApprox) {
     LOG_FATAL() << "There is no functionality for model types that are not age or length";
   }
 

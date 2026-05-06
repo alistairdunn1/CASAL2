@@ -41,7 +41,7 @@ public:
   void     Validate();
   void     Build();
   void     Verify(shared_ptr<Model> model);
-  void     Reset(){};
+  void     Reset() {};
   void     ExecuteForInitialisation(const string& phase_label);
   void     Execute(unsigned year);
   bool     HasProcess(const string& label) { return std::find(process_names_.begin(), process_names_.end(), label) != process_names_.end(); }
@@ -55,13 +55,14 @@ public:
   void     BuildInitialisationProcesses();
 
   // accessors
+  shared_ptr<Model>       model() const { return LockWeakPtr(model_, "TimeStep"); }
   const vector<Process*>& processes() const { return processes_; }
   vector<string>          process_labels() const { return process_names_; }
   vector<string>          initialisation_process_labels(const string& initialisation_phase) { return initialisation_process_labels_[initialisation_phase]; }
 
 private:
   // Members
-  shared_ptr<Model>                               model_ = nullptr;
+  weak_ptr<Model>                                 model_ = {};
   vector<string>                                  process_names_;
   vector<Process*>                                processes_;
   map<unsigned, vector<Executor*>>                executors_;

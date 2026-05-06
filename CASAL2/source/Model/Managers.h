@@ -61,6 +61,7 @@ namespace timevarying { class Manager; }
 class AddressableInputLoader;
 class Model;
 using std::shared_ptr;
+using std::weak_ptr;
 
 // classes
 class Managers {
@@ -112,7 +113,7 @@ protected:
   void Reset();
 
   // members
-  shared_ptr<Model>                    model_;
+  weak_ptr<Model>                      model_;
   additionalpriors::Manager*           additional_prior_           = nullptr;
   ageingerrors::Manager*               ageing_error_               = nullptr;
   agelengths::Manager*                 age_length_                 = nullptr;
@@ -139,6 +140,8 @@ protected:
   timesteps::Manager*                  time_step_    = nullptr;
   timevarying::Manager*                time_varying_ = nullptr;
   static std::mutex                    lock_;
+
+  shared_ptr<Model> model() const;
 };
 
 } /* namespace niwa */

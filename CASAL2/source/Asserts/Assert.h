@@ -32,11 +32,12 @@ public:
   Assert() = delete;
   explicit Assert(shared_ptr<Model> model);
   virtual ~Assert() = default;
-  void Validate();
-  void Build() { DoBuild(); };
-  void Verify(shared_ptr<Model> model){};
-  void Reset(){};
-  void PreExecute() final{};
+  void              Validate();
+  void              Build() { DoBuild(); };
+  void              Verify(shared_ptr<Model> model) {};
+  void              Reset() {};
+  void              PreExecute() final {};
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Assert"); }
 
 protected:
   // methods
@@ -44,9 +45,9 @@ protected:
   virtual void DoBuild()    = 0;
 
   // members
-  shared_ptr<Model> model_ = nullptr;
-  string            error_type_;
-  Double            tol_ = 1e-5;
+  weak_ptr<Model> model_ = {};
+  string          error_type_;
+  Double          tol_ = 1e-5;
 };
 } /* namespace niwa */
 

@@ -36,8 +36,8 @@ public:
   virtual Double GetScore()  = 0;
   void           Validate();
   void           Build();
-  void           Verify(shared_ptr<Model> model){};
-  void           Reset(){};
+  void           Verify(shared_ptr<Model> model) {};
+  void           Reset() {};
   string         parameter() const { return parameter_; }
 
 protected:
@@ -46,9 +46,12 @@ protected:
   virtual void DoBuild()    = 0;
 
   // members
-  string            parameter_;
-  shared_ptr<Model> model_;
-  ScoreFunction     score_function_ = 0;
+  string          parameter_;
+  weak_ptr<Model> model_;
+  ScoreFunction   score_function_ = 0;
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model> model() const { return model_.lock(); }
 };
 
 } /* namespace niwa */

@@ -30,7 +30,7 @@ Penalty::Penalty(shared_ptr<Model> model) : model_(model) {
  * Validate the objects
  */
 void Penalty::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   DoValidate();
 }
 

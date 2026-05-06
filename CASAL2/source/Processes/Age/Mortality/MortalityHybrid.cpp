@@ -96,7 +96,7 @@ void MortalityHybrid::DoValidate() {
   unsigned year_index = std::find(columns.begin(), columns.end(), PARAM_YEAR) - columns.begin();
   LOG_FINEST() << "The year_index for fisheries table is: " << year_index;
 
-  auto model_years = model_->years();
+  auto model_years = model()->years();
   auto rows        = catches_table_->data();
   for (auto row : rows) {
     unsigned year = 0;
@@ -308,7 +308,7 @@ void MortalityHybrid::DoBuild() {
    * Build all of our category objects
    */
   for (auto& category : categories_) {
-    category.category_ = &model_->partition().category(category.category_label_);
+    category.category_ = &model()->partition().category(category.category_label_);
     category.survivor_with_z_by_age_.assign(category.category_->age_spread(), 0.0);
     category.z_values_by_age_.assign(category.category_->age_spread(), 0.0);
     category.exp_values_half_duration_m_.assign(category.category_->age_spread(), 0.0);
@@ -324,7 +324,7 @@ void MortalityHybrid::DoBuild() {
    * apply a different ratio of M so here we want to verify
    * we have enough
    */
-  vector<TimeStep*> time_steps = model_->managers()->time_step()->ordered_time_steps();
+  vector<TimeStep*> time_steps = model()->managers()->time_step()->ordered_time_steps();
   vector<unsigned>  active_time_steps;
   for (unsigned i = 0; i < time_steps.size(); ++i) {
     if (time_steps[i]->HasProcess(label_))
@@ -348,11 +348,11 @@ void MortalityHybrid::DoBuild() {
    * Assign the selectivity, and time step index to each fisher data object
    */
   for (auto& fishery_category : fishery_categories_) {
-    fishery_category.selectivity_ = model_->managers()->selectivity()->GetSelectivity(fishery_category.selectivity_label_);
+    fishery_category.selectivity_ = model()->managers()->selectivity()->GetSelectivity(fishery_category.selectivity_label_);
     /**
      * Check the fishery categories are valid
      */
-    if (!model_->categories()->IsValid(fishery_category.category_label_))
+    if (!model()->categories()->IsValid(fishery_category.category_label_))
       LOG_ERROR_P(PARAM_METHOD) << ": Fishery category " << fishery_category.category_label_ << " was not found.";
 
     if (!fishery_category.selectivity_)
@@ -362,21 +362,21 @@ void MortalityHybrid::DoBuild() {
   for (auto& fishery_iter : fisheries_) {
     auto& fishery = fishery_iter.second;
     if (fishery.penalty_label_ != "none") {
-      fishery.penalty_ = model_->managers()->penalty()->GetProcessPenalty(fishery.penalty_label_);
+      fishery.penalty_ = model()->managers()->penalty()->GetProcessPenalty(fishery.penalty_label_);
       if (!fishery.penalty_)
         LOG_ERROR_P(PARAM_METHOD) << ": Penalty label " << fishery.penalty_label_ << " was not found.";
     }
-    bool check_time_step = model_->managers()->time_step()->CheckTimeStep(fishery.time_step_label_);
+    bool check_time_step = model()->managers()->time_step()->CheckTimeStep(fishery.time_step_label_);
     if (!check_time_step)
       LOG_FATAL_P(PARAM_METHOD) << "Time step label " << fishery.time_step_label_ << " was not found.";
-    fishery.time_step_index_ = model_->managers()->time_step()->GetTimeStepIndex(fishery.time_step_label_);
+    fishery.time_step_index_ = model()->managers()->time_step()->GetTimeStepIndex(fishery.time_step_label_);
   }
 
   /**
    * Check the natural mortality categories are valid
    */
   for (const string& label : category_labels_) {
-    if (!model_->categories()->IsValid(label))
+    if (!model()->categories()->IsValid(label))
       LOG_ERROR_P(PARAM_CATEGORIES) << ": Category " << label << " was not found.";
   }
 
@@ -385,7 +385,7 @@ void MortalityHybrid::DoBuild() {
    */
   for (auto& category : categories_) {
     // Selectivity
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(category.selectivity_label_);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(category.selectivity_label_);
     if (!selectivity)
       LOG_ERROR_P(PARAM_RELATIVE_M_BY_AGE) << "M-by-age ogive label " << category.selectivity_label_ << " was not found.";
     category.selectivity_ = selectivity;
@@ -399,7 +399,7 @@ void MortalityHybrid::DoBuild() {
       use_age_weight_            = false;
     } else {
       LOG_FINE() << "age weight found";
-      AgeWeight* age_weight = model_->managers()->age_weight()->FindAgeWeight(category.age_weight_label_);
+      AgeWeight* age_weight = model()->managers()->age_weight()->FindAgeWeight(category.age_weight_label_);
       if (!age_weight)
         LOG_ERROR_P(PARAM_METHOD) << "age weight label " << category.age_weight_label_ << " was not found.";
       category.age_weight_ = age_weight;
@@ -412,7 +412,7 @@ void MortalityHybrid::DoBuild() {
    */
   vector<unsigned> instant_mort_time_step;
   unsigned         i = 0;
-  for (auto time_step : model_->managers()->time_step()->ordered_time_steps()) {
+  for (auto time_step : model()->managers()->time_step()->ordered_time_steps()) {
     for (auto process : time_step->processes()) {
       if (process->process_type() == ProcessType::kMortality && process->type() == PARAM_MORTALITY_HYBRID) {
         LOG_FINEST() << PARAM_MORTALITY_HYBRID << " process in time step " << i;
@@ -442,7 +442,7 @@ void MortalityHybrid::DoBuild() {
   // reserve memory for reporting objects
   LOG_FINE() << "years " << process_years_.size();
   // allocate memory for observation object
-  const vector<TimeStep*> ordered_time_steps = model_->managers()->time_step()->ordered_time_steps();
+  const vector<TimeStep*> ordered_time_steps = model()->managers()->time_step()->ordered_time_steps();
   LOG_FINE() << "time steps = " << ordered_time_steps.size();
   LOG_FINE() << "partitions = " << partition_.size();
   removals_by_year_fishery_category_.resize(process_years_.size());
@@ -453,7 +453,7 @@ void MortalityHybrid::DoBuild() {
     for (unsigned fishery_ndx = 0; fishery_ndx < fisheries_.size(); ++fishery_ndx) {
       removals_by_year_fishery_category_[year_ndx][fishery_ndx].resize(category_labels_.size());
       for (unsigned category_ndx = 0; category_ndx < category_labels_.size(); ++category_ndx)
-        removals_by_year_fishery_category_[year_ndx][fishery_ndx][category_ndx].resize(model_->age_spread(), 0.0);
+        removals_by_year_fishery_category_[year_ndx][fishery_ndx][category_ndx].resize(model()->age_spread(), 0.0);
     }
   }
   // populate total_catch_by_year_timestep_
@@ -523,11 +523,11 @@ void MortalityHybrid::RebuildCache() {
  */
 void MortalityHybrid::DoExecute() {
   LOG_TRACE();
-  unsigned             time_step_index = model_->managers()->time_step()->current_time_step();
-  unsigned             year            = model_->current_year();
+  unsigned             time_step_index = model()->managers()->time_step()->current_time_step();
+  unsigned             year            = model()->current_year();
   double               ratio           = time_step_ratios_[time_step_index];
   std::pair<bool, int> this_year_iter  = findInVector(process_years_, year);
-  LOG_FINE() << "state = " << model_->state();
+  LOG_FINE() << "state = " << model()->state();
   LOG_FINE() << "Year = " << year << " time-step = " << time_step_index << " found? = " << this_year_iter.first << " should = " << process_years_[this_year_iter.second];
   LOG_FINE() << "season duration = " << annual_duration_by_timestep_[time_step_index];
   Double selectivity_value = 0.0;
@@ -551,16 +551,16 @@ void MortalityHybrid::DoExecute() {
    * Loop for each category. Add the vulnerability from each
    * category in to the fisheries it belongs too
    */
-  if (model_->state() != State::kInitialise) {
+  if (model()->state() != State::kInitialise) {
     // Not in initialisation phase
     LOG_FINE() << "Should we calculate F based on years on and time-step";
-    if (((find(process_years_.begin(), process_years_.end(), year) != process_years_.end()) || (year > model_->final_year()))) {
+    if (((find(process_years_.begin(), process_years_.end(), year) != process_years_.end()) || (year > model()->final_year()))) {
       // There is F in this year are we in the right time-step
       LOG_FINE() << "check time-step";
       if (find(time_steps_to_skip_applying_F_mortality_.begin(), time_steps_to_skip_applying_F_mortality_.end(), time_step_index)
           == time_steps_to_skip_applying_F_mortality_.end()) {
         // Good to calculate F
-        LOG_FINEST() << "time step = " << time_step_index << " not in initialisation and there is an F method in this timestep. year = " << model_->current_year();
+        LOG_FINEST() << "time step = " << time_step_index << " not in initialisation and there is an F method in this timestep. year = " << model()->current_year();
         for (auto& fishery_category : fishery_categories_) {
           if (fishery_category.fishery_.time_step_index_ != time_step_index)
             continue;
@@ -587,7 +587,7 @@ void MortalityHybrid::DoExecute() {
           Double vulnerable = 0.0;
           if (fishery_category.category_.age_weight_) {
             for (unsigned i = 0; i < category->data_.size(); ++i) {
-              vulnerable += category->data_[i] * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model_->min_age())
+              vulnerable += category->data_[i] * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model()->min_age())
                             * fishery_category.selectivity_values_[i] * fishery_category.category_.exp_values_half_duration_m_[i];
             }
           } else if (is_catch_biomass_) {  // as biomass
@@ -659,7 +659,7 @@ void MortalityHybrid::DoExecute() {
             if (fishery_category.category_.age_weight_) {
               for (unsigned i = 0; i < category->data_.size(); ++i) {
                 interim_tot_catch += fishery_category.fishery_.init_F_ * category->data_[i]
-                                     * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model_->min_age()) * fishery_category.selectivity_values_[i]
+                                     * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model()->min_age()) * fishery_category.selectivity_values_[i]
                                      * fishery_category.category_.survivor_with_z_by_age_[i];
               }
             } else if (is_catch_biomass_) {  // as biomass
@@ -684,8 +684,8 @@ void MortalityHybrid::DoExecute() {
               // Double old_F = category.z_values_by_age_[i] - ((*category.m_) * ratio * category.selectivity_values_[i]);
               // Double new_F = z_adjustment * (category.z_values_by_age_[i] - ((*category.m_) * ratio * category.selectivity_values_[i]));
               // LOG_FINEST() << "age = " << model_->min_age() + i << " old F " << old_F << " new F " << new_F;
-              category.z_values_by_age_[i] = (*category.m_) * ratio * category.selectivity_values_[i]
-                                             + z_adjustment * (category.z_values_by_age_[i] - ((*category.m_) * ratio * category.selectivity_values_[i]));
+              category.z_values_by_age_[i]        = (*category.m_) * ratio * category.selectivity_values_[i]
+                                                    + z_adjustment * (category.z_values_by_age_[i] - ((*category.m_) * ratio * category.selectivity_values_[i]));
               category.survivor_with_z_by_age_[i] = (1.0 - exp(-annual_duration_by_timestep_[time_step_index] * category.z_values_by_age_[i])) / category.z_values_by_age_[i];
               // LOG_FINEST() << " age = " << model_->min_age() << " Z " << category.z_values_by_age_[i] << " survivorship " << category.survivor_with_z_by_age_[i];
             }
@@ -699,7 +699,7 @@ void MortalityHybrid::DoExecute() {
             Double               vulnerable = 0.0;
             if (fishery_category.category_.age_weight_) {
               for (unsigned i = 0; i < category->data_.size(); ++i) {
-                vulnerable += category->data_[i] * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model_->min_age())
+                vulnerable += category->data_[i] * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model()->min_age())
                               * fishery_category.selectivity_values_[i] * fishery_category.category_.survivor_with_z_by_age_[i];
               }
             } else if (is_catch_biomass_) {  // as biomass
@@ -757,7 +757,7 @@ void MortalityHybrid::DoExecute() {
           if (fishery_category.category_.age_weight_) {
             for (unsigned i = 0; i < category->data_.size(); ++i) {
               fishery_category.fishery_.actual_catches_[year] += fishery_category.fishery_.final_F_ * category->data_[i]
-                                                                 * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model_->min_age())
+                                                                 * fishery_category.category_.age_weight_->mean_weight_at_age_by_year(year, i + model()->min_age())
                                                                  * fishery_category.selectivity_values_[i] * fishery_category.category_.survivor_with_z_by_age_[i];
             }
           } else if (is_catch_biomass_) {  // as biomass
@@ -775,8 +775,8 @@ void MortalityHybrid::DoExecute() {
           // Catch at age
           LOG_FINEST() << "Catch at age for year ndx = " << this_year_iter.second << " fishery ndx = " << fishery_category.fishery_.fishery_ndx_ << " category ndx "
                        << fishery_category.category_.category_ndx_;
-          for (unsigned i = 0; i < model_->age_spread(); ++i) {
-            unsigned age_offset = category->min_age_ - model_->min_age();
+          for (unsigned i = 0; i < model()->age_spread(); ++i) {
+            unsigned age_offset = category->min_age_ - model()->min_age();
             if (i < age_offset)
               continue;
             removals_by_year_fishery_category_[this_year_iter.second][fishery_category.fishery_.fishery_ndx_][fishery_category.category_.category_ndx_][i]
@@ -801,7 +801,7 @@ void MortalityHybrid::DoExecute() {
   for (auto& category : categories_) {
     for (unsigned i = 0; i < category.category_->data_.size(); ++i) {
       category.category_->data_[i] *= exp(-category.z_values_by_age_[i]);
-      LOG_FINEST() << "category " << category.category_label_ << ": updated numbers at age = " << category.category_->data_[i] << " age " << i + model_->min_age()
+      LOG_FINEST() << "category " << category.category_label_ << ": updated numbers at age = " << category.category_->data_[i] << " age " << i + model()->min_age()
                    << " Z = " << category.z_values_by_age_[i];
     }
   }

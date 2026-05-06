@@ -44,15 +44,15 @@ void UserDefined::DoBuild() {
 void UserDefined::DoUpdate() {
   LOG_TRACE();
   try {
-    value_ = model_->equation_parser().Parse(equation_);
+    value_ = model()->equation_parser().Parse(equation_);
   } catch (std::runtime_error& ex) {
     LOG_FATAL() << "In the projection " << label_ << ", the equation " << equation_ << " could not be parsed because: " << ex.what();
   } catch (...) {
     LOG_FATAL() << "result: equation failed\n";
   }
 
-  LOG_FINE() << "Setting Value to: " << value_ << ", in year = " << model_->current_year();
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  LOG_FINE() << "Setting Value to: " << value_ << ", in year = " << model()->current_year();
+  (this->*DoUpdateFunc_)(value_, true, model()->current_year());
 }
 
 } /* namespace projects */

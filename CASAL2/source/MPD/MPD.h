@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "../BaseClasses/Object.h"
 #include "../Utilities/Types.h"
 
 // namespaces
@@ -35,7 +36,7 @@ using std::vector;
 class MPD {
 public:
   MPD() = delete;
-  explicit MPD(shared_ptr<Model> model) : model_(model){};
+  explicit MPD(shared_ptr<Model> model) : model_(model) {};
   virtual ~MPD() = default;
   void ParseString(const string& mpd_block);
   bool LoadFromDiskToMemory(const string& file_name);
@@ -48,7 +49,8 @@ public:
 
 protected:
   // members
-  shared_ptr<Model> model_;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "MPD"); }
+  weak_ptr<Model>   model_;
   string            file_name_ = "<unknown>";
   vector<string>    file_lines_;
   string            value_;  // stored mpd as a string

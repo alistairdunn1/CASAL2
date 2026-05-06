@@ -31,7 +31,7 @@ LengthWeight::LengthWeight(shared_ptr<Model> model) : model_(model) {
  * Validate the LengthWeight objects
  */
 void LengthWeight::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   DoValidate();
 }
 

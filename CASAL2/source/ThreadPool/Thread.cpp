@@ -72,7 +72,8 @@ void Thread::Loop() {
       std::scoped_lock l(lock_);
       try {
         if (new_candidates_.size() > 0) {
-          LOG_FINEST() << "Thread " << thread_->get_id() << " has model " << model_.get();
+          auto current_model = model();
+          LOG_FINEST() << "Thread " << thread_->get_id() << " has model " << current_model.get();
 
           is_finished_ = false;
           candidates_  = new_candidates_;
@@ -84,20 +85,19 @@ void Thread::Loop() {
           //					LOG_MEDIUM() << "[Thread# " << thread_->get_id() << "] Running candidates: " << cl;
 
           // TODO: Move this to the model
-          auto estimates = model_->managers()->estimate()->GetIsEstimated();
+          auto estimates = current_model->managers()->estimate()->GetIsEstimated();
           if (candidates_.size() != estimates.size()) {
             LOG_CODE_ERROR() << "The number of enabled estimates does not match the number of test solution values";
           }
 
           for (unsigned i = 0; i < candidates_.size(); ++i) estimates[i]->set_value(candidates_[i]);
 
-          model_->FullIteration();
+          current_model->FullIteration();
 
-          ObjectiveFunction& objective = model_->objective_function();
+          ObjectiveFunction& objective = current_model->objective_function();
           objective.CalculateScore();
           //					cout << "Pushing Score: " << objective.score() << " to stack" << endl;
           scores_.push(AS_DOUBLE(objective.score()));
-
 
           is_finished_ = true;
         }
@@ -160,7 +160,6 @@ double Thread::objective_score() {
 }
 
 shared_ptr<Model> Thread::model() {
-  std::scoped_lock l(lock_);
   return model_;
 }
 

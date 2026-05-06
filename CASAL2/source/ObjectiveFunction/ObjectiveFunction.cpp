@@ -51,11 +51,12 @@ void ObjectiveFunction::Clear() {
 void ObjectiveFunction::CalculateScore() {
   LOG_TRACE();
   Clear();
+  auto current_model = model();
 
   /**
    * Get the scores from each of the observations/likelihoods
    */
-  vector<Observation*> observations = model_->managers()->observation()->objects();
+  vector<Observation*> observations = current_model->managers()->observation()->objects();
   likelihoods_                      = 0.0;
   for (auto observation : observations) {
     const map<unsigned, Double>& scores     = observation->scores();
@@ -79,7 +80,7 @@ void ObjectiveFunction::CalculateScore() {
    */
   penalties_ = 0.0;
 
-  for (auto penalty : model_->managers()->penalty()->objects()) {
+  for (auto penalty : current_model->managers()->penalty()->objects()) {
     objective::Score new_score;
 
     new_score.label_ = PARAM_PENALTY + string("->") + penalty->label();
@@ -89,13 +90,13 @@ void ObjectiveFunction::CalculateScore() {
     score_list_.push_back(new_score);
     score_ += new_score.score_;
     penalties_ += new_score.score_;
-    }
+  }
 
   /**
    * Get the scores from each of the estimate priors
    */
-  model_->managers()->addressable_transformation()->PrepareForObjectiveFunction();  // prior applies to the transformed variable
-  vector<Estimate*> estimates = model_->managers()->estimate()->objects();
+  current_model->managers()->addressable_transformation()->PrepareForObjectiveFunction();  // prior applies to the transformed variable
+  vector<Estimate*> estimates = current_model->managers()->estimate()->objects();
   priors_                     = 0.0;
   for (Estimate* estimate : estimates) {
     LOG_FINE() << "estimate -> " << estimate->label();
@@ -113,12 +114,12 @@ void ObjectiveFunction::CalculateScore() {
     score_ += new_score.score_;
     priors_ += new_score.score_;
   }
-  model_->managers()->addressable_transformation()->RestoreForObjectiveFunction();  // revert any transformations that were required to change for prior
+  current_model->managers()->addressable_transformation()->RestoreForObjectiveFunction();  // revert any transformations that were required to change for prior
 
   /**
    * Get the score from each additional prior
    */
-  vector<AdditionalPrior*> additional_priors = model_->managers()->additional_prior()->objects();
+  vector<AdditionalPrior*> additional_priors = current_model->managers()->additional_prior()->objects();
   additional_priors_                         = 0.0;
   for (auto prior : additional_priors) {
     objective::Score new_score;
@@ -134,7 +135,7 @@ void ObjectiveFunction::CalculateScore() {
   /**
    * Get the Jacobian score from parameter_transformations
    */
-  auto jacobians = model_->managers()->addressable_transformation()->objects();
+  auto jacobians = current_model->managers()->addressable_transformation()->objects();
   jacobians_     = 0.0;
   for (auto jacobian : jacobians) {
     objective::Score new_score;

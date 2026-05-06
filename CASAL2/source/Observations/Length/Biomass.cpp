@@ -78,7 +78,7 @@ void Biomass::DoValidate() {
 void Biomass::DoBuild() {
   LOG_TRACE();
 
-  catchability_ = model_->managers()->catchability()->GetCatchability(catchability_label_);
+  catchability_ = model()->managers()->catchability()->GetCatchability(catchability_label_);
   if (!catchability_)
     LOG_FATAL_P(PARAM_CATCHABILITY) << ": catchability label " << catchability_label_ << " was not found.";
 
@@ -90,12 +90,12 @@ void Biomass::DoBuild() {
       LOG_ERROR_P(PARAM_CATCHABILITY) << ": catchability label " << catchability_label_ << " could not create dynamic cast for nuisance catchability";
   }
 
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
 
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -139,7 +139,7 @@ void Biomass::Execute() {
   Double final_value        = 0.0;
   double error_value        = 0.0;
 
-  unsigned current_year = model_->current_year();
+  unsigned current_year = model()->current_year();
 
   // Loop through the obs
   auto cached_partition_iter = cached_partition_->Begin();
@@ -207,7 +207,7 @@ void Biomass::CalculateScore() {
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
   // Check if we have a nuisance q or a free q
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     if (catchability_->type() == PARAM_NUISANCE) {
       if (calculate_nuisance_q_) {
         nuisance_catchability_->CalculateQ(comparisons_, likelihood_type_);

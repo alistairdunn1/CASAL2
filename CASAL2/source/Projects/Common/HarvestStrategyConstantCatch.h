@@ -51,7 +51,7 @@ private:
   int              update_counter_ = 0;
 
 protected:
-  shared_ptr<Model> model_ = nullptr;
+  weak_ptr<Model> model_ = {};
 };
 
 } /* namespace projects */

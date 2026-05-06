@@ -40,7 +40,7 @@ public:
     Reset();
     RebuildCache();
   };
-  void           Verify(shared_ptr<Model> model){};
+  void           Verify(shared_ptr<Model> model) {};
   void           Reset();
   virtual Double GetAgeResult(unsigned age, AgeLength* age_length);
   virtual Double GetLengthResult(unsigned length_bin_index);
@@ -61,11 +61,13 @@ protected:
   // pure methods
   virtual Double GetLengthBasedResult(unsigned age, AgeLength* age_length);
   virtual void   DoValidate() = 0;
-  virtual void   DoBuild(){};
+  virtual void   DoBuild() {};
   virtual void   DoReset();
 
   // Members
-  shared_ptr<Model> model_   = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Selectivity"); }
   unsigned          n_quant_ = 5;
   vector<Double>    quantiles_;
   vector<Double>    quantiles_at_;

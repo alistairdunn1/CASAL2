@@ -113,32 +113,32 @@ void DerivedQuantityObservation::DoValidate() {
  */
 void DerivedQuantityObservation::DoBuild() {
   LOG_TRACE();
-  derived_quantity_ = model_->managers()->derived_quantity()->GetDerivedQuantity(derived_quantity_label_);
+  derived_quantity_ = model()->managers()->derived_quantity()->GetDerivedQuantity(derived_quantity_label_);
   if (!derived_quantity_) {
     LOG_ERROR_P(PARAM_DERIVED_QUANTITY) << "The " << PARAM_DERIVED_QUANTITY << " derived_quantity (" << derived_quantity_label_ << ") was not found.";
   }
   if (initialisation_phase_label_ != "") {
-    initialisation_phase_ = model_->managers()->initialisation_phase()->GetPhaseIndex(initialisation_phase_label_);
+    initialisation_phase_ = model()->managers()->initialisation_phase()->GetPhaseIndex(initialisation_phase_label_);
   } else {
     initialisation_phase_ = 0;
   }
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_ERROR_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
     for (unsigned year : years_) time_step->SubscribeToBlock(this, year);
   }
   for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
+    if ((year < model()->start_year()) || (year > model()->final_year()))
+      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model()->start_year() << "), or greater than final_year (" << model()->final_year() << ").";
   }
 
   // check the time_step is after its creation timestep in order to check the year_lag
   if (year_lag_ < 1) {
     string dq_time_step_label = derived_quantity_->time_step();
-    auto   dq_time_step       = model_->managers()->time_step()->GetTimeStepIndex(dq_time_step_label);
-    auto   this_time_step     = model_->managers()->time_step()->GetTimeStepIndex(time_step_label_);
+    auto   dq_time_step       = model()->managers()->time_step()->GetTimeStepIndex(dq_time_step_label);
+    auto   this_time_step     = model()->managers()->time_step()->GetTimeStepIndex(time_step_label_);
     if ((this_time_step < dq_time_step) && year_lag_ < 1) {
       LOG_ERROR_P(PARAM_TIME_STEP) << "The time step " << time_step_label_ << " occurs before the time step of the derived quantity (" << dq_time_step_label << ").";
     }
@@ -159,7 +159,7 @@ void DerivedQuantityObservation::PreExecute() {}
  */
 void DerivedQuantityObservation::Execute() {
   LOG_FINEST() << "Entering observation " << label_;
-  unsigned current_year = model_->current_year();
+  unsigned current_year = model()->current_year();
   unsigned year         = current_year - year_lag_;
 
   Double expected    = derived_quantity_->GetValue(year) / derived_quantity_->GetLastValueFromInitialisation(initialisation_phase_);
@@ -180,7 +180,7 @@ void DerivedQuantityObservation::CalculateScore() {
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
   // Check if we have a nuisance q or a free q
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     // Send to be simulated
     likelihood_->SimulateObserved(comparisons_);
   } else {

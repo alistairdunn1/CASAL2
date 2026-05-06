@@ -10,6 +10,7 @@
 
 #include <betadiff.h>
 
+#include "../../BaseClasses/Object.h"
 #include "../../Estimates/Manager.h"
 #include "../../Model/Model.h"
 #include "../../ObjectiveFunction/ObjectiveFunction.h"
@@ -24,9 +25,11 @@ class MyModel {};
 class MyObjective {
 public:
   MyObjective(shared_ptr<Model> model) : model_(model) {}
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "BetaDiff::MyObjective"); }
 
   Double operator()(const MyModel& model, const dvv& x_unbounded) {
-    auto estimates = model_->managers()->estimate()->GetIsEstimated();
+    auto current_model = this->model();
+    auto estimates     = current_model->managers()->estimate()->GetIsEstimated();
 
     for (int i = 0; i < x_unbounded.size(); ++i) {
       dvariable estimate = x_unbounded[i + 1];
@@ -34,14 +37,14 @@ public:
       LOG_MEDIUM() << estimates[i]->value() << " ";
     }
 
-    model_->FullIteration();
-    ObjectiveFunction& objective = model_->objective_function();
+    current_model->FullIteration();
+    ObjectiveFunction& objective = current_model->objective_function();
     objective.CalculateScore();
     return objective.score();
   }
 
 private:
-  shared_ptr<Model> model_;
+  weak_ptr<Model> model_;
 };
 
 /**
@@ -66,7 +69,8 @@ void BetaDiff::DoValidate() {
  * Execute the minimiser
  */
 void BetaDiff::Execute() {
-  auto estimate_manager = model_->managers()->estimate();
+  auto current_model    = model();
+  auto estimate_manager = current_model->managers()->estimate();
   auto estimates        = estimate_manager->GetIsEstimated();
 
   dvector lower_bounds((int)estimates.size());
@@ -94,7 +98,7 @@ void BetaDiff::Execute() {
   }
 
   MyModel     my_model;
-  MyObjective my_objective(model_);
+  MyObjective my_objective(current_model);
 
   dmatrix betadiff_hessian(estimates.size(), estimates.size());
   //  dmatrix adolc_hessian(estimates.size(), estimates.size());

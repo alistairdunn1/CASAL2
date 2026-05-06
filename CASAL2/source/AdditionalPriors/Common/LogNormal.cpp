@@ -51,27 +51,27 @@ void LogNormal::DoValidate() {
  */
 void LogNormal::DoBuild() {
   string error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
+  if (!model()->objects().VerifyAddressableForUse(parameter_, addressable::kLookup, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "could not be found. Error: " << error;
   }
 
-  addressable::Type addressable_type = model_->objects().GetAddressableType(parameter_);
+  addressable::Type addressable_type = model()->objects().GetAddressableType(parameter_);
   LOG_FINEST() << "type = " << addressable_type;
   switch (addressable_type) {
     case addressable::kInvalid:
       LOG_CODE_ERROR() << "Invalid addressable type: " << parameter_;
       break;
     case addressable::kMultiple:
-      addressable_ptr_vector_ = model_->objects().GetAddressables(parameter_);
+      addressable_ptr_vector_ = model()->objects().GetAddressables(parameter_);
       break;
     case addressable::kVector:
-      addressable_vector_ = model_->objects().GetAddressableVector(parameter_);
+      addressable_vector_ = model()->objects().GetAddressableVector(parameter_);
       break;
     case addressable::kUnsignedMap:
-      addressable_map_ = model_->objects().GetAddressableUMap(parameter_);
+      addressable_map_ = model()->objects().GetAddressableUMap(parameter_);
       break;
     case addressable::kSingle:
-      addressable_ = model_->objects().GetAddressable(parameter_);
+      addressable_ = model()->objects().GetAddressable(parameter_);
       break;
     default:
       LOG_ERROR() << "The addressable provided '" << parameter_ << "' has a type that is not supported for lognormal additional priors";

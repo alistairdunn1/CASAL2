@@ -19,12 +19,12 @@
 #include <memory>
 #include <string>
 
+#include "../AddressableTransformations/AddressableTransformation.h"
 #include "../BaseClasses/Object.h"
 #include "../Translations/Translations.h"
 #include "../Utilities/Map.h"
 #include "../Utilities/NoCopy.h"
 #include "../Utilities/Types.h"
-#include "../AddressableTransformations/AddressableTransformation.h"
 // namespaces
 namespace niwa {
 
@@ -44,6 +44,7 @@ class Objects {
   friend class estimates::Creator;
   friend class TimeVarying;
   friend class AddressableTransformation;
+
 public:
   // methods
   virtual ~Objects() = default;
@@ -61,13 +62,14 @@ protected:
   // methods
   Objects() = delete;
   explicit Objects(shared_ptr<Model> model);
+  shared_ptr<Model>                 model() const { return base::Object::LockWeakPtr(model_, "Objects"); }
   virtual base::Object*             FindObjectOrNull(const string& parameter_absolute_name);
   virtual void                      ExplodeString(const string& parameter_absolute_name, string& type, string& label, string& addressable, string& index);
   virtual void                      ImplodeString(const string& type, const string& label, const string& parameter, const string& index, string& target_parameter);
   virtual std::pair<string, string> ExplodeParameterAndIndex(const string& parameter_absolute_name);
 
   // members
-  shared_ptr<Model> model_ = nullptr;
+  weak_ptr<Model> model_ = {};
 };
 
 } /* namespace niwa */

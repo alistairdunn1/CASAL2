@@ -39,9 +39,9 @@ namespace util = niwa::utilities;
 Category::Category(shared_ptr<Model> model, const string& category_name) : model_(model) {
   LOG_TRACE();
 
-  vector<unsigned> years = model_->years();
+  vector<unsigned> years = model->years();
 
-  Partition& partition = model_->partition();
+  Partition& partition = model->partition();
 
   partition::Category& category = partition.category(category_name);
   for (unsigned year : years) {

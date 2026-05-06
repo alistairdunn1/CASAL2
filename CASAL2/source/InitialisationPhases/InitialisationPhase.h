@@ -31,11 +31,12 @@ public:
   InitialisationPhase() = delete;
   explicit InitialisationPhase(shared_ptr<Model> model);
   virtual ~InitialisationPhase() = default;
-  void Validate();
-  void Build();
-  void Verify(shared_ptr<Model> model){};
-  void Reset(){};
-  void Execute();
+  void              Validate();
+  void              Build();
+  void              Verify(shared_ptr<Model> model) {};
+  void              Reset() {};
+  void              Execute();
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "InitialisationPhase"); }
 
   vector<unsigned> GetConvergenceYears() const { return convergence_years_; }
   vector<Double>   GetTestConvergenceLambda() const { return test_convergence_lambda_; }
@@ -48,10 +49,10 @@ protected:
   virtual void DoExecute()  = 0;
 
   // members
-  shared_ptr<Model> model_ = nullptr;
-  vector<Double>    test_convergence_lambda_;
-  vector<unsigned>  convergence_years_;
-  Double            lambda_ = 0.0;
+  weak_ptr<Model>  model_ = {};
+  vector<Double>   test_convergence_lambda_;
+  vector<unsigned> convergence_years_;
+  Double           lambda_ = 0.0;
 };
 } /* namespace niwa */
 #endif /* INITIALISATIONPHASE_H_ */

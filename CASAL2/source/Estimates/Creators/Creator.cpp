@@ -49,18 +49,19 @@ Creator::Creator(shared_ptr<Model> model) : model_(model) {
  */
 void Creator::CreateEstimates() {
   LOG_TRACE();
-  type_ = utilities::ToLowercase(type_);
+  auto current_model = model();
+  type_              = utilities::ToLowercase(type_);
 
   /**
    * At this point we need to determine if we need to split this estimate in to multiple estimates.
    */
   string error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kEstimate, error)) {
+  if (!current_model->objects().VerifyAddressableForUse(parameter_, addressable::kEstimate, error)) {
     LOG_FATAL_Q(PARAM_PARAMETER) << "the parameter " << parameter_ << " could not be verified for use in an @estimate block. Error: " << error;
   }
 
   string         new_parameter = parameter_;
-  auto           pair          = model_->objects().ExplodeParameterAndIndex(parameter_);
+  auto           pair          = current_model->objects().ExplodeParameterAndIndex(parameter_);
   string         parameter     = pair.first;
   string         index         = pair.second;
   vector<string> indexes;
@@ -74,7 +75,7 @@ void Creator::CreateEstimates() {
     new_parameter = new_parameter.substr(0, new_parameter.find('{'));
   }
 
-  auto target = model_->objects().FindObject(parameter_);
+  auto target = current_model->objects().FindObject(parameter_);
   // set estimated flag
   target->set_estimated(true);
   if (target->GetAddressableType(parameter) == addressable::kSingle) {
@@ -218,13 +219,14 @@ void Creator::HandleSameParameter() {
     /**
      * At this point we need to determine if we need to split this estimate in to multiple estimates.
      */
-    string error = "";
-    if (!model_->objects().VerifyAddressableForUse(same, addressable::kEstimate, error)) {
+    string error         = "";
+    auto   current_model = model();
+    if (!current_model->objects().VerifyAddressableForUse(same, addressable::kEstimate, error)) {
       LOG_FATAL_P(PARAM_SAME) << "could not be verified for use in an @estimate.same block. Error: " << error;
     }
 
     string new_parameter = same;
-    auto   pair          = model_->objects().ExplodeParameterAndIndex(same);
+    auto   pair          = current_model->objects().ExplodeParameterAndIndex(same);
     string parameter     = pair.first;
     string index         = pair.second;
     LOG_FINEST() << "same: " << same << "; new_parameter: " << new_parameter;
@@ -240,7 +242,7 @@ void Creator::HandleSameParameter() {
       new_parameter = new_parameter.substr(0, new_parameter.find('{'));
     }
 
-    auto target = model_->objects().FindObject(same);
+    auto target = current_model->objects().FindObject(same);
     target->set_estimated(true);
     if (target->GetAddressableType(parameter) == addressable::kSingle) {
       /**
@@ -383,7 +385,8 @@ void Creator::HandleSameParameter() {
  * Create an instance of an estimate
  */
 niwa::Estimate* Creator::CreateEstimate(string parameter, unsigned index, Double* target) {
-  niwa::Estimate* estimate = estimates::Factory::Create(model_, block_type_, type_);
+  auto            current_model = model();
+  niwa::Estimate* estimate      = estimates::Factory::Create(current_model, block_type_, type_);
   if (!estimate)
     LOG_FATAL_P(PARAM_TYPE) << " " << type_ << " is invalid when creating an estimate.";
 
@@ -393,7 +396,7 @@ niwa::Estimate* Creator::CreateEstimate(string parameter, unsigned index, Double
   estimate->set_creator_parameter(parameter_);
   estimate->set_block_type(PARAM_ESTIMATE);
 
-  estimate->parameters().Populate(model_);
+  estimate->parameters().Populate(current_model);
 
   estimates_.push_back(estimate);
   return estimate;

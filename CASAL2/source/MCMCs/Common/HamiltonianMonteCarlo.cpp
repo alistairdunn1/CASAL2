@@ -111,9 +111,9 @@ double HamiltonianMonteCarlo::computePotentialEnergy(const std::vector<double>& 
   }
 
   // Run model iteration and get objective score
-  model_->FullIteration();
-  model_->objective_function().CalculateScore();
-  return model_->objective_function().score();
+  model()->FullIteration();
+  model()->objective_function().CalculateScore();
+  return model()->objective_function().score();
 }
 
 /**
@@ -298,7 +298,7 @@ void HamiltonianMonteCarlo::GeneratedNewScaledCandidates() {
  * @brief Execute the HMC algorithm in single-threaded mode
  *
  * This method implements the Hamiltonian Monte Carlo algorithm without
- * using a thread pool. It uses model_->FullIteration() directly for
+ * using a thread pool. It uses model()->FullIteration() directly for
  * model evaluations.
  *
  * The algorithm works entirely in unbounded (transformed) space:
@@ -308,7 +308,7 @@ void HamiltonianMonteCarlo::GeneratedNewScaledCandidates() {
  */
 void HamiltonianMonteCarlo::DoExecuteSingleThreaded() {
   LOG_MEDIUM() << "Starting Hamiltonian Monte Carlo (Single Threaded)";
-  ObjectiveFunction&                obj_function = model_->objective_function();
+  ObjectiveFunction&                obj_function = model()->objective_function();
   utilities::RandomNumberGenerator& rng          = utilities::RandomNumberGenerator::Instance();
 
   vector<double> gradient(candidates_.size(), 0);
@@ -323,9 +323,9 @@ void HamiltonianMonteCarlo::DoExecuteSingleThreaded() {
 
   // Lambda to run a model iteration and return the objective score
   auto run_model = [this]() {
-    model_->FullIteration();
-    model_->objective_function().CalculateScore();
-    return model_->objective_function().score();
+    model()->FullIteration();
+    model()->objective_function().CalculateScore();
+    return model()->objective_function().score();
   };
 
   // Lambda to set estimate values (in bounded space) and run the model
@@ -497,7 +497,7 @@ void HamiltonianMonteCarlo::DoExecuteSingleThreaded() {
 
     // Report progress periodically
     if (jumps_ % keep_ == 0) {
-      model_->managers()->report()->Execute(model_, State::kIterationComplete);
+      model()->managers()->report()->Execute(model(), State::kIterationComplete);
     }
 
   } while (chain_.size() < length_);
@@ -516,7 +516,7 @@ void HamiltonianMonteCarlo::DoExecuteSingleThreaded() {
  */
 void HamiltonianMonteCarlo::DoExecute(shared_ptr<ThreadPool> thread_pool) {
   LOG_MEDIUM() << "Starting Hamiltonian Monte Carlo";
-  ObjectiveFunction&                obj_function = model_->objective_function();
+  ObjectiveFunction&                obj_function = model()->objective_function();
   utilities::RandomNumberGenerator& rng          = utilities::RandomNumberGenerator::Instance();
   vector<double>                    gradient(candidates_.size(), 0);
 
@@ -527,15 +527,15 @@ void HamiltonianMonteCarlo::DoExecute(shared_ptr<ThreadPool> thread_pool) {
     estimate_upper_bounds_[i] = estimates_[i]->upper_bound();
   }
 
-  model_->FullIteration();
+  model()->FullIteration();
 
   // Lambda to set estimate values (in bounded space) and run the model
   auto quick_run = [this](const vector<double>& candidates) {
     for (unsigned i = 0; i < candidates.size(); ++i) estimates_[i]->set_value(candidates[i]);
 
-    model_->FullIteration();
-    model_->objective_function().CalculateScore();
-    double score = model_->objective_function().score();
+    model()->FullIteration();
+    model()->objective_function().CalculateScore();
+    double score = model()->objective_function().score();
     return score;
   };
 

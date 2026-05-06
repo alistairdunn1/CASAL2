@@ -55,7 +55,7 @@ void MortalityInitialisationBaranov::DoBuild() {
   partition_.Init(category_labels_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
 
@@ -76,7 +76,7 @@ void MortalityInitialisationBaranov::DoReset() {}
 void MortalityInitialisationBaranov::DoExecute() {
   LOG_FINE() << "execute: " << label_;
 
-  if (model_->state() == State::kInitialise) {
+  if (model()->state() == State::kInitialise) {
     /**
      * Work our how much of the stock is vulnerable
      */

@@ -42,7 +42,7 @@ public:
   virtual ~Estimate() = default;
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){};
+  void Verify(shared_ptr<Model> model) {};
   void Reset();
   void AddSame(const string& label, Double* target);
 
@@ -79,7 +79,9 @@ public:
 
 protected:
   // Members
-  shared_ptr<Model> model_  = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Estimate"); }
   Double*           target_ = nullptr;
   string            parameter_;
   string            creator_parameter_;

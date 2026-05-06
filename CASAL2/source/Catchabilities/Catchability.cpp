@@ -39,7 +39,7 @@ Catchability::Catchability(shared_ptr<Model> model) : model_(model) {
  * Note: all parameters are populated from configuration files
  */
 void Catchability::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   DoValidate();
 }
 

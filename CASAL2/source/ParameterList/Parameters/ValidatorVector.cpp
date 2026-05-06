@@ -290,7 +290,7 @@ shared_ptr<ValidatorVector> ValidatorVector::LessThanOrEqualToParameter(const st
 
   auto target_parameter = parameters_->Get(label);
   if (target_parameter == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::GreaterThanOrEqualToParameter " << label << " does not exist in the parameter list";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::GreaterThanOrEqualToParameter " << label << " does not exist in the parameter list";
   }
 
   vector<double> target_parameter_values;
@@ -325,7 +325,7 @@ shared_ptr<ValidatorVector> ValidatorVector::IsModelYear() {
   }
 
   auto parameter_values = ConvertValuesToUnsigned();
-  auto years            = model_->years_all();
+  auto years            = model()->years_all();
   for (const auto& source : parameter_values) {
     if (std::find(years.begin(), years.end(), source) == years.end()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model start year ("
@@ -347,11 +347,12 @@ shared_ptr<ValidatorVector> ValidatorVector::IsAge() {
     return shared_from_this();
   }
 
+  auto current_model    = model();
   auto parameter_values = ConvertValuesToUnsigned();
   for (const auto& source : parameter_values) {
-    if (source < model_->min_age() || source > model_->max_age()) {
+    if (source < current_model->min_age() || source > current_model->max_age()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model min age ("
-                  << model_->min_age() << ") and max age (" << model_->max_age() << ")";
+                  << current_model->min_age() << ") and max age (" << current_model->max_age() << ")";
     }
   }
 
@@ -370,7 +371,7 @@ shared_ptr<ValidatorVector> ValidatorVector::IsLengthBin() {
   }
 
   auto parameter_values  = ConvertValuesToDouble();
-  auto model_length_bins = model_->length_bins();
+  auto model_length_bins = model()->length_bins();
   for (const auto& val : parameter_values) {
     bool is_valid = false;
 
@@ -404,12 +405,13 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
   if (parameter_->has_been_defined())
     return shared_from_this();  // do nothing
 
+  auto current_model = model();
   if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
     if (param->target() != nullptr || param->target()->size() == 0) {
-      *param->target() = model_->years();
+      *param->target() = current_model->years();
     }
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelYears " << parameter_->location() << " " << parameter_->label() << " is not a vector<unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DefaultToAllModelYears " << parameter_->location() << " " << parameter_->label() << " is not a vector<unsigned> type";
   }
 
   return shared_from_this();
@@ -425,17 +427,18 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
   if (parameter_->has_been_defined())
     return shared_from_this();  // do nothing
 
-  if (model_->length_bins().size() == 0) {
+  auto current_model = model();
+  if (current_model->length_bins().size() == 0) {
     LOG_CODE_ERROR() << "Model::length_bins() is empty. Cannot default to all model length bins for parameter " << parameter_->label()
                      << ". Please define length bins in the model.";
   }
 
   if (auto* param = dynamic_cast<BindableVector<double>*>(parameter_)) {
     if (param->target() != nullptr || param->target()->size() == 0) {
-      (*param->target()).assign(model_->length_bins().begin(), model_->length_bins().end());
+      (*param->target()).assign(current_model->length_bins().begin(), current_model->length_bins().end());
     }
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::DefaultToAllModelLengthBins " << parameter_->location() << " " << parameter_->label() << " is not a vector<Double> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DefaultToAllModelLengthBins " << parameter_->location() << " " << parameter_->label() << " is not a vector<Double> type";
   }
 
   return shared_from_this();
@@ -475,7 +478,7 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
   // Get our expected parameter and count
   auto expected_parameter = parameters_->Get(label);
   if (expected_parameter == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << label << " does not exist in the parameter list";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::SameNumberOfElementsAs " << label << " does not exist in the parameter list";
     return shared_from_this();
   }
   auto expected_count = expected_parameter->values().size();
@@ -484,8 +487,8 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
   // if it is, we want to expand the categories out to handle combined categories as individual values.
   if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
     if (split_combined_categories && target_string->is_categories()) {
-      expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
-      LOG_FINEST() << "Parameter::Validator::SameNumberOfElementsAs " << label
+      expected_count = model()->categories()->total_categories_defined(expected_parameter->values());
+      LOG_FINEST() << "Parameter::ValidatorVector::SameNumberOfElementsAs " << label
                    << " is a categories parameter, expanding to total categories defined. Expected count: " << expected_count;
     }
   }
@@ -494,16 +497,19 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
   unsigned actual_target_size = 0;
   if (auto* target_vector = dynamic_cast<BindableVector<Double>*>(parameter_)) {
     actual_target_size = target_vector->target()->size();
+  } else if (auto* target_vector = dynamic_cast<BindableVector<double>*>(parameter_)) {
+    actual_target_size = target_vector->target()->size();
   } else if (auto* target_vector = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
     actual_target_size = target_vector->target()->size();
   } else if (auto* target_vector = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
     if (split_combined_categories && target_vector->is_categories())
-      actual_target_size = model_->categories()->total_categories_defined(target_vector->values());
+      actual_target_size = model()->categories()->total_categories_defined(target_vector->values());
     else
       actual_target_size = target_vector->target()->size();
 
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " is not a vector<double/unsigned/string> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::SameNumberOfElementsAs " << parameter_->location() << " parameter " << parameter_->label()
+                     << " is not a vector<double/unsigned/string> type";
   }
 
   // Do our final check and now
@@ -516,8 +522,8 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsAs(const string
     for (const auto& val : expected_parameter->values()) {
       expected_values_stream << val << " ";
     }
-    LOG_FINEST() << "Parameter::Validator::SameNumberOfElementsAs " << parameter_->label() << " values: " << param_values_stream.str();
-    LOG_FINEST() << "Parameter::Validator::SameNumberOfElementsAs " << label << " values: " << expected_values_stream.str();
+    LOG_FINEST() << "Parameter::ValidatorVector::SameNumberOfElementsAs " << parameter_->label() << " values: " << param_values_stream.str();
+    LOG_FINEST() << "Parameter::ValidatorVector::SameNumberOfElementsAs " << label << " values: " << expected_values_stream.str();
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has " << actual_target_size << " elements, but " << label << " has " << expected_count
                 << " elements";
     LOG_CODE_ERROR() << "Check";
@@ -563,7 +569,7 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToNumberOfElements(unsigned c
   } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
     expand(param);
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToNumberOfElements " << parameter_->label() << " is not a vector<double/unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::ExpandToNumberOfElements " << parameter_->label() << " is not a vector<double/unsigned> type";
   }
 
   return shared_from_this();
@@ -581,7 +587,7 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
   // Get our expected parameter and count
   auto expected_parameter = parameters_->Get(label);
   if (expected_parameter == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label << " does not exist in the parameter list";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::ExpandToSameNumberOfElementsAs " << label << " does not exist in the parameter list";
     return shared_from_this();
   }
   auto expected_count = expected_parameter->values().size();
@@ -590,8 +596,8 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
   // if it is, we want to expand the categories out to handle combined categories as individual values.
   if (auto* target_string = dynamic_cast<BindableVector<std::string>*>(expected_parameter)) {
     if (target_string->is_categories()) {
-      expected_count = model_->categories()->total_categories_defined(expected_parameter->values());
-      LOG_FINEST() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label
+      expected_count = model()->categories()->total_categories_defined(expected_parameter->values());
+      LOG_FINEST() << "Parameter::ValidatorVector::ExpandToSameNumberOfElementsAs " << label
                    << " is a categories parameter, expanding to total categories defined. Expected count: " << expected_count;
     }
   }
@@ -600,7 +606,7 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
   // if it is not already the expected count.
   auto expand = [&](auto* param) {
     if (param == nullptr) {
-      LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << label << " is null";
+      LOG_CODE_ERROR() << "Parameter::ValidatorVector::ExpandToSameNumberOfElementsAs " << label << " is null";
       return;
     }
     auto& src = *param->target();
@@ -624,7 +630,7 @@ shared_ptr<ValidatorVector> ValidatorVector::ExpandToSameNumberOfElementsAs(cons
   } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
     expand(param);
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::ExpandToSameNumberOfElementsAs " << parameter_->label() << " -> " << label << " is not a vector<double/unsigned> type";
   }
 
   return shared_from_this();
@@ -647,14 +653,14 @@ shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(con
 
   auto source = parameters_->Get(label);
   if (source == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " does not exist in the parameter list";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << label << " does not exist in the parameter list";
     return shared_from_this();
   }
 
   if (auto* param = dynamic_cast<BindableVector<Double>*>(parameter_)) {
     if (auto* param2 = dynamic_cast<BindableVector<Double>*>(source)) {
       if (param2->target() == nullptr) {
-        LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " target is null";
+        LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << label << " target is null";
       }
       param->target()->assign(param2->target()->begin(), param2->target()->end());
       return shared_from_this();
@@ -663,26 +669,26 @@ shared_ptr<ValidatorVector> ValidatorVector::DuplicateParameterIfNotAssigned(con
   } else if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
     if (auto* param2 = dynamic_cast<BindableVector<unsigned>*>(parameters_->Get(label))) {
       if (param2->target() == nullptr) {
-        LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " target is null";
+        LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << label << " target is null";
       }
       param->target()->assign(param2->target()->begin(), param2->target()->end());
       return shared_from_this();
     }
 
-    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << label << " is not a vector<unsigned> type";
 
   } else if (auto* param = dynamic_cast<BindableVector<std::string>*>(parameter_)) {
     if (auto* param2 = dynamic_cast<BindableVector<std::string>*>(parameters_->Get(label))) {
       if (param2->target() == nullptr) {
-        LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " target is null";
+        LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << label << " target is null";
       }
       param->target()->assign(param2->target()->begin(), param2->target()->end());
       return shared_from_this();
     }
-    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << label << " is not a vector<string> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << label << " is not a vector<string> type";
 
   } else {
-    LOG_CODE_ERROR() << "Parameter::Validator::DuplicateParameterIfNotAssigned " << parameter_->label() << " is not a vector<double/unsigned> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DuplicateParameterIfNotAssigned " << parameter_->label() << " is not a vector<double/unsigned> type";
   }
 
   return shared_from_this();
@@ -700,9 +706,10 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsModelAgeSpread(
     return shared_from_this();
   }
 
-  if (parameter_->values().size() != model_->age_spread()) {
-    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than the model age spread (" << model_->age_spread()
-                << ")";
+  auto current_model = model();
+  if (parameter_->values().size() != current_model->age_spread()) {
+    LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than the model age spread ("
+                << current_model->age_spread() << ")";
   }
 
   return shared_from_this();
@@ -717,10 +724,11 @@ shared_ptr<ValidatorVector> ValidatorVector::SameNumberOfElementsModelLengthBinM
     return shared_from_this();
   }
 
-  auto* param = GetParameterAsVectorDouble();
-  if (param->target()->size() != model_->length_bin_mid_points().size()) {
+  auto* param         = GetParameterAsVectorDouble();
+  auto  current_model = model();
+  if (param->target()->size() != current_model->length_bin_mid_points().size()) {
     LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " has a different number of elements than the model length bin mid points ("
-                << model_->length_bin_mid_points().size() << ")";
+                << current_model->length_bin_mid_points().size() << ")";
   }
 
   return shared_from_this();
@@ -760,18 +768,18 @@ shared_ptr<ValidatorVector> ValidatorVector::IsUniqueFrom(const string& label) {
 
   auto* param = GetParameterAsVectorString();
   if (param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::IsUniqueFrom " << parameter_->label() << " is not a vector<string> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::IsUniqueFrom " << parameter_->label() << " is not a vector<string> type";
   }
 
   const auto& values       = *param->target();
   auto*       target_param = parameters_->Get(label);
   if (target_param == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::IsUniqueFrom " << label << " does not exist in the parameter list";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::IsUniqueFrom " << label << " does not exist in the parameter list";
   }
 
   auto* target_vector = dynamic_cast<BindableVector<std::string>*>(target_param);
   if (target_vector == nullptr) {
-    LOG_CODE_ERROR() << "Parameter::Validator::IsUniqueFrom " << label << " is not a vector<string> type";
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::IsUniqueFrom " << label << " is not a vector<string> type";
   }
 
   const auto& target_values = *target_vector->target();

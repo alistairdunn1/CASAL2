@@ -52,8 +52,6 @@ protected:
   double             sigma_ = 0;
   double             bias_  = 0;
   double             rho_   = 0;
-
-  shared_ptr<Model> model_ = nullptr;
 };
 
 } /* namespace age */

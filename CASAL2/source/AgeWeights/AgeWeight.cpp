@@ -47,7 +47,7 @@ AgeWeight::AgeWeight(shared_ptr<Model> model) : model_(model) {
  */
 void AgeWeight::Validate() {
   LOG_TRACE();
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   DoValidate();
 }
 

@@ -45,15 +45,15 @@ void TimeStepAbundance::DoBuild() {
   length::Abundance::DoBuild();
   proportion_of_time_ = time_step_proportion_;
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_ERROR_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
     for (unsigned year : years_) time_step->SubscribeToBlock(this, year);
   }
   for (auto year : years_) {
-    if ((year < model_->start_year()) || (year > model_->final_year()))
-      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model_->start_year() << "), or greater than final_year (" << model_->final_year() << ").";
+    if ((year < model()->start_year()) || (year > model()->final_year()))
+      LOG_ERROR_P(PARAM_YEARS) << "Years cannot be less than start_year (" << model()->start_year() << "), or greater than final_year (" << model()->final_year() << ").";
   }
 }
 

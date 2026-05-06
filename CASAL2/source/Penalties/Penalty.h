@@ -37,12 +37,16 @@ public:
   Penalty() = delete;
   explicit Penalty(shared_ptr<Model> model);
   virtual ~Penalty() = default;
-  void           Validate();
-  void           Build() { DoBuild(); };
-  void           Verify(shared_ptr<Model> model) {};
-  void           Reset() { score_ = 0.0; LOG_FINE() << "reset penalty"; };
-  virtual Double GetScore() { return score_; };
-  virtual void   Trigger(Double value_1, Double value_2) {};
+  void Validate();
+  void Build() { DoBuild(); };
+  void Verify(shared_ptr<Model> model) {};
+  void Reset() {
+    score_ = 0.0;
+    LOG_FINE() << "reset penalty";
+  };
+  virtual Double    GetScore() { return score_; };
+  virtual void      Trigger(Double value_1, Double value_2) {};
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Penalty"); }
 
 protected:
   // methods
@@ -50,9 +54,9 @@ protected:
   virtual void DoBuild()    = 0;
 
   // members
-  shared_ptr<Model> model_     = nullptr;
-  bool              has_score_ = true;
-  Double            score_     = 0.0;
+  weak_ptr<Model> model_     = {};
+  bool            has_score_ = true;
+  Double          score_     = 0.0;
 };
 } /* namespace niwa */
 #endif /* PENALTY_H_ */

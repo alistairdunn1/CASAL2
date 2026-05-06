@@ -31,8 +31,8 @@ EmpiricalSampling::EmpiricalSampling(shared_ptr<Model> model) : Project(model) {
  * Validate
  */
 void EmpiricalSampling::DoValidate() {
-  parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model_->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
-  parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model_->projection_final_year());
+  parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model()->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
+  parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model()->projection_final_year());
   parameters_.ValidateVector(PARAM_MULTIPLIER)
       ->DefaultValue(1.0, years_.size())
       ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
@@ -69,10 +69,10 @@ void EmpiricalSampling::DoReset() {
  *  Update the parameter with a random resample of the parameter between start_year_ and final_year_
  */
 void EmpiricalSampling::DoUpdate() {
-  LOG_FINE() << "In year: " << model_->current_year() << " setting value to: " << value_ << " drawn from year: " << resampled_years_[model_->current_year()]
-             << ", with multiplier: " << multiplier_by_year_[model_->current_year()];
-  value_ = stored_values_[resampled_years_[model_->current_year()]] * multiplier_by_year_[model_->current_year()];
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  LOG_FINE() << "In year: " << model()->current_year() << " setting value to: " << value_ << " drawn from year: " << resampled_years_[model()->current_year()]
+             << ", with multiplier: " << multiplier_by_year_[model()->current_year()];
+  value_ = stored_values_[resampled_years_[model()->current_year()]] * multiplier_by_year_[model()->current_year()];
+  (this->*DoUpdateFunc_)(value_, true, model()->current_year());
 }
 
 } /* namespace projects */

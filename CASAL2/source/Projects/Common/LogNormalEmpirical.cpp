@@ -34,8 +34,8 @@ LogNormalEmpirical::LogNormalEmpirical(shared_ptr<Model> model) : Project(model)
  */
 void LogNormalEmpirical::DoValidate() {
   // if no values specified then set default as the model lifespan
-  parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model_->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
-  parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model_->projection_final_year());
+  parameters_.Validate(PARAM_START_YEAR)->IsModelYear()->DefaultValue(model()->start_year())->LessThanParameter(PARAM_FINAL_YEAR);
+  parameters_.Validate(PARAM_FINAL_YEAR)->IsModelYear()->DefaultValue(model()->projection_final_year());
   parameters_.ValidateVector(PARAM_MULTIPLIER)
       ->DefaultValue(1.0, years_.size())
       ->ExpandToSameNumberOfElementsAs(PARAM_YEARS)
@@ -104,13 +104,13 @@ void LogNormalEmpirical::DoUpdate() {
   } else {
   */
   // Just a standard normal deviation
-  value_ = exp(normal_draw_by_year_[model_->current_year()] - 0.5 * sigma_ * sigma_);
+  value_ = exp(normal_draw_by_year_[model()->current_year()] - 0.5 * sigma_ * sigma_);
 
   // Store this value to be pulled out next projection year
-  value_ = value_ * multiplier_by_year_[model_->current_year()];
+  value_ = value_ * multiplier_by_year_[model()->current_year()];
 
   LOG_FINE() << "Setting value to: " << value_;
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  (this->*DoUpdateFunc_)(value_, true, model()->current_year());
 }
 
 } /* namespace projects */

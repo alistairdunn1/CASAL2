@@ -27,10 +27,10 @@ public:
   // methods
   AgeWeight() = delete;
   explicit AgeWeight(shared_ptr<Model> model);
-  virtual ~AgeWeight(){};
+  virtual ~AgeWeight() {};
   void         Validate();
   void         Build();
-  void         Verify(shared_ptr<Model> model){};
+  void         Verify(shared_ptr<Model> model) {};
   void         Reset();
   virtual void RebuildCache();
 
@@ -45,7 +45,10 @@ protected:
   virtual void DoReset()        = 0;
   virtual void DoRebuildCache() = 0;
   // members
-  shared_ptr<Model> model_ = nullptr;
+  weak_ptr<Model> model_;
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model> model() const { return model_.lock(); }
 };
 
 } /* namespace niwa */

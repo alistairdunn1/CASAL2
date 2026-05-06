@@ -42,21 +42,22 @@ void Basic::DoValidate() {
  * Build
  */
 void Basic::DoBuild() {
-  if ((units_ == PARAM_TONNES) && (model_->base_weight_units() == PARAM_KGS || model_->base_weight_units() == PARAM_KILOGRAMS))
+  auto current_model = model();
+  if ((units_ == PARAM_TONNES) && (current_model->base_weight_units() == PARAM_KGS || current_model->base_weight_units() == PARAM_KILOGRAMS))
     unit_multipier_ = 1000;
-  else if (units_ == PARAM_GRAMS && (model_->base_weight_units() == PARAM_KGS || model_->base_weight_units() == PARAM_KILOGRAMS))
+  else if (units_ == PARAM_GRAMS && (current_model->base_weight_units() == PARAM_KGS || current_model->base_weight_units() == PARAM_KILOGRAMS))
     unit_multipier_ = 0.001;
 
   // Deal with base weight as tonnes
-  if ((units_ == PARAM_KGS || units_ == PARAM_KILOGRAMS) && (model_->base_weight_units() == PARAM_TONNES))
+  if ((units_ == PARAM_KGS || units_ == PARAM_KILOGRAMS) && (current_model->base_weight_units() == PARAM_TONNES))
     unit_multipier_ = 0.001;
-  else if (units_ == PARAM_GRAMS && (model_->base_weight_units() == PARAM_TONNES))
+  else if (units_ == PARAM_GRAMS && (current_model->base_weight_units() == PARAM_TONNES))
     unit_multipier_ = 0.000001;
 
   // Deal with base weight as grams
-  if ((units_ == PARAM_KGS || units_ == PARAM_KILOGRAMS) && (model_->base_weight_units() == PARAM_GRAMS))
+  if ((units_ == PARAM_KGS || units_ == PARAM_KILOGRAMS) && (current_model->base_weight_units() == PARAM_GRAMS))
     unit_multipier_ = 1000;
-  else if (units_ == PARAM_TONNES && (model_->base_weight_units() == PARAM_GRAMS))
+  else if (units_ == PARAM_TONNES && (current_model->base_weight_units() == PARAM_GRAMS))
     unit_multipier_ = 1000000;
 }
 

@@ -71,7 +71,7 @@ void TagLossEmpirical::DoValidate() {
   parameters_.ValidateVector(PARAM_SELECTIVITIES)->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->SumToOne();
   parameters_.Validate(PARAM_YEAR)->IsModelYear();
-  parameters_.ValidateVector(PARAM_YEARS_AT_LIBERTY)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year() + 1u);
+  parameters_.ValidateVector(PARAM_YEARS_AT_LIBERTY)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model()->final_year() - model()->start_year() + 1u);
 }
 
 /**
@@ -84,7 +84,7 @@ void TagLossEmpirical::DoBuild() {
   partition_.Init(category_labels_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
 
@@ -96,7 +96,7 @@ void TagLossEmpirical::DoBuild() {
    * apply a different ratio of M so here we want to verify
    * we have enough and re-scale them to 1.0
    */
-  vector<TimeStep*> time_steps = model_->managers()->time_step()->ordered_time_steps();
+  vector<TimeStep*> time_steps = model()->managers()->time_step()->ordered_time_steps();
   LOG_FINEST() << "time_steps.size(): " << time_steps.size();
   vector<unsigned> active_time_steps;
   for (unsigned i = 0; i < time_steps.size(); ++i) {
@@ -125,16 +125,16 @@ void TagLossEmpirical::DoBuild() {
  */
 void TagLossEmpirical::DoExecute() {
   // To reduce computation only execute in relevant years.
-  if (model_->current_year() >= year_) {
-    LOG_FINEST() << "year: " << model_->current_year();
+  if (model()->current_year() >= year_) {
+    LOG_FINEST() << "year: " << model()->current_year();
 
-    unsigned time = model_->current_year() - year_;
+    unsigned time = model()->current_year() - year_;
     unsigned i    = 0;
     // apply the correct rate for the specific time at liberty
     for (unsigned year = 0; year < years_at_liberty_.size(); ++year) {
       if (time == years_at_liberty_[year]) {
         // get the ratio to apply first
-        unsigned time_step = model_->managers()->time_step()->current_time_step();
+        unsigned time_step = model()->managers()->time_step()->current_time_step();
         LOG_FINEST() << "Ratios.size() " << time_step_ratios_.size() << " : time_step: " << time_step << "; ratio: " << time_step_ratios_[time_step];
         Double ratio = time_step_ratios_[time_step];
 

@@ -189,7 +189,7 @@ void ParameterList::Populate(shared_ptr<Model> model) {
        * e.g. male+female would be checked as male, then female to function.
        */
       for (const string& category_groups : iter.second->values()) {
-        if (!allow_combined && model_->categories()->IsCombinedLabels(category_groups)) {
+        if (!allow_combined && model->categories()->IsCombinedLabels(category_groups)) {
           LOG_FATAL() << iter.second->location() << ": the parameter '" << label << "' does not allow combined categories, but the value '" << category_groups
                       << "' contains a '+' character. Please remove the '+' character from the value.";
         }
@@ -452,7 +452,7 @@ shared_ptr<Validator> ParameterList::Validate(const string& label) {
   if (it == nullptr) {
     LOG_CODE_ERROR() << "The parameter " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
   }
-  return std::make_shared<Validator>(model_, this, it);
+  return std::make_shared<Validator>(model(), this, it);
 }
 
 shared_ptr<ValidatorVector> ParameterList::ValidateVector(const string& label) {
@@ -460,7 +460,7 @@ shared_ptr<ValidatorVector> ParameterList::ValidateVector(const string& label) {
   if (it == nullptr) {
     LOG_CODE_ERROR() << "The parameter " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
   }
-  return std::make_shared<ValidatorVector>(model_, this, it);
+  return std::make_shared<ValidatorVector>(model(), this, it);
 }
 
 shared_ptr<ValidatorTable> ParameterList::ValidateTable(const string& label) {
@@ -473,7 +473,7 @@ shared_ptr<ValidatorTable> ParameterList::ValidateTable(const string& label) {
   if (it == nullptr) {
     LOG_CODE_ERROR() << "The table " << label << " has not been bound to " << parent_block_type_ << " at " << defined_file_name_ << ":" << defined_line_number_;
   }
-  return std::make_shared<ValidatorTable>(model_, this, it);
+  return std::make_shared<ValidatorTable>(model(), this, it);
 }
 
 /**

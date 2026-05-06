@@ -64,7 +64,7 @@ ProcessRemovalsByLength::ProcessRemovalsByLength(shared_ptr<Model> model) : Obse
  */
 void ProcessRemovalsByLength::DoValidate() {
   parameters_.ValidateVector(PARAM_YEARS)->IsModelYear()->DefaultToAllModelYears();
-  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model_->length_plus());
+  parameters_.Validate(PARAM_PLUS_GROUP)->DefaultValue(model()->length_plus());
   parameters_.ValidateVector(PARAM_LENGTH_BINS)->IsLengthBin()->IsInIncreasingOrder()->DefaultToAllModelLengthBins();
   parameters_.ValidateVector(PARAM_PROCESS_ERRORS)
       ->GreaterThanOrEqualTo(0.0)
@@ -92,11 +92,11 @@ void ProcessRemovalsByLength::DoValidate() {
       ->GreaterThanForRange(1, category_labels_.size(), 0.0);
 
   // Do some checks if we're not using all of the model length bins
-  using_model_length_bins = length_bins_.size() == model_->length_bins().size();
+  using_model_length_bins = length_bins_.size() == model()->length_bins().size();
   if (!using_model_length_bins)
-    map_local_length_bins_to_global_length_bins_ = model_->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
+    map_local_length_bins_to_global_length_bins_ = model()->get_map_for_bespoke_length_bins_to_global_length_bins(length_bins_, length_plus_);
 
-  if (length_plus_ & !model_->length_plus())
+  if (length_plus_ & !model()->length_plus())
     LOG_ERROR_P(PARAM_LENGTH_PLUS)
         << "you have specified a plus group on this observation, but the global length bins don't have a plus group. This is an inconsistency that must be fixed. Try changing the model plus group to false or this plus group to true";
 
@@ -117,10 +117,10 @@ void ProcessRemovalsByLength::DoValidate() {
  * the labels for other objects are valid.
  */
 void ProcessRemovalsByLength::DoBuild() {
-  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
+  partition_ = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
   // flag age-length to Build age-length matrix
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -180,7 +180,7 @@ void ProcessRemovalsByLength::DoReset() {
  */
 void ProcessRemovalsByLength::PreExecute() {
   LOG_FINEST() << "Entering observation " << label_;
-  if (partition_->Size() != proportions_[model_->current_year()].size())
+  if (partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_[model->current_year()].size()";
 }
 
@@ -193,7 +193,7 @@ void ProcessRemovalsByLength::Execute() {
    * Verify our cached partition and partition sizes are correct
    */
   //  auto categories = model_->categories();
-  unsigned year           = model_->current_year();
+  unsigned year           = model()->current_year();
   auto     it             = std::find(years_.begin(), years_.end(), year);
   unsigned year_ndx       = distance(years_.begin(), it);
   auto     partition_iter = partition_->Begin();  // vector<vector<partition::Category> >
@@ -222,7 +222,7 @@ void ProcessRemovalsByLength::Execute() {
       if (using_model_length_bins) {
         LOG_FINE() << "using model length bins";
         // Model length bins
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           // now for each column (length bin) in age_length_matrix sum up all the rows (ages) for both cached and current matricies
           expected_values_[model_length_offset] += Removals_at_length[model_length_offset];
           final_denominator_[year_ndx] += Removals_at_length[model_length_offset];
@@ -230,7 +230,7 @@ void ProcessRemovalsByLength::Execute() {
       } else {
         LOG_FINE() << "using bespoke length bins";
         // Bespoke model bins
-        for (unsigned model_length_offset = 0; model_length_offset < model_->get_number_of_length_bins(); ++model_length_offset) {
+        for (unsigned model_length_offset = 0; model_length_offset < model()->get_number_of_length_bins(); ++model_length_offset) {
           // if not sum = 1 then denominator over all length bins.
           if (!sum_to_one_)
             final_denominator_[year_ndx] += Removals_at_length[model_length_offset];
@@ -244,18 +244,18 @@ void ProcessRemovalsByLength::Execute() {
       }
     }
 
-    if (expected_values_.size() != proportions_[model_->current_year()][category_labels_[category_offset]].size())
+    if (expected_values_.size() != proportions_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values.size(" << expected_values_.size() << ") != proportions_[category_offset].size("
-                       << proportions_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << proportions_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     /**
      * save our comparisons so we can use them to generate the score from the likelihoods later
      */
     for (unsigned i = 0; i < expected_values_.size(); ++i) {
       LOG_FINEST() << "category_labels_[category_offset] " << category_labels_[category_offset] << " i " << i << " length_bins_[i] " << length_bins_[i] << " proportions "
-                   << proportions_[model_->current_year()][category_labels_[category_offset]][i] << " expected_values_[i] " << expected_values_[i];
-      SaveComparison(category_labels_[category_offset], 0, length_bins_[i], expected_values_[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
+                   << proportions_[model()->current_year()][category_labels_[category_offset]][i] << " expected_values_[i] " << expected_values_[i];
+      SaveComparison(category_labels_[category_offset], 0, length_bins_[i], expected_values_[i], proportions_[model()->current_year()][category_labels_[category_offset]][i],
+                     process_errors_by_year_[model()->current_year()], error_values_[model()->current_year()][category_labels_[category_offset]][0], 0.0, delta_, 0.0);
     }
   }
 }
@@ -271,8 +271,8 @@ void ProcessRemovalsByLength::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
-    if (model_->get_simulation_iterator() == 0) {
+  if (model()->run_mode() == RunMode::kSimulation) {
+    if (model()->get_simulation_iterator() == 0) {
       for (auto& iter : comparisons_) {
         auto     it       = std::find(years_.begin(), years_.end(), iter.first);
         unsigned year_ndx = distance(years_.begin(), it);

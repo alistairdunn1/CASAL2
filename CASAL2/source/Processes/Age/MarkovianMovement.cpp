@@ -27,7 +27,7 @@ namespace age {
 /**
  * Default constructor
  */
-MarkovianMovement::MarkovianMovement(shared_ptr<Model> model) : Process(model), from_partition_(model), to_partition_(model) {
+MarkovianMovement::MarkovianMovement(shared_ptr<Model> model) : Process(model), from_partition_(model), to_partition_(model), min_age_(model->min_age()) {
   LOG_TRACE();
 
   // clang-format off
@@ -65,7 +65,7 @@ void MarkovianMovement::DoValidate() {
   // parameters_.ValidateVector(PARAM_FROM)->MatchesCategoryAgeRange(PARAM_TO);
 
   //  // Validate Categories
-  auto categories = model_->categories();
+  auto categories = model()->categories();
 
   // Validate that each from and to category have the same age range.
   for (unsigned i = 0; i < from_category_names_.size(); ++i) {
@@ -115,19 +115,19 @@ void MarkovianMovement::DoBuild() {
   to_partition_.Init(to_category_names_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
   }
 
   if (from_partition_.size() != to_partition_.size()) {
-    LOG_FATAL() << "The list of categories for the transition category process are not of equal size in year " << model_->current_year() << ". Number of 'From' "
+    LOG_FATAL() << "The list of categories for the transition category process are not of equal size in year " << model()->current_year() << ". Number of 'From' "
                 << from_partition_.size() << " and 'To' " << to_partition_.size() << " categories to transition between";
   }
   abundance_to_move_categories_.resize(from_category_names_.size());
   for (unsigned i = 0; i < from_category_names_.size(); i++) {
-    abundance_to_move_categories_[i].resize(model_->age_spread(), 0.0);
+    abundance_to_move_categories_[i].resize(model()->age_spread(), 0.0);
   }
 }
 

@@ -17,8 +17,8 @@
 // headers
 #include "../BaseClasses/Object.h"
 #include "../Partition/Category.h"
-#include "../Utilities/Distribution.h"
 #include "../Utilities/Compatibility.h"
+#include "../Utilities/Distribution.h"
 
 // namespaces
 namespace niwa {
@@ -38,10 +38,10 @@ public:
   // methods
   AgeLength() = delete;
   explicit AgeLength(shared_ptr<Model> model);
-  virtual ~AgeLength(){};
+  virtual ~AgeLength() {};
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){UpdateYearContainers();};
+  void Verify(shared_ptr<Model> model) { UpdateYearContainers(); };
   void Reset();
   void RebuildCache();          // should only be called by time-varying class
   void UpdateYearContainers();  // should only be called by this class or its manager
@@ -58,23 +58,23 @@ public:
 
   void BuildAgeLengthMatrixForTheseYears(vector<unsigned> years);
   // four versions of this function, these variations are to do with a selectivity, and using bespoke length bins.
-  void populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, Selectivity* selectivity);
-  void populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length);  // overloaded for the case with no selectivity
-  void populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, Selectivity* selectivity,
-                                  vector<int>& map_length_bin_ndx);  // overloaded for the case where class has bespoke length bins
-  void populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length,
-                                  vector<int>& map_length_bin_ndx);  // overloaded for the case with no selectivity and class has bespoke length bins
-  void populate_numbers_at_age_with_length_based_exploitation(vector<Double>& numbers_at_age, vector<Double>& numbers_at_age_with_exploitation, Double& exploitation_by_length,
-                                                              unsigned model_length_bin_ndx, Selectivity* selectivity);  //
-  void populate_numbers_at_age_with_length_based_exploitation(vector<Double>& numbers_at_age, vector<Double>& numbers_at_age_with_exploitation, Double& exploitation_by_length,
-                                                              unsigned model_length_bin_ndx);  //                                                              
-  void populate_age_length_matrix(vector<Double>          numbers_at_age,
-                                  vector<vector<Double>>& numbers_by_age_length);  // overloaded for the case with no selectivity and class has bespoke length bins
-  void populate_age_length_matrix(vector<Double> numbers_at_age, vector<vector<Double>>& numbers_by_age_length,
-                                  Selectivity* selectivity);  // overloaded for the case with no selectivity and class has bespoke length bins
+  void   populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, Selectivity* selectivity);
+  void   populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length);  // overloaded for the case with no selectivity
+  void   populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, Selectivity* selectivity,
+                                    vector<int>& map_length_bin_ndx);  // overloaded for the case where class has bespoke length bins
+  void   populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length,
+                                    vector<int>& map_length_bin_ndx);  // overloaded for the case with no selectivity and class has bespoke length bins
+  void   populate_numbers_at_age_with_length_based_exploitation(vector<Double>& numbers_at_age, vector<Double>& numbers_at_age_with_exploitation, Double& exploitation_by_length,
+                                                                unsigned model_length_bin_ndx, Selectivity* selectivity);  //
+  void   populate_numbers_at_age_with_length_based_exploitation(vector<Double>& numbers_at_age, vector<Double>& numbers_at_age_with_exploitation, Double& exploitation_by_length,
+                                                                unsigned model_length_bin_ndx);  //
+  void   populate_age_length_matrix(vector<Double>          numbers_at_age,
+                                    vector<vector<Double>>& numbers_by_age_length);  // overloaded for the case with no selectivity and class has bespoke length bins
+  void   populate_age_length_matrix(vector<Double> numbers_at_age, vector<vector<Double>>& numbers_by_age_length,
+                                    Selectivity* selectivity);  // overloaded for the case with no selectivity and class has bespoke length bins
   Double get_pdf(unsigned age, Double length, unsigned year, unsigned time_step);
   Double get_pdf_with_sized_based_selectivity(unsigned age, Double length, unsigned year, unsigned time_step, Selectivity* selectivity);
-  void get_cdf_inverse(unsigned age, unsigned year, unsigned time_step, vector<Double>& inverse_result);
+  void   get_cdf_inverse(unsigned age, unsigned year, unsigned time_step, vector<Double>& inverse_result);
 
   // For reporting in the AgeLength
   void FillReportCache(ostringstream& cache);
@@ -92,7 +92,10 @@ protected:
   void UpdateAgeLengthMatrixForThisYear(unsigned year);
 
   // members
-  shared_ptr<Model>              model_ = nullptr;
+  weak_ptr<Model> model_;
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model>              model() const { return model_.lock(); }
   vector<Double>                 time_step_proportions_;
   Double                         cv_first_ = 0.0;
   Double                         cv_last_  = 0.0;
@@ -120,15 +123,14 @@ protected:
   vector<vector<Double>>                 numbers_by_age_length_transition_;  // age x length used as a temporarey container
   vector<vector<vector<vector<Double>>>> age_length_transition_matrix_;      // dims years x timesteps x age x length
   // these members are used in the functions
-  unsigned this_year_                 = model_->start_year();
-  unsigned this_time_step_            = 0;
-  unsigned year_dim_in_age_length_    = 0;
-  unsigned min_age_                   = model_->min_age();
-  unsigned max_age_                   = model_->max_age();
-  bool     change_cvs_                = true;
-  bool     change_mean_length_params_ = true;  // either estimate or input
-  CompatibilityType  compatibility_type_        = CompatibilityType::kUnknown;
-
+  unsigned          this_year_                 = model_.lock()->start_year();
+  unsigned          this_time_step_            = 0;
+  unsigned          year_dim_in_age_length_    = 0;
+  unsigned          min_age_                   = model_.lock()->min_age();
+  unsigned          max_age_                   = model_.lock()->max_age();
+  bool              change_cvs_                = true;
+  bool              change_mean_length_params_ = true;  // either estimate or input
+  CompatibilityType compatibility_type_        = CompatibilityType::kUnknown;
 };
 
 } /* namespace niwa */

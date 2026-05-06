@@ -74,7 +74,9 @@ protected:
                       Double delta, Double score);
 
   // members
-  shared_ptr<Model>                       model_                       = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>                       model() const { return LockWeakPtr(model_, "Observation"); }
   map<unsigned, Double>                   scores_                      = {};
   Double                                  proportion_of_time_          = 0.0;
   bool                                    mean_proportion_method_      = false;

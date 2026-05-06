@@ -51,7 +51,7 @@ void Growth::DoValidate() {}
  */
 void Growth::DoBuild() {
   partition_.Init(category_labels_);
-  new_length_partition_.resize(model_->get_number_of_length_bins(), 0.0);
+  new_length_partition_.resize(model()->get_number_of_length_bins(), 0.0);
 }
 
 void Growth::DoReset() {}
@@ -61,14 +61,14 @@ void Growth::DoReset() {}
  */
 void Growth::DoExecute() {
   LOG_TRACE();
-  LOG_FINE() << "Calculate growth in time_step: " << model_->managers()->time_step()->current_time_step() << " in year: " << model_->current_year();
+  LOG_FINE() << "Calculate growth in time_step: " << model()->managers()->time_step()->current_time_step() << " in year: " << model()->current_year();
   for (auto& category : partition_) {
     // reset container
     LOG_FINEST() << "Calculate growth for category: " << category->name_;
     fill(new_length_partition_.begin(), new_length_partition_.end(), 0.0);
     transition_matrix_ = category->growth_increment_->get_transition_matrix();
-    for (unsigned i = 0; i < model_->get_number_of_length_bins(); i++) {
-      for (unsigned j = 0; j < model_->get_number_of_length_bins(); j++) {
+    for (unsigned i = 0; i < model()->get_number_of_length_bins(); i++) {
+      for (unsigned j = 0; j < model()->get_number_of_length_bins(); j++) {
         new_length_partition_[j] += transition_matrix_[i][j] * category->data_[i];
       }
     }

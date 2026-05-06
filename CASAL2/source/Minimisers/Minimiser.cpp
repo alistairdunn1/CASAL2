@@ -64,7 +64,7 @@ Minimiser::~Minimiser() {
  */
 void Minimiser::Validate() {
   LOG_TRACE();
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
 
   DoValidate();
 }
@@ -74,8 +74,9 @@ void Minimiser::Validate() {
  */
 void Minimiser::Build() {
   LOG_TRACE();
+  auto current_model = model();
 
-  hessian_size_ = model_->managers()->estimate()->GetIsEstimatedCount();
+  hessian_size_ = current_model->managers()->estimate()->GetIsEstimatedCount();
   LOG_MEDIUM() << "Estimated count = " << hessian_size_;
   hessian_ = new double*[hessian_size_];
   for (unsigned i = 0; i < hessian_size_; ++i) {

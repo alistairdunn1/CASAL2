@@ -54,7 +54,7 @@ public:
   virtual ~Minimiser();
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){};
+  void Verify(shared_ptr<Model> model) {};
   void Reset() { DoReset(); };
   void BuildCovarianceMatrix();
 
@@ -78,7 +78,8 @@ public:
 
 protected:
   // Members
-  shared_ptr<Model>     model_   = nullptr;
+  shared_ptr<Model>     model() const { return LockWeakPtr(model_, "Minimiser"); }
+  weak_ptr<Model>       model_   = {};
   bool                  active_  = true;
   double**              hessian_ = nullptr;
   unsigned              hessian_size_;

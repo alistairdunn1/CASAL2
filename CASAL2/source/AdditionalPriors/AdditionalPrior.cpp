@@ -39,7 +39,7 @@ AdditionalPrior::AdditionalPrior(shared_ptr<Model> model) : model_(model) {
  * Note: all parameters are populated from configuration files
  */
 void AdditionalPrior::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   DoValidate();
 }
 

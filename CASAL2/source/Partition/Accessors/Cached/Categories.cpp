@@ -42,8 +42,8 @@ void Categories::Init(const vector<string>& category_labels) {
 void Categories::BuildCache() {
   data_.clear();
 
-  unsigned   year      = model_->current_year();
-  Partition& partition = model_->partition();
+  unsigned   year      = model()->current_year();
+  Partition& partition = model()->partition();
   for (string category_label : category_labels_) {
     partition::Category& category = partition.category(category_label);
     LOG_FINEST() << "Category: " << category_label << " has " << category.years_.size() << " years loaded";

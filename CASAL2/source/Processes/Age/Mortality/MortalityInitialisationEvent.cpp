@@ -59,7 +59,7 @@ void MortalityInitialisationEvent::DoBuild() {
   partition_.Init(category_labels_);
 
   for (string label : selectivity_names_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
 
@@ -67,7 +67,7 @@ void MortalityInitialisationEvent::DoBuild() {
   }
 
   if (penalty_name_ != "") {
-    penalty_ = model_->managers()->penalty()->GetProcessPenalty(penalty_name_);
+    penalty_ = model()->managers()->penalty()->GetProcessPenalty(penalty_name_);
     if (!penalty_) {
       LOG_ERROR_P(PARAM_PENALTY) << ": Penalty label " << penalty_name_ << " was not found.";
     }
@@ -81,7 +81,7 @@ void MortalityInitialisationEvent::DoExecute() {
   LOG_TRACE();
 
   // only apply if initialisation phase
-  if (model_->state() == State::kInitialise) {
+  if (model()->state() == State::kInitialise) {
     /**
      * Work our how much of the stock is vulnerable
      */

@@ -32,11 +32,11 @@ LoadPartition::LoadPartition(shared_ptr<Model> model) : Process(model) {
  *
  */
 void LoadPartition::DoValidate() {
-  unsigned min_age = model_->min_age();
-  unsigned max_age = model_->max_age();
+  unsigned min_age = model()->min_age();
+  unsigned max_age = model()->max_age();
 
   auto columns = data_table_->columns();
-  if (columns.size() != model_->age_spread() + 1)  // category min_age min_age+1 min_age+n
+  if (columns.size() != model()->age_spread() + 1)  // category min_age min_age+1 min_age+n
     LOG_FATAL() << "data table must have columns: category < model ages >";
 
   unsigned age = 0.0;
@@ -56,13 +56,13 @@ void LoadPartition::DoValidate() {
  *
  */
 void LoadPartition::DoBuild() {
-  unsigned min_age = model_->min_age();
+  unsigned min_age = model()->min_age();
 
   auto columns = data_table_->columns();
   auto rows    = data_table_->data();
   for (auto row : rows) {
     string category_label = row[0];
-    auto&  category       = model_->partition().category(category_label);
+    auto&  category       = model()->partition().category(category_label);
 
     for (unsigned i = 1; i < row.size(); ++i) {
       unsigned age   = utilities::ToInline<string, unsigned>(columns[i]);

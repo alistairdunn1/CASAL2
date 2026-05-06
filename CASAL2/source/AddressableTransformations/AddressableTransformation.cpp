@@ -43,7 +43,7 @@ AddressableTransformation::AddressableTransformation(shared_ptr<Model> model) : 
  * sets usage via the VerifyForAddressable()
  */
 void AddressableTransformation::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   // Print out parameters
   LOG_FINE() << "In " << label_ << " parameters supplied for transformation = " << parameter_labels_.size();
   for (auto param : parameter_labels_) LOG_FINE() << param;
@@ -51,7 +51,7 @@ void AddressableTransformation::Validate() {
   // Check parameters are valid addressable types
   string error = "";
   for (auto param : parameter_labels_) {
-    if (!model_->objects().VerifyAddressableForUse(param, addressable::kTransformation, error)) {
+    if (!model()->objects().VerifyAddressableForUse(param, addressable::kTransformation, error)) {
       LOG_FATAL_Q(PARAM_PARAMETERS) << "the parameter " << param << " could not be verified for use in an @parameter_transformation block. Error: " << error;
     }
   }
@@ -72,7 +72,7 @@ void AddressableTransformation::Validate() {
   for (auto param : parameter_labels_) {
     string new_parameter = param;
 
-    auto           pair      = model_->objects().ExplodeParameterAndIndex(param);
+    auto           pair      = model()->objects().ExplodeParameterAndIndex(param);
     string         parameter = pair.first;
     string         index     = pair.second;
     vector<string> indexes;
@@ -87,7 +87,7 @@ void AddressableTransformation::Validate() {
     LOG_FINE() << "sizes = " << indexes.size() << " parameter = " << parameter << " index = " << index << " new param = " << new_parameter << " param " << param;
 
     // Get a pointer to the baseclass
-    auto target = model_->objects().FindObject(param);
+    auto target = model()->objects().FindObject(param);
     // business rules  TO add back in when method better
     /*
     if (target->IsAddressableUsedFor(parameter, addressable::kEstimate))
@@ -349,7 +349,7 @@ void AddressableTransformation::Verify(shared_ptr<Model> model) {
       // TODO:   with the simplex method)
       LOG_VERIFY_P(PARAM_PARAMETERS) << "There is an @estimate block for " << parameter_lookup_for_verify_[i]
                                      << " this is not allowed for parameters with a @parameter_transformation block";
-    if (target_objects_[i]->IsAddressableUsedFor(parameter_lookup_for_verify_[i], addressable::kProfile) & (model_->run_mode() == RunMode::kProfiling))
+    if (target_objects_[i]->IsAddressableUsedFor(parameter_lookup_for_verify_[i], addressable::kProfile) & (model->run_mode() == RunMode::kProfiling))
       LOG_FATAL_P(PARAM_PARAMETERS) << "found an @profile block for " << parameter_lookup_for_verify_[i]
                                     << ". You cannot have a @parameter_transformation and a @profile block for the same parameter.";
   }

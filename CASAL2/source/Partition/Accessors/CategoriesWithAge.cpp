@@ -28,17 +28,17 @@ CategoriesWithAge::CategoriesWithAge(shared_ptr<Model> model, const vector<strin
   LOG_TRACE();
 
   // Variables
-  unsigned start_year = model_->start_year();
+  unsigned start_year = model->start_year();
 
   unsigned final_year;
 
-  if (model_->run_mode() == RunMode::kProjection)
-    final_year = model_->projection_final_year();
+  if (model->run_mode() == RunMode::kProjection)
+    final_year = model->projection_final_year();
   else
-    final_year = model_->final_year();
+    final_year = model->final_year();
 
   for (string category_name : category_names) {
-    partition::Category& category = model_->partition().category(category_name);
+    partition::Category& category = model->partition().category(category_name);
 
     for (unsigned year = start_year; year <= final_year; ++year) {
       if (std::find(category.years_.begin(), category.years_.end(), year) == category.years_.end())
@@ -56,7 +56,7 @@ CategoriesWithAge::CategoriesWithAge(shared_ptr<Model> model, const vector<strin
  * Return the number of active categories for the current year
  */
 unsigned CategoriesWithAge::size() {
-  return data_[model_->current_year()].size();
+  return data_[model()->current_year()].size();
 }
 
 /**
@@ -64,7 +64,7 @@ unsigned CategoriesWithAge::size() {
  * for the current year.
  */
 const CategoriesWithAge::DataType::iterator CategoriesWithAge::begin() {
-  return data_[model_->current_year()].begin();
+  return data_[model()->current_year()].begin();
 }
 
 /**
@@ -73,7 +73,7 @@ const CategoriesWithAge::DataType::iterator CategoriesWithAge::begin() {
  * any process.
  */
 const CategoriesWithAge::DataType::iterator CategoriesWithAge::end() {
-  return data_[model_->current_year()].end();
+  return data_[model()->current_year()].end();
 }
 
 } /* namespace accessors */

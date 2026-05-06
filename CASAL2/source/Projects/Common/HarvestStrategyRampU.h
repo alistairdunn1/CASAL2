@@ -58,7 +58,7 @@ private:
   unsigned         initialisation_phase_;
 
 protected:
-  shared_ptr<Model> model_ = nullptr;
+  weak_ptr<Model> model_ = {};
 };
 
 } /* namespace projects */

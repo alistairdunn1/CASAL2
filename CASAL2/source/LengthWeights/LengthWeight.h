@@ -29,10 +29,10 @@ public:
   // methods
   LengthWeight() = delete;
   explicit LengthWeight(shared_ptr<Model> model);
-  virtual ~LengthWeight(){};
+  virtual ~LengthWeight() {};
   void Validate();
   void Build() { DoBuild(); };
-  void Verify(shared_ptr<Model> model){};
+  void Verify(shared_ptr<Model> model) {};
   void Reset() { DoReset(); };
 
   virtual void DoValidate() = 0;
@@ -40,12 +40,13 @@ public:
   virtual void DoReset()    = 0;
 
   // accessors
-  virtual Double mean_weight(Double size, Distribution distribution, Double cv) const = 0;
-  virtual Double mean_weight(Double size) const = 0;  // overloader for length based models
-  virtual string weight_units() const                                                 = 0;
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "LengthWeight"); }
+  virtual Double    mean_weight(Double size, Distribution distribution, Double cv) const = 0;
+  virtual Double    mean_weight(Double size) const                                       = 0;  // overloader for length based models
+  virtual string    weight_units() const                                                 = 0;
 
   // members
-  shared_ptr<Model> model_ = nullptr;
+  weak_ptr<Model> model_ = {};
 };
 } /* namespace niwa */
 #endif /* LENGTHWEIGHT_H_ */

@@ -44,7 +44,7 @@ void Abundance::PreExecute() {
 void Abundance::Execute() {
   Double value = 0.0;
 
-  if (model_->state() == State::kInitialise) {
+  if (model()->state() == State::kInitialise) {
     // initialisation calculation
     auto iterator = partition_.begin();
     // iterate over each category
@@ -54,7 +54,7 @@ void Abundance::Execute() {
       }
     }
 
-    unsigned initialisation_phase = model_->managers()->initialisation_phase()->current_initialisation_phase();
+    unsigned initialisation_phase = model()->managers()->initialisation_phase()->current_initialisation_phase();
     if (initialisation_values_.size() <= initialisation_phase)
       initialisation_values_.resize(initialisation_phase + 1);
 
@@ -74,9 +74,9 @@ void Abundance::Execute() {
     }
 
     if (mean_proportion_method_)
-      values_[model_->current_year()] = cache_value_ + ((value - cache_value_) * time_step_proportion_);
+      values_[model()->current_year()] = cache_value_ + ((value - cache_value_) * time_step_proportion_);
     else
-      values_[model_->current_year()] = (1 - time_step_proportion_) * cache_value_ + time_step_proportion_ * value;
+      values_[model()->current_year()] = (1 - time_step_proportion_) * cache_value_ + time_step_proportion_ * value;
   }
 }
 

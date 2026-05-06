@@ -32,6 +32,7 @@ using std::map;
 using std::shared_ptr;
 using std::string;
 using std::vector;
+using std::weak_ptr;
 using utilities::Double;
 class Model;
 
@@ -44,11 +45,11 @@ enum class AddressableType { kInvalid = 0, kSingle = 1, kVector = 2, kStringMap 
 class AddressableInputLoader {
 public:
   // methods
-  AddressableInputLoader(shared_ptr<Model> model) : model_(model){};
+  AddressableInputLoader(shared_ptr<Model> model) : model_(model) {};
   virtual ~AddressableInputLoader() = default;
   void                Validate();
-  void                Build(){};
-  void                Verify(shared_ptr<Model> model){};
+  void                Build() {};
+  void                Verify(shared_ptr<Model> model) {};
   void                AddValue(const string& addressable_label, Double value);
   vector<string>      GetAddressableLabels() const;
   unsigned            GetValueCount() const;
@@ -57,9 +58,12 @@ public:
 
 private:
   // members
-  shared_ptr<Model>           model_ = nullptr;
+  weak_ptr<Model>             model_;
   map<string, vector<Double>> addressable_values_;
   map<string, Double*>        addressables_;
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model> model() const { return model_.lock(); }
 };
 } /* namespace niwa */
 

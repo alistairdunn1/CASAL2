@@ -86,7 +86,7 @@ void Simplex::DoBuild() {
   for (unsigned i = 0; i < n_par_in_estimates; ++i) {
     estimate_label = "parameter_transformation[" + label_ + "].simplex{" + utilities::ToInline<unsigned, string>(i + 1) + "}";
     LOG_FINE() << "looking for " << estimate_label;
-    simplex_estimate_ = model_->managers()->estimate()->GetEstimate(estimate_label);
+    simplex_estimate_ = model()->managers()->estimate()->GetEstimate(estimate_label);
     if (!simplex_estimate_) {
       LOG_WARNING() << "Could not find @estimate block for " << estimate_label << ". You cannot have a transformation and then not estimate the transformed parameter";
       continue;

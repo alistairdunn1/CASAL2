@@ -45,7 +45,8 @@ GrowthIncrement::GrowthIncrement(shared_ptr<Model> model) : model_(model) {
  */
 void GrowthIncrement::Validate() {
   LOG_TRACE();
-  parameters_.Populate(model_);
+  auto current_model = model();
+  parameters_.Populate(current_model);
   parameters_.Validate(PARAM_DISTRIBUTION)->IsInList({PARAM_NORMAL});
   parameters_.Validate(PARAM_CV)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_MIN_SIGMA)->GreaterThan(0.0);
@@ -65,10 +66,10 @@ void GrowthIncrement::Validate() {
     compatibility_type_ = CompatibilityType::kCasal2;
   }
 
-  number_of_model_length_bins_ = model_->get_number_of_length_bins();
-  model_min_length_bins_       = model_->length_bins();
-  plus_group_                  = model_->length_plus();
-  model_length_midpoints_      = model_->length_bin_mid_points();
+  number_of_model_length_bins_ = current_model->get_number_of_length_bins();
+  model_min_length_bins_       = current_model->length_bins();
+  plus_group_                  = current_model->length_plus();
+  model_length_midpoints_      = current_model->length_bin_mid_points();
   mean_weight_by_length_bin_index_.resize(number_of_model_length_bins_, 0.0);
   // calculate midpoints
 
@@ -95,7 +96,7 @@ void GrowthIncrement::Build() {
   LOG_FINE() << "Get Length Weight pointer";
 
   // Get length weight pointer
-  length_weight_ = model_->managers()->length_weight()->GetLengthWeight(length_weight_label_);
+  length_weight_ = model()->managers()->length_weight()->GetLengthWeight(length_weight_label_);
   if (!length_weight_)
     LOG_ERROR_P(PARAM_LENGTH_WEIGHT) << "Length-weight label " << length_weight_label_ << " was not found";
   // Subscribe this class to this length_weight class

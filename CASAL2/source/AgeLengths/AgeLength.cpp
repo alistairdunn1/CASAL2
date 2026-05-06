@@ -68,7 +68,7 @@ AgeLength::AgeLength(shared_ptr<Model> model) : model_(model) {
  */
 void AgeLength::Validate() {
   LOG_FINEST() << "by_length_ = " << by_length_;
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
 
   // Validate our parameters
   parameters_.ValidateVector(PARAM_TIME_STEP_PROPORTIONS)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
@@ -78,8 +78,8 @@ void AgeLength::Validate() {
   parameters_.Validate(PARAM_COMPATIBILITY)->IsInList({PARAM_CASAL, PARAM_CASAL2});
 
   // get offsets
-  year_offset_ = model_->start_year();
-  age_offset_  = model_->min_age();
+  year_offset_ = model()->start_year();
+  age_offset_  = model()->min_age();
 
   if (distribution_label_ == PARAM_NORMAL)
     distribution_ = Distribution::kNormal;
@@ -121,7 +121,7 @@ void AgeLength::Build() {
     change_cvs_ = false;
   }
 
-  unsigned time_step_count = model_->time_steps().size();
+  unsigned time_step_count = model()->time_steps().size();
   if (time_step_proportions_.size() == 0) {
     time_step_proportions_.assign(time_step_count, 0.0);
 
@@ -139,7 +139,7 @@ void AgeLength::Build() {
       LOG_ERROR_P(PARAM_TIME_STEP_PROPORTIONS) << "Time step proportion value (" << iter << ") must be in the range 0.0 to 1.0 inclusive";
   }
   // Get length weight pointer
-  length_weight_ = model_->managers()->length_weight()->GetLengthWeight(length_weight_label_);
+  length_weight_ = model()->managers()->length_weight()->GetLengthWeight(length_weight_label_);
   if (!length_weight_)
     LOG_ERROR_P(PARAM_LENGTH_WEIGHT) << "Length-weight label " << length_weight_label_ << " was not found";
   // Subscribe this class to this length_weight class
@@ -148,19 +148,19 @@ void AgeLength::Build() {
   // if this length weight class time-varies then it will flag this age-length class to rebuild cache
 
   // allocate memory for cvs
-  cvs_.resize(model_->years().size());
+  cvs_.resize(model()->years().size());
   for (unsigned year_ndx = 0; year_ndx < cvs_.size(); ++year_ndx) {
     cvs_[year_ndx].resize(time_step_count);
     for (unsigned time_step_ndx = 0; time_step_ndx < cvs_[year_ndx].size(); ++time_step_ndx) {
-      cvs_[year_ndx][time_step_ndx].resize(model_->age_spread(), 0.0);
+      cvs_[year_ndx][time_step_ndx].resize(model()->age_spread(), 0.0);
     }
   }
   // allocate memory for mean weight and length
   mean_length_by_timestep_age_.resize(time_step_count);
   mean_weight_by_timestep_age_.resize(time_step_count);
   for (unsigned time_step_ndx = 0; time_step_ndx < mean_weight_by_timestep_age_.size(); ++time_step_ndx) {
-    mean_length_by_timestep_age_[time_step_ndx].resize(model_->age_spread(), 0.0);
-    mean_weight_by_timestep_age_[time_step_ndx].resize(model_->age_spread(), 0.0);
+    mean_length_by_timestep_age_[time_step_ndx].resize(model()->age_spread(), 0.0);
+    mean_weight_by_timestep_age_[time_step_ndx].resize(model()->age_spread(), 0.0);
   }
   // age-length matrix assumes all down stream classes i.e. processes and observations have flagged BuildAgeLengthMatrixForTheseYears
   LOG_FINE() << "years we need to build age-length matrix for = " << age_length_matrix_years_.size();
@@ -169,17 +169,17 @@ void AgeLength::Build() {
     for (unsigned year_iter = 0; year_iter < age_length_matrix_years_.size(); ++year_iter) {
       age_length_transition_matrix_[year_iter].resize(time_step_count);
       for (unsigned time_step_ndx = 0; time_step_ndx < time_step_count; ++time_step_ndx) {
-        age_length_transition_matrix_[year_iter][time_step_ndx].resize(model_->age_spread());
-        numbers_by_age_length_transition_.resize(model_->age_spread());
-        for (unsigned age_iter = 0; age_iter < model_->age_spread(); ++age_iter) {
-          age_length_transition_matrix_[year_iter][time_step_ndx][age_iter].resize(model_->get_number_of_length_bins(), 0.0);
-          numbers_by_age_length_transition_[age_iter].resize(model_->get_number_of_length_bins(), 0.0);
+        age_length_transition_matrix_[year_iter][time_step_ndx].resize(model()->age_spread());
+        numbers_by_age_length_transition_.resize(model()->age_spread());
+        for (unsigned age_iter = 0; age_iter < model()->age_spread(); ++age_iter) {
+          age_length_transition_matrix_[year_iter][time_step_ndx][age_iter].resize(model()->get_number_of_length_bins(), 0.0);
+          numbers_by_age_length_transition_[age_iter].resize(model()->get_number_of_length_bins(), 0.0);
         }
       }
     }
   }
 
-  model_years_ = model_->years();
+  model_years_ = model()->years();
   // Build child dependencies
   DoBuild();
   //
@@ -206,7 +206,7 @@ void AgeLength::PopulateCV() {
   LOG_FINE() << "PopulateCV()";
 
   unsigned       age        = min_age_;
-  vector<string> time_steps = model_->time_steps();
+  vector<string> time_steps = model()->time_steps();
 
   for (unsigned year_ndx = 0; year_ndx < cvs_.size(); ++year_ndx) {
     for (unsigned step_iter = 0; step_iter < time_steps.size(); ++step_iter) {
@@ -214,11 +214,11 @@ void AgeLength::PopulateCV() {
         // TODO: Fix this #this test is robust but not compatible with testing framework, blah
         // If cv_last_ is not defined in the input then assume cv_first_ represents the cv for all age classes i.e constant cv
         LOG_FINEST() << "No cv_last defined";
-        for (unsigned age_ndx = 0; age_ndx < model_->age_spread(); ++age_ndx) cvs_[year_ndx][step_iter][age_ndx] = (cv_first_);
+        for (unsigned age_ndx = 0; age_ndx < model()->age_spread(); ++age_ndx) cvs_[year_ndx][step_iter][age_ndx] = (cv_first_);
       } else if (by_length_) {  // if passed the first test we have a min and max CV. So ask if this is linear interpolated by length at age
         LOG_FINEST() << "cv_last defined with by_length = true";
         age = min_age_;  // needs resetting for each year and timestep
-        for (unsigned age_ndx = 0; age_ndx < model_->age_spread(); ++age_ndx, ++age) {
+        for (unsigned age_ndx = 0; age_ndx < model()->age_spread(); ++age_ndx, ++age) {
           cvs_[year_ndx][step_iter][age_ndx]
               = ((this->calculate_mean_length(model_years_[year_ndx], step_iter, age) - this->calculate_mean_length(model_years_[year_ndx], step_iter, min_age_))
                      * (cv_last_ - cv_first_)
@@ -229,7 +229,7 @@ void AgeLength::PopulateCV() {
         // else Do linear interpolation between cv_first_ and cv_last_ based on age class
         LOG_FINEST() << "cv_last defined with by_length = false";
         age = min_age_;  // needs resetting for each year and timestep
-        for (unsigned age_ndx = 0; age_ndx < model_->age_spread(); ++age_ndx, ++age) {
+        for (unsigned age_ndx = 0; age_ndx < model()->age_spread(); ++age_ndx, ++age) {
           cvs_[year_ndx][step_iter][age_ndx] = (cv_first_ + (cv_last_ - cv_first_) * (age - min_age_) / (max_age_ - min_age_));
         }
       }  // if (!parameters_.Get(PARAM_CV_LAST)->has_been_defined()) {
@@ -274,15 +274,15 @@ void AgeLength::Reset() {
  * this class is responsible for populating mean_length_by_timestep_age_ mean_weight_by_timestep_age_
  */
 void AgeLength::UpdateYearContainers() {
-  LOG_FINE() << "UpdateYearContainers " << model_->current_year();
-  unsigned time_step_count = model_->time_steps().size();
+  LOG_FINE() << "UpdateYearContainers " << model()->current_year();
+  unsigned time_step_count = model()->time_steps().size();
   unsigned age             = min_age_;
   for (unsigned step_iter = 0; step_iter < time_step_count; ++step_iter) {
     age = min_age_;
-    for (unsigned age_iter = 0; age_iter < model_->age_spread(); ++age_iter, ++age) {
-      mean_length_by_timestep_age_[step_iter][age_iter] = calculate_mean_length(model_->current_year(), step_iter, age);
+    for (unsigned age_iter = 0; age_iter < model()->age_spread(); ++age_iter, ++age) {
+      mean_length_by_timestep_age_[step_iter][age_iter] = calculate_mean_length(model()->current_year(), step_iter, age);
       mean_weight_by_timestep_age_[step_iter][age_iter]
-          = length_weight_->mean_weight(mean_length_by_timestep_age_[step_iter][age_iter], distribution_, cvs_[model_->current_year() - year_offset_][step_iter][age_iter]);
+          = length_weight_->mean_weight(mean_length_by_timestep_age_[step_iter][age_iter], distribution_, cvs_[model()->current_year() - year_offset_][step_iter][age_iter]);
     }
   }
 }
@@ -290,13 +290,13 @@ void AgeLength::UpdateYearContainers() {
  * ReBuild Cache: called by the time_varying class
  */
 void AgeLength::RebuildCache() {
-  LOG_FINE() << "Rebuilding age-length cache for year " << model_->current_year() << " run mode " << model_->run_mode() << " state " << model_->state();
+  LOG_FINE() << "Rebuilding age-length cache for year " << model()->current_year() << " run mode " << model()->run_mode() << " state " << model()->state();
   // needs to go after Rebuild Cache
   PopulateCV();
   //
   UpdateYearContainers();
   // Build Age-length matrix
-  UpdateAgeLengthMatrixForThisYear(model_->current_year());
+  UpdateAgeLengthMatrixForThisYear(model()->current_year());
 }
 
 /**
@@ -347,8 +347,8 @@ void AgeLength::PopulateAgeLengthMatrix() {
   LOG_FINE() << "PopulateAgeLengthMatrix";
   // Some heavy lifting to be done here.
   unsigned year_count       = age_length_matrix_years_.size();
-  unsigned time_step_count  = model_->time_steps().size();
-  unsigned length_bin_count = model_->get_number_of_length_bins();
+  unsigned time_step_count  = model()->time_steps().size();
+  unsigned length_bin_count = model()->get_number_of_length_bins();
   unsigned year             = 0;
   year_dim_in_age_length_   = 0;
   Double         mu         = 0.0;
@@ -359,7 +359,7 @@ void AgeLength::PopulateAgeLengthMatrix() {
   Double         tmp        = 0.0;
   Double         sum        = 0.0;
   vector<Double> cum(length_bin_count, 0.0);
-  auto           model_length_bins = model_->length_bins();
+  auto           model_length_bins = model()->length_bins();
   vector<double> length_bins(model_length_bins.size(), 0.0);
 
   LOG_FINE() << "age-length label: " << label_ << "; years: " << year_count << "; time_steps: " << time_step_count << "; length_bins: " << length_bin_count;
@@ -375,7 +375,7 @@ void AgeLength::PopulateAgeLengthMatrix() {
     for (unsigned time_step = 0; time_step < time_step_count; ++time_step) {
       age = min_age_;
 
-      for (unsigned age_index = 0; age_index < model_->age_spread(); ++age_index, ++age) {
+      for (unsigned age_index = 0; age_index < model()->age_spread(); ++age_index, ++age) {
         mu    = calculate_mean_length(year, time_step, age);
         cv    = cvs_[year - year_offset_][time_step - time_step_offset_][age - age_offset_];
         sigma = cv * mu;
@@ -415,7 +415,7 @@ void AgeLength::PopulateAgeLengthMatrix() {
               LOG_FINEST() << "j " << j << " prop_in_length[j - 1]: " << prop_in_length[j - 1] << " : cum[j] " << cum[j] << " : cum[j - 1] " << cum[j - 1];
             }
           }  // for (unsigned j = 0; j < length_bin_count; ++j)
-          if (model_->length_plus()) {
+          if (model()->length_plus()) {
             prop_in_length[length_bin_count - 1] = 1.0 - sum - cum[0];
             LOG_FINEST() << "prop_in_length[length_bin_count - 1]: " << prop_in_length[length_bin_count - 1];
           } else {
@@ -453,7 +453,7 @@ void AgeLength::PopulateAgeLengthMatrix() {
               LOG_FINEST() << "j " << j << " prop_in_length[j - 1]: " << prop_in_length[j - 1] << " : cum[j] " << cum[j] << " : cum[j - 1] " << cum[j - 1];
             }
           }  // for (unsigned j = 0; j < length_bin_count; ++j)
-          if (model_->length_plus()) {
+          if (model()->length_plus()) {
             prop_in_length[length_bin_count - 1] = 1.0 - sum - cum[0];
             LOG_FINEST() << "prop_in_length[length_bin_count - 1]: " << prop_in_length[length_bin_count - 1];
           } else {
@@ -496,8 +496,8 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
   LOG_FINE() << "UpdateAgeLengthMatrixForThisYear";
 
   if (std::find(age_length_matrix_years_.begin(), age_length_matrix_years_.end(), year) != age_length_matrix_years_.end()) {
-    unsigned time_step_count  = model_->time_steps().size();
-    unsigned length_bin_count = model_->get_number_of_length_bins();
+    unsigned time_step_count  = model()->time_steps().size();
+    unsigned length_bin_count = model()->get_number_of_length_bins();
     year_dim_in_age_length_   = 0;
     Double         mu         = 0.0;
     Double         cv         = 0.0;
@@ -507,7 +507,7 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
     Double         tmp        = 0.0;
     Double         sum        = 0.0;
     vector<Double> cum(length_bin_count, 0.0);
-    auto           model_length_bins = model_->length_bins();
+    auto           model_length_bins = model()->length_bins();
     vector<double> length_bins(model_length_bins.size(), 0.0);
     LOG_FINEST() << "length_bin_count: " << length_bin_count;
 
@@ -516,7 +516,7 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
     year_dim_in_age_length_ = age_length_matrix_year_key_[year];
     for (unsigned time_step = 0; time_step < time_step_count; ++time_step) {
       age = min_age_;
-      for (unsigned age_index = 0; age_index < model_->age_spread(); ++age_index, ++age) {
+      for (unsigned age_index = 0; age_index < model()->age_spread(); ++age_index, ++age) {
         mu    = calculate_mean_length(year, time_step, age);
         cv    = cvs_[year - year_offset_][time_step - time_step_offset_][age - age_offset_];
         sigma = cv * mu;
@@ -556,7 +556,7 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
               LOG_FINEST() << "j " << j << " prop_in_length[j - 1]: " << prop_in_length[j - 1] << " : cum[j] " << cum[j] << " : cum[j - 1] " << cum[j - 1];
             }
           }  // for (unsigned j = 0; j < length_bin_count; ++j)
-          if (model_->length_plus()) {
+          if (model()->length_plus()) {
             prop_in_length[length_bin_count - 1] = 1.0 - sum - cum[0];
             LOG_FINEST() << "prop_in_length[length_bin_count - 1]: " << prop_in_length[length_bin_count - 1];
           } else {
@@ -593,7 +593,7 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
               LOG_FINEST() << "j " << j << " prop_in_length[j - 1]: " << prop_in_length[j - 1] << " : cum[j] " << cum[j] << " : cum[j - 1] " << cum[j - 1];
             }
           }  // for (unsigned j = 0; j < length_bin_count; ++j)
-          if (model_->length_plus()) {
+          if (model()->length_plus()) {
             prop_in_length[length_bin_count - 1] = 1.0 - sum - cum[0];
             LOG_FINEST() << "prop_in_length[length_bin_count - 1]: " << prop_in_length[length_bin_count - 1];
           } else {
@@ -623,11 +623,11 @@ void AgeLength::UpdateAgeLengthMatrixForThisYear(unsigned year) {
  */
 void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, Selectivity* selectivity) {
   LOG_FINEST() << "populate_numbers_at_length";
-  this_year_                 = model_->current_year();
-  this_time_step_            = model_->managers()->time_step()->current_time_step();
+  this_year_                 = model()->current_year();
+  this_time_step_            = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_    = age_length_matrix_year_key_[this_year_];
-  vector<double> length_bins = model_->length_bins();
-  unsigned       size        = model_->get_number_of_length_bins();
+  vector<double> length_bins = model()->length_bins();
+  unsigned       size        = model()->get_number_of_length_bins();
 
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_;
   LOG_FINE() << "Calculating age length data";
@@ -650,12 +650,12 @@ void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector
  */
 void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length) {
   LOG_FINEST() << "populate_numbers_at_length";
-  this_year_              = model_->current_year();
-  this_time_step_         = model_->managers()->time_step()->current_time_step();
+  this_year_              = model()->current_year();
+  this_time_step_         = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_ = age_length_matrix_year_key_[this_year_];
 
-  vector<double> length_bins = model_->length_bins();
-  unsigned       size        = model_->get_number_of_length_bins();
+  vector<double> length_bins = model()->length_bins();
+  unsigned       size        = model()->get_number_of_length_bins();
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_
              << " year ndx = " << year_dim_in_age_length_;
   LOG_FINE() << "Calculating age length data";
@@ -686,10 +686,10 @@ void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector
  */
 void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, Selectivity* selectivity, vector<int>& map_length_bin_ndx) {
   LOG_FINEST() << "populate_numbers_at_length";
-  this_year_              = model_->current_year();
-  this_time_step_         = model_->managers()->time_step()->current_time_step();
+  this_year_              = model()->current_year();
+  this_time_step_         = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_ = age_length_matrix_year_key_[this_year_];
-  unsigned size           = model_->get_number_of_length_bins();
+  unsigned size           = model()->get_number_of_length_bins();
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_;
   LOG_FINE() << "Calculating age length data";
 
@@ -723,11 +723,11 @@ void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector
  */
 void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector<Double>& numbers_at_length, vector<int>& map_length_bin_ndx) {
   LOG_FINEST() << "populate_numbers_at_length";
-  this_year_                 = model_->current_year();
-  this_time_step_            = model_->managers()->time_step()->current_time_step();
+  this_year_                 = model()->current_year();
+  this_time_step_            = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_    = age_length_matrix_year_key_[this_year_];
-  vector<double> length_bins = model_->length_bins();
-  unsigned       size        = model_->get_number_of_length_bins();
+  vector<double> length_bins = model()->length_bins();
+  unsigned       size        = model()->get_number_of_length_bins();
 
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_
              << " year ndx = " << year_dim_in_age_length_;
@@ -763,12 +763,12 @@ void AgeLength::populate_numbers_at_length(vector<Double> numbers_at_age, vector
 void AgeLength::populate_numbers_at_age_with_length_based_exploitation(vector<Double>& numbers_at_age, vector<Double>& numbers_at_age_with_exploitation,
                                                                        Double& exploitation_by_length, unsigned model_length_bin_ndx, Selectivity* selectivity) {
   LOG_FINEST() << "populate_numbers_at_age_with_length_based_exploitation";
-  this_year_              = model_->current_year();
-  this_time_step_         = model_->managers()->time_step()->current_time_step();
+  this_year_              = model()->current_year();
+  this_time_step_         = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_ = age_length_matrix_year_key_[this_year_];
-  if (model_length_bin_ndx >= model_->get_number_of_length_bins())
+  if (model_length_bin_ndx >= model()->get_number_of_length_bins())
     LOG_CODE_ERROR() << "this function only works with length bins that are consistent with the model length bins. this function received a length bin = " << model_length_bin_ndx
-                     << " but there are only " << model_->get_number_of_length_bins() << " model length bins";
+                     << " but there are only " << model()->get_number_of_length_bins() << " model length bins";
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_
              << " year ndx = " << year_dim_in_age_length_;
 
@@ -792,12 +792,12 @@ void AgeLength::populate_numbers_at_age_with_length_based_exploitation(vector<Do
 void AgeLength::populate_numbers_at_age_with_length_based_exploitation(vector<Double>& numbers_at_age, vector<Double>& numbers_at_age_with_exploitation,
                                                                        Double& exploitation_by_length, unsigned model_length_bin_ndx) {
   LOG_FINEST() << "populate_numbers_at_age_with_length_based_exploitation";
-  this_year_              = model_->current_year();
-  this_time_step_         = model_->managers()->time_step()->current_time_step();
+  this_year_              = model()->current_year();
+  this_time_step_         = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_ = age_length_matrix_year_key_[this_year_];
-  if (model_length_bin_ndx >= model_->get_number_of_length_bins())
+  if (model_length_bin_ndx >= model()->get_number_of_length_bins())
     LOG_CODE_ERROR() << "this function only works with length bins that are consistent with the model length bins. this function received a length bin = " << model_length_bin_ndx
-                     << " but there are only " << model_->get_number_of_length_bins() << " model length bins";
+                     << " but there are only " << model()->get_number_of_length_bins() << " model length bins";
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_
              << " year ndx = " << year_dim_in_age_length_;
 
@@ -816,12 +816,12 @@ void AgeLength::populate_numbers_at_age_with_length_based_exploitation(vector<Do
  */
 void AgeLength::populate_age_length_matrix(vector<Double> numbers_at_age, vector<vector<Double>>& numbers_by_age_length) {
   LOG_FINEST() << "populate_numbers_at_length";
-  this_year_              = model_->current_year();
-  this_time_step_         = model_->managers()->time_step()->current_time_step();
+  this_year_              = model()->current_year();
+  this_time_step_         = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_ = age_length_matrix_year_key_[this_year_];
 
-  vector<double> length_bins = model_->length_bins();
-  unsigned       size        = model_->get_number_of_length_bins();
+  vector<double> length_bins = model()->length_bins();
+  unsigned       size        = model()->get_number_of_length_bins();
   LOG_FINE() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_
              << " year ndx = " << year_dim_in_age_length_;
   LOG_FINE() << "Calculating age length data";
@@ -843,11 +843,11 @@ void AgeLength::populate_age_length_matrix(vector<Double> numbers_at_age, vector
  */
 void AgeLength::populate_age_length_matrix(vector<Double> numbers_at_age, vector<vector<Double>>& numbers_by_age_length, Selectivity* selectivity) {
   LOG_FINEST() << "populate_numbers_at_length";
-  this_year_                 = model_->current_year();
-  this_time_step_            = model_->managers()->time_step()->current_time_step();
+  this_year_                 = model()->current_year();
+  this_time_step_            = model()->managers()->time_step()->current_time_step();
   year_dim_in_age_length_    = age_length_matrix_year_key_[this_year_];
-  vector<double> length_bins = model_->length_bins();
-  unsigned       size        = model_->get_number_of_length_bins();
+  vector<double> length_bins = model()->length_bins();
+  unsigned       size        = model()->get_number_of_length_bins();
   LOG_FINEST() << "Populating the age-length matrix for agelength class " << label_ << " in year " << this_year_ << " and time-step " << this_time_step_
                << " year ndx = " << year_dim_in_age_length_;
   LOG_FINEST() << "Calculating age length data";
@@ -955,10 +955,10 @@ void AgeLength::get_cdf_inverse(unsigned age, unsigned year, unsigned time_step,
  * populates necessary information that we want to report for this current year.
  */
 void AgeLength::FillReportCache(ostringstream& cache) {
-  unsigned min_age                = model_->min_age();
-  unsigned max_age                = model_->max_age();
-  unsigned year                   = model_->current_year();
-  unsigned this_time_step         = model_->managers()->time_step()->current_time_step();
+  unsigned min_age                = model()->min_age();
+  unsigned max_age                = model()->max_age();
+  unsigned year                   = model()->current_year();
+  unsigned this_time_step         = model()->managers()->time_step()->current_time_step();
   unsigned year_dim_in_age_length = age_length_matrix_year_key_[year];
   LOG_FINE() << "FillReportCache time step = " << this_time_step << " year = " << year;
 
@@ -981,8 +981,8 @@ void AgeLength::FillReportCache(ostringstream& cache) {
     cache << "age_length_transition_matrix " << REPORT_R_DATAFRAME << REPORT_EOL;
     cache << "year time_step age ";
 
-    for (auto length : model_->length_bins()) {
-      if (!model_->length_plus() & (length == model_->length_bins()[model_->length_bins().size() - 1]))
+    for (auto length : model()->length_bins()) {
+      if (!model()->length_plus() & (length == model()->length_bins()[model()->length_bins().size() - 1]))
         continue;  // don't print header for the last class min (it is a maximum)
       cache << "L(" << length << ") ";
     }

@@ -75,7 +75,9 @@ public:
 
 private:
   // members
-  shared_ptr<Model> model_ = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "Partition::Category"); }
 
   // TODO: Re-enable this when we have a single unified accessor
   // DISALLOW_COPY_AND_ASSIGN(Category);

@@ -45,11 +45,12 @@ Selectivity::Selectivity(shared_ptr<Model> model) : model_(model) {
  * Validate the objects
  */
 void Selectivity::Validate() {
-  parameters_.Populate(model_);
+  auto current_model = model();
+  parameters_.Populate(current_model);
   LOG_FINE() << "selectivity " << label_ << " type = " << type_;
 
   if (partition_type_label_ == PARAM_MODEL)
-    partition_type_ = model_->partition_type();
+    partition_type_ = current_model->partition_type();
   else if (partition_type_label_ == PARAM_AGE)
     partition_type_ = PartitionType::kAge;
   else if (partition_type_label_ == PARAM_LENGTH)
@@ -57,7 +58,7 @@ void Selectivity::Validate() {
   else {
     LOG_CODE_ERROR() << "The partition_type is not recognised for this selectivity. It is not available for a length or age";
   }
-  age_index_ = model_->min_age();
+  age_index_ = current_model->min_age();
 
   DoValidate();
 
@@ -72,10 +73,10 @@ void Selectivity::Validate() {
     }
   }
 
-  if (model_->partition_type() == PartitionType::kAge) {
-    values_.assign(model_->age_spread(), 0.0);
+  if (current_model->partition_type() == PartitionType::kAge) {
+    values_.assign(current_model->age_spread(), 0.0);
   } else {
-    length_values_.assign(model_->length_bin_mid_points().size(), 0.0);
+    length_values_.assign(current_model->length_bin_mid_points().size(), 0.0);
   }
   if (length_based_) {
     if (!allowed_length_based_in_age_based_model_)
@@ -101,14 +102,15 @@ void Selectivity::DoReset() {}
  * Reset the objects
  */
 void Selectivity::RebuildCache() {
+  auto current_model = model();
   LOG_FINE() << "RebuildCache label " << label_;
-  if (model_->partition_type() == PartitionType::kAge) {
-    for (unsigned age = model_->min_age(); age <= model_->max_age(); ++age) {
+  if (current_model->partition_type() == PartitionType::kAge) {
+    for (unsigned age = current_model->min_age(); age <= current_model->max_age(); ++age) {
       values_[age - age_index_] = this->get_value(age);
       LOG_FINEST() << "age = " << age << " value = " << values_[age - age_index_];
     }
-  } else if (model_->partition_type() == PartitionType::kLength) {
-    vector<double> length_bins = model_->length_bin_mid_points();
+  } else if (current_model->partition_type() == PartitionType::kLength) {
+    vector<double> length_bins = current_model->length_bin_mid_points();
     Double         temp        = 0.0;
     for (unsigned length_bin_index = 0; length_bin_index < length_bins.size(); ++length_bin_index) {
       temp                             = length_bins[length_bin_index];
@@ -169,9 +171,10 @@ Double Selectivity::GetResult(Double x) {
  */
 Double Selectivity::GetLengthBasedResult(unsigned age, AgeLength* age_length) {
   LOG_TRACE();
-  unsigned time_step = model_->managers()->time_step()->current_time_step();
-  unsigned year      = model_->current_year();
-  Double   cv        = age_length->cv(year, time_step, age);
+  auto     current_model = model();
+  unsigned time_step     = current_model->managers()->time_step()->current_time_step();
+  unsigned year          = current_model->current_year();
+  Double   cv            = age_length->cv(year, time_step, age);
   LOG_FINE() << "times step " << time_step << " year = " << year;
   Double mean = age_length->mean_length(time_step, age);
   string dist = age_length->distribution_label();
@@ -218,11 +221,12 @@ Double Selectivity::GetLengthBasedResult(unsigned age, AgeLength* age_length) {
  * If the target object does not exist, then it will build it.
  */
 Vector3* Selectivity::GetCache(AgeLength* age_length) {
+  auto current_model = model();
   RebuildCache();
   // size varies for multi-dimensional vector
-  unsigned year_count      = model_->years().size();
-  unsigned time_step_count = model_->managers()->time_step()->size();
-  unsigned age_count       = model_->age_spread();
+  unsigned year_count      = current_model->years().size();
+  unsigned time_step_count = current_model->managers()->time_step()->size();
+  unsigned age_count       = current_model->age_spread();
 
   if (!length_based_) {
     Vector3* new_vector = &cached_age_length_values_[PARAM_NONE];
@@ -257,7 +261,7 @@ Vector3* Selectivity::GetCache(AgeLength* age_length) {
   for (unsigned i = 0; i < year_count; ++i) {
     for (unsigned j = 0; j < time_step_count; ++j) {
       for (unsigned k = 0; k < age_count; ++k) {
-        unsigned age           = model_->min_age() + k;
+        unsigned age           = current_model->min_age() + k;
         (*new_vector)[i][j][k] = this->GetLengthBasedResult(age, age_length);
       }
     }

@@ -42,8 +42,9 @@ void Exogenous::DoValidate() {
  * values_by_year.
  */
 void Exogenous::DoBuild() {
+  auto current_model = model();
   // Check that the parameter is of type scalar
-  if (model_->objects().GetAddressableType(parameter_) != addressable::kSingle)
+  if (current_model->objects().GetAddressableType(parameter_) != addressable::kSingle)
     LOG_ERROR_Q(PARAM_PARAMETER) << ": parameter '" << parameter_ << "'must be a scalar. Other addressable types not supported";
   // calculate mean;
   Double total = 0.0;
@@ -61,7 +62,7 @@ void Exogenous::DoBuild() {
 void Exogenous::DoReset() {
   // Add this to the Reset so that if a, is estimated the model can actually update the model.
 
-  Double* value = model_->objects().GetAddressable(parameter_);
+  Double* value = model()->objects().GetAddressable(parameter_);
   LOG_FINEST() << " Parameter value = " << (*value) << " a " << a_;
   for (unsigned year : years_) {
     parameter_by_year_[year] = (*value) + (a_ * (values_by_year_[year] - mean_value_));
@@ -73,8 +74,9 @@ void Exogenous::DoReset() {
  * Update
  */
 void Exogenous::DoUpdate() {
-  LOG_FINE() << "Setting Value to: " << parameter_by_year_[model_->current_year()];
-  (this->*update_function_)(parameter_by_year_[model_->current_year()]);
+  auto current_model = model();
+  LOG_FINE() << "Setting Value to: " << parameter_by_year_[current_model->current_year()];
+  (this->*update_function_)(parameter_by_year_[current_model->current_year()]);
 }
 
 } /* namespace timevarying */

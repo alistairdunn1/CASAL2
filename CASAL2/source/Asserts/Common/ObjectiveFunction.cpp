@@ -40,14 +40,14 @@ ObjectiveFunction::ObjectiveFunction(shared_ptr<Model> model) : Assert(model) {
  * Obtain smart_pointers to any objects that will be used by this object.
  */
 void ObjectiveFunction::DoBuild() {
-  model_->Subscribe(State::kFinalise, this);
+  model()->Subscribe(State::kFinalise, this);
 }
 
 /**
  * Execute/Run/Process the object.
  */
 void ObjectiveFunction::Execute() {
-  niwa::ObjectiveFunction& obj  = model_->objective_function();
+  niwa::ObjectiveFunction& obj  = model()->objective_function();
   std::streamsize          prec = std::cout.precision();
   std::cout.precision(12);
 

@@ -80,6 +80,7 @@ Model::~Model() {
   delete categories_;
   delete partition_;
   delete objective_function_;
+  delete equation_parser_;
 }
 
 GlobalConfiguration& Model::global_configuration() {

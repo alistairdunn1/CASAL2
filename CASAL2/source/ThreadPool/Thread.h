@@ -17,6 +17,7 @@
 #include <thread>
 #include <vector>
 
+#include "../BaseClasses/Object.h"
 #include "../Utilities/NoCopy.h"
 
 // namespaces

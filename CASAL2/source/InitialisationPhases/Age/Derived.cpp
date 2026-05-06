@@ -59,7 +59,8 @@ void Derived::DoValidate() {
  */
 
 void Derived::DoBuild() {
-  time_steps_ = model_->managers()->time_step()->ordered_time_steps();
+  auto current_model = model();
+  time_steps_        = current_model->managers()->time_step()->ordered_time_steps();
 
   // handle any new processes we want to insert
   for (string insert : insert_processes_) {
@@ -69,7 +70,7 @@ void Derived::DoBuild() {
     string target_process = pieces.size() == 3 ? pieces[1] : "";
     string new_process    = pieces.size() == 3 ? pieces[2] : pieces[1];
 
-    auto           time_step      = model_->managers()->time_step()->GetTimeStep(pieces[0]);
+    auto           time_step      = current_model->managers()->time_step()->GetTimeStep(pieces[0]);
     vector<string> process_labels = time_step->initialisation_process_labels(label_);
 
     if (target_process == "")
@@ -102,13 +103,13 @@ void Derived::DoBuild() {
   }
 
   // Build our partition
-  vector<string> categories = model_->categories()->category_names();
+  vector<string> categories = current_model->categories()->category_names();
 
   partition_.Init(categories);
   cached_partition_.Init(categories);
 
   // Find out the recruitment and ageing order
-  vector<ProcessType> process_types     = model_->managers()->time_step()->GetOrderedProcessTypes();
+  vector<ProcessType> process_types     = current_model->managers()->time_step()->GetOrderedProcessTypes();
   unsigned            ageing_index      = std::numeric_limits<unsigned>::max();
   unsigned            recruitment_index = std::numeric_limits<unsigned>::max();
 
@@ -126,7 +127,7 @@ void Derived::DoBuild() {
 
   // Find any BH_recruitment process in the annual cycle
   unsigned i = 0;
-  for (auto time_step : model_->managers()->time_step()->ordered_time_steps()) {
+  for (auto time_step : current_model->managers()->time_step()->ordered_time_steps()) {
     for (auto process : time_step->processes()) {
       if (process->process_type() == ProcessType::kRecruitment && process->type() == PARAM_RECRUITMENT_BEVERTON_HOLT) {
         LOG_FINEST() << "Found a BevertonHolt process";
@@ -155,20 +156,21 @@ void Derived::DoBuild() {
  * Execute the Derived Initialisation phase
  */
 void Derived::DoExecute() {
-  unsigned year_range = model_->age_spread();
+  auto     current_model = model();
+  unsigned year_range    = current_model->age_spread();
 
   if (recruitment_)
     year_range -= 1;
 
-  vector<string> categories = model_->categories()->category_names();
+  vector<string> categories = current_model->categories()->category_names();
 
   LOG_FINEST() << "running initialisation for " << year_range << " years";
-  timesteps::Manager* time_step_manager = model_->managers()->time_step();
+  timesteps::Manager* time_step_manager = current_model->managers()->time_step();
   time_step_manager->ExecuteInitialisation(label_, year_range);
 
   // a shortcut to avoid running the model over more years to get the plus group right
   // calculate the annual change c for each element of the plus group
-  if (model_->age_plus()) {
+  if (current_model->age_plus()) {
     cached_partition_.BuildCache();
     // Run the model for an extra year
     time_step_manager->ExecuteInitialisation(label_, 1);

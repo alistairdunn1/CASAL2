@@ -96,8 +96,8 @@ void MortalityHollingRate::DoValidate() {
   if (parameters_.GetTable(PARAM_PREY_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
     prey_selectivity_by_year_supplied_ = true;
     auto columns                       = prey_selectivities_table_->columns();
-    if (columns.size() != (model_->age_spread() + 1))
-      LOG_FATAL_P(PARAM_PREY_SELECTIVITIES_BY_YEAR) << "Specify a column for each model age plus a year column, which should = " << (model_->age_spread() + 1)
+    if (columns.size() != (model()->age_spread() + 1))
+      LOG_FATAL_P(PARAM_PREY_SELECTIVITIES_BY_YEAR) << "Specify a column for each model age plus a year column, which should = " << (model()->age_spread() + 1)
                                                     << " but the number of columns = " << columns.size() << "";
     if (std::find(columns.begin(), columns.end(), PARAM_YEAR) == columns.end())
       LOG_ERROR_P(PARAM_PREY_SELECTIVITIES_BY_YEAR) << "The required column '" << PARAM_YEAR << "'' was not found.";
@@ -121,7 +121,7 @@ void MortalityHollingRate::DoValidate() {
         LOG_FATAL_P(PARAM_PREY_SELECTIVITIES_BY_YEAR) << "The ages in the columns should be strictly increasing: " << ages[age] << " + 1 != " << ages[age + 1];
     }
 
-    auto model_years = model_->years();
+    auto model_years = model()->years();
     auto rows        = prey_selectivities_table_->data();
     for (auto row : rows) {
       unsigned year = 0;
@@ -143,8 +143,8 @@ void MortalityHollingRate::DoValidate() {
   if (parameters_.GetTable(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR)->HasBeenDefined()) {
     predator_selectivity_by_year_supplied_ = true;
     auto columns                           = predator_selectivities_table_->columns();
-    if (columns.size() != (model_->age_spread() + 1))
-      LOG_FATAL_P(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR) << "Specify a column for each model age plus a year column, which should = " << (model_->age_spread() + 1)
+    if (columns.size() != (model()->age_spread() + 1))
+      LOG_FATAL_P(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR) << "Specify a column for each model age plus a year column, which should = " << (model()->age_spread() + 1)
                                                         << ", the number of columns = " << columns.size() << "";
     if (std::find(columns.begin(), columns.end(), PARAM_YEAR) == columns.end())
       LOG_ERROR_P(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR) << "The required column " << PARAM_YEAR << " was not found.";
@@ -168,7 +168,7 @@ void MortalityHollingRate::DoValidate() {
         LOG_FATAL_P(PARAM_PREDATOR_SELECTIVITIES_BY_YEAR) << "The ages in the columns should be strictly increasing: " << ages[age] << " + 1 != " << ages[age + 1];
     }
 
-    auto model_years = model_->years();
+    auto model_years = model()->years();
     auto rows        = predator_selectivities_table_->data();
     for (auto row : rows) {
       unsigned year = 0;
@@ -204,7 +204,7 @@ void MortalityHollingRate::DoBuild() {
   if (!prey_selectivity_by_year_supplied_) {
     unsigned category_offset = 0;
     for (string selectivity : prey_selectivity_labels_) {
-      prey_selectivities_.push_back(model_->managers()->selectivity()->GetSelectivity(selectivity));
+      prey_selectivities_.push_back(model()->managers()->selectivity()->GetSelectivity(selectivity));
       if (!prey_selectivities_[category_offset])
         LOG_ERROR_P(PARAM_PREY_SELECTIVITIES) << "Prey selectivity " << selectivity << " was not found.";
       ++category_offset;
@@ -214,7 +214,7 @@ void MortalityHollingRate::DoBuild() {
   if (!predator_selectivity_by_year_supplied_) {
     category_offset = 0;
     for (string selectivity : predator_selectivity_labels_) {
-      predator_selectivities_.push_back(model_->managers()->selectivity()->GetSelectivity(selectivity));
+      predator_selectivities_.push_back(model()->managers()->selectivity()->GetSelectivity(selectivity));
       if (!predator_selectivities_[category_offset])
         LOG_ERROR_P(PARAM_PREDATOR_SELECTIVITIES) << "Predator selectivity " << selectivity << " was not found.";
       ++category_offset;
@@ -222,7 +222,7 @@ void MortalityHollingRate::DoBuild() {
   }
 
   if (penalty_label_ != "none") {
-    penalty_ = model_->managers()->penalty()->GetProcessPenalty(penalty_label_);
+    penalty_ = model()->managers()->penalty()->GetProcessPenalty(penalty_label_);
     if (!penalty_)
       LOG_ERROR_P(PARAM_PENALTY) << ": Penalty label " << penalty_label_ << " was not found.";
   }
@@ -238,13 +238,13 @@ void MortalityHollingRate::DoBuild() {
 void MortalityHollingRate::DoExecute() {
   LOG_TRACE();
   // Check if we are executing this process in current year
-  if (std::find(years_.begin(), years_.end(), model_->current_year()) != years_.end()) {
-    unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  if (std::find(years_.begin(), years_.end(), model()->current_year()) != years_.end()) {
+    unsigned time_step_index = model()->managers()->time_step()->current_time_step();
 
     /**
      * Loop for prey each category, calculate vulnerable abundance
      */
-    unsigned current_year       = model_->current_year();
+    unsigned current_year       = model()->current_year();
     Double   Mortality          = 0;
     Double   SumMortality       = 0;
     Double   Vulnerable         = 0;

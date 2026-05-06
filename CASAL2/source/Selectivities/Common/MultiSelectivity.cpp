@@ -52,17 +52,18 @@ void MultiSelectivity::DoValidate() {
  *
  */
 void MultiSelectivity::DoBuild() {
+  auto current_model = model();
   // Build Selectivity pointers
-  vector<unsigned> run_years        = model_->years();             // years for the run
-  vector<unsigned> projection_years = model_->years_projection();  // projection years only
-  vector<unsigned> all_years        = model_->years_all();         // years for the run + projection years
-  default_selectivity_              = model_->managers()->selectivity()->GetSelectivity(default_selectivity_label_);
-  projection_selectivity_           = model_->managers()->selectivity()->GetSelectivity(projection_selectivity_label_);
+  vector<unsigned> run_years        = current_model->years();             // years for the run
+  vector<unsigned> projection_years = current_model->years_projection();  // projection years only
+  vector<unsigned> all_years        = current_model->years_all();         // years for the run + projection years
+  default_selectivity_              = current_model->managers()->selectivity()->GetSelectivity(default_selectivity_label_);
+  projection_selectivity_           = current_model->managers()->selectivity()->GetSelectivity(projection_selectivity_label_);
 
   if (!default_selectivity_)
     LOG_ERROR_P(PARAM_DEFAULT_SELECTIVITY) << ": Default selectivity label " << default_selectivity_label_ << " was not found.";
 
-  projection_selectivity_ = model_->managers()->selectivity()->GetSelectivity(projection_selectivity_label_);
+  projection_selectivity_ = current_model->managers()->selectivity()->GetSelectivity(projection_selectivity_label_);
 
   if (projection_selectivity_label_ != "" && !projection_selectivity_)
     LOG_ERROR_P(PARAM_DEFAULT_SELECTIVITY) << ": The projection selectivity label " << projection_selectivity_label_ << " was not found.";
@@ -83,7 +84,7 @@ void MultiSelectivity::DoBuild() {
 
   // Then overwrite with the year value if user supplied for either/both run and projection years
   for (unsigned y_ndx = 0; y_ndx < years_.size(); ++y_ndx) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(selectivity_labels_[y_ndx]);
+    Selectivity* selectivity = current_model->managers()->selectivity()->GetSelectivity(selectivity_labels_[y_ndx]);
     if (selectivity) {
       selectivities_[years_[y_ndx]] = selectivity;
       selectivities_[years_[y_ndx]]->set_label(selectivity->GetLabel());
@@ -107,15 +108,15 @@ void MultiSelectivity::DoBuild() {
  * @return the MultiSelectivity value
  */
 Double MultiSelectivity::GetAgeResult(unsigned age, AgeLength* age_length) {
-  return selectivities_[model_->current_year()]->GetAgeResult(age, age_length);
+  return selectivities_[model()->current_year()]->GetAgeResult(age, age_length);
 }
 
 Double MultiSelectivity::get_value(Double value) {
-  return selectivities_[model_->current_year()]->get_value(value);
+  return selectivities_[model()->current_year()]->get_value(value);
 }
 
 Double MultiSelectivity::get_value(unsigned value) {
-  return selectivities_[model_->current_year()]->get_value(value);
+  return selectivities_[model()->current_year()]->get_value(value);
 }
 /**
  * GetLengthResult function
@@ -124,7 +125,7 @@ Double MultiSelectivity::get_value(unsigned value) {
  * @return the MultiSelectivity value
  */
 Double MultiSelectivity::GetLengthResult(unsigned length_bin_index) {
-  return selectivities_[model_->current_year()]->GetLengthResult(length_bin_index);
+  return selectivities_[model()->current_year()]->GetLengthResult(length_bin_index);
 }
 
 } /* namespace selectivities */

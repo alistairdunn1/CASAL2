@@ -50,9 +50,10 @@ void ADOLC::DoValidate() {
 void ADOLC::Execute() {
   LOG_TRACE();
   // Variables
-  adolc::CallBack call_back(model_);
+  auto            current_model = model();
+  adolc::CallBack call_back(current_model);
 
-  auto estimate_manager = model_->managers()->estimate();
+  auto estimate_manager = current_model->managers()->estimate();
 
   if (parameter_transformation_ == PARAM_TAN_TRANSFORM) {
     use_tan_transform = true;

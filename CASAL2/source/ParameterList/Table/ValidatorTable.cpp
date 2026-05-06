@@ -200,14 +200,15 @@ shared_ptr<ValidatorTable> ValidatorTable::ColumnIsYear(unsigned column_index, c
   if (table_ == nullptr)
     LOG_CODE_ERROR() << "table_ is nullptr";
 
-  auto data = table_->data();
+  auto current_model = model();
+  auto data          = table_->data();
   for (const auto& row : data) {
     if (column_index >= row.size()) {
       LOG_ERROR() << table_->location() << "The table " << table_->label() << " does not have a column at index " << column_index << ". We expected it to contain year values.";
       return shared_from_this();
     }
 
-    auto     model_years = model_->years();
+    auto     model_years = current_model->years();
     unsigned year        = 0;
     if (!utilities::To<unsigned>(row[column_index], year)) {
       LOG_ERROR() << table_->location() << "The table " << table_->label() << " column at index " << column_index << " does not contain a valid year value: '" << row[column_index]

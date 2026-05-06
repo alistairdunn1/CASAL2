@@ -73,7 +73,7 @@ void AgeLength::DoValidate() {
   parameters_.ValidateVector(PARAM_NUMERATOR_CATEGORIES)->DuplicateParameterIfNotAssigned(PARAM_CATEGORIES);
 
   // check ages and parameters are sensible
-  age_spread_ = model_->age_spread();
+  age_spread_ = model()->age_spread();
 
   // set sum internal flags
   // enums have a cheaper lookup cost than string
@@ -140,8 +140,8 @@ void AgeLength::DoValidate() {
  */
 void AgeLength::DoBuild() {
   LOG_TRACE();
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
   // create an index so that we can get a pointer to an individual category (we will need to access their age-length pointer)
   // from the partition
 
@@ -181,7 +181,7 @@ void AgeLength::DoBuild() {
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
     LOG_FINEST() << "label = " << label;
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -197,7 +197,7 @@ void AgeLength::DoBuild() {
 
   // Create a pointer to Ageing error misclassification matrix
   if (ageing_error_label_ != "") {
-    ageing_error_ = model_->managers()->ageing_error()->GetAgeingError(ageing_error_label_);
+    ageing_error_ = model()->managers()->ageing_error()->GetAgeingError(ageing_error_label_);
     if (!ageing_error_)
       LOG_ERROR_P(PARAM_AGEING_ERROR) << "Ageing error label (" << ageing_error_label_ << ") was not found.";
     ageing_error_matrix_ = ageing_error_->mis_matrix();
@@ -221,7 +221,7 @@ void AgeLength::DoBuild() {
   }
 
   // Subscribe this observation to timestep to be executed
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_ERROR_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -248,8 +248,8 @@ void AgeLength::Execute() {
   LOG_TRACE();
   LOG_FINEST() << "Entering observation " << label_;
   auto     partition_iter = partition_->Begin();  // vector<vector<partition::Category> >
-  unsigned year           = model_->current_year();
-  unsigned time_step      = model_->managers()->time_step()->current_time_step();
+  unsigned year           = model()->current_year();
+  unsigned time_step      = model()->managers()->time_step()->current_time_step();
   fill(numbers_by_unique_size_.begin(), numbers_by_unique_size_.end(), 0.0);
   fill(numbers_at_age_numerator_.begin(), numbers_at_age_numerator_.end(), 0.0);
   LOG_FINEST() << "Number of categories " << category_labels_.size();
@@ -264,7 +264,7 @@ void AgeLength::Execute() {
     for (unsigned cached_counter = 0; category_iter != partition_iter->end(); ++category_iter, ++cached_counter) {
       fill(numbers_at_age_[cached_counter].begin(), numbers_at_age_[cached_counter].end(), 0.0);
       for (unsigned data_offset = 0; data_offset < (*category_iter)->data_.size(); ++data_offset) {
-        select_value = selectivities_[all_category_iter]->GetAgeResult(data_offset + model_->min_age(), age_length_ptr_);
+        select_value = selectivities_[all_category_iter]->GetAgeResult(data_offset + model()->min_age(), age_length_ptr_);
         start_value  = (*category_iter)->data_[data_offset] * select_value;
         end_value    = (*category_iter)->cached_data_[data_offset] * select_value;
         LOG_FINEST() << "start : " << start_value << " end " << end_value << " selectivity = " << select_value;
@@ -287,7 +287,7 @@ void AgeLength::Execute() {
     for (unsigned i = 0; i < n_fish_; ++i) {
       numerator           = 0.0;
       denominator         = 0.0;
-      individual_age_iter = individual_ages_[i] - model_->min_age();
+      individual_age_iter = individual_ages_[i] - model()->min_age();
 
       LOG_FINEST() << "age = " << individual_ages_[i] << " individual_age_iter = " << individual_age_iter;
 
@@ -309,17 +309,17 @@ void AgeLength::Execute() {
           if (ageing_error_matrix_[age_iter][individual_age_iter] > 1e-4) {
             if (numerator_selectivity_->IsSelectivityLengthBased()) {
               LOG_FINEST() << "N " << numbers_at_age_numerator_[age_iter] << " mis " << ageing_error_matrix_[age_iter][individual_age_iter] << " pdf "
-                           << age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model_->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
+                           << age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model()->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
               numerator += numbers_at_age_numerator_[age_iter] * ageing_error_matrix_[age_iter][individual_age_iter]
-                           * age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model_->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
+                           * age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model()->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
             } else {
               LOG_FINEST() << "N " << numbers_at_age_numerator_[age_iter] << " mis "
                            << ageing_error_matrix_[age_iter][individual_age_iter];  // << " pdf " << age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter +
                                                                                     // model_->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
               LOG_FINEST() << "age-length label = " << age_length_ptr_->label();
-              LOG_FINEST() << "pdf = " << age_length_ptr_->get_pdf(age_iter + model_->min_age(), individual_lengths_[i], year, time_step);
+              LOG_FINEST() << "pdf = " << age_length_ptr_->get_pdf(age_iter + model()->min_age(), individual_lengths_[i], year, time_step);
               numerator += numbers_at_age_numerator_[age_iter] * ageing_error_matrix_[age_iter][individual_age_iter]
-                           * age_length_ptr_->get_pdf(age_iter + model_->min_age(), individual_lengths_[i], year, time_step);
+                           * age_length_ptr_->get_pdf(age_iter + model()->min_age(), individual_lengths_[i], year, time_step);
             }
           }
         }
@@ -368,12 +368,13 @@ void AgeLength::Execute() {
               // selectivities_[cached_counter]);
               numbers_by_unique_size_[l]
                   += numbers_at_age_[cached_counter][age_iter]
-                     * age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model_->min_age(), unique_lengths_[l], year, time_step, selectivities_[cached_counter]);
+                     * age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model()->min_age(), unique_lengths_[l], year, time_step, selectivities_[cached_counter]);
               LOG_FINEST() << numbers_by_unique_size_[l];
             } else {
               // LOG_FINEST() << "age = " << age_iter << " N = " << numbers_at_age_[cached_counter][age_iter] << " pdf = " << age_length_ptr_->age_length_->get_pdf(age_iter +
               // model_->min_age(), unique_lengths_[l], year, time_step);
-              numbers_by_unique_size_[l] += numbers_at_age_[cached_counter][age_iter] * age_length_ptr_->get_pdf(age_iter + model_->min_age(), unique_lengths_[l], year, time_step);
+              numbers_by_unique_size_[l]
+                  += numbers_at_age_[cached_counter][age_iter] * age_length_ptr_->get_pdf(age_iter + model()->min_age(), unique_lengths_[l], year, time_step);
             }
           }
         }
@@ -385,7 +386,7 @@ void AgeLength::Execute() {
     for (unsigned i = 0; i < n_fish_; ++i) {
       numerator           = 0.0;
       denominator         = 0.0;
-      individual_age_iter = individual_ages_[i] - model_->min_age();
+      individual_age_iter = individual_ages_[i] - model()->min_age();
       if (!apply_ageing_error_) {
         LOG_FINE() << "No ageing error";
         if (numerator_selectivity_->IsSelectivityLengthBased()) {
@@ -401,12 +402,12 @@ void AgeLength::Execute() {
           if (ageing_error_matrix_[age_iter][individual_age_iter] > 1e-4) {
             if (numerator_selectivity_->IsSelectivityLengthBased()) {
               numerator += numbers_at_age_numerator_[age_iter] * ageing_error_matrix_[age_iter][individual_age_iter]
-                           * age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model_->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
+                           * age_length_ptr_->get_pdf_with_sized_based_selectivity(age_iter + model()->min_age(), individual_lengths_[i], year, time_step, numerator_selectivity_);
             } else {
               LOG_FINE() << numbers_at_age_numerator_[age_iter] << " mis " << ageing_error_matrix_[age_iter][individual_age_iter]
-                         << " get pdf = " << age_length_ptr_->get_pdf(age_iter + model_->min_age(), individual_lengths_[i], year, time_step);
+                         << " get pdf = " << age_length_ptr_->get_pdf(age_iter + model()->min_age(), individual_lengths_[i], year, time_step);
               numerator += numbers_at_age_numerator_[age_iter] * ageing_error_matrix_[age_iter][individual_age_iter]
-                           * age_length_ptr_->get_pdf(age_iter + model_->min_age(), individual_lengths_[i], year, time_step);
+                           * age_length_ptr_->get_pdf(age_iter + model()->min_age(), individual_lengths_[i], year, time_step);
             }
           }
         }

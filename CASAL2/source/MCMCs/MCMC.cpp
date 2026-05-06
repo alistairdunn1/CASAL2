@@ -97,7 +97,7 @@ bool MCMC::WithinBounds() {
  * Validate the parameters defined in the configuration file
  */
 void MCMC::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   parameters_.Validate(PARAM_LENGTH)->GreaterThan(0u);
   parameters_.Validate(PARAM_BURN_IN)->GreaterThanOrEqualTo(0u)->LessThanOrEqualToParameter(PARAM_LENGTH);
   parameters_.Validate(PARAM_STEP_SIZE)->GreaterThanOrEqualTo(0.0);
@@ -121,7 +121,7 @@ void MCMC::Validate() {
 void MCMC::Build() {
   LOG_TRACE();
 
-  estimates_ = model_->managers()->estimate()->GetIsEstimated();
+  estimates_ = model()->managers()->estimate()->GetIsEstimated();
 
   estimate_count_ = estimates_.size();
   if (estimate_count_ == 0)
@@ -145,8 +145,8 @@ void MCMC::Build() {
 void MCMC::Execute(shared_ptr<ThreadPool> thread_pool) {
   LOG_INFO() << "Starting MCMC " << type_;
   utilities::RandomNumberGenerator& rng = utilities::RandomNumberGenerator::Instance();
-  rng.Reset(model_->global_configuration().random_seed());
-  LOG_MEDIUM() << "Resetting RNG with Seed: " << model_->global_configuration().random_seed();
+  rng.Reset(model()->global_configuration().random_seed());
+  LOG_MEDIUM() << "Resetting RNG with Seed: " << model()->global_configuration().random_seed();
 
   if (type_ == PARAM_INDEPENDENCE_METROPOLIS)
     return DoExecute(thread_pool);
@@ -157,7 +157,7 @@ void MCMC::Execute(shared_ptr<ThreadPool> thread_pool) {
   // for (size_t i = 0; auto e : estimates_) candidates_[i++] = e->value(); // C++20
   for (unsigned i = 0; i < estimates_.size(); ++i) candidates_[i] = estimates_[i]->value();
 
-  if (!model_->global_configuration().resume_mcmc()) {
+  if (!model()->global_configuration().resume_mcmc()) {
     BuildCovarianceMatrix();
     successful_jumps_ = starting_iteration_;
   } else
@@ -176,8 +176,8 @@ void MCMC::Execute(shared_ptr<ThreadPool> thread_pool) {
       estimates_[i]->set_value(candidates_[i]);
   }
 
-  model_->FullIteration();
-  ObjectiveFunction& obj_function = model_->objective_function();
+  model()->FullIteration();
+  ObjectiveFunction& obj_function = model()->objective_function();
   obj_function.CalculateScore();
 
   /**
@@ -198,7 +198,7 @@ void MCMC::Execute(shared_ptr<ThreadPool> thread_pool) {
                            .step_size_                   = step_size_,
                            .values_                      = candidates_};
 
-  if (!model_->global_configuration().resume_mcmc()) {
+  if (!model()->global_configuration().resume_mcmc()) {
     jumps_++;
     jumps_since_adapt_++;
     chain_.push_back(new_link);
@@ -212,7 +212,7 @@ void MCMC::Execute(shared_ptr<ThreadPool> thread_pool) {
     chain_.push_back(new_link);
   }
   // Make sure we print the first link of the chain
-  model_->managers()->report()->Execute(model_, State::kIterationComplete);
+  model()->managers()->report()->Execute(model(), State::kIterationComplete);
 
   if (length_ == 1)
     return;
@@ -253,7 +253,7 @@ void MCMC::ResumeChain() {
 void MCMC::GenerateRandomStart() {
   LOG_INFO() << "Generating random start values for MCMC";
   vector<double>    original_candidates = candidates_;
-  vector<Estimate*> estimates           = model_->managers()->estimate()->GetIsEstimated();
+  vector<Estimate*> estimates           = model()->managers()->estimate()->GetIsEstimated();
   vector<string>    failed_parameter_list;
 
   LOG_MEDIUM() << "candidates: ";
@@ -407,7 +407,7 @@ void MCMC::BuildCovarianceMatrix() {
   }
 
   // Remove for the shared library only used for debugging purposes
-  // Minimiser* minimiser = model_->managers()->minimiser()->active_minimiser();
+  // Minimiser* minimiser = model()->managers()->minimiser()->active_minimiser();
   // covariance_matrix_ = minimiser->covariance_matrix();
   // original_correlation = minimiser->correlation_matrix();
 
@@ -461,7 +461,7 @@ void MCMC::BuildCovarianceMatrix() {
    * Adjust any non-zero variances less than min_diff_ * difference between bounds
    */
   vector<double>    difference_bounds;
-  vector<Estimate*> estimates = model_->managers()->estimate()->GetIsEstimated();
+  vector<Estimate*> estimates = model()->managers()->estimate()->GetIsEstimated();
   LOG_MEDIUM() << "upper_bound lower_bound";
   for (Estimate* estimate : estimates) {
     difference_bounds.push_back(estimate->upper_bound() - estimate->lower_bound());

@@ -51,13 +51,14 @@ Observation::Observation(shared_ptr<Model> model) : model_(model) {
  */
 void Observation::Validate() {
   LOG_TRACE();
-  parameters_.Populate(model_);
+  auto current_model = model();
+  parameters_.Populate(current_model);
   parameters_.Validate(PARAM_DELTA)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_LIKELIHOOD_MULTIPLIER)->GreaterThanOrEqualTo(0.0);
   parameters_.Validate(PARAM_ERROR_VALUE_MULTIPLIER)->GreaterThanOrEqualTo(0.0);
 
   LOG_FINEST() << "validating obs " << label_ << " of type = " << type_;
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (current_model->run_mode() == RunMode::kSimulation) {
     if (likelihood_type_ == PARAM_PSEUDO) {
       likelihood_type_ = simulation_likelihood_label_;
     } else {
@@ -74,7 +75,7 @@ void Observation::Validate() {
    * or the number of defined collections
    */
   expected_selectivity_count_ = 0;
-  Categories* categories      = model_->categories();
+  Categories* categories      = current_model->categories();
   for (const string& category_label : category_labels_) expected_selectivity_count_ += categories->GetNumberOfCategoriesDefined(category_label);
 
   LOG_FINEST() << "Expected Selectivity count = " << expected_selectivity_count_;
@@ -88,7 +89,8 @@ void Observation::Validate() {
 void Observation::Build() {
   LOG_TRACE();
 
-  likelihood_ = model_->managers()->likelihood()->GetOrCreateLikelihood(model_, label_, likelihood_type_);
+  auto current_model = model();
+  likelihood_        = current_model->managers()->likelihood()->GetOrCreateLikelihood(current_model, label_, likelihood_type_);
   if (!likelihood_) {
     LOG_FATAL_P(PARAM_LIKELIHOOD) << "(" << likelihood_type_ << ") was not found or could not be constructed.";
     return;
@@ -145,7 +147,7 @@ void Observation::SaveComparison(string category, std::set<string> selectivities
   new_comparison.adjusted_error_ = adjusted_error;
   new_comparison.delta_          = delta;
   new_comparison.score_          = score;
-  comparisons_[model_->current_year()].push_back(new_comparison);
+  comparisons_[model()->current_year()].push_back(new_comparison);
 }
 
 void Observation::SaveComparison(string category, unsigned age, Double length, Double expected, double observed, Double process_error, double error_value, Double adjusted_error,

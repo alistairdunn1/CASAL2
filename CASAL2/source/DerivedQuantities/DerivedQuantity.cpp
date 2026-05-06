@@ -53,7 +53,7 @@ DerivedQuantity::DerivedQuantity(shared_ptr<Model> model) : model_(model), parti
  * Note: all parameters are populated from configuration files
  */
 void DerivedQuantity::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
 
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION)->GreaterThanOrEqualTo(0.0)->LessThanOrEqualTo(1.0);
   parameters_.Validate(PARAM_TIME_STEP_PROPORTION_METHOD)->IsInList({PARAM_WEIGHTED_SUM, PARAM_WEIGHTED_PRODUCT});
@@ -75,7 +75,7 @@ void DerivedQuantity::Build() {
 
   partition_.Init(category_labels_);
 
-  selectivities::Manager& selectivity_manager = *model_->managers()->selectivity();
+  selectivities::Manager& selectivity_manager = *model()->managers()->selectivity();
   for (string label : selectivity_labels_) {
     Selectivity* selectivity = selectivity_manager.GetSelectivity(label);
     if (!selectivity)
@@ -87,7 +87,7 @@ void DerivedQuantity::Build() {
   /**
    * ensure the time steps we have are valid
    */
-  TimeStep* time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  TimeStep* time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step)
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label (" << time_step_label_ << ") was not found";
 
@@ -103,7 +103,7 @@ void DerivedQuantity::Reset() {
   initialisation_values_.clear();
 
   // initialise the values variable
-  for (unsigned year : model_->years()) values_[year] = 0.0;
+  for (unsigned year : model()->years()) values_[year] = 0.0;
 }
 
 /**
@@ -129,7 +129,7 @@ Double DerivedQuantity::GetValue(unsigned year) {
   // Calculate how many years to go back. At this point
   // either we're in the init phases or we're going back
   // in to the init phases.
-  unsigned years_to_go_back = model_->start_year() - year;
+  unsigned years_to_go_back = model()->start_year() - year;
 
   Double result = 0.0;
   if (years_to_go_back == 0) {
@@ -144,7 +144,7 @@ Double DerivedQuantity::GetValue(unsigned year) {
   }
 
   // Make an exception for intialisation phases such as derived which only requires to go back one year
-  if (model_->b0_initialised(label_)) {
+  if (model()->b0_initialised(label_)) {
     result = (*initialisation_values_.rbegin()->rbegin());
   }
 

@@ -39,7 +39,7 @@ public:
   virtual ~AgeingError() = default;
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){};
+  void Verify(shared_ptr<Model> model) {};
   void Reset() { DoReset(); }
 
   // Accessors
@@ -55,7 +55,10 @@ protected:
   virtual void DoReset()    = 0;
 
   // Members
-  shared_ptr<Model>       model_      = nullptr;
+  weak_ptr<Model> model_;
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model>       model() const { return model_.lock(); }
   unsigned                min_age_    = 0;
   unsigned                max_age_    = 0;
   bool                    plus_group_ = false;

@@ -29,12 +29,12 @@ namespace cached {
 CombinedCategories::CombinedCategories(shared_ptr<Model> model, const vector<string>& category_labels) : model_(model) {
   LOG_TRACE();
 
-  unsigned start_year = model_->start_year();
-  unsigned final_year = model_->final_year();
+  unsigned start_year = model->start_year();
+  unsigned final_year = model->final_year();
   LOG_FINEST() << "Model details: start_year: " << start_year << "; final_year: " << final_year;
   LOG_FINEST() << "Categories: " << category_labels.size();
 
-  Partition&     partition = model_->partition();
+  Partition&     partition = model->partition();
   vector<string> split_category_labels;
 
   for (unsigned year = start_year; year <= final_year; ++year) data_[year].resize(category_labels.size());
@@ -69,7 +69,7 @@ CombinedCategories::CombinedCategories(shared_ptr<Model> model, const vector<str
  * so it can be used for interpolation later.
  */
 void CombinedCategories::BuildCache() {
-  for (auto& category_vector : data_[model_->current_year()]) {
+  for (auto& category_vector : data_[model()->current_year()]) {
     for (auto* category : category_vector) {
       category->cached_data_ = category->data_;
     }
@@ -77,15 +77,15 @@ void CombinedCategories::BuildCache() {
 }
 
 CombinedCategories::DataType::iterator CombinedCategories::Begin() {
-  return data_[model_->current_year()].begin();
+  return data_[model()->current_year()].begin();
 }
 
 CombinedCategories::DataType::iterator CombinedCategories::End() {
-  return data_[model_->current_year()].end();
+  return data_[model()->current_year()].end();
 }
 
 unsigned CombinedCategories::Size() {
-  return data_[model_->current_year()].size();
+  return data_[model()->current_year()].size();
 }
 
 } /* namespace cached */

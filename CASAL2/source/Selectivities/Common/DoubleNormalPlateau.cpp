@@ -56,7 +56,7 @@ void DoubleNormalPlateau::DoValidate() {
   parameters_.Validate(PARAM_ALPHA)->GreaterThan(0.0);
   parameters_.Validate(PARAM_BETA)->GreaterThanOrEqualTo(0.0);
 
-  if (model_->partition_type() == PartitionType::kAge) {
+  if (model()->partition_type() == PartitionType::kAge) {
     parameters_.Validate(PARAM_BETA)->LessThanOrEqualToModelMaxAge();
   }
 }

@@ -32,15 +32,15 @@ Categories::Categories(shared_ptr<Model> model) : model_(model) {}
 void Categories::Init(const vector<string>& category_labels) {
   LOG_TRACE();
 
-  unsigned start_year = model_->start_year();
-  unsigned final_year = model_->final_year();
+  unsigned start_year = model()->start_year();
+  unsigned final_year = model()->final_year();
 
-  if (model_->run_mode() == RunMode::kProjection)
-    final_year = model_->projection_final_year();
+  if (model()->run_mode() == RunMode::kProjection)
+    final_year = model()->projection_final_year();
   LOG_FINEST() << "Model details: start_year: " << start_year << "; final_year: " << final_year;
   LOG_FINEST() << "Categories: " << category_labels.size();
 
-  Partition& partition = model_->partition();
+  Partition& partition = model()->partition();
 
   for (string category_label : category_labels) {
     partition::Category& category = partition.category(category_label);
@@ -60,7 +60,7 @@ void Categories::Init(const vector<string>& category_labels) {
  * @return Iterator to first stored element for current year
  */
 Categories::DataType::const_iterator Categories::begin() {
-  return data_[model_->current_year()].begin();
+  return data_[model()->current_year()].begin();
 }
 
 /**
@@ -70,14 +70,14 @@ Categories::DataType::const_iterator Categories::begin() {
  * @return End iterator for the stored elements for current year
  */
 Categories::DataType::const_iterator Categories::end() {
-  return data_[model_->current_year()].end();
+  return data_[model()->current_year()].end();
 }
 
 /**
  *
  */
 unsigned Categories::size() {
-  return data_[model_->current_year()].size();
+  return data_[model()->current_year()].size();
 }
 
 } /* namespace accessors */

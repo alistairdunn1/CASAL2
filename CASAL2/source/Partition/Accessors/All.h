@@ -60,7 +60,9 @@ public:
 
 private:
   // Members
-  shared_ptr<Model> model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "Partition::All"); }
   All::DataType     data_;
 };
 

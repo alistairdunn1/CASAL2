@@ -120,13 +120,14 @@ EquationParser::~EquationParser() {
  */
 Double& EquationParser::LookupValue(const std::string& name) {
   LOG_FINEST() << "Equation lookup on value: " << name;
+  auto current_model = model();
 
   string error = "";
-  if (!model_->objects().VerifyAddressableForUse(name, addressable::kLookup, error)) {
+  if (!current_model->objects().VerifyAddressableForUse(name, addressable::kLookup, error)) {
     LOG_FATAL() << "addressable " << name << " could not be verified for use in equation_parser. Error: " << error;
   }
 
-  Double* value = model_->objects().GetAddressable(name);
+  Double* value = current_model->objects().GetAddressable(name);
   LOG_FINEST() << name << ".value: " << AS_DOUBLE((*value));
   return *value;
 }

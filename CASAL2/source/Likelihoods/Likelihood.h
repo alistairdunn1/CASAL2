@@ -35,27 +35,28 @@ public:
   Likelihood(shared_ptr<Model> model);
   virtual ~Likelihood() = default;
   void           Validate();
-  void           Build(){};
-  void           Verify(shared_ptr<Model> model){DoVerify(model);};
-  void           Reset() final{};
+  void           Build() {};
+  void           Verify(shared_ptr<Model> model) { DoVerify(model); };
+  void           Reset() final {};
   virtual Double AdjustErrorValue(const Double process_error, const Double error_value) = 0;
-  virtual void   SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons){};
+  virtual void   SimulateObserved(map<unsigned, vector<observations::Comparison> >& comparisons) {};
   virtual Double GetInitialScore(map<unsigned, vector<observations::Comparison> >& comparisons, unsigned year) { return 0.0; };
-  virtual void   GetScores(map<unsigned, vector<observations::Comparison> >& comparisons){};
-  virtual void   DoValidate(){};
-  virtual void   DoVerify(shared_ptr<Model> model){};
+  virtual void   GetScores(map<unsigned, vector<observations::Comparison> >& comparisons) {};
+  virtual void   DoValidate() {};
+  virtual void   DoVerify(shared_ptr<Model> model) {};
 
   // accessors
-  void set_multiplier(Double new_value) { multiplier_ = new_value; }
-  void set_error_value_multiplier(Double new_value) { error_value_multiplier_ = new_value; }
-  void set_type(const string& type) { type_ = type; }
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Likelihood"); }
+  void              set_multiplier(Double new_value) { multiplier_ = new_value; }
+  void              set_error_value_multiplier(Double new_value) { error_value_multiplier_ = new_value; }
+  void              set_type(const string& type) { type_ = type; }
 
 protected:
   // members
-  shared_ptr<Model> model_                  = nullptr;
-  Double            multiplier_             = 1.0;
-  Double            error_value_multiplier_ = 1.0;
-  vector<string>    likelihood_types_with_no_labels_;
+  weak_ptr<Model> model_                  = {};
+  Double          multiplier_             = 1.0;
+  Double          error_value_multiplier_ = 1.0;
+  vector<string>  likelihood_types_with_no_labels_;
 };
 } /* namespace niwa */
 #endif /* LIKELIHOOD_H_ */

@@ -58,7 +58,9 @@ public:
 
 private:
   // Members
-  shared_ptr<Model>       model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>       model() const { return base::Object::LockWeakPtr(model_, "Partition::Accessors::Cached::CombinedCategories"); }
   map<unsigned, DataType> data_;
   bool                    need_rebuild_ = true;
   unsigned                category_count_;

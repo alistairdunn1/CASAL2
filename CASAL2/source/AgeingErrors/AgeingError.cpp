@@ -39,12 +39,12 @@ AgeingError::AgeingError(shared_ptr<Model> model) : model_(model) {
  * Note: all parameters are populated from configuration files
  */
 void AgeingError::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
 
-  min_age_    = model_->min_age();
-  max_age_    = model_->max_age();
-  plus_group_ = model_->age_plus();
-  age_spread_ = model_->age_spread();
+  min_age_    = model()->min_age();
+  max_age_    = model()->max_age();
+  plus_group_ = model()->age_plus();
+  age_spread_ = model()->age_spread();
 
   DoValidate();
 }

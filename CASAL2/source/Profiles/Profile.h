@@ -37,33 +37,34 @@ public:
   void Validate();
   void Build();
   void Verify(shared_ptr<Model> model);
-  void Reset(){};
+  void Reset() {};
   void FirstStep();
   void NextStep();
   void RestoreOriginalValue();
 
   // accessors
-  string   parameter() const { return parameter_; }
-  vector<string>   same_parameters() const { return same_labels_; }
-  unsigned steps() const { return steps_; }
-  Double   value() const { return *target_; }
-  vector<Double>   get_values() const { return values_; }
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Profile"); }
+  string            parameter() const { return parameter_; }
+  vector<string>    same_parameters() const { return same_labels_; }
+  unsigned          steps() const { return steps_; }
+  Double            value() const { return *target_; }
+  vector<Double>    get_values() const { return values_; }
 
 private:
   // members
-  shared_ptr<Model> model_               = nullptr;
-  unsigned          steps_               = 0;
-  Double            lower_bound_         = 0;
-  Double            upper_bound_         = 0;
-  string            parameter_           = "";
-  vector<string>    same_labels_;
-  vector<Double*>   sames_;
-  Double            step_size_           = 0;
-  Double*           target_              = nullptr;
-  Double            original_value_      = 0;
-  Double            same_original_value_ = 0;
-  vector<Double>    values_;
-  Double            current_value_       =  0.0;
+  weak_ptr<Model> model_       = {};
+  unsigned        steps_       = 0;
+  Double          lower_bound_ = 0;
+  Double          upper_bound_ = 0;
+  string          parameter_   = "";
+  vector<string>  same_labels_;
+  vector<Double*> sames_;
+  Double          step_size_           = 0;
+  Double*         target_              = nullptr;
+  Double          original_value_      = 0;
+  Double          same_original_value_ = 0;
+  vector<Double>  values_;
+  Double          current_value_ = 0.0;
 };
 } /* namespace niwa */
 #endif /* PROFILE_H_ */

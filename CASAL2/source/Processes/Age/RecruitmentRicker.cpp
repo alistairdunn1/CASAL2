@@ -80,11 +80,11 @@ RecruitmentRicker::RecruitmentRicker(shared_ptr<Model> model) : Process(model), 
 void RecruitmentRicker::DoValidate() {
   LOG_TRACE();
 
-  for (auto year = model_->start_year(); year <= model_->final_year(); ++year) years_.push_back(year);
+  for (auto year = model()->start_year(); year <= model()->final_year(); ++year) years_.push_back(year);
 
   parameters_.Validate(PARAM_R0)->GreaterThanOrEqualTo(0.0)->EitherOrDefined(PARAM_B0);
   parameters_.Validate(PARAM_B0)->GreaterThanOrEqualTo(0.0)->ForbiddenIfDefined(PARAM_R0);
-  parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model_->min_age());
+  parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model()->min_age());
   parameters_.ValidateVector(PARAM_PROPORTIONS)
       ->GreaterThanOrEqualTo(0.0)
       ->LessThanOrEqualTo(1.0)
@@ -92,11 +92,11 @@ void RecruitmentRicker::DoValidate() {
       ->ExpandToSameNumberOfElementsAs(PARAM_CATEGORIES)
       ->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.ValidateVector(PARAM_RECRUITMENT_MULTIPLIERS)->GreaterThanOrEqualTo(0.0)->NumberOfElements(years_.size());
-  parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model_->final_year() - model_->start_year());
+  parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model()->final_year() - model()->start_year());
   parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
 
-  if (age_ != model_->min_age()) {
-    LOG_WARNING_P(PARAM_AGE) << "(" << age_ << ") is not equal to the model min_age (" << model_->min_age()
+  if (age_ != model()->min_age()) {
+    LOG_WARNING_P(PARAM_AGE) << "(" << age_ << ") is not equal to the model min_age (" << model()->min_age()
                              << "). This is likely an error. Please check your input configuration files";
   }
 
@@ -112,13 +112,13 @@ void RecruitmentRicker::DoBuild() {
   partition_.Init(category_labels_);
 
   if (parameters_.Get(PARAM_B0)->has_been_defined()) {
-    model_->set_b0_initialised(ssb_label_, true);
+    model()->set_b0_initialised(ssb_label_, true);
     b0_initialised_ = true;
   }
   if (phase_b0_label_ != "")
-    phase_b0_ = model_->managers()->initialisation_phase()->GetPhaseIndex(phase_b0_label_);
+    phase_b0_ = model()->managers()->initialisation_phase()->GetPhaseIndex(phase_b0_label_);
 
-  derived_quantity_ = model_->managers()->derived_quantity()->GetDerivedQuantity(ssb_label_);
+  derived_quantity_ = model()->managers()->derived_quantity()->GetDerivedQuantity(ssb_label_);
   if (!derived_quantity_)
     LOG_ERROR_P(PARAM_SSB) << "Derived quantity SSB (" << ssb_label_ << ") was not found.";
 
@@ -126,14 +126,14 @@ void RecruitmentRicker::DoBuild() {
    * Calculate out SSB offset
    */
   unsigned                temp_ssb_offset                  = 0;
-  const vector<TimeStep*> ordered_time_steps               = model_->managers()->time_step()->ordered_time_steps();
+  const vector<TimeStep*> ordered_time_steps               = model()->managers()->time_step()->ordered_time_steps();
   unsigned                time_step_index                  = 0;
   unsigned                process_index                    = 0;
   unsigned                ageing_processes                 = 0;
   unsigned                ageing_index                     = std::numeric_limits<unsigned>::max();
   unsigned                recruitment_index                = std::numeric_limits<unsigned>::max();
   unsigned                derived_quantity_index           = std::numeric_limits<unsigned>::max();
-  unsigned                derived_quantity_time_step_index = model_->managers()->time_step()->GetTimeStepIndex(derived_quantity_->time_step());
+  unsigned                derived_quantity_time_step_index = model()->managers()->time_step()->GetTimeStepIndex(derived_quantity_->time_step());
   bool                    mortality_block                  = false;
 
   // loop through time steps
@@ -168,7 +168,7 @@ void RecruitmentRicker::DoBuild() {
     time_step_index++;
   }
 
-  recruitment_index = model_->managers()->time_step()->GetProcessIndex(label_);
+  recruitment_index = model()->managers()->time_step()->GetProcessIndex(label_);
   if ((ageing_processes > 1) & !parameters_.Get(PARAM_SSB_OFFSET)->has_been_defined()) {
     LOG_ERROR_P(PARAM_LABEL) << "For the Ricker recruitment process, " << PARAM_SSB_OFFSET << " can only be derived when there is only one ageing process in the annual cycle. "
                              << ageing_processes << " ageing processes were specified. Manually set the " << PARAM_SSB_OFFSET;
@@ -197,10 +197,10 @@ void RecruitmentRicker::DoBuild() {
       ssb_offset_ = temp_ssb_offset;
     }
   }
-  spawn_event_years_.resize(model_->years().size(), 0.0);
-  for (unsigned year_iter = 0; year_iter < model_->years().size(); ++year_iter) {
-    spawn_event_years_[year_iter] = model_->years()[year_iter] - ssb_offset_;
-    LOG_FINEST() << "ssb year = " << spawn_event_years_[year_iter] << " for year = " << model_->years()[year_iter];
+  spawn_event_years_.resize(model()->years().size(), 0.0);
+  for (unsigned year_iter = 0; year_iter < model()->years().size(); ++year_iter) {
+    spawn_event_years_[year_iter] = model()->years()[year_iter] - ssb_offset_;
+    LOG_FINEST() << "ssb year = " << spawn_event_years_[year_iter] << " for year = " << model()->years()[year_iter];
   }
 
   // Check users haven't specified an @estimate block for both R0 and B0
@@ -208,9 +208,9 @@ void RecruitmentRicker::DoBuild() {
     LOG_ERROR() << "Both R0 and B0 have an @estimate specified for recruitment process " << label_ << ". Only one of these parameters can be estimated.";
 
   // Pre allocate memory
-  ssb_values_.resize(model_->years().size());
-  true_ycs_values_.resize(model_->years().size());
-  recruitment_values_.resize(model_->years().size());
+  ssb_values_.resize(model()->years().size());
+  true_ycs_values_.resize(model()->years().size());
+  recruitment_values_.resize(model()->years().size());
 
   DoReset();
 }
@@ -290,14 +290,14 @@ void RecruitmentRicker::DoReset() {
  * Execute this process
  */
 void RecruitmentRicker::DoExecute() {
-  unsigned             current_year   = model_->current_year();
-  std::pair<bool, int> this_year_iter = niwa::utilities::findInVector(model_->years(), current_year);
+  unsigned             current_year   = model()->current_year();
+  std::pair<bool, int> this_year_iter = niwa::utilities::findInVector(model()->years(), current_year);
   year_counter_                       = this_year_iter.second;
   unsigned ssb_year                   = current_year - ssb_offset_;
   LOG_FINE() << "year = " << current_year << " ssb year = " << ssb_year << " year counter = " << year_counter_;
   Double amount_per = 0.0;
-  if (model_->state() == State::kInitialise) {
-    initialisationphases::Manager& init_phase_manager = *model_->managers()->initialisation_phase();
+  if (model()->state() == State::kInitialise) {
+    initialisationphases::Manager& init_phase_manager = *model()->managers()->initialisation_phase();
     if ((init_phase_manager.last_executed_phase() <= phase_b0_) && (parameters_.Get(PARAM_R0)->has_been_defined())) {
       amount_per = r0_;
     } else if ((init_phase_manager.last_executed_phase() <= phase_b0_) && (parameters_.Get(PARAM_B0)->has_been_defined())) {
@@ -323,23 +323,23 @@ void RecruitmentRicker::DoExecute() {
      * The model is not in an initialisation phase
      */
     LOG_FINEST() << "standardise_years_.size(): " << standardise_years_.size() << "; model_->current_year(): " << current_year
-                 << "; model_->start_year(): " << model_->start_year();
+                 << "; model_->start_year(): " << model()->start_year();
     Double ycs;
     // If projection mode ycs values get replaced with projected value from @project block
     // note that the container recruitment_multipliers_by_year_ is changed by time_varying and projection classes
     // but the code wants to use standardised_recruitment_multipliers_by_year_ in the functions following here, so we might need to update this.
-    if (model_->run_mode() == RunMode::kProjection) {
+    if (model()->run_mode() == RunMode::kProjection) {
       if (recruitment_multipliers_by_year_[current_year] == 0.0) {
-        LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model_->current_year()
+        LOG_FATAL_P(PARAM_RECRUITMENT_MULTIPLIERS) << "Projection mode (-f) is being run but ycs values are = 0 for year " << model()->current_year()
                                                    << ", which will cause the recruitment process to supply 0 recruits. Please check the @project block for this parameter";
       }
       // Projection classes will update this container automatically
       ycs = recruitment_multipliers_by_year_[current_year];
       // We need to see if this value has changed from the initial input, if it has we are going to assume that this is because the projection class has changed it.
       // set standardised ycs = ycs for reporting
-      LOG_FINE() << "ssb year = " << ssb_year << " value = " << ycs << " last val = " << model_->final_year() << " counter = " << year_counter_ << " size of vector "
+      LOG_FINE() << "ssb year = " << ssb_year << " value = " << ycs << " last val = " << model()->final_year() << " counter = " << year_counter_ << " size of vector "
                  << recruitment_multipliers_.size();
-      if (current_year > model_->final_year()) {
+      if (current_year > model()->final_year()) {
         // we are in projection years so force standardised ycs to be the same as recruitment_multipliers_by_year_[ssb_year];
         standardised_recruitment_multipliers_by_year_[current_year] = ycs;
       } else {
@@ -362,9 +362,9 @@ void RecruitmentRicker::DoExecute() {
 
     // Calculate year to get SSB that contributes to this years recruits
     Double SSB;
-    if (ssb_year < model_->start_year()) {
+    if (ssb_year < model()->start_year()) {
       // Model is in normal years but requires an SSB from the initialisation phase
-      initialisationphases::Manager& init_phase_manager = *model_->managers()->initialisation_phase();
+      initialisationphases::Manager& init_phase_manager = *model()->managers()->initialisation_phase();
       LOG_FINE() << "Initialisation phase index SSB is being extracted from init phase " << init_phase_manager.last_executed_phase() << " SSB year = " << ssb_year;
       SSB = derived_quantity_->GetLastValueFromInitialisation(init_phase_manager.last_executed_phase());
     } else {
@@ -382,7 +382,7 @@ void RecruitmentRicker::DoExecute() {
     recruitment_values_[year_counter_] = amount_per;
     ssb_values_[year_counter_]         = SSB;
 
-    LOG_FINEST() << "year = " << model_->current_year() << " SSB = " << SSB << " SR = " << SR << "; ycs = " << recruitment_multipliers_by_year_[current_year]
+    LOG_FINEST() << "year = " << model()->current_year() << " SSB = " << SSB << " SR = " << SR << "; ycs = " << recruitment_multipliers_by_year_[current_year]
                  << " Standardised year class = " << standardised_recruitment_multipliers_by_year_[current_year] << "; B0_ = " << b0_ << "; R0 = " << r0_
                  << "; ssb_ratio = " << ssb_ratio << "; true_ycs = " << true_ycs << "; amount_per = " << amount_per;
   }
@@ -404,7 +404,7 @@ void RecruitmentRicker::ScalePartition() {
     LOG_CODE_ERROR() << "Cannot apply this method as B0 has not been defined";
 
   have_scaled_partition  = true;
-  Double alternative_ssb = derived_quantity_->GetValue(model_->start_year() - ssb_offset_);
+  Double alternative_ssb = derived_quantity_->GetValue(model()->start_year() - ssb_offset_);
 
   // Look at initialisation phase
   Double SSB = derived_quantity_->GetLastValueFromInitialisation(phase_b0_);
@@ -454,7 +454,7 @@ void RecruitmentRicker::FillReportCache(ostringstream& cache) {
  */
 void RecruitmentRicker::FillTabularReportCache(ostringstream& cache, bool first_run) {
   if (first_run) {
-    vector<unsigned> years = model_->years();
+    vector<unsigned> years = model()->years();
 
     for (auto iter : standardised_recruitment_multipliers_by_year_) cache << "standardised_recruitment_multipliers[" << iter.first << "] ";
     for (auto iter : recruitment_multipliers_by_year_) cache << "recruitment_multipliers[" << iter.first << "] ";

@@ -67,7 +67,7 @@ void HarvestStrategyConstantU::DoValidate() {
  * Build
  */
 void HarvestStrategyConstantU::DoBuild() {
-  biomass_index_ = model_->managers()->derived_quantity()->GetDerivedQuantity(biomass_index_label_);
+  biomass_index_ = model()->managers()->derived_quantity()->GetDerivedQuantity(biomass_index_label_);
   if (!biomass_index_) {
     LOG_ERROR_P(PARAM_BIOMASS_INDEX) << "The " << PARAM_BIOMASS_INDEX << " derived_quantity (" << biomass_index_label_ << ") was not found.";
   }
@@ -87,20 +87,21 @@ void HarvestStrategyConstantU::DoReset() {
  *  Update the parameter with the harvest control rule
  */
 void HarvestStrategyConstantU::DoUpdate() {
-  int    index_year = model_->current_year() - year_lag_;
-  Double biomass    = biomass_index_->GetValue(index_year);
-  value_            = last_catch_;
+  auto   current_model = model();
+  int    index_year    = current_model->current_year() - year_lag_;
+  Double biomass       = biomass_index_->GetValue(index_year);
+  value_               = last_catch_;
 
-  if (model_->current_year() >= first_year_)
+  if (current_model->current_year() >= first_year_)
     update_counter_++;
 
-  bool do_update = ((model_->current_year() == first_year_) || ((model_->current_year() > first_year_) && (update_counter_ % (int)year_delta_) == 0));
+  bool do_update = ((current_model->current_year() == first_year_) || ((current_model->current_year() > first_year_) && (update_counter_ % (int)year_delta_) == 0));
 
-  LOG_FINE() << "HarvestStrategyConstantU: u=" << u_ << ", biomass_index=" << biomass << " in year=" << model_->current_year() << " using index_year=" << index_year
+  LOG_FINE() << "HarvestStrategyConstantU: u=" << u_ << ", biomass_index=" << biomass << " in year=" << current_model->current_year() << " using index_year=" << index_year
              << " with update_counter=" << update_counter_ << ", year_delta=" << year_delta_ << ", and result of test=" << do_update;
 
   if (do_update) {  // its in year_delta, so do an update
-    this_catch_  = (biomass * biomass_index_scalar_) * u_ * multiplier_by_year_[model_->current_year()];
+    this_catch_  = (biomass * biomass_index_scalar_) * u_ * multiplier_by_year_[current_model->current_year()];
     Double delta = (this_catch_ - last_catch_) / math::ZeroFun(last_catch_, math::ZERO);
     Double sign  = (delta >= 0) ? 1.0 : -1.0;
 
@@ -123,10 +124,10 @@ void HarvestStrategyConstantU::DoUpdate() {
     }
   }
 
-  LOG_FINE() << "HarvestStrategyConstantU: DoUpdateFunc in year=" << model_->current_year() << ", and with biomass_index=" << biomass << ", scalar=" << biomass_index_scalar_
+  LOG_FINE() << "HarvestStrategyConstantU: DoUpdateFunc in year=" << current_model->current_year() << ", and with biomass_index=" << biomass << ", scalar=" << biomass_index_scalar_
              << " and catch value = " << value_;
 
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  (this->*DoUpdateFunc_)(value_, true, current_model->current_year());
 }
 
 } /* namespace projects */

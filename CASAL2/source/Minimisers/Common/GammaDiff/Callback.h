@@ -20,6 +20,7 @@
 // Headers
 #include <vector>
 
+#include "../../../BaseClasses/Object.h"
 #include "../../../Model/Model.h"
 
 // namespaces
@@ -39,7 +40,8 @@ public:
   double operator()(const vector<double>& Parameters);
 
 private:
-  shared_ptr<Model> model_;
+  shared_ptr<Model> model() const { return base::Object::LockWeakPtr(model_, "GammaDiff::CallBack"); }
+  weak_ptr<Model>   model_;
 };
 
 } /* namespace gammadiff */

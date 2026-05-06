@@ -100,23 +100,23 @@ void ProportionsMatureByAge::DoValidate() {
 void ProportionsMatureByAge::DoBuild() {
   LOG_TRACE();
   // Get all categories in the system.
-  total_partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, total_category_labels_));
-  total_cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, total_category_labels_));
+  total_partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), total_category_labels_));
+  total_cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), total_category_labels_));
 
   // all categories
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
 
   // Create a pointer to misclassification matrix
   if (ageing_error_label_ != "") {
-    ageing_error_ = model_->managers()->ageing_error()->GetAgeingError(ageing_error_label_);
+    ageing_error_ = model()->managers()->ageing_error()->GetAgeingError(ageing_error_label_);
     if (!ageing_error_)
       LOG_ERROR_P(PARAM_AGEING_ERROR) << "Ageing error label (" << ageing_error_label_ << ") was not found.";
   }
 
   age_results_.resize(age_spread_ * category_labels_.size(), 0.0);
 
-  TimeStep* time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  TimeStep* time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_FATAL_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -135,16 +135,16 @@ void ProportionsMatureByAge::PreExecute() {
   total_cached_partition_->BuildCache();
   LOG_FINEST() << "Entering observation " << label_;
 
-  if (cached_partition_->Size() != proportions_[model_->current_year()].size()) {
+  if (cached_partition_->Size() != proportions_[model()->current_year()].size()) {
     LOG_CODE_ERROR() << "cached_partition_->Size() != proportions_[model->current_year()].size()";
   }
-  if (total_cached_partition_->Size() != proportions_[model_->current_year()].size()) {
+  if (total_cached_partition_->Size() != proportions_[model()->current_year()].size()) {
     LOG_CODE_ERROR() << "total_cached_partition_->Size() != proportions_[model->current_year()].size()";
   }
 
-  if (partition_->Size() != proportions_[model_->current_year()].size())
+  if (partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_[model->current_year()].size()";
-  if (total_partition_->Size() != proportions_[model_->current_year()].size())
+  if (total_partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "total_partition_->Size() != proportions_[model->current_year()].size()";
 }
 
@@ -163,8 +163,8 @@ void ProportionsMatureByAge::Execute() {
   auto total_partition_iter        = total_partition_->Begin();
 
   vector<Double> expected_values(age_spread_, 0.0);
-  vector<Double> numbers_age((model_->age_spread() + 1), 0.0);
-  vector<Double> total_numbers_age((model_->age_spread() + 1), 0.0);
+  vector<Double> numbers_age((model()->age_spread() + 1), 0.0);
+  vector<Double> total_numbers_age((model()->age_spread() + 1), 0.0);
 
   /**
    * Loop through the provided categories. Each provided category (combination) will have a list of observations
@@ -249,7 +249,7 @@ void ProportionsMatureByAge::Execute() {
     Double plus = 0, total_plus = 0;
     for (unsigned k = 0; k < numbers_age.size(); ++k) {
       // this is the difference between the
-      unsigned age_offset = min_age_ - model_->min_age();
+      unsigned age_offset = min_age_ - model()->min_age();
       if (k >= age_offset && (k - age_offset + min_age_) <= max_age_) {
         // not plus group
         if (total_numbers_age[k] > 0.0) {
@@ -276,17 +276,17 @@ void ProportionsMatureByAge::Execute() {
         expected_values[age_spread_ - 1] = 0.0;
     }
 
-    if (expected_values.size() != proportions_[model_->current_year()][category_labels_[category_offset]].size())
+    if (expected_values.size() != proportions_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values.size(" << expected_values.size() << ") != proportions_[category_offset].size("
-                       << proportions_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << proportions_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     /**
      * save our comparisons so we can use them to generate the score from the likelihoods later
      */
     for (unsigned i = 0; i < expected_values.size(); ++i) {
       LOG_FINEST() << "proportions mature at age " << min_age_ + i << " = " << expected_values[i];
-      SaveComparison(category_labels_[category_offset], min_age_ + i, 0.0, expected_values[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
+      SaveComparison(category_labels_[category_offset], min_age_ + i, 0.0, expected_values[i], proportions_[model()->current_year()][category_labels_[category_offset]][i],
+                     process_errors_by_year_[model()->current_year()], error_values_[model()->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
     }
   }
 }
@@ -302,7 +302,7 @@ void ProportionsMatureByAge::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
   } else {
     /**

@@ -55,8 +55,8 @@ TransitionCategoryByAge::TransitionCategoryByAge(shared_ptr<Model> model) : Proc
 void TransitionCategoryByAge::DoValidate() {
   parameters_.ValidateVector(PARAM_FROM)->SameNumberOfElementsAs(PARAM_TO)->IsUniqueFrom(PARAM_TO);
   parameters_.ValidateVector(PARAM_YEARS)->IsInIncreasingOrder()->IsModelYear()->DefaultToAllModelYears();
-  parameters_.Validate(PARAM_MIN_AGE)->GreaterThanOrEqualTo(model_->min_age());
-  parameters_.Validate(PARAM_MAX_AGE)->GreaterThanOrEqualTo(model_->min_age())->LessThanOrEqualTo(model_->max_age());
+  parameters_.Validate(PARAM_MIN_AGE)->GreaterThanOrEqualTo(model()->min_age());
+  parameters_.Validate(PARAM_MAX_AGE)->GreaterThanOrEqualTo(model()->min_age())->LessThanOrEqualTo(model()->max_age());
   parameters_.Validate(PARAM_U_MAX)->GreaterThan(0.0)->LessThanOrEqualTo(1.0);
 
   unsigned age_spread = (max_age_ - min_age_) + 1;
@@ -111,16 +111,16 @@ void TransitionCategoryByAge::DoBuild() {
   to_partition_.Init(to_category_labels_);
 
   if (penalty_label_ != "")
-    penalty_ = model_->managers()->penalty()->GetPenalty(penalty_label_);
+    penalty_ = model()->managers()->penalty()->GetPenalty(penalty_label_);
   if (selectivity_label_ != "")
-    selectivity_ = model_->managers()->selectivity()->GetSelectivity(selectivity_label_);
+    selectivity_ = model()->managers()->selectivity()->GetSelectivity(selectivity_label_);
 }
 
 /**
  * Execute the process
  */
 void TransitionCategoryByAge::DoExecute() {
-  unsigned current_year = model_->current_year();
+  unsigned current_year = model()->current_year();
   if (std::find(years_.begin(), years_.end(), current_year) == years_.end())
     return;
 

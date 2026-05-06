@@ -80,7 +80,9 @@ protected:
   virtual map<string, string> GetCategoryLabelsAndValues(const string& lookup, const string& parameter_location);
 
   // Members
-  shared_ptr<Model>         model_ = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>         model() const { return LockWeakPtr(model_, "Categories"); }
   string                    format_;
   vector<string>            names_;
   vector<string>            years_;

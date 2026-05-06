@@ -35,10 +35,11 @@ public:
   explicit Creator(shared_ptr<Model> model);
   virtual ~Creator() = default;
   void CreateEstimates();
-  void Reset() override final{};
+  void Reset() override final {};
 
   // accessors
-  string parameter() const { return parameter_; }
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "Estimate::Creator"); }
+  string            parameter() const { return parameter_; }
 
 protected:
   // methods
@@ -48,7 +49,7 @@ protected:
   virtual void    DoCopyParameters(niwa::Estimate* estimate, unsigned index) = 0;
 
   // members
-  shared_ptr<Model>       model_ = nullptr;
+  weak_ptr<Model>         model_ = {};
   string                  parameter_;
   vector<double>          lower_bounds_;
   vector<double>          upper_bounds_;

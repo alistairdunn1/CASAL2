@@ -28,7 +28,7 @@ namespace age {
 /**
  * Default constructor
  */
-BiomassIndex::BiomassIndex(shared_ptr<Model> model) : DerivedQuantity(model), model_(model) {
+BiomassIndex::BiomassIndex(shared_ptr<Model> model) : DerivedQuantity(model) {
   // clang-format off
   parameters_.Bind<string>(PARAM_AGE_WEIGHT_LABELS, &age_weight_labels_, "The labels for the age-weights that correspond to each category for the biomass_index calculation")
     ->set_default_value("");
@@ -68,7 +68,7 @@ void BiomassIndex::DoBuild() {
     use_age_weights_ = true;
     LOG_FINE() << "Age-weight has been defined";
     for (string label : age_weight_labels_) {
-      AgeWeight* age_weight = model_->managers()->age_weight()->FindAgeWeight(label);
+      AgeWeight* age_weight = model()->managers()->age_weight()->FindAgeWeight(label);
       if (!age_weight)
         LOG_ERROR_P(PARAM_AGE_WEIGHT_LABELS) << "Age-weight label (" << label << ") was not found.";
       age_weights_.push_back(age_weight);
@@ -90,7 +90,7 @@ void BiomassIndex::DoBuild() {
   } else {
     catchability_value_ = 1.0;
   }
-  catchability_ = model_->managers()->catchability()->GetCatchability(catchability_label_);
+  catchability_ = model()->managers()->catchability()->GetCatchability(catchability_label_);
   if (!catchability_)
     catchability_value_ = 1.0;
 
@@ -104,9 +104,9 @@ void BiomassIndex::DoBuild() {
  */
 void BiomassIndex::PreExecute() {
   cache_value_             = 0.0;
-  unsigned year            = model_->current_year();
+  unsigned year            = model()->current_year();
   auto     iterator        = partition_.begin();
-  unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  unsigned time_step_index = model()->managers()->time_step()->current_time_step();
   LOG_FINE() << "The time-step when calculating biomass = " << time_step_index;
 
   // iterate over each category
@@ -145,9 +145,9 @@ void BiomassIndex::PreExecute() {
  */
 void BiomassIndex::Execute() {
   LOG_TRACE();
-  unsigned year            = model_->current_year();
+  unsigned year            = model()->current_year();
   Double   value           = 0.0;
-  unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  unsigned time_step_index = model()->managers()->time_step()->current_time_step();
   LOG_FINE() << "Time step for calculating biomass = " << time_step_index;
 
   utilities::RandomNumberGenerator& rng = utilities::RandomNumberGenerator::Instance();
@@ -169,7 +169,7 @@ void BiomassIndex::Execute() {
     catchability_value_ = 1.0;
   }
 
-  if (model_->state() == State::kInitialise) {
+  if (model()->state() == State::kInitialise) {
     auto iterator = partition_.begin();
     LOG_FINEST() << "Partition size = " << partition_.size();
     if (!use_age_weights_) {
@@ -194,7 +194,7 @@ void BiomassIndex::Execute() {
       }
     }
 
-    unsigned initialisation_phase = model_->managers()->initialisation_phase()->current_initialisation_phase();
+    unsigned initialisation_phase = model()->managers()->initialisation_phase()->current_initialisation_phase();
     if (initialisation_values_.size() <= initialisation_phase)
       initialisation_values_.resize(initialisation_phase + 1);
 
@@ -243,32 +243,32 @@ void BiomassIndex::Execute() {
     }
 
     if (time_step_proportion_ == 0.0) {
-      biomass_                        = cache_value_ * rng_value;
-      biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
-      biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      values_[model_->current_year()] = biomass_;
+      biomass_                         = cache_value_ * rng_value;
+      biomass_                         = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                         = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
+      values_[model()->current_year()] = biomass_;
     } else if (time_step_proportion_ == 1.0) {
-      biomass_                        = value * rng_value;
-      biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
-      biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      values_[model_->current_year()] = biomass_;
+      biomass_                         = value * rng_value;
+      biomass_                         = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                         = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
+      values_[model()->current_year()] = biomass_;
     } else if (mean_proportion_method_) {
-      Double temp                     = cache_value_ + ((value - cache_value_) * time_step_proportion_);
-      biomass_                        = temp * rng_value;
-      biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
-      biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      values_[model_->current_year()] = biomass_;
+      Double temp                      = cache_value_ + ((value - cache_value_) * time_step_proportion_);
+      biomass_                         = temp * rng_value;
+      biomass_                         = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                         = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
+      values_[model()->current_year()] = biomass_;
     } else {
-      Double temp                     = pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_);
-      biomass_                        = temp * rng_value;
-      biomass_                        = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
-      biomass_                        = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
-      values_[model_->current_year()] = biomass_;
+      Double temp                      = pow(cache_value_, 1 - time_step_proportion_) * pow(value, time_step_proportion_);
+      biomass_                         = temp * rng_value;
+      biomass_                         = (rho_ * last_biomass_) + ((1.0 - rho_) * biomass_);
+      biomass_                         = math::ZeroFun(biomass_, math::ZERO) * catchability_value_;
+      values_[model()->current_year()] = biomass_;
     }
   }
   last_biomass_ = biomass_;
   LOG_FINE() << " Pre Exploitation value " << cache_value_ << " time step proportion " << time_step_proportion_ << " Post exploitation " << value << " Final value "
-             << values_[model_->current_year()];
+             << values_[model()->current_year()];
 }
 
 } /* namespace age */

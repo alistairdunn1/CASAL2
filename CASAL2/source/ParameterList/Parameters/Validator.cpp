@@ -329,11 +329,12 @@ shared_ptr<Validator> Validator::GreaterThanOrEqualToModelMinAge() {
     return shared_from_this();
   }
 
+  auto current_model    = model();
   auto parameter_values = ConvertValuesToUnsigned();
   for (const auto& source : parameter_values) {
-    if (source < model_->min_age()) {
+    if (source < current_model->min_age()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source
-                  << ") is invalid. Must be greater than or equal to model min age (" << model_->min_age() << ")";
+                  << ") is invalid. Must be greater than or equal to model min age (" << current_model->min_age() << ")";
     }
   }
 
@@ -351,11 +352,12 @@ shared_ptr<Validator> Validator::GreaterThanModelMinAge() {
     return shared_from_this();
   }
 
+  auto current_model    = model();
   auto parameter_values = ConvertValuesToUnsigned();
   for (const auto& source : parameter_values) {
-    if (source <= model_->min_age()) {
+    if (source <= current_model->min_age()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source
-                  << ") is invalid. Must be greater than or equal to model min age (" << model_->min_age() << ")";
+                  << ") is invalid. Must be greater than or equal to model min age (" << current_model->min_age() << ")";
     }
   }
 
@@ -373,11 +375,12 @@ shared_ptr<Validator> Validator::LessThanOrEqualToModelMaxAge() {
     return shared_from_this();
   }
 
+  auto current_model    = model();
   auto parameter_values = ConvertValuesToUnsigned();
   for (const auto& source : parameter_values) {
-    if (source > model_->max_age()) {
+    if (source > current_model->max_age()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than or equal to model max age ("
-                  << model_->max_age() << ")";
+                  << current_model->max_age() << ")";
     }
   }
 
@@ -395,11 +398,12 @@ shared_ptr<Validator> Validator::LessThanModelMaxAge() {
     return shared_from_this();
   }
 
+  auto current_model    = model();
   auto parameter_values = ConvertValuesToUnsigned();
   for (const auto& source : parameter_values) {
-    if (source >= model_->max_age()) {
+    if (source >= current_model->max_age()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be less than model max age ("
-                  << model_->max_age() << ")";
+                  << current_model->max_age() << ")";
     }
   }
 
@@ -417,11 +421,12 @@ shared_ptr<Validator> Validator::IsAge() {
     return shared_from_this();
   }
 
+  auto current_model    = model();
   auto parameter_values = ConvertValuesToUnsigned();
   for (const auto& source : parameter_values) {
-    if (source < model_->min_age() || source > model_->max_age()) {
+    if (source < current_model->min_age() || source > current_model->max_age()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model min age ("
-                  << model_->min_age() << ") and max age (" << model_->max_age() << ")";
+                  << current_model->min_age() << ") and max age (" << current_model->max_age() << ")";
     }
   }
 
@@ -503,7 +508,7 @@ shared_ptr<Validator> Validator::IsModelYear() {
   }
 
   auto parameter_values = ConvertValuesToUnsigned();
-  auto years            = model_->years_all();
+  auto years            = model()->years_all();
   for (const auto& source : parameter_values) {
     if (std::find(years.begin(), years.end(), source) == years.end()) {
       LOG_ERROR() << this->parameter_->location() << " parameter " << parameter_->label() << " value (" << source << ") is invalid. Must be between model start year ("
@@ -524,8 +529,9 @@ shared_ptr<Validator> Validator::IsProjectionYear() {
   }
 
   auto     parameter_values      = ConvertValuesToUnsigned();
-  unsigned projection_start_year = model_->projection_start_year();
-  unsigned projection_final_year = model_->projection_final_year();
+  auto     current_model         = model();
+  unsigned projection_start_year = current_model->projection_start_year();
+  unsigned projection_final_year = current_model->projection_final_year();
 
   for (const auto& source : parameter_values) {
     if (source < projection_start_year || source > projection_final_year) {

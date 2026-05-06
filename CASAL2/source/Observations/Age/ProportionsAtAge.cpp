@@ -106,13 +106,13 @@ void ProportionsAtAge::DoValidate() {
  */
 void ProportionsAtAge::DoBuild() {
   LOG_TRACE();
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
 
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
     LOG_FINEST() << "label = " << label;
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -125,7 +125,7 @@ void ProportionsAtAge::DoBuild() {
 
   // Create a pointer to Ageing error misclassification matrix
   if (ageing_error_label_ != "") {
-    ageing_error_ = model_->managers()->ageing_error()->GetAgeingError(ageing_error_label_);
+    ageing_error_ = model()->managers()->ageing_error()->GetAgeingError(ageing_error_label_);
     if (!ageing_error_)
       LOG_ERROR_P(PARAM_AGEING_ERROR) << "Ageing error label (" << ageing_error_label_ << ") was not found.";
   }
@@ -141,8 +141,8 @@ void ProportionsAtAge::DoBuild() {
   }
 
   expected_values_.resize(age_spread_, 0.0);
-  numbers_age_.resize((model_->age_spread() + 1), 0.0);
-  numbers_at_age_with_error_.resize((model_->age_spread() + 1), 0.0);
+  numbers_age_.resize((model()->age_spread() + 1), 0.0);
+  numbers_at_age_with_error_.resize((model()->age_spread() + 1), 0.0);
 }
 
 /**
@@ -156,9 +156,9 @@ void ProportionsAtAge::PreExecute() {
   LOG_TRACE();
   cached_partition_->BuildCache();
 
-  if (cached_partition_->Size() != proportions_[model_->current_year()].size())
+  if (cached_partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "cached_partition_->Size() != proportions_[model->current_year()].size()";
-  if (partition_->Size() != proportions_[model_->current_year()].size())
+  if (partition_->Size() != proportions_[model()->current_year()].size())
     LOG_CODE_ERROR() << "partition_->Size() != proportions_[model->current_year()].size()";
 }
 
@@ -248,7 +248,7 @@ void ProportionsAtAge::Execute() {
      */
     for (unsigned k = 0; k < numbers_age_.size(); ++k) {
       // this is the difference between the
-      unsigned age_offset = min_age_ - model_->min_age();
+      unsigned age_offset = min_age_ - model()->min_age();
       if (k >= age_offset && (k - age_offset + min_age_) <= max_age_) {
         expected_values_[k - age_offset] = numbers_age_[k];
       }
@@ -257,16 +257,16 @@ void ProportionsAtAge::Execute() {
       }
     }
 
-    if (expected_values_.size() != proportions_[model_->current_year()][category_labels_[category_offset]].size())
+    if (expected_values_.size() != proportions_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values_.size(" << expected_values_.size() << ") != proportions_[category_offset].size("
-                       << proportions_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << proportions_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     for (unsigned i = 0; i < expected_values_.size(); ++i) {
       LOG_FINEST() << "-----";
       LOG_FINEST() << "Numbers at age for all categories in age " << min_age_ + i << " = " << expected_values_[i];
 
-      SaveComparison(category_labels_[category_offset], min_age_ + i, 0.0, expected_values_[i], proportions_[model_->current_year()][category_labels_[category_offset]][i],
-                     process_errors_by_year_[model_->current_year()], error_values_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
+      SaveComparison(category_labels_[category_offset], min_age_ + i, 0.0, expected_values_[i], proportions_[model()->current_year()][category_labels_[category_offset]][i],
+                     process_errors_by_year_[model()->current_year()], error_values_[model()->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
     }
   }
 }
@@ -282,7 +282,7 @@ void ProportionsAtAge::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     for (auto& iter : comparisons_) {
       Double total_expec = 0.0;
       for (auto& comparison : iter.second) total_expec += comparison.expected_;

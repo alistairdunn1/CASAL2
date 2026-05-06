@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+#include "../Logging/Logging.h"
 #include "../Utilities/Types.h"
 
 // Namespaces
@@ -37,6 +38,7 @@ using std::pair;
 using std::shared_ptr;
 using std::string;
 using std::vector;
+using std::weak_ptr;
 
 /**
  * Struct definition
@@ -72,9 +74,15 @@ public:
 private:
   // methods
   ObjectiveFunction(shared_ptr<Model> model);
+  shared_ptr<Model> model() const {
+    auto locked = model_.lock();
+    if (!locked)
+      LOG_CODE_ERROR() << "ObjectiveFunction weak_ptr expired";
+    return locked;
+  }
 
   // Members
-  shared_ptr<Model>        model_             = nullptr;
+  weak_ptr<Model>          model_             = {};
   Double                   score_             = 0.0;
   Double                   penalties_         = 0.0;
   Double                   priors_            = 0.0;

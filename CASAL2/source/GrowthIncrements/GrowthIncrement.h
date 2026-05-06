@@ -31,10 +31,10 @@ public:
   // methods
   GrowthIncrement() = delete;
   explicit GrowthIncrement(shared_ptr<Model> model);
-  virtual ~GrowthIncrement(){};
+  virtual ~GrowthIncrement() {};
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){};
+  void Verify(shared_ptr<Model> model) {};
   void Reset();
   void RebuildCache();  // should only be called by time-varying class
   void FillReportCache(ostringstream& cache);
@@ -45,6 +45,7 @@ public:
   void apply_growth();
 
   // accessors
+  shared_ptr<Model> model() const { return LockWeakPtr(model_, "GrowthIncrement"); }
 
 protected:
   virtual void DoValidate() = 0;
@@ -59,7 +60,7 @@ protected:
 
   // members
 
-  shared_ptr<Model>      model_ = nullptr;
+  weak_ptr<Model>        model_ = {};
   string                 distribution_label_;
   Distribution           distribution_;
   string                 length_weight_label_;

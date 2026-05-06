@@ -55,6 +55,7 @@ MCMCObjective::MCMCObjective(shared_ptr<Model> model) : model_(model) {}
  */
 bool MCMCObjective::LoadFile(const string& file_name) {
   LOG_MEDIUM() << "LoadFile()";
+  auto current_model = model();
   // open file
   ifstream file(file_name.c_str());
   if (file.fail() || !file.is_open()) {
@@ -80,10 +81,10 @@ bool MCMCObjective::LoadFile(const string& file_name) {
     return false;
   }
 
-  auto estimate_count = model_->managers()->estimate()->GetIsEstimatedCount();
-  auto estimates      = model_->managers()->estimate()->GetIsEstimated();
+  auto estimate_count = current_model->managers()->estimate()->GetIsEstimatedCount();
+  auto estimates      = current_model->managers()->estimate()->GetIsEstimated();
 
-  auto& covariance_matrix = model_->managers()->mcmc()->active_mcmc()->covariance_matrix();
+  auto& covariance_matrix = current_model->managers()->mcmc()->active_mcmc()->covariance_matrix();
   covariance_matrix.resize(estimate_count, estimate_count);
 
   // Check the order of parameters
@@ -189,11 +190,11 @@ bool MCMCObjective::LoadFile(const string& file_name) {
   }
   LOG_MEDIUM() << "step size = " << step_size;
 
-  model_->managers()->mcmc()->active_mcmc()->set_starting_iteration(iteration_number);
-  model_->managers()->mcmc()->active_mcmc()->set_successful_jumps(success_jump);
-  model_->managers()->mcmc()->active_mcmc()->set_step_size(step_size);
-  model_->managers()->mcmc()->active_mcmc()->set_acceptance_rate(AR);
-  model_->managers()->mcmc()->active_mcmc()->set_acceptance_rate_from_last_adapt(AR_since_last_adapt);
+  current_model->managers()->mcmc()->active_mcmc()->set_starting_iteration(iteration_number);
+  current_model->managers()->mcmc()->active_mcmc()->set_successful_jumps(success_jump);
+  current_model->managers()->mcmc()->active_mcmc()->set_step_size(step_size);
+  current_model->managers()->mcmc()->active_mcmc()->set_acceptance_rate(AR);
+  current_model->managers()->mcmc()->active_mcmc()->set_acceptance_rate_from_last_adapt(AR_since_last_adapt);
 
   file.close();
   LOG_MEDIUM() << "File close";

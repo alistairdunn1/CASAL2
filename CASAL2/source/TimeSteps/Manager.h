@@ -48,6 +48,7 @@ public:
 
   // accessors
   const vector<TimeStep*>& ordered_time_steps() const { return ordered_time_steps_; }
+  shared_ptr<Model>        model() const { return niwa::base::Object::LockWeakPtr(model_, "TimeSteps::Manager"); }
   virtual unsigned         current_time_step() const;
 
 protected:
@@ -55,7 +56,7 @@ protected:
   Manager();
 
   // Members
-  shared_ptr<Model>        model_;
+  weak_ptr<Model>          model_;
   vector<TimeStep*>        ordered_time_steps_;
   vector<DerivedQuantity*> derived_quantities_;
   unsigned                 current_time_step_ = 0;

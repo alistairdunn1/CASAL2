@@ -57,12 +57,13 @@ void RandomWalk::DoValidate() {
  *
  */
 void RandomWalk::DoBuild() {
+  auto current_model = model();
   // Warn users that they have a time-varying parameter in estimation mode.
-  if (model_->run_mode() == RunMode::kEstimation) {
+  if (current_model->run_mode() == RunMode::kEstimation) {
     LOG_WARNING() << "Time varying of type " << type_ << " was found during estimation. Note that this is NOT recommended as it is not a true random effect."
                   << " The purpose of this is for investigating model behaviour in simulations or projections";
   }
-  if (model_->objects().GetAddressableType(parameter_) != addressable::kSingle)
+  if (current_model->objects().GetAddressableType(parameter_) != addressable::kSingle)
     LOG_ERROR_P(PARAM_TYPE) << "@time_varying blocks of type " << PARAM_RANDOMWALK << " can be used only with parameters that are scalars or single values";
 }
 
@@ -70,11 +71,12 @@ void RandomWalk::DoBuild() {
  * Update
  */
 void RandomWalk::DoUpdate() {
+  auto current_model = model();
   LOG_FINEST() << "value = " << *addressable_;
   utilities::RandomNumberGenerator& rng     = utilities::RandomNumberGenerator::Instance();
   Double                            value   = *addressable_;
   double                            deviate = rng.normal(AS_DOUBLE(mu_), AS_DOUBLE(sigma_));
-  cout << "year: " << model_->current_year() << "; value: " << value << "; deviate: " << deviate << endl;
+  cout << "year: " << current_model->current_year() << "; value: " << value << "; deviate: " << deviate << endl;
   value += value * rho_ + deviate;
 
   if (value < lower_bound_) {
@@ -86,11 +88,11 @@ void RandomWalk::DoUpdate() {
     value = upper_bound_;
   }
 
-  LOG_FINEST() << "value after deviate of " << deviate << " = " << value << " for year " << model_->current_year();
+  LOG_FINEST() << "value after deviate of " << deviate << " = " << value << " for year " << current_model->current_year();
   cout << "setting value to " << value;
 
   LOG_FINE() << "Setting Value to: " << value;
-  parameter_by_year_[model_->current_year()] = value;
+  parameter_by_year_[current_model->current_year()] = value;
   (this->*update_function_)(value);
 }
 

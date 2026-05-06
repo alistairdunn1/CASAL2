@@ -44,7 +44,7 @@ using std::vector;
 class CombinedCategories {
 public:
   // Typedef
-  typedef vector<vector<partition::Category*> > DataType;  
+  typedef vector<vector<partition::Category*> > DataType;
   /* the first element is a 'group' of combined categories the second is specific combinations for example
   male+female  : one group with two combinations or DataType.size() == 1 and DataType[0].size == 2
   male.east+male.west  female.east+female.west  : two groups with each having two combinations or DataType.size() == 2 and DataType[0].size == 2
@@ -53,23 +53,24 @@ public:
   CombinedCategories() = delete;
   CombinedCategories(shared_ptr<Model> model, const vector<string>& category_labels);
   virtual ~CombinedCategories() = default;
-  DataType::iterator Begin();
-  DataType::iterator End();
+  DataType::iterator   Begin();
+  DataType::iterator   End();
   partition::Category* GetCategoryFromCombinedCategoryByIndex(unsigned group_index, unsigned combined_index);
-  unsigned           Size();
-  unsigned           category_count() const { return category_count_; }
+  unsigned             Size();
+  unsigned             category_count() const { return category_count_; }
   // Not a super efficient function below, should only be called in Validate or Build.
-  vector<unsigned>   get_category_index(string category_label); // returns a vector first element is the group_index_, second element is the combined_index_
+  vector<unsigned> get_category_index(string category_label);  // returns a vector first element is the group_index_, second element is the combined_index_
 
 private:
   // Members
-  shared_ptr<Model>       model_;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>       model() const { return base::Object::LockWeakPtr(model_, "Partition::Accessors::CombinedCategories"); }
   map<unsigned, DataType> data_;
   unsigned                category_count_;
   vector<string>          category_labels_;
   vector<unsigned>        group_index_;
   vector<unsigned>        combined_index_;
-
 };
 
 // Typedef

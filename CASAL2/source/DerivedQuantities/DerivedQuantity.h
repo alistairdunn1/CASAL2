@@ -54,7 +54,9 @@ public:
 
 protected:
   // Members
-  shared_ptr<Model>      model_                        = nullptr;
+  weak_ptr<Model> model_ = {};
+
+  shared_ptr<Model>      model() const { return LockWeakPtr(model_, "DerivedQuantity"); }
   string                 time_step_label_              = "";
   unsigned               current_initialisation_phase_ = 0;
   vector<vector<Double>> initialisation_values_;

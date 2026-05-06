@@ -77,8 +77,8 @@ void Tagging::DoValidate() {
   LOG_TRACE();
 
   if (process_profile_ == ProcessProfile::kAge) {
-    parameters_.Validate(PARAM_MIN_AGE)->IsAge()->GreaterThanOrEqualTo(model_->min_age())->LessThanOrEqualTo(model_->max_age())->DefaultValue(model_->min_age());
-    parameters_.Validate(PARAM_MAX_AGE)->IsAge()->GreaterThanOrEqualTo(model_->min_age())->LessThanOrEqualTo(model_->max_age())->DefaultValue(model_->max_age());
+    parameters_.Validate(PARAM_MIN_AGE)->IsAge()->GreaterThanOrEqualTo(model()->min_age())->LessThanOrEqualTo(model()->max_age())->DefaultValue(model()->min_age());
+    parameters_.Validate(PARAM_MAX_AGE)->IsAge()->GreaterThanOrEqualTo(model()->min_age())->LessThanOrEqualTo(model()->max_age())->DefaultValue(model()->max_age());
   } else {
     parameters_.ValidateVector(PARAM_FROM)->SameNumberOfElementsAs(PARAM_TO);
   }
@@ -93,7 +93,7 @@ void Tagging::DoValidate() {
   if (process_profile_ == ProcessProfile::kAge) {
     age_spread_        = (max_age_ - min_age_) + 1;
     number_categories_ = from_category_labels_.size();
-    min_age_offset_    = min_age_ - model_->min_age();
+    min_age_offset_    = min_age_ - model()->min_age();
   }
 
   if (tolerance_ > 0.01) {
@@ -130,7 +130,7 @@ void Tagging::DoValidate() {
                               << " 'From' category labels size " << from_category_labels_.size();
     }
 
-    split_from_category_labels_ = model_->categories()->SplitCombinedCategory(from_category_labels_[0], parameters_.location(PARAM_FROM));
+    split_from_category_labels_ = model()->categories()->SplitCombinedCategory(from_category_labels_[0], parameters_.location(PARAM_FROM));
     if (split_from_category_labels_.size() != to_category_labels_.size()) {
       LOG_FATAL_P(PARAM_FROM) << "The number of 'From' categories (" << split_from_category_labels_.size() << ") does not match the number of 'To' categories ("
                               << to_category_labels_.size() << "). These must be the same.";
@@ -233,9 +233,9 @@ void Tagging::DoValidate() {
     // Length-specific validation
     // Load data from proportions table using n parameter
     vector<string> columns = proportions_table_->columns();
-    if (columns.size() != (model_->get_number_of_length_bins() + 1))
+    if (columns.size() != (model()->get_number_of_length_bins() + 1))
       LOG_ERROR_P(PARAM_PROPORTIONS) << "The number of columns provided (" << columns.size() << ") does not match the model's length bins + 1 ("
-                                     << (model_->get_number_of_length_bins() + 1) << ")";
+                                     << (model()->get_number_of_length_bins() + 1) << ")";
     if (columns[0] != PARAM_YEAR)
       LOG_ERROR_P(PARAM_PROPORTIONS) << "The first column label (" << columns[0] << ") provided must be 'year'";
 
@@ -259,7 +259,7 @@ void Tagging::DoValidate() {
         if (!utilities::To<Double>(iter[i], proportion))
           LOG_ERROR_P(PARAM_PROPORTIONS) << "value (" << iter[i] << ") could not be converted to a Double";
         if (numbers_[year].size() == 0)
-          numbers_[year].resize(model_->get_number_of_length_bins(), 0.0);
+          numbers_[year].resize(model()->get_number_of_length_bins(), 0.0);
         numbers_[year][i - 1] = n_by_year[year] * proportion;
         total_proportion += proportion;
       }
@@ -301,11 +301,11 @@ void Tagging::DoBuild() {
   }
 
   if (penalty_label_ != "")
-    penalty_ = model_->managers()->penalty()->GetPenalty(penalty_label_);
+    penalty_ = model()->managers()->penalty()->GetPenalty(penalty_label_);
   else
     LOG_WARNING() << location() << "No penalty has been specified. Attempting to tag fish above u_max of the vulnerable population will not affect the objective function";
 
-  selectivities::Manager& selectivity_manager = *model_->managers()->selectivity();
+  selectivities::Manager& selectivity_manager = *model()->managers()->selectivity();
 
   if (process_profile_ == ProcessProfile::kAge) {
     for (unsigned i = 0; i < selectivity_labels_.size(); ++i) {
@@ -348,9 +348,9 @@ void Tagging::DoBuild() {
  */
 void Tagging::DoExecute() {
   LOG_FINE() << label_;
-  unsigned current_year = model_->current_year();
+  unsigned current_year = model()->current_year();
 
-  if (model_->state() == State::kInitialise)
+  if (model()->state() == State::kInitialise)
     return;
   if ((std::find(years_.begin(), years_.end(), current_year) == years_.end()))
     return;
@@ -429,7 +429,7 @@ void Tagging::DoExecute() {
     }
   } else {
     // Length-specific execution
-    if (model_->current_year() < first_year_)
+    if (model()->current_year() < first_year_)
       return;
 
     auto from_iter = from_partition_.begin();
@@ -441,9 +441,9 @@ void Tagging::DoExecute() {
     for (unsigned i = 0; i < numbers_[current_year].size(); ++i) LOG_FINEST() << "numbers_[current_year][" << i << "]: " << numbers_[current_year][i];
 
     Double total_stock_with_selectivities = 0.0;
-    LOG_FINE() << "length_spread: " << model_->get_number_of_length_bins() << " in year " << current_year;
+    LOG_FINE() << "length_spread: " << model()->get_number_of_length_bins() << " in year " << current_year;
 
-    for (unsigned i = 0; i < model_->get_number_of_length_bins(); ++i) {
+    for (unsigned i = 0; i < model()->get_number_of_length_bins(); ++i) {
       // Calculate the Exploitation rate
       from_iter = from_partition_.begin();
       to_iter   = to_partition_.begin();

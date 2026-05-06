@@ -235,7 +235,8 @@ vector<Double>* Objects::GetAddressableVector(const string& parameter_absolute_n
  */
 base::Object* Objects::FindObjectOrNull(const string& parameter_absolute_name) {
   LOG_FINE() << "Looking for object: " << parameter_absolute_name;
-  base::Object* result = nullptr;
+  auto          current_model = model();
+  base::Object* result        = nullptr;
 
   string type      = "";
   string label     = "";
@@ -248,49 +249,49 @@ base::Object* Objects::FindObjectOrNull(const string& parameter_absolute_name) {
     return nullptr;
 
   if (type == PARAM_PROCESS) {
-    result = model_->managers()->process()->GetProcess(label);
+    result = current_model->managers()->process()->GetProcess(label);
 
   } else if (type == PARAM_PARAMETER_TRANSFORMATION) {
-    result = model_->managers()->addressable_transformation()->GetAddressableTransformation(label);
+    result = current_model->managers()->addressable_transformation()->GetAddressableTransformation(label);
 
   } else if (type == PARAM_DERIVED_QUANTITY) {
-    result = model_->managers()->derived_quantity()->GetDerivedQuantity(label);
+    result = current_model->managers()->derived_quantity()->GetDerivedQuantity(label);
 
   } else if (type == PARAM_AGE_LENGTH) {
-    result = model_->managers()->age_length()->FindAgeLength(label);
+    result = current_model->managers()->age_length()->FindAgeLength(label);
 
   } else if (type == PARAM_LENGTH_WEIGHT) {
-    result = model_->managers()->length_weight()->GetLengthWeight(label);
+    result = current_model->managers()->length_weight()->GetLengthWeight(label);
 
   } else if (type == PARAM_INITIALISATION_PHASE) {
-    result = model_->managers()->initialisation_phase()->GetInitPhase(label);
+    result = current_model->managers()->initialisation_phase()->GetInitPhase(label);
 
   } else if (type == PARAM_ESTIMATE) {
-    result = model_->managers()->estimate()->GetEstimateByLabel(label);
+    result = current_model->managers()->estimate()->GetEstimateByLabel(label);
 
   } else if (type == PARAM_PARAMETER_TRANSFORMATION) {
-    result = model_->managers()->addressable_transformation()->GetAddressableTransformation(label);
+    result = current_model->managers()->addressable_transformation()->GetAddressableTransformation(label);
 
   } else if (type == PARAM_CATCHABILITY) {
-    result = model_->managers()->catchability()->GetCatchability(label);
+    result = current_model->managers()->catchability()->GetCatchability(label);
 
   } else if (type == PARAM_SELECTIVITY) {
-    result = model_->managers()->selectivity()->GetSelectivity(label);
+    result = current_model->managers()->selectivity()->GetSelectivity(label);
 
   } else if (type == PARAM_TIME_VARYING) {
-    result = model_->managers()->time_varying()->GetTimeVarying(label);
+    result = current_model->managers()->time_varying()->GetTimeVarying(label);
 
   } else if (type == PARAM_OBSERVATION) {
-    result = model_->managers()->observation()->GetObservation(label);
+    result = current_model->managers()->observation()->GetObservation(label);
 
   } else if (type == PARAM_LIKELIHOOD) {
-    result = model_->managers()->likelihood()->GetLikelihood(label);
+    result = current_model->managers()->likelihood()->GetLikelihood(label);
 
   } else if (type == PARAM_GROWTH_INCREMENT) {
-    result = model_->managers()->growth_increment()->GetGrowthIncrement(label);
+    result = current_model->managers()->growth_increment()->GetGrowthIncrement(label);
 
   } else if (type == PARAM_AGEING_ERROR) {
-    result = model_->managers()->ageing_error()->GetAgeingError(label);
+    result = current_model->managers()->ageing_error()->GetAgeingError(label);
 
   } else {
     if (type.substr(0, 1) == "@") {

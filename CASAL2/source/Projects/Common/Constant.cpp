@@ -53,9 +53,9 @@ void Constant::DoReset() {}
  * Update
  */
 void Constant::DoUpdate() {
-  value_ = year_values_[model_->current_year()] * multiplier_by_year_[model_->current_year()];
-  LOG_FINE() << "Setting Value to: " << value_ << ", with multiplier: " << multiplier_by_year_[model_->current_year()];
-  (this->*DoUpdateFunc_)(value_, true, model_->current_year());
+  value_ = year_values_[model()->current_year()] * multiplier_by_year_[model()->current_year()];
+  LOG_FINE() << "Setting Value to: " << value_ << ", with multiplier: " << multiplier_by_year_[model()->current_year()];
+  (this->*DoUpdateFunc_)(value_, true, model()->current_year());
 }
 
 } /* namespace projects */

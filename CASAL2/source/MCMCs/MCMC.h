@@ -60,8 +60,8 @@ public:
   virtual ~MCMC() = default;
   void Validate();
   void Build();
-  void Verify(shared_ptr<Model> model){};
-  void Reset(){};
+  void Verify(shared_ptr<Model> model) {};
+  void Reset() {};
   void Execute(shared_ptr<ThreadPool> thread_pool);
 
   // accessors/mutators
@@ -95,7 +95,10 @@ protected:
   bool WithinBounds();
 
   // members
-  shared_ptr<Model>       model_;  // first model in thread pool
+  weak_ptr<Model> model_;  // first model in thread pool (weak to avoid circular ownership)
+
+  // accessor to lock the weak_ptr safely
+  shared_ptr<Model>       model() const { return model_.lock(); }
   unsigned                length_                   = 0;
   unsigned                starting_iteration_       = 0;
   unsigned                burn_in_                  = 0;

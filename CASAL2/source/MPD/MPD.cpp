@@ -139,7 +139,7 @@ void MPD::ParseFile() {
     if (!utilities::To<double>(values[i], numeric))
       LOG_FATAL() << "The file " << file_name_ << " is not a valid MPD file. Could not convert the value " << values[i] << " to a double";
 
-    auto estimate = model_->managers()->estimate()->GetEstimate(parameters[i]);
+    auto estimate = model()->managers()->estimate()->GetEstimate(parameters[i]);
     if (!estimate)
       LOG_FATAL() << "The file " << file_name_ << " is not a valid MPD file. Estimate " << parameters[i] << " was defined in MPD file but was not found";
 
@@ -152,12 +152,13 @@ void MPD::ParseFile() {
     LOG_FATAL() << "The file " << file_name_ << " is not a valid MPD file. The second line of MPD data must be 'covariance_matrix:'";
 
   // now we load the covariance matrix data
-  auto estimates_available_in_mcmc = model_->managers()->estimate()->GetIsEstimated();
-  auto estimate_count = estimates_available_in_mcmc.size();
-  auto active_mcmc    = model_->managers()->mcmc()->active_mcmc();
+  auto current_model               = model();
+  auto estimates_available_in_mcmc = current_model->managers()->estimate()->GetIsEstimated();
+  auto estimate_count              = estimates_available_in_mcmc.size();
+  auto active_mcmc                 = current_model->managers()->mcmc()->active_mcmc();
   if (active_mcmc == nullptr)
     LOG_FATAL() << "No active MCMC to set covariance matrix on";
-  auto& covariance_matrix = model_->managers()->mcmc()->active_mcmc()->covariance_matrix();
+  auto& covariance_matrix = current_model->managers()->mcmc()->active_mcmc()->covariance_matrix();
   covariance_matrix.resize(estimate_count, estimate_count);
   for (unsigned i = 0; i < estimate_count; ++i) {
     line = get_next_line();

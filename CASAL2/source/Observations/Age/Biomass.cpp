@@ -95,15 +95,15 @@ void Biomass::DoBuild() {
     // TimeStep
     mean_proportion_method_ = true;
     proportion_of_time_     = time_step_proportion_;
-    model_->managers()->time_step()->SubscribeToBlock(time_step_label_, this, years_);
+    model()->managers()->time_step()->SubscribeToBlock(time_step_label_, this, years_);
   } else {
     // Process
     mean_proportion_method_ = false;
     proportion_of_time_     = process_proportion_;
-    model_->managers()->time_step()->SubscribeToProcess(time_step_label_, this, process_label_, years_);
+    model()->managers()->time_step()->SubscribeToProcess(time_step_label_, this, process_label_, years_);
   }
 
-  catchability_ = model_->managers()->catchability()->GetCatchability(catchability_label_);
+  catchability_ = model()->managers()->catchability()->GetCatchability(catchability_label_);
   if (!catchability_)
     LOG_FATAL_P(PARAM_CATCHABILITY) << ": catchability label " << catchability_label_ << " was not found.";
 
@@ -117,12 +117,12 @@ void Biomass::DoBuild() {
     catchability_->SaveObservationLabel(label_);
   }
 
-  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
+  partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
 
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
     selectivities_.push_back(selectivity);
@@ -130,7 +130,7 @@ void Biomass::DoBuild() {
 
   if (parameters_.Get(PARAM_AGE_WEIGHT_LABELS)->has_been_defined()) {
     for (string label : age_weight_labels_) {
-      AgeWeight* age_weight = model_->managers()->age_weight()->FindAgeWeight(label);
+      AgeWeight* age_weight = model()->managers()->age_weight()->FindAgeWeight(label);
       if (!age_weight)
         LOG_ERROR_P(PARAM_AGE_WEIGHT_LABELS) << ": age-weight label (" << label << ") was not found.";
       age_weights_.push_back(age_weight);
@@ -162,7 +162,7 @@ void Biomass::PreExecute() {
  */
 void Biomass::Execute() {
   LOG_FINEST() << "Entering observation " << label_;
-  unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  unsigned time_step_index = model()->managers()->time_step()->current_time_step();
 
   Double   expected_total     = 0.0;  // value in the model
   Double   selectivity_result = 0.0;
@@ -172,7 +172,7 @@ void Biomass::Execute() {
   unsigned age                = 0;
   double   error_value        = 0.0;
 
-  unsigned current_year = model_->current_year();
+  unsigned current_year = model()->current_year();
 
   // Loop through the obs
   auto cached_partition_iter = cached_partition_->Begin();
@@ -268,7 +268,7 @@ void Biomass::CalculateScore() {
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
   // Check if we have a nuisance q or a free q
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     if (catchability_->type() == PARAM_NUISANCE) {
       if (calculate_nuisance_q_) {
         nuisance_catchability_->CalculateQ(comparisons_, likelihood_type_);

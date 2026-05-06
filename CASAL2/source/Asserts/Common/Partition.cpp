@@ -53,9 +53,10 @@ void Partition::DoValidate() {
  * Obtain smart_pointers to any objects that will be used by this object.
  */
 void Partition::DoBuild() {
-  model_->Subscribe(State::kFinalise, this);  // Note this compares the partition at the end of the model run, i.e., the final state
+  auto current_model = model();
+  current_model->Subscribe(State::kFinalise, this);  // Note this compares the partition at the end of the model run, i.e., the final state
 
-  if (!model_->categories()->IsValid(category_label_))
+  if (!current_model->categories()->IsValid(category_label_))
     LOG_FATAL_P(PARAM_CATEGORY) << "category " << category_label_ << " is not a valid category";
 }
 
@@ -66,7 +67,7 @@ void Partition::Execute() {
   std::streamsize prec = std::cout.precision();
   std::cout.precision(12);
 
-  auto category = &model_->partition().category(category_label_);
+  auto category = &model()->partition().category(category_label_);
   auto data     = category->data_;
 
   if (data.size() != values_.size())

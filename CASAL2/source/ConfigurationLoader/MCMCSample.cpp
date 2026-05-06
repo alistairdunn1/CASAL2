@@ -52,6 +52,7 @@ MCMCSample::MCMCSample(shared_ptr<Model> model) : model_(model) {}
  * @return true if the file was parsed, false if not
  */
 bool MCMCSample::LoadFile(const string& file_name) {
+  auto current_model = model();
   // open file
   ifstream file(file_name.c_str());
   if (file.fail() || !file.is_open()) {
@@ -89,8 +90,8 @@ bool MCMCSample::LoadFile(const string& file_name) {
   boost::trim_right(line);
 
   // Check the order of parameters
-  auto estimate_count = model_->managers()->estimate()->GetIsEstimatedCount();
-  auto estimates      = model_->managers()->estimate()->GetIsEstimated();
+  auto estimate_count = current_model->managers()->estimate()->GetIsEstimatedCount();
+  auto estimates      = current_model->managers()->estimate()->GetIsEstimated();
   LOG_MEDIUM() << "Check the order of parameters";
   vector<string> param_labels;
   boost::split(param_labels, line, boost::is_any_of(" "), boost::token_compress_on);

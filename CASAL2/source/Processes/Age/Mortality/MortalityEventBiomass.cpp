@@ -62,7 +62,7 @@ void MortalityEventBiomass::DoBuild() {
   partition_.Init(category_labels_);
 
   for (string label : selectivity_labels_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " was not found.";
 
@@ -70,7 +70,7 @@ void MortalityEventBiomass::DoBuild() {
   }
 
   if (penalty_label_ != "") {
-    penalty_ = model_->managers()->penalty()->GetProcessPenalty(penalty_label_);
+    penalty_ = model()->managers()->penalty()->GetProcessPenalty(penalty_label_);
     if (!penalty_) {
       LOG_ERROR_P(PARAM_PENALTY) << ": Penalty label " << penalty_label_ << " was not found.";
     }
@@ -91,10 +91,10 @@ void MortalityEventBiomass::DoReset() {
  * Execute the process
  */
 void MortalityEventBiomass::DoExecute() {
-  if (catch_years_[model_->current_year()] == 0)
+  if (catch_years_[model()->current_year()] == 0)
     return;
 
-  unsigned time_step_index = model_->managers()->time_step()->current_time_step();
+  unsigned time_step_index = model()->managers()->time_step()->current_time_step();
   LOG_TRACE();
 
   /**
@@ -117,23 +117,23 @@ void MortalityEventBiomass::DoExecute() {
   /**
    * Work out the exploitation rate to remove (catch/vulnerable)
    */
-  Double exploitation = catch_years_[model_->current_year()] / utilities::math::ZeroFun(vulnerable);
+  Double exploitation = catch_years_[model()->current_year()] / utilities::math::ZeroFun(vulnerable);
   if (exploitation > u_max_) {
     exploitation = u_max_;
     actual_catches_.push_back(vulnerable * u_max_);
     if (penalty_)
-      penalty_->Trigger(catch_years_[model_->current_year()], vulnerable * u_max_);
+      penalty_->Trigger(catch_years_[model()->current_year()], vulnerable * u_max_);
     exploitation_by_year_.push_back(exploitation);
   } else {
     exploitation_by_year_.push_back(exploitation);
-    actual_catches_.push_back(catch_years_[model_->current_year()]);
+    actual_catches_.push_back(catch_years_[model()->current_year()]);
   }
 
   if (exploitation < 0.0) {
     LOG_CODE_ERROR() << "exploitation < 0.0 for process " << label_;
   }
 
-  LOG_FINEST() << "year: " << model_->current_year() << "; exploitation: " << AS_DOUBLE(exploitation);
+  LOG_FINEST() << "year: " << model()->current_year() << "; exploitation: " << AS_DOUBLE(exploitation);
 
   /**
    * Remove the stock now. The amount to remove is

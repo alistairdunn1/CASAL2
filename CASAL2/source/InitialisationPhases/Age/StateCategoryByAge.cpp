@@ -41,6 +41,7 @@ StateCategoryByAge::StateCategoryByAge(shared_ptr<Model> model) : Initialisation
  * Validate the parameters passed in from the configuration file
  */
 void StateCategoryByAge::DoValidate() {
+  auto current_model = model();
   parameters_.Validate(PARAM_MIN_AGE)->LessThanParameter(PARAM_MAX_AGE);
   column_count_ = (max_age_ - min_age_) + 2;
 
@@ -48,7 +49,7 @@ void StateCategoryByAge::DoValidate() {
    * Validate our categories
    */
   for (string label : category_labels_) {
-    if (!model_->categories()->IsValid(label))
+    if (!current_model->categories()->IsValid(label))
       LOG_ERROR_P(PARAM_CATEGORIES) << " label " << label << " is not a valid category";
   }
 
@@ -88,6 +89,7 @@ void StateCategoryByAge::DoBuild() {
  * Execute this process
  */
 void StateCategoryByAge::DoExecute() {
+  auto current_model = model();
   for (auto iter : partition_) {
     unsigned i = 0;
     for (unsigned index = min_age_ - iter->min_age_; index <= max_age_ - iter->min_age_; ++index, ++i) {
@@ -102,7 +104,7 @@ void StateCategoryByAge::DoExecute() {
   cached_partition_.BuildCache();
 
   // Execute the annual cycle for one year to calculate Quantities that might get used in year 1 of the annual cycle
-  timesteps::Manager* time_step_manager = model_->managers()->time_step();
+  timesteps::Manager* time_step_manager = current_model->managers()->time_step();
   time_step_manager->ExecuteInitialisation(label_, 1);
 
   auto cached_partition_iter = cached_partition_.begin();

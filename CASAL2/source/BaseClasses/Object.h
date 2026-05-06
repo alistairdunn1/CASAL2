@@ -59,6 +59,7 @@ using std::shared_ptr;
 using std::string;
 using std::string_view;
 using std::vector;
+using std::weak_ptr;
 using utilities::OrderedMap;
 
 namespace base {
@@ -69,6 +70,15 @@ public:
   // Methods
   Object() = default;
   virtual ~Object() {};
+  template <typename T>
+  static shared_ptr<T> LockWeakPtr(const weak_ptr<T>& pointer, string_view owner) {
+    auto locked = pointer.lock();
+    if (!locked)
+      LOG_CODE_ERROR() << owner << " weak_ptr expired";
+
+    return locked;
+  }
+
   bool                        HasAddressable(const string& label) const;
   bool                        HasAddressableUsage(const string& label, const addressable::Usage&) const;
   void                        SetAddressableIsUsed(const string& label, const addressable::Usage&);

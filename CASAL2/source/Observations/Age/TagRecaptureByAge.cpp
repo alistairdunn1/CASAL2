@@ -113,10 +113,10 @@ void TagRecaptureByAge::DoValidate() {
  * Build any runtime relationships and ensure that the labels for other objects are valid.
  */
 void TagRecaptureByAge::DoBuild() {
-  partition_               = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, category_labels_));
-  cached_partition_        = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, category_labels_));
-  tagged_partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model_, tagged_category_labels_));
-  tagged_cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model_, tagged_category_labels_));
+  partition_               = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), category_labels_));
+  cached_partition_        = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), category_labels_));
+  tagged_partition_        = CombinedCategoriesPtr(new niwa::partition::accessors::CombinedCategories(model(), tagged_category_labels_));
+  tagged_cached_partition_ = CachedCombinedCategoriesPtr(new niwa::partition::accessors::cached::CombinedCategories(model(), tagged_category_labels_));
 
   if (ageing_error_label_ != "") {
     LOG_CODE_ERROR() << "ageing error has not been implemented for the tag recapture at age observation";
@@ -126,7 +126,7 @@ void TagRecaptureByAge::DoBuild() {
 
   // Build Selectivity pointers
   for (string label : selectivity_labels_) {
-    Selectivity* selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    Selectivity* selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity)
       LOG_ERROR_P(PARAM_SELECTIVITIES) << ": Selectivity label " << label << " does not exist.";
     selectivities_.push_back(selectivity);
@@ -138,7 +138,7 @@ void TagRecaptureByAge::DoBuild() {
   }
 
   for (string label : tagged_selectivity_labels_) {
-    auto selectivity = model_->managers()->selectivity()->GetSelectivity(label);
+    auto selectivity = model()->managers()->selectivity()->GetSelectivity(label);
     if (!selectivity) {
       LOG_ERROR_P(PARAM_TAGGED_SELECTIVITIES) << ": Selectivity label " << label << " does not exist.";
     } else
@@ -154,7 +154,7 @@ void TagRecaptureByAge::DoBuild() {
     LOG_ERROR_P(PARAM_TIME_STEP_PROPORTION) << ": time_step_proportion (" << time_step_proportion_ << ") must be between 0.0 and 1.0 inclusive";
   proportion_of_time_ = time_step_proportion_;
 
-  auto time_step = model_->managers()->time_step()->GetTimeStep(time_step_label_);
+  auto time_step = model()->managers()->time_step()->GetTimeStep(time_step_label_);
   if (!time_step) {
     LOG_ERROR_P(PARAM_TIME_STEP) << "Time step label " << time_step_label_ << " was not found.";
   } else {
@@ -172,10 +172,10 @@ void TagRecaptureByAge::PreExecute() {
   cached_partition_->BuildCache();
   tagged_cached_partition_->BuildCache();
 
-  if (cached_partition_->Size() != scanned_[model_->current_year()].size()) {
+  if (cached_partition_->Size() != scanned_[model()->current_year()].size()) {
     LOG_CODE_ERROR() << "cached_partition_->Size() != scanned_[model->current_year()].size()";
   }
-  if (partition_->Size() != scanned_[model_->current_year()].size()) {
+  if (partition_->Size() != scanned_[model()->current_year()].size()) {
     LOG_CODE_ERROR() << "partition_->Size() != scanned_[model->current_year()].size()";
   }
 }
@@ -323,28 +323,28 @@ void TagRecaptureByAge::Execute() {
       }
     }  // for (tagged_category_iter)
 
-    if (age_results.size() != scanned_[model_->current_year()][category_labels_[category_offset]].size())
+    if (age_results.size() != scanned_[model()->current_year()][category_labels_[category_offset]].size())
       LOG_CODE_ERROR() << "expected_values.size(" << age_results.size() << ") != scanned_[category_offset].size("
-                       << scanned_[model_->current_year()][category_labels_[category_offset]].size() << ")";
+                       << scanned_[model()->current_year()][category_labels_[category_offset]].size() << ")";
 
     // save our comparisons so we can use them to generate the score from the likelihoods later
     for (unsigned i = 0; i < age_results.size(); ++i) {
       Double expected = 0.0;
       double observed = 0.0;
       if (age_results[i] != 0.0)
-        expected = detection_ * tagged_age_results[i] / (age_results[i] * overlap_scalar_by_year_[model_->current_year()]);
-      if (scanned_[model_->current_year()][category_labels_[category_offset]][i] == 0.0)
+        expected = detection_ * tagged_age_results[i] / (age_results[i] * overlap_scalar_by_year_[model()->current_year()]);
+      if (scanned_[model()->current_year()][category_labels_[category_offset]][i] == 0.0)
         observed = 0.0;
       else
-        observed = (recaptures_[model_->current_year()][category_labels_[category_offset]][i]) / scanned_[model_->current_year()][category_labels_[category_offset]][i];
+        observed = (recaptures_[model()->current_year()][category_labels_[category_offset]][i]) / scanned_[model()->current_year()][category_labels_[category_offset]][i];
 
       LOG_MEDIUM() << "Comparison for age " << min_age_ + i << ": expected = " << expected << " observed = " << observed
-                   << " error = " << scanned_[model_->current_year()][category_labels_[category_offset]][i]
-                   << " recaptures = " << recaptures_[model_->current_year()][category_labels_[category_offset]][i];
+                   << " error = " << scanned_[model()->current_year()][category_labels_[category_offset]][i]
+                   << " recaptures = " << recaptures_[model()->current_year()][category_labels_[category_offset]][i];
 
       // process_error is not used here, and the dispersion is applied to the final likelihood value below
       SaveComparison(tagged_category_labels_[category_offset], selectivity_labels_set, min_age_ + i, 0, expected, observed, 0.0,
-                     scanned_[model_->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
+                     scanned_[model()->current_year()][category_labels_[category_offset]][i], 0.0, delta_, 0.0);
     }  // for (i)
   }  // for (category_offset)
 }
@@ -360,7 +360,7 @@ void TagRecaptureByAge::CalculateScore() {
    */
   LOG_FINEST() << "Calculating neglogLikelihood for observation = " << label_;
 
-  if (model_->run_mode() == RunMode::kSimulation) {
+  if (model()->run_mode() == RunMode::kSimulation) {
     likelihood_->SimulateObserved(comparisons_);
   } else {
     likelihood_->GetScores(comparisons_);

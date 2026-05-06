@@ -37,7 +37,7 @@ Profile::Profile(shared_ptr<Model> model) : model_(model) {
  * Validate the objects
  */
 void Profile::Validate() {
-  parameters_.Populate(model_);
+  parameters_.Populate(model());
   parameters_.Validate(PARAM_STEPS)->GreaterThanOrEqualTo(2u);
   parameters_.Validate(PARAM_LOWER_BOUND)->LessThanParameter(PARAM_UPPER_BOUND);
 }
@@ -46,12 +46,13 @@ void Profile::Validate() {
  * Build the objects
  */
 void Profile::Build() {
-  string error = "";
-  if (!model_->objects().VerifyAddressableForUse(parameter_, addressable::kProfile, error)) {
+  auto   current_model = model();
+  string error         = "";
+  if (!current_model->objects().VerifyAddressableForUse(parameter_, addressable::kProfile, error)) {
     LOG_FATAL_P(PARAM_PARAMETER) << "This parameter cannot be used in an @profile block. Error: " << error;
   }
 
-  target_         = model_->objects().GetAddressable(parameter_);
+  target_         = current_model->objects().GetAddressable(parameter_);
   original_value_ = *target_;
   step_size_      = (upper_bound_ - lower_bound_) / (steps_ - 1);
   LOG_MEDIUM() << "start_value for parameter: " << original_value_;
@@ -59,11 +60,11 @@ void Profile::Build() {
   // Deal with Same parameters
   if (!parameters_.Get(PARAM_SAME)->has_been_defined()) {
     for (auto same : same_labels_) {
-      if (!model_->objects().VerifyAddressableForUse(same, addressable::kProfile, error)) {
+      if (!current_model->objects().VerifyAddressableForUse(same, addressable::kProfile, error)) {
         LOG_FATAL_P(PARAM_SAME) << "This parameter cannot be used in an @profile block. Error: " << error;
       }
 
-      auto same_target = model_->objects().GetAddressable(same);
+      auto same_target = current_model->objects().GetAddressable(same);
       if (!same_target) {
         LOG_FATAL_P(PARAM_SAME) << "Could nof find " << same << " does it exist, or in the right format?";
       }

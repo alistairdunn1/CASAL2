@@ -34,8 +34,9 @@ void Constant::DoValidate() {
  * Update
  */
 void Constant::DoUpdate() {
-  LOG_FINE() << "Setting Value to: " << parameter_by_year_[model_->current_year()];
-  (this->*update_function_)(parameter_by_year_[model_->current_year()]);
+  auto current_model = model();
+  LOG_FINE() << "Setting Value to: " << parameter_by_year_[current_model->current_year()];
+  (this->*update_function_)(parameter_by_year_[current_model->current_year()]);
 }
 
 } /* namespace timevarying */
