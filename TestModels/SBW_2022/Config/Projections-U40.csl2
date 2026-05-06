@@ -1,0 +1,49 @@
+# PROJECTIONS: Define YCS random process and future catches
+@derived_quantity SSB_index
+type biomass_index
+time_step step2
+categories male.spawn female.spawn
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities One One
+distribution lognormal
+cv 0.3
+bias 0
+rho 0.0
+
+@derived_quantity Survey_index
+type biomass_index
+time_step step2
+categories male.spawn female.spawn
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities One One
+catchability TangaroaMatureq
+distribution lognormal
+cv 0.3
+bias 0.0
+rho 0.0
+
+@project Recruitment
+type empirical_sampling
+parameter process[Recruitment].standardised_recruitment_multipliers
+start_year 1960
+final_year 2021
+years 2022:2250
+multiplier 1
+
+@project Trawl
+type harvest_strategy_ramp_u
+parameter process[Instantaneous_Mortality].method_Trawl
+biomass_index SSB_index
+reference_index SSB_index
+years 2023:2250
+u                0.22 0.22 0.22
+reference_points 0.00 0.10 0.40
+min_delta 0.1
+max_delta 0
+update_frequency_years 3
+biomass_index_lag_years 3
+current_catch 22803
+first_year 2026
+multiplier 1.0

@@ -46,7 +46,7 @@ Nuisance::Nuisance(shared_ptr<Model> model) : Catchability(model) {
 void Nuisance::DoBuild() {
   // TODO: Fix this. Building dynamic parameter feels horrible.
   if (IsAddressableUsedFor(PARAM_Q, addressable::kEstimate))
-    LOG_ERROR_P(PARAM_Q) << "Has an @esimate block, this is not allowed. An @additional_prior must be specified for nuisance catchability parameters";
+    LOG_ERROR_P(PARAM_Q) << "Has an @estimate block, this is not allowed. An @additional_prior must be specified for nuisance catchability parameters";
 
   /**
    *  Build the objects
@@ -100,7 +100,7 @@ void Nuisance::DoBuild() {
       }
     }
   } else {
-    LOG_ERROR_P(PARAM_LABEL) << ": An @additional_prior must be specified for nuisance catchability parameters";
+    LOG_ERROR_P(PARAM_LABEL) << ": An @additional_prior ";
   }
 }
 

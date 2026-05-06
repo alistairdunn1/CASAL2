@@ -1,0 +1,12 @@
+# PROFILES: Define profiles 
+
+## profile B0
+@profile profile
+parameter process[Recruitment].b0
+lower_bound 250000
+upper_bound 380000
+steps 10
+
+
+@report profile
+type profile

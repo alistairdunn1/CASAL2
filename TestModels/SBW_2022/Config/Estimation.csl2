@@ -1,0 +1,128 @@
+## Structure of my estimation.csl2
+# - Define Minimiser along with subcommands such as gradient tolerance to stop, how many evaluations to stop at etc.
+# - Define Estimates = Parameters being estiamted with assumed priors and bounds
+# - Define Penalties = Additional Penalties assumed on these models
+# - Define AdditionalPriors = Analogous to Penalties really.
+
+################################### Minimiser ###############################
+
+@mcmc mcmc
+type random_walk
+start 0.25  #0 do a jump first
+length 1500000   #11000000
+keep 1000   #10000
+step_size 0.002
+adapt_stepsize_at 50000 100000 150000 200000 500000
+#50000 100000 150000 200000 500000
+burn_in 500000   #500000
+proposal_distribution t
+#adapt_stepsize_method double_half # NIWA original method
+adapt_stepsize_method ratio
+max_correlation 0.8
+
+
+################################### Estimates ###############################
+## Format for parameter in @estimate block = type[label].parameter
+#######
+## B0
+#######
+@estimate B0
+type uniform_log
+parameter process[Recruitment].b0
+lower_bound  30000
+upper_bound 800000
+
+## profile B0
+@profile B0_profile
+parameter process[Recruitment].b0
+lower_bound 250000
+upper_bound 380000
+steps 10
+
+#######################
+## Migration/Maturation
+#######################
+#male
+@estimate Migration_male
+type uniform
+parameter selectivity[MaturationSel_male].v
+lower_bound 0.001 0.001 0.001 0.001 0.999
+upper_bound 0.999 0.999 0.999 0.999 0.999
+
+#female
+@estimate Migration_female
+type uniform
+parameter selectivity[MaturationSel_female].v
+lower_bound 0.001 0.001 0.001 0.001 0.999
+upper_bound 0.999 0.999 0.999 0.999 0.999
+
+#######
+## YCS
+#######
+@estimate YCS
+parameter process[Recruitment].recruitment_multipliers{1960:2021} 
+# YCS 1958:2019
+#2018] #2014}   #1958:2012} ## he doesn't estimate the last year see bounds of CASAL
+type lognormal
+mu 	      	  1 * 62     #59  #55
+cv            1.3 * 62  #59  #55
+lower_bound   0.001 * 62  #59  #55
+upper_bound   100 * 62  #59  #55
+
+
+#######
+## M's
+#######
+
+/*  turn off for base
+@estimate M_with_avg_prior
+parameter parameter_transformation[M_nonspawn_avg_diff].average_parameter
+same parameter_transformation[M_spawn_avg_diff].average_parameter
+
+type lognormal
+mu 0.20
+cv 0.20
+estimation_phase 2
+lower_bound 0.075
+upper_bound 0.325
+
+@estimate M_with_diff_prior
+parameter parameter_transformation[M_nonspawn_avg_diff].difference_parameter
+same parameter_transformation[M_spawn_avg_diff].difference_parameter
+type normal_by_stdev
+estimation_phase 2
+mu 0.0
+sigma 0.05
+lower_bound -0.05
+upper_bound 0.05
+
+## transformations
+@parameter_transformation M_nonspawn_avg_diff
+type average_difference
+parameters process[Instantaneous_Mortality].m{male.nonspawn} process[Instantaneous_Mortality].m{female.nonspawn}
+prior_applies_to_restored_parameters false
+
+@parameter_transformation M_spawn_avg_diff
+type average_difference
+parameters process[Instantaneous_Mortality].m{male.spawn} process[Instantaneous_Mortality].m{female.spawn}
+prior_applies_to_restored_parameters false
+
+*/
+
+
+################################### Penalties ###############################
+@penalty CatchMustBeTaken
+type process
+log_scale True
+multiplier 100
+
+################################### Additional Priors ########################
+########
+## YCS's
+#########
+@additional_prior Penalty-YCS
+type vector_average
+parameter process[Recruitment].recruitment_multipliers
+k 1
+multiplier 1
+

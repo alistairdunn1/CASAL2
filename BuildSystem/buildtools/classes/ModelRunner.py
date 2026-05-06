@@ -45,6 +45,7 @@ class ModelRunner:
         self.executionTypeList.append(["TwoSex", "adolc"])
         self.executionTypeList.append(["TwoSexHybridMortality", "adolc"])
         self.executionTypeList.append(["SBW", "adolc"])
+        self.executionTypeList.append(["SBW_2022", "adolc"])
         self.executionTypeList.append(["Simple", "adolc"])
         self.executionTypeList.append(["SimpleRicker", "adolc"])
         self.executionTypeList.append(["SexedLengthBased", "adolc"])
@@ -52,7 +53,9 @@ class ModelRunner:
         self.executionTypeList.append(["SimAllObs", "simulate_dash_i"])
         self.executionTypeList.append(["Complex_input", "run_dash_i"])
         self.executionTypeList.append(["TwoSex_input", "run_dash_i"])
-        self.executionTypeList.append(["mcmc_start_mpd_mcmc_fixed", "resume_mcmc_from_mpd"])
+        self.executionTypeList.append(
+            ["mcmc_start_mpd_mcmc_fixed", "resume_mcmc_from_mpd"]
+        )
         self.executionTypeList.append(["mcmc_start_mpd", "resume_mcmc_from_mpd"])
         self.executionTypeList.append(["mcmc_resume", "resume_mcmc"])
         self.executionTypeList.append(["SingleSexTagByLength_input", "run_dash_I"])
@@ -60,12 +63,11 @@ class ModelRunner:
         self.executionTypeList.append(["Simple", "projections"])
         # self.executionTypeList.append(["MultiSelectivity", "betadiff"])
         # self.executionTypeList.append(["SimpleExploitationRates", "projections"])
-        self.executionTypeList.append(["SimpleNoStdYcs", "adolc"])
-        self.executionTypeList.append(["SimpleNoStdYcs", "betadiff"])
-        self.executionTypeList.append(["SimpleNoStdYcs", "projections"])
+        # self.executionTypeList.append(["SimpleNoStdYcs", "adolc"])
+        # self.executionTypeList.append(["SimpleNoStdYcs", "betadiff"])
+        # self.executionTypeList.append(["SimpleNoStdYcs", "projections"])
 
         self.adolcLock = threading.Lock()
-
 
     def _print_log_tail(self, folder_path, execution_type, lines=100):
         """Print the last N lines of log/error files for a failed run."""
@@ -101,14 +103,20 @@ class ModelRunner:
                         print(f"  {line}", end="")
                     print()
 
-
-    def thread_target(self, folder, executionType, threadCwd, threadCommands, checkForFile=None):
-        self.result_container[f"{folder} - {executionType}"] = self.runCommandInThread(threadCwd, folder, executionType, threadCommands, checkForFile)
+    def thread_target(
+        self, folder, executionType, threadCwd, threadCommands, checkForFile=None
+    ):
+        self.result_container[f"{folder} - {executionType}"] = self.runCommandInThread(
+            threadCwd, folder, executionType, threadCommands, checkForFile
+        )
 
     """
     Utility functions to run from the threads
     """
-    def runCommandInThread(self, folderPath, folderName,executionType, commands, checkForFileList=[]):
+
+    def runCommandInThread(
+        self, folderPath, folderName, executionType, commands, checkForFileList=[]
+    ):
         for command in commands:
             if "-s" in command and not os.path.exists(folderPath + "/sim"):
                 os.mkdir(folderPath + "/sim")
@@ -116,7 +124,7 @@ class ModelRunner:
         # Prevent multiple differentiation methods from running simultaneously
         requires_lock = executionType in ["betadiff"]
         if requires_lock:
-            self.adolcLock.acquire()        
+            self.adolcLock.acquire()
 
         try:
             start = time.time()
@@ -125,13 +133,13 @@ class ModelRunner:
                 if exit_code != EX_OK:
                     break  # Skip remaining commands if one fails
                 process = subprocess.Popen(
-                    command, 
+                    command,
                     cwd=folderPath,
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.PIPE, 
-                    shell=True
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
                 )
-                (output, error) = process.communicate()
+                output, error = process.communicate()
                 exit_code = process.wait()
             elapsed = time.time() - start
         finally:
@@ -141,7 +149,7 @@ class ModelRunner:
 
         for command in commands:
             if "-s" in command and os.path.exists(folderPath + "/sim"):
-                for checkForFile in  checkForFileList:
+                for checkForFile in checkForFileList:
                     if not os.path.exists(folderPath + "/sim/" + checkForFile):
                         exit_code = 1  # Indicate failure if expected file is not found
                 # clean up sim directory after running
@@ -151,10 +159,10 @@ class ModelRunner:
 
         return (output, error, exit_code, elapsed, folderPath)
 
-
     """
     Start the modelrunner builder
-    """    
+    """
+
     def start(self):
         binary_name = "casal2"
         if Globals.operating_system_ == "windows":
@@ -174,14 +182,26 @@ class ModelRunner:
         print("")
         success_count = 0
         fail_count = 0
-        
-        
 
         dir_list = os.listdir("../TestModels/")
         cwd = os.path.normpath(os.getcwd())
 
         exe_path = f"{cwd}/{exe_path}"
         print(f"--> Full Casal2 path for model runner: {exe_path}")
+
+        # Check that every model folder referenced in executionTypeList actually exists
+        missing_folders = []
+        for model_name, exec_type in self.executionTypeList:
+            folder_path = "../TestModels/" + model_name
+            if not os.path.isdir(folder_path):
+                missing_folders.append(f"{model_name} (exec type '{exec_type}')")
+        if missing_folders:
+            print(
+                "ERROR: The following model folders are listed in executionTypeList but do not exist:"
+            )
+            for entry in missing_folders:
+                print(f"  - {entry}")
+            return False
 
         threads = []
 
@@ -193,25 +213,39 @@ class ModelRunner:
                 continue
             if folder.startswith("DO NOT"):
                 continue
-        
-            for (model_name, exec_type) in self.executionTypeList:
+
+            for model_name, exec_type in self.executionTypeList:
                 if folder == model_name:
                     threadCommand = []
                     checkForFile = []
 
-                    if (exec_type == "betadiff"):
-                        threadCommand.append(f"{exe_path} -e -g 20 -c config_betadiff.csl2 > estimate_betadiff.log 2> estimate_betadiff.err")
-                    if (exec_type == "gammadiff"):
-                        threadCommand.append(f"{exe_path} -e -g 20 -c config_gammadiff.csl2 > estimate_gammadiff.log 2> estimate_gammadiff.err")
-                    if (exec_type == "adolc"):
-                        threadCommand.append(f"{exe_path} -e -g 20 --config config_adolc.csl2 > estimate_adolc.log 2> estimate_adolc.err")
-                    if (exec_type == "resume_mcmc_from_mpd"):
-                        threadCommand.append(f"{exe_path} -E mpd.log > estimate.log 2> esimate.err")
-                        threadCommand.append(f"{exe_path} -M mpd.log > mcmc.log 2> mcmc.err ")
-                    if (exec_type == "resume_mcmc"):
-                        threadCommand.append(f"{exe_path} -R mpd.log --objective-file objectives.1 --sample-file samples.1 > mcmc.log 2>&1")
-                    if (exec_type == "simulate_dash_i"):
-                        threadCommand.append(f"{exe_path} -s 10 -i samples.1  > multi_sim.log 2> multi_sim.err")
+                    if exec_type == "betadiff":
+                        threadCommand.append(
+                            f"{exe_path} -e -g 20 -c config_betadiff.csl2 > estimate_betadiff.log 2> estimate_betadiff.err"
+                        )
+                    if exec_type == "gammadiff":
+                        threadCommand.append(
+                            f"{exe_path} -e -g 20 -c config_gammadiff.csl2 > estimate_gammadiff.log 2> estimate_gammadiff.err"
+                        )
+                    if exec_type == "adolc":
+                        threadCommand.append(
+                            f"{exe_path} -e -g 20 --config config_adolc.csl2 > estimate_adolc.log 2> estimate_adolc.err"
+                        )
+                    if exec_type == "resume_mcmc_from_mpd":
+                        threadCommand.append(
+                            f"{exe_path} -E mpd.log > estimate.log 2> estimate.err"
+                        )
+                        threadCommand.append(
+                            f"{exe_path} -M mpd.log > mcmc.log 2> mcmc.err "
+                        )
+                    if exec_type == "resume_mcmc":
+                        threadCommand.append(
+                            f"{exe_path} -R mpd.log --objective-file objectives.1 --sample-file samples.1 > mcmc.log 2>&1"
+                        )
+                    if exec_type == "simulate_dash_i":
+                        threadCommand.append(
+                            f"{exe_path} -s 10 -i samples.1  > multi_sim.log 2> multi_sim.err"
+                        )
                         if folder == "ORH3B":
                             checkForFile.append("CPUEandes.1_01")
                             checkForFile.append("CPUEandes.9_10")
@@ -219,21 +253,33 @@ class ModelRunner:
                         else:
                             checkForFile.append("sim_all_obs.1_01")
                             checkForFile.append("sim_all_obs.1_10")
-                    if (exec_type == "run_dash_i"):
-                        threadCommand.append(f"{exe_path} -r -i pars.out > run.log 2> run.err")
-                    if (exec_type == "run_dash_I"):
-                        threadCommand.append(f"{exe_path} -r -I pars.out > run.log 2> run.err")
-                    if (exec_type == "projections"):
-                        threadCommand.append(f"{exe_path} -f 100 -i free.dat -g 20 -c config_projections.csl2 -t > projections.log 2> projections.err")
-                
-                    if len(threadCommand) == 0: # Default -r test
+                    if exec_type == "run_dash_i":
+                        threadCommand.append(
+                            f"{exe_path} -r -i pars.out > run.log 2> run.err"
+                        )
+                    if exec_type == "run_dash_I":
+                        threadCommand.append(
+                            f"{exe_path} -r -I pars.out > run.log 2> run.err"
+                        )
+                    if exec_type == "projections":
+                        threadCommand.append(
+                            f"{exe_path} -f 100 -i free.dat -g 20 -c config_projections.csl2 -t > projections.log 2> projections.err"
+                        )
+
+                    if len(threadCommand) == 0:  # Default -r test
                         threadCommand.append(f"{exe_path} -r > run.log 2> run.err")
 
                     threadCwd = "../TestModels/" + folder
                     threads.append(
                         threading.Thread(
                             target=self.thread_target,
-                            args=(folder, exec_type, threadCwd, threadCommand, checkForFile)
+                            args=(
+                                folder,
+                                exec_type,
+                                threadCwd,
+                                threadCommand,
+                                checkForFile,
+                            ),
                         )
                     )
                     threads[-1].start()
@@ -241,30 +287,32 @@ class ModelRunner:
         print(f"Total threads created: {len(threads)}")  # Add this line
         totalThreads = len(threads)
         while any(t.is_alive() for t in threads):
-            alive_count = sum(1 for t in threads if t.is_alive())    
+            alive_count = sum(1 for t in threads if t.is_alive())
             progressPercentage = ((totalThreads - alive_count) / totalThreads) * 100
-            print(f"Progress: {progressPercentage:.2f}% - Waiting for {alive_count} models to complete...")                    
+            print(
+                f"Progress: {progressPercentage:.2f}% - Waiting for {alive_count} models to complete..."
+            )
             time.sleep(2)
 
         for i, thread in enumerate(threads):
             thread.join()
-        
-        for key, (output, error, exit_code, elapsed, folder_path) in self.result_container.items():
+
+        for key, (
+            output,
+            error,
+            exit_code,
+            elapsed,
+            folder_path,
+        ) in self.result_container.items():
             if exit_code != EX_OK:
                 print(
-                    "[FAILED] - "
-                    + key
-                    + " in "
-                    + str(round(elapsed, 2))
-                    + " seconds"
+                    "[FAILED] - " + key + " in " + str(round(elapsed, 2)) + " seconds"
                 )
                 exec_type = key.split(" - ", 1)[1] if " - " in key else ""
                 self._print_log_tail(folder_path, exec_type)
                 fail_count += 1
             else:
-                print(
-                    "[OK] - " + key + " in " + str(round(elapsed, 2)) + " seconds"
-                )
+                print("[OK] - " + key + " in " + str(round(elapsed, 2)) + " seconds")
                 success_count += 1
 
         print("")

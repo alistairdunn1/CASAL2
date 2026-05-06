@@ -1,0 +1,23 @@
+# Includes required csl2 input configuration files and defines ASSERTS
+
+# Population
+!include "Config/Population.csl2"
+
+# Estimation
+!include "Config/Estimation.csl2"
+
+@minimiser adolc
+type adolc
+iterations 1000
+evaluations 1000
+tolerance 1e-6
+parameter_transformation sin_transform
+covariance True
+
+# Observations
+!include "Config/Observation.csl2"
+!include "Config/Observation-Acoustics.csl2"
+!include "Config/Observation-CPUE.csl2"
+
+# Reports
+!include "Config/Reports.csl2"

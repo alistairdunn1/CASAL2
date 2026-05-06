@@ -18,7 +18,6 @@
 #include <boost/algorithm/string/trim_all.hpp>
 #include <fstream>
 #include <iostream>
-#include <regex>
 
 #include "../ConfigurationLoader/File.h"
 #include "../Logging/Logging.h"
@@ -431,7 +430,7 @@ void Loader::ParseBlock(shared_ptr<Model> model, vector<FileLine>& block) {
         LOG_FINEST() << "Ignoring values: [" << parameter_type << "]: " << line;
       }
     }  // if (!loading_table && parameter_type == PARAM_TABLE)
-  }    // for(FileLine file_line : block)
+  }  // for(FileLine file_line : block)
 
   if (block_type == "model") {
     model->PopulateParameters();
@@ -470,8 +469,11 @@ void Loader::HandleInlineDefinitions() {
     // Do a quick check to see if we have any inline declarations in this block
     bool has_inline = false;
     for (auto& file_line : block) {
-      std::regex e(".*[\\[].*=.*[\\]].*");
-      if (std::regex_match(file_line.line_, e)) {
+      size_t first_inline_bracket  = file_line.line_.find('[');
+      size_t second_inline_bracket = file_line.line_.find(']', first_inline_bracket == string::npos ? 0 : first_inline_bracket + 1);
+      size_t equals_loc            = file_line.line_.find('=', first_inline_bracket == string::npos ? 0 : first_inline_bracket + 1);
+
+      if (first_inline_bracket != string::npos && second_inline_bracket != string::npos && equals_loc != string::npos && equals_loc < second_inline_bracket) {
         LOG_FINEST() << "Found inline declaration on line " << file_line.line_;
         has_inline = true;
         break;
@@ -634,7 +636,7 @@ void Loader::HandleInlineDefinitions() {
                     << ": This line contains either a '[' or a ']' but not both. This line is not in a valid format";
       }
     }  // for (auto& file_line : file_lines_) {
-  }    // for (auto& block : blocks_) {
+  }  // for (auto& block : blocks_) {
 
   // add new inline blocks to the object
   for (auto block : new_blocks) blocks_.push_back(block);

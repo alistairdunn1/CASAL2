@@ -1,0 +1,19 @@
+@project Recruitment
+type empirical_sampling
+parameter process[Recruitment].standardised_recruitment_multipliers
+start_year 1960
+final_year 2021
+years 2022:2250
+multiplier 1
+
+@project Trawl
+type harvest_strategy_constant_u
+parameter process[Instantaneous_Mortality].method_Trawl
+years 2023:2250
+u 0.2
+biomass_index SSB
+update_frequency_years 1
+biomass_index_lag_years 1
+current_catch 22803
+first_year 2026
+multiplier 1.0
