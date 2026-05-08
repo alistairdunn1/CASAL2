@@ -1,6 +1,6 @@
 #' Utility extract function
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "split.header" <- function(line) {

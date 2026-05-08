@@ -1,6 +1,6 @@
 #' Utility function for observation related functionality
 #'
-#' @author Craig marsh
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "transform.comparisons" <- function(Data) {

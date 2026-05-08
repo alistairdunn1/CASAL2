@@ -146,7 +146,7 @@ KnifeEdge <- function(age_or_length, alpha = 1, Edge) {
 new.graph(0.8)
 par(mfrow = c(4, 2), mar = c(0.3, 0.3, 2, 0.2), oma = c(4, 4, 1, 1), xaxt = "n", yaxt = "n")
 
-Age <- seq(1, 30, by = 0.02);
+Age <- seq(1, 30, by = 0.02)
 X <- 1.8
 Y <- 0.95
 
@@ -159,7 +159,7 @@ sel <- KnifeEdge(age_or_length = Age, Edge = 8)
 plot(Age, sel, type = "l", xlim = c(1, 30), ylim = c(0, 1.05), main = "Knife-edge")
 legend(X, Y, legend = c("E = 8"), bty = "n")
 
-## logisitic
+## logistic
 sel <- Logistic(age_or_length = Age, a50 = 13, ato95 = 3)
 plot(Age, sel, type = "l", xlim = c(1, 30), ylim = c(0, 1.05), main = "Logisitic", yaxt = "s")
 legend(X, Y, legend = c("a50 = 13", "ato95 = 3"), bty = "n")
@@ -187,7 +187,7 @@ legend(X, Y, legend = c("mu = 13", "sigma_l = 3", "sigma_r = 7"), bty = "n")
 ## Double exponential
 sel <- DoubleExponential(age_or_length = Age, x0 = 15, x1 = 1, x2 = 30, y0 = 0.1, y1 = 0.5, y2 = 0.8)
 plot(Age, sel, type = "l", xlim = c(1, 30), ylim = c(0, 1.05), main = "Double Exponential", xaxt = "s")
-legend(X+8, Y, legend = c("x0 = 15", "x1 = 1", "x2 = 30", "y0 = 0.1", "y1 = 0.5", "y2 = 0.8"), bty = "n")
+legend(X + 8, Y, legend = c("x0 = 15", "x1 = 1", "x2 = 30", "y0 = 0.1", "y1 = 0.5", "y2 = 0.8"), bty = "n")
 
 ## labels
 mtext(side = 1, adj = 0.5, outer = T, "Age", line = 2)

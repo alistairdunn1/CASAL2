@@ -30,5 +30,5 @@ class(data)
 }
 }
 \author{
-Dan Fu
+Casal2 Development Team
 }

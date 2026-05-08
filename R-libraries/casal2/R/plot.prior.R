@@ -2,7 +2,7 @@
 #' @description
 #' Plot priors available in Casal2
 #'
-#' @author A. Dunn
+#' @author Casal2 Development Team
 #' @param type The prior type
 #' @param mu mean of the distribution for the prior
 #' @param sd standard deviation (where required) of the distribution for the prior
@@ -16,6 +16,9 @@
 #' @param logx TRUE/FALSE (default = FALSE) to plot the xaxis in log-space
 #' @param add TRUE/FALSE (default = FALSE) to add to an existing plot
 #' @param dump TRUE/FALSE (default = FALSE) to dump the coordinates of the plotted line
+#' @param xlab Label for the x-axis (default \code{"x"}).
+#' @param ylab Label for the y-axis (default \code{"Density"}).
+#' @param \dots Further graphical arguments passed to the underlying plot calls.
 #' @rdname plot_prior
 #' @export plot_prior
 

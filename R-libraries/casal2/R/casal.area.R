@@ -1,6 +1,6 @@
 #' Utility function
 #'
-#' @author A.Dunn
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 

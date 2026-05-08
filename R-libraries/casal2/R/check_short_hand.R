@@ -1,9 +1,9 @@
 #' Utility extract function
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param x variable to check
 
-"check_short_hand" <- function(x) {
+"checkShortHand" <- function(x) {
   string_ndx <- rep(F, length(x))
   numeric_ndx <- string_ndx
   for (i in 2:length(x)) {

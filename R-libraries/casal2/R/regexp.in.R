@@ -1,11 +1,9 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "regexp.in" <- function(vector, regexp) {
-  if (length(vector) == 0) {
-    return(F)
-  }
-  any(Regexpr(regexp, vector) > 0)
+  if (length(vector) == 0L) return(FALSE)
+  any(regexpr(regexp, vector, fixed = TRUE) > 0)
 }

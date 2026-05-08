@@ -35,6 +35,6 @@ expand_category_shorthand(shorthand_categories = "stock=BOP", reference_categori
 }
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }
 \keyword{internal}

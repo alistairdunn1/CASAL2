@@ -21,5 +21,5 @@ indicates ill-posedness, i.e. the parameter estimation problem does not have a u
 This eigenvalue decomposition has been widely used in the estimation literature
 }
 \author{
-C.Marsh
+Casal2 Development Team
 }

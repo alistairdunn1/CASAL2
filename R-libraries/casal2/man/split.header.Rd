@@ -10,6 +10,6 @@
 Utility extract function
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }
 \keyword{internal}

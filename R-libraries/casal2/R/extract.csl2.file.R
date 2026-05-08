@@ -2,7 +2,7 @@
 #'
 #' This function reads a Casal2 configuration file and returns a list object in R. Where each element is a command and subcommand from the configuration file
 #'
-#' @author Craig Marsh & Alistair Dunn
+#' @author Casal2 Development Team
 #' @param file the name of the input file containing model configuration
 #' @param path Optionally, the path to the file
 #' @param fileEncoding Optional, allows the R-library to read in files that have been encoded in alternative UTF formats, see the manual for the error message that would indicate when to use this switch.
@@ -18,15 +18,12 @@
   }
   ## get the list that lines subcommands to their type.
   casal2_list <- get.casal2.unique_subcommands_list()
-  filename <- make.filename(path = path, file = file)
-  file <- convert.to.lines(filename, fileEncoding = fileEncoding, quiet = quiet)
+  filename <- if (nzchar(path)) file.path(path, file) else file
+  file <- scan(filename, what = "", sep = "\n", fileEncoding = fileEncoding, quiet = quiet)
   ## remove white space at the beginning of a subcommand or command e.g
-  while (any(regexpr(" ", file) == 1)) {
-    index <- regexpr(" ", file) == 1
-    file <- ifelse(index, substring(file, 2), file)
-  }
+  file <- trimws(file, which = "left")
   ## try and convert tabs to spaces
-  file <- as.vector(tapply(file, 1:length(file), strip))
+  file <- vapply(file, strip, character(1L), USE.NAMES = FALSE)
 
   # process any !includes
   if (include) {
@@ -36,16 +33,13 @@
       if (tolower(substring(file[i], 1, 8)) == "!include") {
         temp <- string.to.vector.of.words(file[i])[2]
         temp <- gsub("\"", "", temp)
-        temp <- make.filename(path = path, file = temp)
+        temp <- if (nzchar(path)) file.path(path, temp) else temp
         if (!quiet) print(paste("Adding !include file: ", temp, sep = ""))
-        new.file <- convert.to.lines(temp, fileEncoding = fileEncoding, quiet = quiet)
+        new.file <- scan(temp, what = "", sep = "\n", fileEncoding = fileEncoding, quiet = quiet)
         ## remove white space at the beginning of a subcommand or command e.g
-        while (any(regexpr(" ", new.file) == 1)) {
-          index <- regexpr(" ", new.file) == 1
-          new.file <- ifelse(index, substring(new.file, 2), new.file)
-        }
+        new.file <- trimws(new.file, which = "left")
         ## try and convert tabs to spaces
-        new.file <- as.vector(tapply(new.file, 1:length(new.file), strip))
+        new.file <- vapply(new.file, strip, character(1L), USE.NAMES = FALSE)
         file <- c(file[1:(i - 1)], new.file, file[(i + 1):length(file)])
       }
       i <- i + 1
@@ -93,7 +87,7 @@
       header <- 1
       CommandCount <- CommandCount + 1
       Command <- substring(temp[1], 2)
-      if (!is.in(Command, exception_blocks)) {
+      if (!Command %in% exception_blocks) {
         ## Create a label for the block
         Command <- paste(Command, "[", temp[2], "]", sep = "")
         if (!quiet) {

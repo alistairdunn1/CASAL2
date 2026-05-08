@@ -12,10 +12,6 @@ R CMD build --force casal2
 rem R CMD INSTALL --build casal2
 R CMD check Casal2
 
-rem Build DataWeighting Library
-R CMD build --force DataWeighting
-rem R CMD INSTALL --build DataWeighting
-R CMD check DataWeighting
 
 
 

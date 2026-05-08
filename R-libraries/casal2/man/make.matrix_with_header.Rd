@@ -10,6 +10,6 @@ make.matrix_with_header(lines)
 create a matrix that has a header
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }
 \keyword{internal}

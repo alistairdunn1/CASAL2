@@ -18,5 +18,5 @@ reformat the Casal2 observations so they can be used as input for functions on C
 Chris Francis' Data Weighting function.
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

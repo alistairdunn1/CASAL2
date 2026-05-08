@@ -1,49 +1,5 @@
 
-[INFO] Setting the random number seed to 20
 [INFO] Estimable parameters were set from the input configuration files
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 1993 was 0.9998 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 1994 was 1.0001 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 1995 was 1.0001 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 1996 was 1.0002 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 1998 was 1.0001 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2000 was 0.9998 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2001 was 1.0001 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2002 was 0.9997 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2004 was 1.0001 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2007 was 1.0002 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2009 was 0.9999 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2010 was 1.0002 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2011 was 1.0001 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2013 was 1.0003 and do not sum to 1.0
-[WARNING] At line 54 in Observation.csl2 the table obs : The sum of the values for year 2014 was 1.0001 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 1992 was 0.9998 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 1994 was 1.0002 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 1995 was 1.0002 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 1996 was 0.9998 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 1997 was 0.9998 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2000 was 0.9997 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2001 was 0.9999 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2003 was 0.9998 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2005 was 0.9999 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2006 was 0.9999 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2008 was 1.0002 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2009 was 1.0001 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2010 was 0.9998 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2011 was 0.9998 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2012 was 0.9999 and do not sum to 1.0
-[WARNING] At line 125 in Observation.csl2 the table obs : The sum of the values for year 2013 was 0.9999 and do not sum to 1.0
-[WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2002 was 0.9999 and do not sum to 1.0
-[WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2004 was 1.0002 and do not sum to 1.0
-[WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2005 was 0.9999 and do not sum to 1.0
-[WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2006 was 1.0004 and do not sum to 1.0
-[WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2007 was 1.0001 and do not sum to 1.0
-[WARNING] At line 190 in Observation.csl2 the table obs : The sum of the values for year 2008 was 0.9998 and do not sum to 1.0
-[WARNING] obs sum total (0.9999) for year (1995) doesn't sum to 1.0
-[WARNING] obs sum total (0.9999) for year (1996) doesn't sum to 1.0
-[WARNING] obs sum total (1.0003) for year (1997) doesn't sum to 1.0
-[WARNING] obs sum total (0.9999) for year (1998) doesn't sum to 1.0
-[WARNING] obs sum total (0.9997) for year (2000) doesn't sum to 1.0
-[WARNING] obs sum total (0.9997) for year (2001) doesn't sum to 1.0
 [INFO] The likelihood for the observation 'Tangaroa_propn_at_age_Jan' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
 [INFO] The likelihood for the observation 'trawl_propn_at_age' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
 [INFO] The likelihood for the observation 'longline_propn_at_length' is multinomial. Normalised residuals can only be calculated for the lognormal, lognormal_with_Q, and normal likelihoods
@@ -136,8 +92,7 @@
 [INFO] Convergence check value = 4.74684e-06. Convergence tolerance = 1e-06 objective score 1782.95
 [INFO] Convergence check value = 1.55553e-06. Convergence tolerance = 1e-06 objective score 1782.95
 [INFO] Convergence check value = 1.13921e-07. Convergence tolerance = 1e-06 objective score 1782.95
-[WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 0.001 of the upper bound of 200
+[WARNING] estimated parameter 'selectivity[chatTANSel_m].sigma_r' with value 200 was within 1e-4 of the upper bound of 200. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 [INFO] Assert Passed: The Assert with label 'obj' for the Objective Function had value 1782.95 and 1782.95 was expected.
 [INFO] Completed
-[INFO] Total CPU time: -20.5968 hours
-[INFO] Total elapsed time: 6 seconds
+[INFO] Total elapsed time: 7 seconds

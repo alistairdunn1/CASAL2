@@ -14,6 +14,7 @@ get.lines(
   clip.from = "",
   clip.to.match = "",
   clip.from.match = "",
+  fixed = TRUE,
   ...
 )
 }
@@ -21,6 +22,6 @@ get.lines(
 Utility extract function
 }
 \author{
-Dan Fu
+Casal2 Development Team
 }
 \keyword{internal}

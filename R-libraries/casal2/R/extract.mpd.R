@@ -4,7 +4,7 @@
 #' An extract function that reads Casal2 output that are produced from a '-r' or '-e' or '-f' or '-p' model run. This function
 #' also creates a 'casal2.mpd' class which can be used in plotting and summary functions. See the casal2 manual for more information.
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @param file the name of the input file containing model output to extract
 #' @param path Optionally, the path to the file
 #' @param fileEncoding Optional, allows the R-library to read in files that have been encoded in alternative UTF formats, see the manual for the error message that would indicate when to use this switch.
@@ -18,15 +18,9 @@
 #' class(data)
 #' }
 "extract.mpd" <- function(file, path = "", fileEncoding = "", quiet = FALSE) {
-  set.class <- function(object, new.class) {
-    # use in the form
-    #  object <- set.class(object,"new class")
-    attributes(object)$class <- c(new.class, attributes(object)$class[attributes(object)$class != new.class])
-    object
-  }
   multi_input_args <- c("-i", "-I", "--input-force", "--input", "-s", "--simulation", "--profile", "-p", "--projection", "-f")
-  filename <- make.filename(path = path, file = file)
-  file <- convert.to.lines(filename, fileEncoding = fileEncoding, quiet = quiet)
+  filename <- if (nzchar(path)) file.path(path, file) else file
+  file <- scan(filename, what = "", sep = "\n", fileEncoding = fileEncoding, quiet = quiet)
 
   result <- list()
   if (substring(file[1], 1, 6) == "Casal2") {
@@ -86,7 +80,7 @@
       report$type <- type
       if (mult_input_run) {
         ## deal with the multi input run.
-        if (!is.in(label, names(result))) {
+        if (!label %in% names(result)) {
           ## if first appearence of report register it as 1
           result[[label]][["1"]] <- list()
           if (type %in% multi_year_reports) {
@@ -98,7 +92,7 @@
           } else {
             result[[label]][["1"]] <- report
           }
-        } else if (is.in(label, names(result)) & type %in% multi_year_reports) {
+        } else if (label %in% names(result) & type %in% multi_year_reports) {
           ## if we have seen this report find out if we are adding to -i or year
           if (report$year %in% names(result[[label]][[as.character(length(result[[label]]))]])) {
             result[[label]][[as.character(length(result[[label]]) + 1)]][[as.character(report$year)]] <- report

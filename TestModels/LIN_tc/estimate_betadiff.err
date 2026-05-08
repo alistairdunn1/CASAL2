@@ -1,58 +1,5 @@
 
-[INFO] Setting the random number seed to 20
 [INFO] Estimable parameters were set from the input configuration files
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 1990 was 0.9999 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 1993 was 0.9998 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 1994 was 0.9999 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2001 was 1.0002 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2003 was 1.0001 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2004 was 0.9999 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2005 was 1.0001 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2007 was 0.9999 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2008 was 0.9998 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2010 was 1.0001 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2012 was 1.0001 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2013 was 1.0001 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2015 was 1.0002 and do not sum to 1.0
-[WARNING] At line 47 in Observation.csl2 the table obs : The sum of the values for year 2017 was 1.0003 and do not sum to 1.0
-[WARNING] At line 121 in Observation.csl2 the table obs : The sum of the values for year 1993 was 1.0002 and do not sum to 1.0
-[WARNING] At line 121 in Observation.csl2 the table obs : The sum of the values for year 1996 was 0.9999 and do not sum to 1.0
-[WARNING] At line 121 in Observation.csl2 the table obs : The sum of the values for year 1998 was 0.9998 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 1992 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 1993 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 1994 was 0.9999 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 1996 was 0.9999 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 1998 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2001 was 1.0001 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2002 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2003 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2005 was 0.9999 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2006 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2007 was 0.9998 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2008 was 0.9999 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2009 was 1.0001 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2010 was 1.0002 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2011 was 0.9997 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2012 was 1.0001 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2014 was 0.9999 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2015 was 1.0003 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2016 was 0.9998 and do not sum to 1.0
-[WARNING] At line 149 in Observation.csl2 the table obs : The sum of the values for year 2017 was 0.9996 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2001 was 1.0001 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2003 was 1.0002 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2005 was 1.0002 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2009 was 1.0002 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2010 was 0.9998 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2011 was 0.9999 and do not sum to 1.0
-[WARNING] At line 214 in Observation.csl2 the table obs : The sum of the values for year 2014 was 0.9998 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2001 was 1.0001 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2002 was 0.9999 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2003 was 1.0001 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2004 was 1.0001 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2005 was 0.9999 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2008 was 1.0004 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2010 was 0.9998 and do not sum to 1.0
-[WARNING] At line 250 in Observation.csl2 the table obs : The sum of the values for year 2017 was 1.0001 and do not sum to 1.0
 [INFO] Creating default report for catchability summerTANq
 [INFO] Creating default report for catchability autumnTANq
 [INFO] Creating default report for derived quantity SSB
@@ -92,6 +39,7 @@ Convergence check: current value is 0.306238 and threshold is 0.002
 done fmin call
 ireturn = 0
 about to evaluate function with x = 223774 0.0742694 0.116361 8.46314 0.0705489 0.218066 0.37737 7.29786 2.13555 0.198428 8.01775 1.50529 5.53436 2.68927 0.885206 5.82518 2.72322 9.8227 2.72919 25.7346 1.0396 10.4804 2.00471 25.429 7.71188 7.97953 0.32713 7.41457 9.59667 6.90896 7.41108 0.66601 11.3359 4.8618 2.53422 0.956768 3.95747 2.83696 1.7238 2.97074 2.28233 3.04611 2.08311 2.48962 1.19569 2.01165 0.861308 0.303484 0.0163749 0.0133219 0.0571303 0.0108976 0.0140409 0.0113165 0.0123327 0.245509 0.680692 1.13123 0.902806 0.383447 0.0455005 0.0151068 0.0904855 0.137984 0.054589 0.303344 0.907898 2.19415 1.60006 2.26611 1.55821 1.82994 1.64784 1.17209 1.52138 1.61959 1.88929 
+resizing from 40000 to 44000
 finished objective call: f = 8352.71
 about to do fmin call with x = 223774 0.0742694 0.116361 8.46314 0.0705489 0.218066 0.37737 7.29786 2.13555 0.198428 8.01775 1.50529 5.53436 2.68927 0.885206 5.82518 2.72322 9.8227 2.72919 25.7346 1.0396 10.4804 2.00471 25.429 7.71188 7.97953 0.32713 7.41457 9.59667 6.90896 7.41108 0.66601 11.3359 4.8618 2.53422 0.956768 3.95747 2.83696 1.7238 2.97074 2.28233 3.04611 2.08311 2.48962 1.19569 2.01165 0.861308 0.303484 0.0163749 0.0133219 0.0571303 0.0108976 0.0140409 0.0113165 0.0123327 0.245509 0.680692 1.13123 0.902806 0.383447 0.0455005 0.0151068 0.0904855 0.137984 0.054589 0.303344 0.907898 2.19415 1.60006 2.26611 1.55821 1.82994 1.64784 1.17209 1.52138 1.61959 1.88929  f = 8352.71 g = 631.102 638.44 47.0829 -134.592 831.626 133.349 433.387 -432.177 135.888 821.517 -560.227 252.665 -104.9 46.3988 13.3575 -160.654 41.2115 32.3274 49.9722 -19.469 -33.9817 -87.4674 206.572 -11.4005 410.474 -565.294 -38.7 449.934 -712.34 518.291 -510.818 -179.273 -40.0397 -240.817 -207.089 -198.636 -251.676 -214.258 -174.892 -226.431 -200.241 -224.465 -160.264 -120.791 -63.7188 -124.231 -38.2703 153.692 253.615 259.151 208.278 310.766 350.512 312.303 311.83 263.743 119.173 56.3066 50.7437 124.335 261.541 369.329 246.507 220.889 271.597 157.247 16.4723 -168.286 -92.5674 -176.731 -86.7458 -123.285 -99.1232 -28.8607 -81.5566 -95.2585 -130.901 
 done fmin call
@@ -912,5 +860,4 @@ finished main minimiser loop
 Successful convergence in optimise
 [INFO] Assert Passed: The Assert with label 'ObjectiveFunction' for the Objective Function had value 2296.97 and 2296.97 was expected.
 [INFO] Completed
-[INFO] Total CPU time: -89.2414 hours
-[INFO] Total elapsed time: 2 seconds
+[INFO] Total elapsed time: 1 second

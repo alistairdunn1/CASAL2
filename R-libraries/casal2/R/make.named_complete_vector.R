@@ -1,6 +1,6 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "make.named_complete_vector" <- function(lines) {

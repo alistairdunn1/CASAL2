@@ -1,12 +1,10 @@
-Environment: User=Casal2 (git@github.com:casal2/casal2)
-Call: /opt/casal2/casal2/BuildSystem/Casal2/casal2 -e -g 20 -c config_betadiff.csl2 
-Date: Sun May 26 22:13:44 2024
+Casal2 (https://github.com/alistairdunn1/CASAL2.git:master)
+Call: C:\Projects\Software\CASAL2-AD\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
+Date: Sat May 09 05:39:16 2026
 Seed: 20
-Version: v24.05 (2024-05-26)
-Copyright (c) 2017-2024, NIWA (www.niwa.co.nz)
-root
- Machine=thoth (Linux 6.8.8-1-default x86_64)
- PID=24207
+Version: v26.05 (2026-05-06)
+Copyright (c) 2017-2026, NIWA (www.niwa.co.nz)
+Environment: User=alist Machine=ZALMAN OS=Windows_NT PID=26040
 
 
 *selectivity_by_year[multisel_by_year]
@@ -1773,7 +1771,8 @@ process[Recruitment].b0 catchability[chatTANq].q selectivity[chatTANSel].mu sele
 52583 0.0575073 9.51995 5.53388 10.8664 10.8129 3.50265 6.86987 6.44798 3.00327 7.8833 1.02472 1.04658 1.06324 1.07299 1.07458 1.06541 1.04328 1.01815 1.00285 0.426938 0.476757 0.520428 0.382199 0.527158 0.445187 0.67427 1.00397 0.761247 0.653433 0.592745 0.488619 0.321246 0.303421 0.221372 0.33299 0.219917 0.328752 0.925172 0.525766 0.434871 0.187221 0.307342 0.259689 0.23094 0.260211 3 3 
 *end
 
-*selectivity[multi_eastFSel]
+*selectivity[multisel_sel]
+selectivity_label: multi_eastFSel
 default_selectivity: default_eastFSel 
 intervals: 5 
 label: multi_eastFSel 
@@ -1815,7 +1814,7 @@ Values {vector}
 30 1
 *end
 
-*derived_quantity[biomass_t1]
+*derived_quantity[__biomass_t1__]
 biomass_t1 {list}
 type: biomass
 initialisation_phase[1]: 52583 
@@ -1863,7 +1862,6 @@ values {vector}
 
 *info[messages_encountered]
 Values {string}
-Setting the random number seed to 20
 Estimable parameters were set from the input configuration files
 Creating default report for derived quantity biomass_t1
 Initiating point estimate run mode
@@ -1874,39 +1872,7 @@ Assert Passed: The Assert with label 'obj' for the Objective Function had value 
 
 *warnings[messages_encountered]
 Values {string}
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 1990 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 1993 was 1.0001 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 1994 was 1.0002 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 1995 was 1.0002 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 1997 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 1999 was 1.0002 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2000 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2001 was 1.0001 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2002 was 0.9998 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2003 was 1.0002 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2005 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2006 was 1.0001 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2007 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2008 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2009 was 0.9999 and do not sum to 1.0
-At line 49 in Observation.csl2 the table obs : The sum of the values for year 2011 was 1.0003 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 1992 was 0.9998 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 1995 was 0.9999 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 1996 was 0.9998 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 1997 was 0.9999 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 1998 was 0.9999 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 1999 was 1.0002 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 2000 was 0.9999 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 2002 was 1.0001 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 2003 was 0.9999 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 2004 was 1.0001 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 2005 was 0.9999 and do not sum to 1.0
-At line 115 in Observation.csl2 the table obs : The sum of the values for year 2011 was 1.0001 and do not sum to 1.0
-At line 171 in Observation.csl2 the table obs : The sum of the values for year 1992 was 1.0001 and do not sum to 1.0
-At line 171 in Observation.csl2 the table obs : The sum of the values for year 1998 was 1.0002 and do not sum to 1.0
-At line 171 in Observation.csl2 the table obs : The sum of the values for year 2004 was 1.0001 and do not sum to 1.0
-At line 171 in Observation.csl2 the table obs : The sum of the values for year 2007 was 0.9999 and do not sum to 1.0
-estimated parameter 'process[Recruitment].recruitment_multipliers{2011}' with value 3 was within 0.001 of the upper bound of 3
-estimated parameter 'process[Recruitment].recruitment_multipliers{2012}' with value 3 was within 0.001 of the upper bound of 3
+estimated parameter 'process[Recruitment].recruitment_multipliers{2011}' with value 3 was within 1e-4 of the upper bound of 3. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
+estimated parameter 'process[Recruitment].recruitment_multipliers{2012}' with value 3 was within 1e-4 of the upper bound of 3. Note estimation errors can occur when a parameter is close to a bound. Changing the bound or using a parameter transformation may help to rectify this problem
 *end
 

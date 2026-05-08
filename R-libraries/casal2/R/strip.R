@@ -1,6 +1,6 @@
 #' Utility for extract function
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 strip <- function(x) {

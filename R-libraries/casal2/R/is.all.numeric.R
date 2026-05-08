@@ -1,6 +1,6 @@
 #' Utility extract function
 #'
-#' @author Dan Fu (not really)
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "is.all.numeric" <- function(x, what = c("test", "vector"), extras = c(".", "NA", "na", "null", "NULL")) {

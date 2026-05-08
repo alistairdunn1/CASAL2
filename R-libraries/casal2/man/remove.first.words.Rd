@@ -10,6 +10,6 @@ remove.first.words(string, words = 1)
 Utility extract function
 }
 \author{
-Dan Fu
+Casal2 Development Team
 }
 \keyword{internal}

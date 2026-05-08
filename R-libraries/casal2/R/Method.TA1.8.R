@@ -2,7 +2,7 @@
 #' @description
 #' This function is useful for deciding on the data weights of one or more at-age or at-length data sets with assumed multinomial error structure in a stock assessment. Can produce a diagnostic plot if the analysis is for a single data set
 #'
-#' @author Chris Francis
+#' @author Casal2 Development Team
 #' @param model Casal2 output that is the result of a -r, -e run.
 #' @param observation_labels vector<string> Labels of the observations you want to apply the iterative weighting too, can be multiple datasets as in in Chris's original package multiple = T.
 #' @param plot.it If TRUE, plot the index and the smoothed fit. Otherwise, return a dataframe of the year, index, smoothed fitted value, and cv)

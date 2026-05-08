@@ -10,6 +10,6 @@ make.list_element(lines)
 Utility extract function
 }
 \author{
-Dan Fu
+Casal2 Development Team
 }
 \keyword{internal}

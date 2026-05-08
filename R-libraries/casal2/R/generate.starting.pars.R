@@ -1,8 +1,9 @@
-#' generate.starting.pars Generates a parameter file that is formatted for -i input into Casal2.
+#' generate.starting.pars Generates a parameter file that is formatted
+#' for -i input into Casal2.
 #'
 #' This function reads a Casal2 estimation configuration file and returns a par file. Where each parameter is drawn from the prior defined in an @estimate block.
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param estimation_csl2_file the name of the configuration file containing the @estimate blocks.
 #' @param path Optionally, the path to the file
 #' @param n_sim the number of random samples you want.
@@ -73,7 +74,9 @@ generate.starting.pars <- function(path = "", estimation_csl2_file = "Estimation
         std_dev <- as.numeric(this_estimate$mu$value) * as.numeric(this_estimate$cv$value)
         values <- rnorm(n = n_sim, mean = as.numeric(this_estimate$mu$value), sd = std_dev)
       } else if (this_estimate$type == "lognormal") {
-        values <- Rlnorm(n = n_sim, mu = as.numeric(this_estimate$mu$value), cv = as.numeric(this_estimate$cv$value))
+        .mu <- as.numeric(this_estimate$mu$value)
+        .cv <- as.numeric(this_estimate$cv$value)
+        values <- rlnorm(n_sim, meanlog = log(.mu) - log(.cv^2 + 1) / 2, sdlog = sqrt(log(.cv^2 + 1)))
       } else if (this_estimate$type == "normal_by_stdev") {
         values <- rnorm(n = n_sim, mean = as.numeric(this_estimate$mu$value), sd = as.numeric(this_estimate$sigma$value))
       } else if (this_estimate$type == "normal_log") {
@@ -152,7 +155,9 @@ generate.starting.pars <- function(path = "", estimation_csl2_file = "Estimation
           this_estimate$cv$value <- rep(left_value, n_params)
         }
         for (param in 1:n_params) {
-          values <- Rlnorm(n = n_sim, mu = as.numeric(this_estimate$mu$value[param]), cv = as.numeric(this_estimate$cv$value[param]))
+          .mu <- as.numeric(this_estimate$mu$value[param])
+          .cv <- as.numeric(this_estimate$cv$value[param])
+          values <- rlnorm(n_sim, meanlog = log(.mu) - log(.cv^2 + 1) / 2, sdlog = sqrt(log(.cv^2 + 1)))
           ## check within bounds
           values[values < as.numeric(this_estimate$lower_bound$value[param])] <- as.numeric(this_estimate$lower_bound$value[param])
           values[values > as.numeric(this_estimate$upper_bound$value[param])] <- as.numeric(this_estimate$upper_bound$value[param])
@@ -200,7 +205,7 @@ generate.starting.pars <- function(path = "", estimation_csl2_file = "Estimation
   }
   colnames(param_values) <- value_labels
   ## write the file.
-  filename <- make.filename(path = path, file = par_file_name)
+  filename <- if (nzchar(path)) file.path(path, par_file_name) else par_file_name
   cat(param_labels, file = filename, sep = " ", fill = F, labels = NULL, append = F)
   cat("\n", file = filename, sep = " ", fill = F, labels = NULL, append = T)
   for (i in 1:n_sim) {

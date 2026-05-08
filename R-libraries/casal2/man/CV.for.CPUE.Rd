@@ -29,5 +29,5 @@ This is equivalent to saying that we expect the stock assessment model to fit th
 This approach is recommended on p. 1132 of the following paper: Francis, R.I.C.C. (2011). Data weighting in statistical fisheries stock assessment models. Canadian Journal of Fisheries and Aquatic Sciences 68: 1124-1138.
 }
 \author{
-Chris Francis
+Casal2 Development Team
 }

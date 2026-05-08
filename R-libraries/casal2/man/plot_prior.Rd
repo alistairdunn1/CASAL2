@@ -44,15 +44,21 @@ plot_prior(
 
 \item{label}{TRUE/FALSE (default = FALSE) display the name of the prior}
 
+\item{xlab}{Label for the x-axis (default \code{"x"}).}
+
+\item{ylab}{Label for the y-axis (default \code{"Density"}).}
+
 \item{logx}{TRUE/FALSE (default = FALSE) to plot the xaxis in log-space}
 
 \item{add}{TRUE/FALSE (default = FALSE) to add to an existing plot}
 
 \item{dump}{TRUE/FALSE (default = FALSE) to dump the coordinates of the plotted line}
+
+\item{\dots}{Further graphical arguments passed to the underlying plot calls.}
 }
 \description{
 Plot priors available in Casal2
 }
 \author{
-A. Dunn
+Casal2 Development Team
 }

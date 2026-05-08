@@ -1,6 +1,6 @@
 #' Utility function
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "get.casal2.unique_subcommands_list" <- function() {

@@ -2,7 +2,8 @@
 % Please edit documentation in R/generate.starting.pars.R
 \name{generate.starting.pars}
 \alias{generate.starting.pars}
-\title{generate.starting.pars Generates a parameter file that is formatted for -i input into Casal2.}
+\title{generate.starting.pars Generates a parameter file that is formatted
+for -i input into Casal2.}
 \usage{
 generate.starting.pars(
   path = "",
@@ -36,5 +37,5 @@ a file named 'parms.out' in the path directory
 This function reads a Casal2 estimation configuration file and returns a par file. Where each parameter is drawn from the prior defined in an @estimate block.
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

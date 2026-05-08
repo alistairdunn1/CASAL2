@@ -3,7 +3,7 @@
 #' This function reads in your observation.csl2 file and apples a reweighting factor and saves as a new .csl2 file, pretty much just trying to
 #' automate the dataweighting process. The problem with this method, is that it strips out all the comments from the original observation.csl2 file.
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param Observation_csl2_file the name of the configuration file containing the @observation blocks.
 #' @param Observation_label the label of the observation you want to apply the weighting to.
 #' @param weighting_factor - the multiplier for the effective sample sizes for the compositional data.

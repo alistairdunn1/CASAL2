@@ -18,5 +18,5 @@ line start with #
 or a wrapped in /* */
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

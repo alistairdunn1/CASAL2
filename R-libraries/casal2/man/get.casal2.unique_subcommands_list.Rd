@@ -10,6 +10,6 @@ get.casal2.unique_subcommands_list()
 Utility function
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }
 \keyword{internal}

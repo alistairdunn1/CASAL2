@@ -23,6 +23,6 @@ expand_category_block("stock.male,female.untagged,1990")
 }
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }
 \keyword{internal}
