@@ -71,6 +71,7 @@ void Selectivity::DoExecute(shared_ptr<Model> model) {
   if (model->partition_type() == PartitionType::kAge) {
     LOG_FINEST() << "Printing report for the age-based selectivity with label '" << selectivity_->GetLabel() << "'";
     cache_ << ReportHeader(type_, label_, format_);
+    cache_ << "selectivity_label: " << selectivity_->GetLabel() << REPORT_EOL;
     const map<string, Parameter*> parameters = selectivity_->parameters().parameters();
 
     for (auto iter : parameters) {
@@ -97,7 +98,8 @@ void Selectivity::DoExecute(shared_ptr<Model> model) {
     }
   } else if (model->partition_type() == PartitionType::kLength) {
     LOG_FINEST() << "Printing report for the length-based selectivity with label '" << selectivity_->GetLabel() << "'";
-    cache_ << ReportHeader(type_, selectivity_label_, format_);
+    cache_ << ReportHeader(type_, label_, format_);
+    cache_ << "selectivity_label: " << selectivity_->GetLabel() << REPORT_EOL;
     const map<string, Parameter*> parameters = selectivity_->parameters().parameters();
 
     for (auto iter : parameters) {

@@ -88,7 +88,8 @@ void Observation::DoExecute(shared_ptr<Model> model) {
   if (!is_valid())
     return;
 
-  cache_ << ReportHeader(type_, observation_label_, format_);
+  cache_ << ReportHeader(type_, label_, format_);
+  cache_ << "observation_label: " << observation_label_ << REPORT_EOL;
   cache_ << "observation_type: " << utilities::ToLowercase(observation_->type()) << REPORT_EOL;
   cache_ << "likelihood: " << utilities::ToLowercase(observation_->likelihood()) << REPORT_EOL;
   cache_ << "error_value_multiplier: " << observation_->error_value_multiplier() << REPORT_EOL;
@@ -218,6 +219,7 @@ void Observation::DoExecuteTabular(shared_ptr<Model> model) {
   if (first_run_) {
     first_run_ = false;
     cache_ << ReportHeader(type_, label_, format_);
+    cache_ << "observation_label: " << observation_label_ << REPORT_EOL;
     cache_ << "observation_type: " << utilities::ToLowercase(observation_->type()) << REPORT_EOL;
     cache_ << "likelihood: " << utilities::ToLowercase(observation_->likelihood()) << REPORT_EOL;
     cache_ << "categories:";

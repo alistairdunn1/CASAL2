@@ -57,6 +57,7 @@ void AddressableTransformation::DoExecute(shared_ptr<Model> model) {
   if (!transformation_)
     LOG_CODE_ERROR() << "(!transformation_): " << addressable_label_;
   cache_ << ReportHeader(type_, label_, format_);
+  cache_ << "addressable_label: " << addressable_label_ << REPORT_EOL;
   cache_ << "transformation_type: " << transformation_->type() << REPORT_EOL;
   transformation_->FillReportCache(cache_);
   ready_for_writing_ = true;
@@ -68,7 +69,8 @@ void AddressableTransformation::DoExecuteTabular(shared_ptr<Model> model) {
   LOG_FINE() << "here";
   if (first_run_) {
     first_run_ = false;
-    cache_ << ReportHeader(type_, addressable_label_, format_);
+    cache_ << ReportHeader(type_, label_, format_);
+    cache_ << "addressable_label: " << addressable_label_ << REPORT_EOL;
     cache_ << "transformation_type: " << transformation_->type() << REPORT_EOL;
     cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
     transformation_->FillTabularReportCache(cache_, true);

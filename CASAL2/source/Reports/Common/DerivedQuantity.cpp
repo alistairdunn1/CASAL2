@@ -46,7 +46,7 @@ void DerivedQuantity::DoBuild(shared_ptr<Model> model) {
  */
 void DerivedQuantity::DoExecute(shared_ptr<Model> model) {
   LOG_TRACE();
-  cache_ << ReportHeader(type_, derived_quantity_label_, format_);
+  cache_ << ReportHeader(type_, label_, format_);
   string label = derived_quantity_->label();
   cache_ << label << " " << REPORT_R_LIST << REPORT_EOL;
   cache_ << "type: " << derived_quantity_->type() << REPORT_EOL;
@@ -71,7 +71,7 @@ void DerivedQuantity::DoExecute(shared_ptr<Model> model) {
 }
 
 void DerivedQuantity::DoPrepareTabular(shared_ptr<Model> model) {
-  cache_ << ReportHeader(type_, derived_quantity_label_, format_);
+  cache_ << ReportHeader(type_, label_, format_);
   cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
 }
 
