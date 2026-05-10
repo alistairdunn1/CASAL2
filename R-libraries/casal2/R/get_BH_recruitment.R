@@ -10,7 +10,7 @@
 #'   (default \code{TRUE}).
 #' @param \dots Further arguments (currently unused).
 #' @return For \code{casal2MPD} input: a data frame with columns
-#'   \code{model_year}, \code{spawn_event_year}, \code{ycs_years},
+#'   \code{year}, \code{spawn_event_year}, \code{ycs_year},
 #'   \code{standardised_recruitment_multipliers}, \code{recruitment_multipliers},
 #'   \code{recruits}, \code{true_ycs}, \code{r0}, \code{b0},
 #'   \code{recruit_event_SSB}, \code{recruit_event_SSB_percent}, \code{ssb},
@@ -33,9 +33,9 @@
 ## Build a single-run recruitment data frame from a report object.
 .bh_df_from_report <- function(rpt, par_set, label) {
   df <- data.frame(
-    model_year = rpt$model_year,
+    year = rpt$model_year,
     spawn_event_year = rpt$spawn_event_year,
-    ycs_years = rpt$spawn_event_year,
+    ycs_year = rpt$spawn_event_year,
     standardised_recruitment_multipliers = rpt$standardised_recruitment_multipliers,
     recruitment_multipliers = rpt$recruitment_multipliers,
     recruits = rpt$recruits,
@@ -60,9 +60,16 @@
 #' @export
 "get_BH_recruitment.casal2MPD" <- function(model, reformat_labels = TRUE, ...) {
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
+
+  orig_names <- names(model)
+  is_default <- startsWith(orig_names, "__") & endsWith(orig_names, "__")
+  stripped <- ifelse(is_default, substring(orig_names, 3L, nchar(orig_names) - 2L), orig_names)
+  skip_default <- is_default & (stripped %in% stripped[!is_default])
+
   rows <- vector("list", length(model))
   for (i in seq_along(model)) {
     if (report_labels[i] == "header") next
+    if (skip_default[i]) next
     this_report <- model[[i]]
     if ("type" %in% names(this_report)) {
       ## single run

@@ -27,7 +27,7 @@ get_BH_recruitment(model, ...)
 }
 \value{
 For \code{casal2MPD} input: a data frame with columns
-  \code{model_year}, \code{spawn_event_year}, \code{ycs_years},
+  \code{year}, \code{spawn_event_year}, \code{ycs_year},
   \code{standardised_recruitment_multipliers}, \code{recruitment_multipliers},
   \code{recruits}, \code{true_ycs}, \code{r0}, \code{b0},
   \code{recruit_event_SSB}, \code{recruit_event_SSB_percent}, \code{ssb},

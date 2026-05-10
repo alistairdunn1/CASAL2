@@ -67,9 +67,16 @@
     "process_removals_by_age", "process_removals_by_length"
   )
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
+
+  orig_names <- names(model)
+  is_default <- startsWith(orig_names, "__") & endsWith(orig_names, "__")
+  stripped <- ifelse(is_default, substring(orig_names, 3L, nchar(orig_names) - 2L), orig_names)
+  skip_default <- is_default & (stripped %in% stripped[!is_default])
+
   rows <- vector("list", length(model))
   for (i in seq_along(model)) {
     if (report_labels[i] == "header") next
+    if (skip_default[i]) next
     this_report <- model[[i]]
     if ("type" %in% names(this_report)) {
       ## single run
@@ -120,7 +127,9 @@
     "process_removals_by_age", "process_removals_by_length"
   )
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
-  complete_df <- NULL
+
+  ## Collect per-report results in a list; bind once at the end (avoids O(n^2) rbind growth).
+  report_chunks <- vector("list", length(model))
 
   field_types <- c("fits", "observed", "residuals", "pearson_residuals", "normalised_residuals")
   ft_pattern <- paste(field_types, collapse = "|")
@@ -137,13 +146,16 @@
     collabs <- colnames(val_df)
     n_iter <- nrow(val_df)
 
-    ## Parse field_type, year, category, bin from each column name
+    ## Parse all four capture groups in one pass: do.call(rbind) builds a
+    ## character matrix directly rather than four separate vapply sweeps.
     m <- regmatches(collabs, regexec(col_regex, collabs))
-
-    ftype_vec <- vapply(m, function(x) if (length(x) >= 2L) x[2L] else NA_character_, character(1L))
-    year_vec <- vapply(m, function(x) if (length(x) >= 3L) x[3L] else NA_character_, character(1L))
-    category_vec <- vapply(m, function(x) if (length(x) >= 4L) x[4L] else NA_character_, character(1L))
-    bin_vec <- vapply(m, function(x) if (length(x) >= 5L) x[5L] else NA_character_, character(1L))
+    parsed <- do.call(rbind, lapply(m, function(x) {
+      if (length(x) == 5L) x[2:5] else rep(NA_character_, 4L)
+    }))
+    ftype_vec <- parsed[, 1L]
+    year_vec <- parsed[, 2L]
+    category_vec <- parsed[, 3L]
+    bin_vec <- parsed[, 4L]
 
     valid <- !is.na(ftype_vec)
     obs_mask <- valid & ftype_vec == "observed"
@@ -153,28 +165,30 @@
     cat_u <- category_vec[obs_mask]
     bin_u <- bin_vec[obs_mask]
     n_obs <- sum(obs_mask)
+    obs_key <- paste(yr_u, cat_u, bin_u, sep = "\r")
 
-    ## Key columns repeated for every field type
     iter_vec <- rep(seq_len(n_iter), times = n_obs)
     year_long <- suppressWarnings(as.numeric(rep(yr_u, each = n_iter)))
     cat_long <- rep(cat_u, each = n_iter)
     bin_long <- suppressWarnings(as.numeric(rep(bin_u, each = n_iter)))
-    obs_key <- paste(yr_u, cat_u, bin_u, sep = "\r")
 
-    ## Build long form: one row per (iteration, year, category, bin, type)
     ft_chunks <- vector("list", length(field_types))
     for (ft in field_types) {
       ft_mask <- valid & ftype_vec == ft
       if (!any(ft_mask)) next
-      ft_cols <- which(ft_mask)
       ft_key <- paste(year_vec[ft_mask], category_vec[ft_mask], bin_vec[ft_mask], sep = "\r")
       idx <- match(obs_key, ft_key)
-      vals <- rep(NA_real_, n_iter * n_obs)
-      for (j in seq_len(n_obs)) {
-        if (!is.na(idx[j])) {
-          vals[((j - 1L) * n_iter + 1L):(j * n_iter)] <- as.numeric(val_df[[ft_cols[idx[j]]]])
-        }
+      ft_cols <- which(ft_mask)
+
+      ## Extract all matched columns as a matrix in a single C-level call,
+      ## replacing the previous per-observation R loop.  Column-major unrolling
+      ## via as.numeric() matches iter_vec = rep(seq_len(n_iter), times = n_obs).
+      val_mat <- matrix(NA_real_, nrow = n_iter, ncol = n_obs)
+      valid_j <- which(!is.na(idx))
+      if (length(valid_j) > 0L) {
+        val_mat[, valid_j] <- as.matrix(val_df[, ft_cols[idx[valid_j]], drop = FALSE])
       }
+
       ft_chunks[[ft]] <- data.frame(
         iteration         = iter_vec,
         year              = year_long,
@@ -184,12 +198,12 @@
         observation_type  = this_report$observation_type,
         likelihood        = this_report$likelihood,
         type              = ft,
-        value             = vals,
+        value             = as.numeric(val_mat),
         stringsAsFactors  = FALSE
       )
     }
 
-    complete_df <- .safe_rbind(list(complete_df, .safe_rbind(ft_chunks)))
+    report_chunks[[i]] <- .safe_rbind(ft_chunks)
   }
-  complete_df
+  .safe_rbind(report_chunks)
 }

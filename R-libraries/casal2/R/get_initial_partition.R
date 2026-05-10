@@ -25,9 +25,16 @@
 #' @export
 "get_initial_partition.casal2MPD" <- function(model, reformat_labels = TRUE, ...) {
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
+
+  orig_names <- names(model)
+  is_default <- startsWith(orig_names, "__") & endsWith(orig_names, "__")
+  stripped <- ifelse(is_default, substring(orig_names, 3L, nchar(orig_names) - 2L), orig_names)
+  skip_default <- is_default & (stripped %in% stripped[!is_default])
+
   rows <- vector("list", length(model))
   for (i in seq_along(model)) {
     if (report_labels[i] == "header") next
+    if (skip_default[i]) next
     this_report <- model[[i]]
     if ("type" %in% names(this_report)) {
       ## single run

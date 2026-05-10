@@ -20,16 +20,11 @@ reformat_default_labels <- function(report_labels) {
   ## strip the leading/trailing '__' from default labels
   new_labels[default_ndx] <- substring(report_labels[default_ndx], 3L, n[default_ndx] - 2L)
   ## resolve duplicates: if trimming created a collision with an original label,
-  ## suffix the default-derived label with '_default'
-  dup_pos <- anyDuplicated(new_labels)
-  if (dup_pos != 0L) {
-    dup_val  <- new_labels[dup_pos]
-    all_dups <- which(new_labels == dup_val)
-    ## the original (non-default) label keeps its name; the default-derived one is renamed
-    original_ndx <- all_dups[!default_ndx[all_dups]]
-    default_dup  <- all_dups[default_ndx[all_dups]]
-    if (length(default_dup) > 0L)
-      new_labels[default_dup] <- paste0(new_labels[default_dup], "_default")
+  ## suffix every default-derived label that collides with '_default'
+  non_default_names <- new_labels[!default_ndx]
+  colliding <- default_ndx & (new_labels %in% non_default_names)
+  if (any(colliding)) {
+    new_labels[colliding] <- paste0(new_labels[colliding], "_default")
   }
   new_labels
 }

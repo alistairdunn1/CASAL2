@@ -26,10 +26,10 @@ get_covariance(model, ...)
 included for interface consistency.}
 }
 \value{
-For \\code{casal2MPD} input: a matrix containing the covariance
-  matrix, or \\code{NULL} when no matching report is found.
-  For \\code{list} input: a named list of covariance matrices (one per model).
-  \\code{casal2TAB} is not implemented.
+For \code{casal2MPD} input: a matrix containing the covariance
+  matrix, or \code{NULL} when no matching report is found.
+  For \code{list} input: a named list of covariance matrices (one per model).
+  \code{casal2TAB} is not implemented.
 }
 \description{
 Extract the covariance matrix from a Casal2 MPD model output.

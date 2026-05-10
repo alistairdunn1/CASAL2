@@ -8,11 +8,16 @@
 #' @param reformat_labels Logical. Reformat default Casal2 report labels
 #'   (default \code{TRUE}).
 #' @param \dots Further arguments (currently unused).
-#' @return For \code{casal2MPD} input: a data frame with columns \code{age},
-#'   \code{year}, \code{time_step}, \code{cvs_by_age}, \code{mean_length_at_age},
-#'   \code{mean_weight_at_age}, \code{label}, and \code{par_set} (integer index
-#'   of the parameter set/minimisation; 1 for single run, ordered factor for
-#'   multi-run \code{-i} output).
+#' @return For \code{casal2MPD} input: a data frame whose columns depend on
+#'   the report sub-type.  For \code{age_length} reports the columns are
+#'   \code{age}, \code{year}, \code{time_step}, \code{cvs_by_age},
+#'   \code{mean_length_at_age}, \code{mean_weight_at_age}, \code{label}, and
+#'   \code{par_set}.  For \code{growth_increment} reports the columns come
+#'   directly from the report values (e.g. \code{length_bin}, \code{mean},
+#'   \code{cv}) plus \code{year}, \code{label}, \code{distribution},
+#'   \code{time_step}, and \code{par_set}.
+#'   \code{par_set} is an integer (1) for a single run or an ordered factor for
+#'   multi-run \code{-i} output.
 #'   \code{casal2TAB} is not yet implemented.
 #'   Returns \code{NULL} when no matching reports are found.
 #' @rdname get_growth
@@ -64,9 +69,16 @@
 #' @export
 "get_growth.casal2MPD" <- function(model, reformat_labels = TRUE, ...) {
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
+
+  orig_names <- names(model)
+  is_default <- startsWith(orig_names, "__") & endsWith(orig_names, "__")
+  stripped <- ifelse(is_default, substring(orig_names, 3L, nchar(orig_names) - 2L), orig_names)
+  skip_default <- is_default & (stripped %in% stripped[!is_default])
+
   rows <- vector("list", length(model))
   for (i in seq_along(model)) {
     if (report_labels[i] == "header") next
+    if (skip_default[i]) next
     this_report <- model[[i]]
     if ("type" %in% names(this_report)) {
       ## single run

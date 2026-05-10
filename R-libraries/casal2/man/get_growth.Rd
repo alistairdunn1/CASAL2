@@ -25,11 +25,16 @@ get_growth(model, ...)
 (default \code{TRUE}).}
 }
 \value{
-For \code{casal2MPD} input: a data frame with columns \code{age},
-  \code{year}, \code{time_step}, \code{cvs_by_age}, \code{mean_length_at_age},
-  \code{mean_weight_at_age}, \code{label}, and \code{par_set} (integer index
-  of the parameter set/minimisation; 1 for single run, ordered factor for
-  multi-run \code{-i} output).
+For \code{casal2MPD} input: a data frame whose columns depend on
+  the report sub-type.  For \code{age_length} reports the columns are
+  \code{age}, \code{year}, \code{time_step}, \code{cvs_by_age},
+  \code{mean_length_at_age}, \code{mean_weight_at_age}, \code{label}, and
+  \code{par_set}.  For \code{growth_increment} reports the columns come
+  directly from the report values (e.g. \code{length_bin}, \code{mean},
+  \code{cv}) plus \code{year}, \code{label}, \code{distribution},
+  \code{time_step}, and \code{par_set}.
+  \code{par_set} is an integer (1) for a single run or an ordered factor for
+  multi-run \code{-i} output.
   \code{casal2TAB} is not yet implemented.
   Returns \code{NULL} when no matching reports are found.
 }

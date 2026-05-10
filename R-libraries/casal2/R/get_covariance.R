@@ -10,10 +10,10 @@
 #'   (default \code{TRUE}); currently unused for covariance extraction but
 #'   included for interface consistency.
 #' @param \dots Further arguments (currently unused).
-#' @return For \\code{casal2MPD} input: a matrix containing the covariance
-#'   matrix, or \\code{NULL} when no matching report is found.
-#'   For \\code{list} input: a named list of covariance matrices (one per model).
-#'   \\code{casal2TAB} is not implemented.
+#' @return For \code{casal2MPD} input: a matrix containing the covariance
+#'   matrix, or \code{NULL} when no matching report is found.
+#'   For \code{list} input: a named list of covariance matrices (one per model).
+#'   \code{casal2TAB} is not implemented.
 #' @rdname get_covariance
 #' @export get_covariance
 "get_covariance" <- function(model, ...) {

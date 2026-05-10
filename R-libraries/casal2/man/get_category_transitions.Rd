@@ -16,7 +16,7 @@ get_category_transitions(model, ...)
 \method{get_category_transitions}{casal2TAB}(model, reformat_labels = TRUE, ...)
 }
 \arguments{
-\item{model}{A \code{casal2MPD}, \code{casal2TAB}, or named \code{list} of
+\item{model}{A \code{casal2MPD} or named \code{list} of
 \code{casal2MPD} objects.}
 
 \item{\dots}{Further arguments (currently unused).}

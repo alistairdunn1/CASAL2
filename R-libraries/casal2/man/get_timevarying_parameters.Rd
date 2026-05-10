@@ -25,7 +25,11 @@ objects.}
 (default \code{TRUE}).}
 }
 \value{
-A data frame of time-varying parameter values, or \code{NULL}.
+A data frame with columns from the Casal2 time-varying report (e.g.
+  \code{year}, \code{parameter}, \code{value}) plus \code{label} (report
+  label) and \code{par_set} (integer index of the parameter
+  set/minimisation; 1 for single run, ordered factor for multi-run
+  \code{-i} output).  Returns \code{NULL} when no matching reports are found.
 }
 \description{
 Extract time-varying parameter report data from a Casal2 model
@@ -34,6 +38,4 @@ Extract time-varying parameter report data from a Casal2 model
 }
 \author{
 Casal2 Development Team
-  Bug fix: original source used incorrect variable \code{reports_label}
-  (should be \code{report_labels}).
 }

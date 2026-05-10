@@ -31,15 +31,20 @@
   }
   tab_object <- tab_objects[[1]]
 
+  n_objects <- length(tab_objects)
   for (i in seq_along(tab_object)) {
     this_list <- tab_object[[i]]
     if (!("values" %in% names(this_list))) {
       next
     }
-    for (j in 2:length(tab_objects)) {
-      this_list$values <- rbind(this_list$values, tab_objects[[j]][[i]]$values)
+    ## Collect all data frames then bind once -- avoids O(n^2) row copying
+    ## that occurs when rbind-ing inside a loop.
+    chunks <- vector("list", n_objects)
+    chunks[[1L]] <- this_list$values
+    for (j in 2L:n_objects) {
+      chunks[[j]] <- tab_objects[[j]][[i]]$values
     }
-    ## try and store it back in to the original object.
+    this_list$values <- do.call(rbind, chunks)
     tab_object[[i]] <- this_list
   }
   return(tab_object)
