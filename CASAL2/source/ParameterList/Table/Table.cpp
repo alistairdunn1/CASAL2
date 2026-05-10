@@ -159,12 +159,18 @@ void Table::Populate(shared_ptr<Model> model) {
   unsigned year_index = column_index(PARAM_YEAR, false);
   year_index          = year_index == columns_.size() ? column_index(PARAM_YEARS, false) : year_index;
   if (year_index != columns_.size()) {
-    vector<unsigned> years = model->years_all();
+    vector<unsigned> years         = model->years_all();
+    const string&    year_col_name = (column_index(PARAM_YEAR, false) != columns_.size()) ? PARAM_YEAR : PARAM_YEARS;
 
-    if (column_index(PARAM_YEAR, false) != columns_.size())
-      CheckColumnValuesContain<unsigned>(PARAM_YEAR, years);
-    else
-      CheckColumnValuesContain<unsigned>(PARAM_YEARS, years);
+    // Years outside the model range (including projection years) are a warning, not an error.
+    // Extra rows will simply be ignored by the object that owns this table.
+    for (const auto& row : data_) {
+      unsigned year_val = 0;
+      if (!utilities::To<string, unsigned>(row[year_index], year_val))
+        LOG_ERROR() << location() << "The value " << row[year_index] << " in column " << year_col_name << " could not be converted to an unsigned integer";
+      if (std::find(years.begin(), years.end(), year_val) == years.end())
+        LOG_WARNING() << location() << "The value " << year_val << " in column " << year_col_name << " is not a valid year for this model and will be ignored";
+    }
   }  // if (year_index != columns_.size()) {
 }
 

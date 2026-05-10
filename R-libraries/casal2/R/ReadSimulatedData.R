@@ -16,7 +16,7 @@ ReadSimulatedData <- function(filename, path = "") {
   ## Stolen from casal's extract package
   index <- grepl(filename, Files)
   if (!path == "") {
-    Files <- paste(path, "\\", Files, sep = "")
+    Files <- file.path(path, Files)
   }
   Files_to_cycle_through <- Files[index]
   store_obs <- store_error <- list()

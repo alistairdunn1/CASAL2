@@ -16,14 +16,13 @@
 ## Build a file path from a directory path and file name.
 ## Used by write.csl2.file() and similar functions.
 make.filename <- function(file = "", path = "", add.terminal = FALSE) {
-  if (path != "") {
-    plc <- substring(path, nchar(path))
-    if (!(plc == "\\" | plc == "/")) path <- paste(path, "\\", sep = "")
+  if (nzchar(path)) {
+    filename <- file.path(path, file)
+  } else {
+    filename <- file
   }
-  filename <- paste(path, file, sep = "")
   if (add.terminal) {
-    plc <- substring(filename, nchar(filename))
-    if (!(plc == "\\" | plc == "/")) filename <- paste(filename, "\\", sep = "")
+    filename <- paste0(filename, "/")
   }
   return(filename)
 }
