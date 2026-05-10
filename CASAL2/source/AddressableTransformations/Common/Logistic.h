@@ -29,21 +29,20 @@ public:
   Logistic() = delete;
   explicit Logistic(shared_ptr<Model> model);
   virtual ~Logistic() = default;
-  Double           GetScore() override final;
-  void             FillReportCache(ostringstream& cache) override final;
-  void             FillTabularReportCache(ostringstream& cache, bool first_run) override final;
-  void             PrepareForObjectiveFunction() override final;
-  void             RestoreForObjectiveFunction() override final;
+  Double GetScore() override final;
+  void   FillReportCache(ostringstream& cache) override final;
+  void   FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep = " ") override final;
+  void   PrepareForObjectiveFunction() override final;
+  void   RestoreForObjectiveFunction() override final;
 
 protected:
   // methods
-  void DoValidate() override final;
-  void DoBuild() override final;
-  void DoRestore() override final;
-  Double    logistic_value_;
-  Double    lower_bound_;
-  Double    upper_bound_;
-
+  void   DoValidate() override final;
+  void   DoBuild() override final;
+  void   DoRestore() override final;
+  Double logistic_value_;
+  Double lower_bound_;
+  Double upper_bound_;
 };
 
 } /* namespace addressabletransformations */

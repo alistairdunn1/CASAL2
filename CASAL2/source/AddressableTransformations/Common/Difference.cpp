@@ -122,13 +122,13 @@ void Difference::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void Difference::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void Difference::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_PARAMETER << " " << PARAM_SECOND_PARAMETER << " " << PARAM_DIFFERENCE << " " << parameter_labels_[0] << " " << parameter_labels_[1] << " negative_log_jacobian"
-          << REPORT_EOL;
+    cache << PARAM_PARAMETER << sep << PARAM_SECOND_PARAMETER << sep << PARAM_DIFFERENCE << sep << parameter_labels_[0] << sep << parameter_labels_[1] << sep
+          << "negative_log_jacobian" << REPORT_EOL;
   }
-  cache << first_parameter_ << " " << second_parameter_ << " " << difference_parameter_ << " " << restored_values_[0] << " " << restored_values_[1] << " " << jacobian_
+  cache << first_parameter_ << sep << second_parameter_ << sep << difference_parameter_ << sep << restored_values_[0] << sep << restored_values_[1] << sep << jacobian_
         << REPORT_EOL;
 }
 

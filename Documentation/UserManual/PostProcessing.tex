@@ -2,15 +2,17 @@
 
 \R\ (\url{https://www.r-project.org/}) is the main application used to process and visualise output from a \CNAME\ model. Install the \cname\ \R\ package which is part of the \CNAME\ download.
 
-\CNAME\ has two \R\ packages, a base library which is bundled with \CNAME\ application and a post processing package \texttt{r4Casal2} for plotting and model comparisons \url{https://github.com/NIWAFisheriesModelling/Casal2_contrib}. The base \R\ package is made to read and write output from \CNAME\ where as the post-processing package is more generalisable. 
+\CNAME\ has one \R\ package which is bundled with \CNAME\ application. This includes post processing function for extracting elements, in long form, from the Casal2 input for further analysis and plotting.  
 
-There are three types of output that \CNAME\ can produce, depending on the type of analysis run. These outputs are: Standard, MCMC, and Derived Quantity.
+There are three types of output that \CNAME\ can produce, depending on the type of analysis run. These outputs are: standard, MCMC, and tabular output.
 
-The Standard outputs are the reports that are produced in most \CNAME\ run modes, with the exception of \texttt{-s} and \texttt{-m}. The Standard output can be split into two additional categories, a single parameter run (\texttt{casal2 -r}) or a multi-parameter run (\texttt{casal2 -r -i many\_pars.out}), or running in projection mode (\texttt{-f 1}). The Standard outputs can be read into \R\ using the \texttt{extract.mpd()} function.
+The standard outputs are the reports that are produced in most \CNAME\ run modes, with the exception of \texttt{-s} and \texttt{-m}. The standard output can be split into two additional categories, a single parameter run (\texttt{casal2 -r}) or a multi-parameter run (\texttt{casal2 -r -i many\_pars.out}), or running in projection mode (\texttt{-f 1}). The standard output can be read into \R\ using the \texttt{extract.mpd()} function.
 
 The second type of output is generated when doing an MCMC analysis (\texttt{casal2 -m}), which can generate two files, \texttt{mcmc\_objective.out} and \texttt{mcmc\_samples.out}. The MCMC outputs can be used to summarise convergence properties or chain behaviour, and can also be used to view marginal posteriors and quantify parameter uncertainty.
 
-The third output type is the Derived Quantity outputs, also referred to as tabular output. The Derived Quantity output can be generated after an MCMC analysis is done, to produce the marginal posteriors for derived quantities. A commonly reported derived quantity in fisheries stock assessment modelling is the time series of spawning stock biomass. To get the posterior distributions for these derived quantities use the \texttt{-{}-tabular} flag (e.g., \texttt{casal2 -r -i mcmc\_samples.out -{}-tabular > Tabular\_report.out}). This output can then be read into \R\ using the \texttt{extract.tabular()} function.
+The third output type is the tabular outputs, either as space delimited (tabular) or as tab delimited (tabular-tsv). The tabular output can be generated after an MCMC analysis is done, to produce the marginal posteriors for various quantities, e.g., SSBs, model fits, etc. To get the posterior distributions for these derived quantities use the \texttt{-{}-tabular} or  \texttt{-{}-tabular-tsv} flag (e.g., \texttt{casal2 -r -i mcmc\_samples.out -{}-tabular > Tabular\_report.out}). This output can then be read into \R\ using the \texttt{extract.tabular()} function.
+
+Note that the tabular-tsv will be much faster to read into \R\, \R\ nativity scans for tabs rather than spaces when reading a t4ext file.
 
 \CNAME's reported output is written so that each \command{report} will start with a '*' and end with `*end'. This format can be used as the basis to construct functions that read \CNAME\ output to identify and read individual reports for post-processing.
 
@@ -20,68 +22,22 @@ The list of \cname\ \R\ functions include:
 
 \begin{itemize}
 	\item \texttt{extract.mpd()}, which parses the \CNAME\ default output into a list
-	\item \texttt{extract.mcmc()}, which parses the \CNAME\ MCMC output into a list
-	\item \texttt{extract.tabular()}, which parses the \CNAME\ tabular output into a list
-	\item \texttt{extract.parameters()}, which parses the \CNAME\ parameter files into a list
-	\item \texttt{generate.starting.pars()}, which reads in a file that contains the \command{estimate} blocks and generates 'N' starting values to test convergence
-	\item \texttt{burn.in.tabular()}, which omits the first 'N' rows from a \subcommand{casal2TAB} object
-	\item \texttt{extract.csl2.file()}, which reads a \CNAME\ .csl2 (configuration) file into a list
-	\item \texttt{write.csl2.file()}, which writes a \CNAME\ .csl2 (configuration) file to a file
+	\item \texttt{extract.mcmc()}, which parses the \CNAME\ MCMC samples and objectives files into a list
+	\item \texttt{extract.tabular()}, which parses the \CNAME\ tabular (space-separated or tab-separated) output into a list
+	\item \texttt{extract.parameters()}, which parses the \CNAME\ free-parameter files into a list
+	\item \texttt{extract.covariance.matrix()}, which reads the covariance matrix from an \texttt{mpd.out} estimation file
+	\item \texttt{extract.correlation.matrix()}, which reads the correlation matrix from an \texttt{mpd.out} estimation file
+	\item \texttt{extract.csl2.file()}, which reads a \CNAME\ \texttt{.csl2} (configuration) file into a list
+	\item \texttt{generate.starting.pars()}, which reads in a file that contains the \command{estimate} blocks and generates \emph{N} starting values to test convergence
+	\item \texttt{burn.in.tabular()}, which omits the first \emph{N} rows from a \texttt{casal2TAB} object
+	\item \texttt{write.csl2.file()}, which writes a \CNAME\ \texttt{.csl2} (configuration) file to disk
 	\item \texttt{ReadSimulatedData()}, which parses \CNAME\ output from a \texttt{casal2 -s} run
 	\item \texttt{Method.TA1.8()}, which returns a weighting factor for age or length composition data. See \cite{francis2011data} for more detail
-	\item \texttt{apply.dataweighting.to.csl2()}, which parses a \CNAME\ .csl2 (configuration) file that contains \command{observation} blocks, applies a weighting factor to an age or length composition data set, and generates a new \subcommand{.csl2} file with modified effective sample size values
 \end{itemize}
 
+For the full list of functions available in the \CNAME\ \R\ package, including \texttt{get\_*()} helper functions for extracting specific objects from parsed output, refer to the package help system after loading the library (\texttt{library(Casal2)}; then \texttt{help(package = "Casal2")}).
+
 The required and optional arguments for these functions can be queried after loading the \CNAME\ \R\ library with \texttt{library(Casal2)} and using the standard \R\ help syntax \texttt{?} (e.g., \texttt{?param.profile()}). Many of the help files have example code and data to demonstrate function syntax.
-
-\paragraph*{Data weighting}
-
-An important component of fisheries stock assessment modelling is addressing data conflicts through the use of data weighting. There are a range of methods that can be used (\cite{francis2011data}). The \CNAME\ \R\ function is \texttt{Method.TA1.8()}. An additional function \subcommand{apply.dataweighting.to.csl2()} automatically applies a weighting factor to a specific age or length composition data in an \command{observation} block, and generates a new \subcommand{.csl2} file with modified effective sample size values.
-
-\begin{lstlisting}
-library(casal2)
-
-## read in the reported output from a "casal2 -e" run
-## ensure there is a @report block for the observation of interest.
-mpd <- extract.mpd(file = "estimate.log")
-
-## calculate weighting factor from Francis method
-WeightingFactor <- Method.TA1.8(model = mpd, observation_labels = "chatTANage")
-
-## Apply the weighting factor to the block in the Observation.csl2 file
-## this call generates a new file (Observation.csl2.0) with the re-weighted effective sample sizes
-apply.dataweighting.to.csl2(weighting_factor = WeightingFactor,
-                                Observation_csl2_file = "Observations.csl2",
-                                Observation_label = "chatTANage",
-                                Observation_out_filename = "Observation.csl2.0")
-\end{lstlisting}
-
-
-Automating the data weighting process:
-
-\begin{lstlisting}
-library(Casal2)
-
-mpd <- extract.mpd(file = "estimate.log")
-
-ModelFactor <- Method.TA1.8(mpd, observation_labels = c("ObserverProportionsAtAge"))
-
-## make a back-up copy of the file Observation.csl2 before running this section
-
-while(abs(ModelFactor - 1) > 0.01) {
-	shell("betadiff & casal2 -e > estimate.log 2> log.out")
-
-	new_mpd <- extract.mpd(file = "estimate.log")
-
-	ModelFactor <- Method.TA1.8(new_mpd, observation_labels = c("ObserverProportionsAtAge"))
-
-	apply.dataweighting.to.csl2(weighting_factor = ModelFactor,
-                                  Observation_csl2_file = "Observation.csl2",
-                                  Observation_out_filename = "Observation.csl2",
-                                  Observation_label = c("ObserverProportionsAtAge"))
-	print(ModelFactor)
-}
-\end{lstlisting}
 
 \paragraph*{Troubleshooting the \cname\ \R\ package}
 

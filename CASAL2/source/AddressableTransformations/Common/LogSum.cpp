@@ -120,13 +120,13 @@ void LogSum::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void LogSum::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void LogSum::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_LOG_TOTAL_PARAMETER << " " << PARAM_TOTAL_PROPORTION_PARAMETER << " " << parameter_labels_[0] << " " << parameter_labels_[1] << " negative_log_jacobian"
+    cache << PARAM_LOG_TOTAL_PARAMETER << sep << PARAM_TOTAL_PROPORTION_PARAMETER << sep << parameter_labels_[0] << sep << parameter_labels_[1] << sep << "negative_log_jacobian"
           << REPORT_EOL;
   }
-  cache << log_total_parameter_ << " " << total_proportion_parameter_ << " " << restored_values_[0] << " " << restored_values_[1] << " " << jacobian_ << REPORT_EOL;
+  cache << log_total_parameter_ << sep << total_proportion_parameter_ << sep << restored_values_[0] << sep << restored_values_[1] << sep << jacobian_ << REPORT_EOL;
 }
 } /* namespace addressabletransformations */
 } /* namespace niwa */

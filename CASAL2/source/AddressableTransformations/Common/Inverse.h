@@ -27,12 +27,12 @@ public:
   Inverse() = delete;
   explicit Inverse(shared_ptr<Model> model);
   virtual ~Inverse() = default;
-  Double           GetScore() override final;
-  void             FillReportCache(ostringstream& cache) override final;
-  void             FillTabularReportCache(ostringstream& cache, bool first_run) override final;
+  Double GetScore() override final;
+  void   FillReportCache(ostringstream& cache) override final;
+  void   FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep = " ") override final;
 
-  void             PrepareForObjectiveFunction() override final;
-  void             RestoreForObjectiveFunction() override final;
+  void PrepareForObjectiveFunction() override final;
+  void RestoreForObjectiveFunction() override final;
 
 protected:
   // methods
@@ -40,8 +40,7 @@ protected:
   void DoBuild() override final;
   void DoRestore() override final;
 
-  Double          inverse_value_;
-
+  Double inverse_value_;
 };
 
 } /* namespace addressabletransformations */

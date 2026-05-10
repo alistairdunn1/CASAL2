@@ -13,3 +13,13 @@ type estimate_value
 
 @report ObjectiveFunction
 type objective_function
+
+@report mcmc_objectives
+type mcmc_objective
+file_name objectives
+write_mode incremental_suffix
+
+@report mcmc_samples
+type mcmc_sample
+file_name samples
+write_mode incremental_suffix

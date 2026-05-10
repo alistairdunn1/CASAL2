@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2.git:master)
 Call: C:\Projects\Software\CASAL2-AD\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Sat May 09 05:38:06 2026
+Date: Sun May 10 20:18:27 2026
 Seed: 20
-Version: v26.05 (2026-05-06)
+Version: v26.05 (2026-05-10)
 Copyright (c) 2017-2026, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=ZALMAN OS=Windows_NT PID=21596
+Environment: User=alist Machine=ZALMAN OS=Windows_NT PID=41480
 
 
 *partition[state_Oct_Jan]
@@ -9474,8 +9474,8 @@ from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_2_male
-max_age: 892481072
-min_age: 808463921
+max_age: 0
+min_age: 842610993
 n: 9
 penalty: none
 selectivities: tag_1996_2_male.one
@@ -9493,7 +9493,7 @@ initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_2_female
 max_age: 0
-min_age: 13618
+min_age: 6647375
 n: 31
 penalty: none
 selectivities: tag_1996_2_female.one
@@ -9510,8 +9510,8 @@ from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_3_male
-max_age: 0
-min_age: 909705264
+max_age: 909705264
+min_age: 0
 n: 61.9068
 penalty: none
 selectivities: tag_1996_3_male.one
@@ -9529,7 +9529,7 @@ initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_3_female
 max_age: 0
-min_age: 909705264
+min_age: 0
 n: 75.9552
 penalty: none
 selectivities: tag_1996_3_female.one
@@ -9546,8 +9546,8 @@ from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1997_1_male
-max_age: 1918959670
-min_age: 909705264
+max_age: 909705264
+min_age: 1918959670
 n: 55.005
 penalty: none
 selectivities: tag_1997_1_male.one
@@ -9564,7 +9564,7 @@ from: untagged.female
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1997_1_female
-max_age: 926482480
+max_age: 0
 min_age: 0
 n: 40.033
 penalty: none

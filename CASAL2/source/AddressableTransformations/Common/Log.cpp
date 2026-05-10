@@ -107,12 +107,12 @@ void Log::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void Log::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void Log::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_LOG_PARAMETER << " " << parameter_labels_[0] << " negative_log_jacobian" << REPORT_EOL;
+    cache << PARAM_LOG_PARAMETER << sep << parameter_labels_[0] << sep << "negative_log_jacobian" << REPORT_EOL;
   }
-  cache << log_value_ << " " << restored_values_[0] << " " << jacobian_ << REPORT_EOL;
+  cache << log_value_ << sep << restored_values_[0] << sep << jacobian_ << REPORT_EOL;
 }
 } /* namespace addressabletransformations */
 } /* namespace niwa */

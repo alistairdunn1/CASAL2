@@ -101,12 +101,12 @@ void SumToOne::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void SumToOne::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void SumToOne::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_PROPORTION_PARAMETER << " " << parameter_labels_[0] << " " << parameter_labels_[1] << " negative_log_jacobian" << REPORT_EOL;
+    cache << PARAM_PROPORTION_PARAMETER << sep << parameter_labels_[0] << sep << parameter_labels_[1] << sep << "negative_log_jacobian" << REPORT_EOL;
   }
-  cache << difference_parameter_ << " " << restored_values_[0] << " " << restored_values_[1] << " " << jacobian_ << REPORT_EOL;
+  cache << difference_parameter_ << sep << restored_values_[0] << sep << restored_values_[1] << sep << jacobian_ << REPORT_EOL;
 }
 
 } /* namespace addressabletransformations */

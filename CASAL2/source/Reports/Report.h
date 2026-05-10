@@ -50,12 +50,12 @@ public:
   // Methods
   Report();
   virtual ~Report() = default;
-  void Validate(){};
-  void Build(){};
+  void Validate() {};
+  void Build() {};
   void Validate(shared_ptr<Model> model);
   void Build(shared_ptr<Model> model);
   void Verify(shared_ptr<Model> model);
-  void Reset(){};
+  void Reset() {};
   void Prepare(shared_ptr<Model> model);
   void Execute(shared_ptr<Model> model);
   void Finalise(shared_ptr<Model> model);
@@ -85,12 +85,12 @@ protected:
   virtual void DoValidate(shared_ptr<Model> model) = 0;
   virtual void DoBuild(shared_ptr<Model> model)    = 0;
   virtual void DoVerify(shared_ptr<Model> model) {};
-  virtual void DoPrepare(shared_ptr<Model> model){};
+  virtual void DoPrepare(shared_ptr<Model> model) {};
   virtual void DoExecute(shared_ptr<Model> model) = 0;
-  virtual void DoFinalise(shared_ptr<Model> model){};
-  virtual void DoPrepareTabular(shared_ptr<Model> model){};
-  virtual void DoExecuteTabular(shared_ptr<Model> model){};
-  virtual void DoFinaliseTabular(shared_ptr<Model> model){};
+  virtual void DoFinalise(shared_ptr<Model> model) {};
+  virtual void DoPrepareTabular(shared_ptr<Model> model) {};
+  virtual void DoExecuteTabular(shared_ptr<Model> model) {};
+  virtual void DoFinaliseTabular(shared_ptr<Model> model) {};
   string       ReportHeader(string type, string label, string format);
 
   // Members
@@ -112,6 +112,7 @@ protected:
   string            format_            = PARAM_R;
   bool              is_valid_          = true;
   bool              default_report_    = false;
+  string            report_sep_        = " ";  // " " normally, "\t" in --tabular-tsv mode
 };
 
 // Typedef

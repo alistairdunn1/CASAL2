@@ -29,19 +29,18 @@ public:
   Log() = delete;
   explicit Log(shared_ptr<Model> model);
   virtual ~Log() = default;
-  Double           GetScore() override final;
-  void             FillReportCache(ostringstream& cache) override final;
-  void             FillTabularReportCache(ostringstream& cache, bool first_run) override final;
-  void             PrepareForObjectiveFunction() override final;
-  void             RestoreForObjectiveFunction() override final;
+  Double GetScore() override final;
+  void   FillReportCache(ostringstream& cache) override final;
+  void   FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep = " ") override final;
+  void   PrepareForObjectiveFunction() override final;
+  void   RestoreForObjectiveFunction() override final;
 
 protected:
   // methods
-  void DoValidate() override final;
-  void DoBuild() override final;
-  void DoRestore() override final;
-  Double    log_value_;
-
+  void   DoValidate() override final;
+  void   DoBuild() override final;
+  void   DoRestore() override final;
+  Double log_value_;
 };
 
 } /* namespace addressabletransformations */

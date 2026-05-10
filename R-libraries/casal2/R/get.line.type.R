@@ -25,8 +25,8 @@
       line <- string.to.vector.of.words(line)
       if (length(line) == 2 && substr(line[2], 1, 1) == "{" && substr(line[2], nchar(line[2]), nchar(line[2])) == "}") {
         type <- substr(line[2], 2, nchar(line[2]) - 1)
-        if (type != "dataframe" && type != "vector" && type != "list" && type != "matrix" && type != "string" && type != "dataframe_with_row_labels") {
-          stop("type from {} must be one of 'list', 'vector', 'dataframe', 'matrix', 'string', 'dataframe_with_row_labels'")
+        if (type != "dataframe" && type != "dataframe_tsv" && type != "vector" && type != "list" && type != "matrix" && type != "string" && type != "dataframe_with_row_labels") {
+          stop("type from {} must be one of 'list', 'vector', 'dataframe', 'dataframe_tsv', 'matrix', 'string', 'dataframe_with_row_labels'")
         }
       } else if (substr(line[1], nchar(line[1]), nchar(line[1])) == ":") {
         type <- "L_E"

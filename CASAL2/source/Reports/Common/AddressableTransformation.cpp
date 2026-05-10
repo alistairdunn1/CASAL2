@@ -72,10 +72,11 @@ void AddressableTransformation::DoExecuteTabular(shared_ptr<Model> model) {
     cache_ << ReportHeader(type_, label_, format_);
     cache_ << "addressable_label: " << addressable_label_ << REPORT_EOL;
     cache_ << "transformation_type: " << transformation_->type() << REPORT_EOL;
-    cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
-    transformation_->FillTabularReportCache(cache_, true);
+    string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+    cache_ << "values " << marker << REPORT_EOL;
+    transformation_->FillTabularReportCache(cache_, true, report_sep_);
   } else {
-    transformation_->FillTabularReportCache(cache_, false);
+    transformation_->FillTabularReportCache(cache_, false, report_sep_);
   }
 }
 

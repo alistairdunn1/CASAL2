@@ -252,10 +252,32 @@ This report prints all \command{time\_varying} blocks with the values and years 
 
 An alternative reporting framework to the standard output is the tabular reporting format. Tabular reporting is used with multi-line \texttt{-i} input files (like the MCMC sample or \texttt{-o} outputs). Tabular reports will print out a row that will correspond with each row of the \texttt{-i} input files.
 
-Tabular reporting is specified using the \texttt{-{}-tabular} argument (\texttt{casal2 -r -{}-tabular -i file\_name}).
+Tabular reporting is specified using the \texttt{-{}-tabular} argument (\texttt{casal2 -r -{}-tabular -i file\_name}), or its short form \texttt{-t}.
 
-Derived quantities, processes, observations, and \texttt{estimate\_values} are the only report types that can be output with this format. For each input file the output will begin with the names of each column followed by a multi-line report ending with the \texttt{*end} syntax.
+Derived quantities, processes, observations, catchabilities, parameter transformations, and \texttt{estimate\_value} reports are the report types that can be output in this format. For each input row the output will begin with the names of each column followed by a multi-line report ending with the \texttt{*end} syntax.
 
-These tables can be read with \R\ using the \CNAME\ \R\ package. An example usage is reading in files of MCMC posterior values of derived quantities, which can then be plotted.
+These tables can be read with \R\ using the \CNAME\ \R\ package function \texttt{extract.tabular()}. An example usage is reading in files of MCMC posterior values of derived quantities, which can then be plotted.
+
+\subsubsection{\I{Tab-separated tabular output (\texttt{-{}-tabular-tsv})}}
+\index{Reports ! Tabular ! Tab-separated}\label{sec:TabularTSV}
+
+The \texttt{-{}-tabular-tsv} flag (short form \texttt{-T}) is an extension of the tabular reporting mode that writes data rows using \emph{tab} characters as the column separator rather than spaces. It implies \texttt{-{}-tabular} and does not need to be combined with \texttt{-t}.
+
+The primary motivation is performance when importing large MCMC outputs into \R: tab-separated files can be read with \texttt{data.table::fread} or with \texttt{extract.tabular()} (which detects the \texttt{\{dataframe\_tsv\}} marker automatically and uses an optimised internal parser, typically 5--10$\times$ faster than the space-separated path for large chains).
+
+A typical workflow for an MCMC run is:
+{\small{\begin{verbatim}
+casal2 -E mpd.log             # obtain the MPD
+casal2 -M mpd.log -T > mcmc.log 2> mcmc.err   # MCMC with TSV tabular reports
+\end{verbatim}}}
+
+In \R:
+{\small{\begin{verbatim}
+library(Casal2)
+tab <- extract.tabular(file = "mcmc.log")
+head(tab$EstimateValues$values)  # data frame, one row per retained sample
+\end{verbatim}}}
+
+The output format is identical to standard tabular output except that within each \texttt{\{dataframe\}} block the column-header line and all data rows use tab characters as separators. The report boundaries (\texttt{*label (type)}, \texttt{*end}) and key--value lines (e.g.~\texttt{year: 2025}) remain space-delimited.
 
 

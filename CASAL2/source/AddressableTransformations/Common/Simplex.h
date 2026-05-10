@@ -29,11 +29,12 @@ public:
   Simplex() = delete;
   explicit Simplex(shared_ptr<Model> model);
   virtual ~Simplex() = default;
-  Double           GetScore() override final;
-  void             FillReportCache(ostringstream& cache) override final;
-  void             FillTabularReportCache(ostringstream& cache, bool first_run) override final;
-  void             PrepareForObjectiveFunction() override final;
-  void             RestoreForObjectiveFunction() override final;
+  Double GetScore() override final;
+  void   FillReportCache(ostringstream& cache) override final;
+  void   FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep = " ") override final;
+  void   PrepareForObjectiveFunction() override final;
+  void   RestoreForObjectiveFunction() override final;
+
 protected:
   // methods
   void DoValidate() override final;
@@ -41,20 +42,20 @@ protected:
   void DoRestore() override final;
 
 private:
-  vector<Double>    zk_;
-  vector<Double>    cumulative_simplex_k_;
-  vector<Double>    unit_vector_;
-  vector<Double>    simplex_parameter_;
-  vector<Double>    cache_log_k_value_;
-  Double            total_ = 0.0;
-  bool              sum_to_one_ = true;
-  Double            n_param_double_;
-  Double            sub_total_;
-  vector<Double>    cached_simplex_values_for_objective_function_restore_;
-  bool              simplex_input_supplied_ = false;
-  Estimate*         simplex_estimate_;
-  Double            delta_ = 1e-6;
-  int               Km1_;
+  vector<Double> zk_;
+  vector<Double> cumulative_simplex_k_;
+  vector<Double> unit_vector_;
+  vector<Double> simplex_parameter_;
+  vector<Double> cache_log_k_value_;
+  Double         total_      = 0.0;
+  bool           sum_to_one_ = true;
+  Double         n_param_double_;
+  Double         sub_total_;
+  vector<Double> cached_simplex_values_for_objective_function_restore_;
+  bool           simplex_input_supplied_ = false;
+  Estimate*      simplex_estimate_;
+  Double         delta_ = 1e-6;
+  int            Km1_;
 };
 
 } /* namespace addressabletransformations */

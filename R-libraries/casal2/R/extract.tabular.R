@@ -36,9 +36,14 @@
   )
   if (!quiet) cat(sprintf("Read %d lines\n", length(file_lines)))
 
-  ## Check this is a tabular report
-  if (!grepl(pattern = "--tabular", x = file_lines[2]) & !grepl(pattern = "-t ", x = file_lines[2])) {
-    stop("This model was NOT run with the command '--tabular'. Please use the extract.mpd() function to import model runs without --tabular or -t")
+  ## Check this is a tabular report.
+  ## Matches: --tabular, --tabular-tsv (both start with --tabular),
+  ##          -t (short form of --tabular), -T (short form of --tabular-tsv).
+  is_tabular <- grepl(pattern = "--tabular", x = file_lines[2]) |
+    grepl(pattern = "(^| )-t( |$)", x = file_lines[2]) |
+    grepl(pattern = "(^| )-T( |$)", x = file_lines[2])
+  if (!is_tabular) {
+    stop("This model was NOT run with the command '--tabular' or '--tabular-tsv'. Please use the extract.mpd() function to import model runs without --tabular, -t, or -T")
   }
 
   ## Pre-compute all report-header and *end positions in one pass -- avoids
@@ -105,48 +110,74 @@
         if (report_label == "type") report_label <- "sub_type"
         temp_result[[report_label]] <- make.list_element(current_line)
         line_no <- line_no + 1L
-      } else if (report_type == "dataframe") {
+      } else if (report_type == "dataframe" || report_type == "dataframe_tsv") {
         ## Next content line is the column-header row; the rest are data.
-        ## Empty-report guard: nothing after the "values {dataframe}" marker.
+        ## Empty-report guard: nothing after the "values {dataframe...}" marker.
         if (line_no + 1L > length(content_lines)) {
           line_no <- length(content_lines) + 1L
           next
         }
 
-        col_header <- string.to.vector.of.words(content_lines[line_no + 1L])
+        is_tsv <- (report_type == "dataframe_tsv")
+
+        ## Column headers use the same separator as data rows.
+        col_header <- if (is_tsv) {
+          strsplit(content_lines[line_no + 1L], "\t", fixed = TRUE)[[1L]]
+        } else {
+          string.to.vector.of.words(content_lines[line_no + 1L])
+        }
         data_lines <- content_lines[(line_no + 2L):length(content_lines)]
 
         if (length(data_lines) > 0L) {
           n_cols <- length(col_header)
           n_rows <- length(data_lines)
 
-          ## Fast path: strip trailing whitespace, split on spaces, reshape
-          ## to a character matrix and type-convert per column.  For large
-          ## tables (e.g. 100 K-row MCMC output) this is ~5-10x faster than
-          ## read.table(textConnection(...)).
-          trimmed <- sub("\\s+$", "", data_lines, perl = TRUE)
-          tokens <- strsplit(trimmed, " ", fixed = TRUE)
-          tok_len <- lengths(tokens)
-
-          if (all(tok_len == n_cols)) {
-            raw <- unlist(tokens, use.names = FALSE)
-            mat <- matrix(raw, nrow = n_rows, ncol = n_cols, byrow = TRUE)
-            Data <- as.data.frame(mat, stringsAsFactors = FALSE)
-            Data[] <- lapply(Data, type.convert, as.is = TRUE)
-            colnames(Data) <- col_header
-          } else {
-            ## Fallback for irregular rows (e.g. ragged columns or mixed
-            ## spacing) -- slower but handles any valid Casal2 output.
-            con <- textConnection(data_lines)
-            Data <- read.table(con,
-              stringsAsFactors = FALSE, sep = " ",
-              header = FALSE, strip.white = FALSE, fill = FALSE
-            )
-            close(con)
-            if (ncol(Data) > 0L && all(is.na(Data[, ncol(Data)]))) {
-              Data <- Data[, -ncol(Data), drop = FALSE]
+          if (is_tsv) {
+            ## TSV fast path: no trailing-whitespace issue, split on tab.
+            ## Tab-separated files never have trailing tabs from Casal2.
+            tokens <- strsplit(data_lines, "\t", fixed = TRUE)
+            tok_len <- lengths(tokens)
+            if (all(tok_len == n_cols)) {
+              raw <- unlist(tokens, use.names = FALSE)
+              mat <- matrix(raw, nrow = n_rows, ncol = n_cols, byrow = TRUE)
+              Data <- as.data.frame(mat, stringsAsFactors = FALSE)
+              Data[] <- lapply(Data, type.convert, as.is = TRUE)
+              colnames(Data) <- col_header
+            } else {
+              ## Fallback (irregular row widths are unusual but safe to handle).
+              con <- textConnection(data_lines)
+              Data <- read.table(con,
+                stringsAsFactors = FALSE, sep = "\t",
+                header = FALSE, fill = FALSE
+              )
+              close(con)
+              colnames(Data) <- col_header
             }
-            colnames(Data) <- col_header
+          } else {
+            ## Space-separated fast path (existing logic).
+            trimmed <- sub("\\s+$", "", data_lines, perl = TRUE)
+            tokens <- strsplit(trimmed, " ", fixed = TRUE)
+            tok_len <- lengths(tokens)
+
+            if (all(tok_len == n_cols)) {
+              raw <- unlist(tokens, use.names = FALSE)
+              mat <- matrix(raw, nrow = n_rows, ncol = n_cols, byrow = TRUE)
+              Data <- as.data.frame(mat, stringsAsFactors = FALSE)
+              Data[] <- lapply(Data, type.convert, as.is = TRUE)
+              colnames(Data) <- col_header
+            } else {
+              ## Fallback for irregular rows.
+              con <- textConnection(data_lines)
+              Data <- read.table(con,
+                stringsAsFactors = FALSE, sep = " ",
+                header = FALSE, strip.white = FALSE, fill = FALSE
+              )
+              close(con)
+              if (ncol(Data) > 0L && all(is.na(Data[, ncol(Data)]))) {
+                Data <- Data[, -ncol(Data), drop = FALSE]
+              }
+              colnames(Data) <- col_header
+            }
           }
         } else {
           Data <- data.frame()

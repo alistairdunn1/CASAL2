@@ -61,6 +61,7 @@ class ModelRunner:
         self.executionTypeList.append(["SingleSexTagByLength_input", "run_dash_I"])
         self.executionTypeList.append(["SingleSexTagByLength_n", "run_dash_I"])
         self.executionTypeList.append(["Simple", "projections"])
+        self.executionTypeList.append(["SBW_2022", "tabular_tsv_mcmc"])
         # self.executionTypeList.append(["MultiSelectivity", "betadiff"])
         # self.executionTypeList.append(["SimpleExploitationRates", "projections"])
         # self.executionTypeList.append(["SimpleNoStdYcs", "adolc"])
@@ -78,6 +79,13 @@ class ModelRunner:
             log_files = ["estimate_gammadiff.log", "estimate_gammadiff.err"]
         elif execution_type == "adolc":
             log_files = ["estimate_adolc.log", "estimate_adolc.err"]
+        elif execution_type == "tabular_tsv_mcmc":
+            log_files = [
+                "mcmc_tsv_mpd.log",
+                "mcmc_tsv_mpd.err",
+                "mcmc_tsv.log",
+                "mcmc_tsv.err",
+            ]
         elif execution_type == "resume_mcmc_from_mpd":
             log_files = ["estimate.log", "esimate.err", "mcmc.log", "mcmc.err"]
         elif execution_type == "resume_mcmc":
@@ -264,6 +272,13 @@ class ModelRunner:
                     if exec_type == "projections":
                         threadCommand.append(
                             f"{exe_path} -f 100 -i free.dat -g 20 -c config_projections.csl2 -t > projections.log 2> projections.err"
+                        )
+                    if exec_type == "tabular_tsv_mcmc":
+                        threadCommand.append(
+                            f"{exe_path} -E mpd_tsv.log -c config_mcmc_tsv.csl2 > mcmc_tsv_mpd.log 2> mcmc_tsv_mpd.err"
+                        )
+                        threadCommand.append(
+                            f"{exe_path} -M mpd_tsv.log -T -c config_mcmc_tsv.csl2 > mcmc_tsv.log 2> mcmc_tsv.err"
                         )
 
                     if len(threadCommand) == 0:  # Default -r test
