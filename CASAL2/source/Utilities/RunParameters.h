@@ -73,6 +73,7 @@ struct RunParameters {
 
   // reporting options
   bool        tabular_reports_         = false;  // print reports in tabular format
+  bool        tabular_reports_tsv_     = false;  // print tabular data rows as tab-separated values
   bool        disable_all_reports_     = false;  // disable all reports
   bool        no_std_report_           = false;  // skip standard header
   bool        print_std_report_header_ = true;   // print top part of std header

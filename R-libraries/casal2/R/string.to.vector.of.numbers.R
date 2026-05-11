@@ -1,6 +1,6 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "string.to.vector.of.numbers" <- function(string) {

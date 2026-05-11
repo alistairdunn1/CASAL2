@@ -1,6 +1,6 @@
 #' @title combine.tabular used to return a list that combines multiple tabular reports into a single tabular report
 #' @description returns a casal2TAB class that is several casal2TAB objects combined into one. Used when tabular output from different chains of the same model are to be combined into a single chain
-#' @author Alistair Dunn
+#' @author Casal2 Development Team
 #' @param tab_objects list object of tab_object casal2TAB objects
 #' @param Row  Optionally, the Row number to burn in from. Note this is not the iteration but the row that corresponds to your iteration that you want to burn-in from. if keep > 1 then the iteration and row will be different
 #' @param verbose print extra info.
@@ -14,32 +14,37 @@
   if (length(tab_objects) < 2) {
     stop("tab_objects must be a list of more than one object of class 'casal2TAB'")
   }
-  for (i in 1:length(tab_objects)) {
+  for (i in seq_along(tab_objects)) {
     if (class(tab_objects[[i]]) != "casal2TAB") {
       stop(paste0("The element ", i, "of tab_objects  must be class 'casal2TAB', but the parsed object is class '", class(tab_objects[[i]]), "'"))
     }
   }
-  for (i in 1:length(tab_objects)) {
+  for (i in seq_along(tab_objects)) {
     if (any(names(tab_objects[[1]]) != names(tab_objects[[i]]))) {
       stop("The object of class 'casal2TAB' in tab_objects must be identical")
     }
   }
   if (!is.null(Row)) {
-    for (i in 1:length(tab_objects)) {
+    for (i in seq_along(tab_objects)) {
       tab_objects[[i]] <- burn.in.tabular(tab_objects[[i]], Row = Row, verbose = verbose)
     }
   }
   tab_object <- tab_objects[[1]]
 
-  for (i in 1:length(names(tab_object))) {
-    this_list <- get(names(tab_object)[i], tab_object)
+  n_objects <- length(tab_objects)
+  for (i in seq_along(tab_object)) {
+    this_list <- tab_object[[i]]
     if (!("values" %in% names(this_list))) {
       next
     }
-    for (j in 2:length(tab_objects)) {
-      this_list$values <- rbind(this_list$values, get(names(tab_objects[[j]])[i], tab_objects[[j]])$values)
+    ## Collect all data frames then bind once -- avoids O(n^2) row copying
+    ## that occurs when rbind-ing inside a loop.
+    chunks <- vector("list", n_objects)
+    chunks[[1L]] <- this_list$values
+    for (j in 2L:n_objects) {
+      chunks[[j]] <- tab_objects[[j]][[i]]$values
     }
-    ## try and store it back in to the original object.
+    this_list$values <- do.call(rbind, chunks)
     tab_object[[i]] <- this_list
   }
   return(tab_object)

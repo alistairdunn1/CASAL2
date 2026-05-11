@@ -23,5 +23,5 @@ An extract function that reads Casal2 output that are produced from a '-r' or '-
 also create a 'casal2TAB' class which can be used in plotting and summary functions. See the casal2 manual for more information.
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

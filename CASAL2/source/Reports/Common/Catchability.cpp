@@ -60,7 +60,8 @@ void Catchability::DoExecute(shared_ptr<Model> model) {
 void Catchability::DoPrepareTabular(shared_ptr<Model> model) {
   LOG_TRACE();
   cache_ << ReportHeader(type_, label_, format_);
-  cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
   if (catchability_label_ != "") {
     // single catchability provided not recommended
     catchability_ = model->managers()->catchability()->GetCatchability(catchability_label_);
@@ -69,9 +70,12 @@ void Catchability::DoPrepareTabular(shared_ptr<Model> model) {
     cache_ << REPORT_EOL;
   } else {
     catchabilities::Manager& CatchabilityManager = *model->managers()->catchability();
+    bool                     first               = true;
     for (auto object : CatchabilityManager.objects()) {
-      string label = object->label();
-      cache_ << "catchability[" << label << "] ";
+      if (!first)
+        cache_ << report_sep_;
+      first = false;
+      cache_ << "catchability[" << object->label() << "]";
     }
     cache_ << REPORT_EOL;
   }
@@ -82,12 +86,15 @@ void Catchability::DoPrepareTabular(shared_ptr<Model> model) {
 
 void Catchability::DoExecuteTabular(shared_ptr<Model> model) {
   if (catchability_label_ != "") {
-    cache_ << AS_DOUBLE(catchability_->q()) << " ";
-    cache_ << REPORT_EOL;
+    cache_ << AS_DOUBLE(catchability_->q()) << REPORT_EOL;
   } else {
     catchabilities::Manager& CatchabilityManager = *model->managers()->catchability();
+    bool                     first               = true;
     for (auto object : CatchabilityManager.objects()) {
-      cache_ << AS_DOUBLE(object->q()) << " ";
+      if (!first)
+        cache_ << report_sep_;
+      first = false;
+      cache_ << AS_DOUBLE(object->q());
     }
     cache_ << REPORT_EOL;
   }

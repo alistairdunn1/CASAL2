@@ -22,5 +22,5 @@ Data <"data.frame"> of parameters that are from a -i format.
 This function reads in a parameter file that would be generated using the -o syntax.
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

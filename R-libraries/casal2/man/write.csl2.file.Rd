@@ -19,5 +19,5 @@ is used once a model has been read into R using extract.csl2.file and modified. 
 output the configuration to a new file where it can be rerun in Casal2
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

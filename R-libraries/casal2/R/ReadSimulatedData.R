@@ -2,7 +2,7 @@
 #'
 #' This function reads in a set of simulated observations generated from Casal2 in simulation mode. These functions read in all the simulated obs as a list, for visualising and summarising in R
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param filename the name of simulated obs for an observation. For example if you generated 100 sets of simulated observations named "SubAntarticObs". Casal2 will generate 100 of these with the following extensions SubAntarticObs.001, SubAntarticObs.002, SubAntarticObs.003.,,, SubAntarticObs.100. filename = SubAntarticObs.
 #' @param path Optionally, the path to the file, default is current working directory.
 #' @export
@@ -16,7 +16,7 @@ ReadSimulatedData <- function(filename, path = "") {
   ## Stolen from casal's extract package
   index <- grepl(filename, Files)
   if (!path == "") {
-    Files <- paste(path, "\\", Files, sep = "")
+    Files <- file.path(path, Files)
   }
   Files_to_cycle_through <- Files[index]
   store_obs <- store_error <- list()

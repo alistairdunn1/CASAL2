@@ -43,25 +43,23 @@ void InitialisationPartition::DoExecute(shared_ptr<Model> model) {
   niwa::partition::accessors::All all_view(model);
 
   // Print the header
-  // this report is slightly unique. Instead of the label it will use the name of the initialisation phase
-  // The reason this was done was to deal with multi initialisation phases.
-  cache_ << ReportHeader(type_, model->get_current_initialisation_phase_label(), format_); 
+  // Note: uses the initialisation phase name rather than the @report label so that
+  // each phase produces a uniquely-keyed block when there are multiple phases.
+  cache_ << ReportHeader(type_, model->get_current_initialisation_phase_label(), format_);
   cache_ << "values " << REPORT_R_DATAFRAME_ROW_LABELS << REPORT_EOL;
   cache_ << "category";
-  if(model->partition_type() == PartitionType::kAge) {
-    for (unsigned i = model->min_age(); i <= model->max_age(); ++i) 
-      cache_ << " " << i;
+  if (model->partition_type() == PartitionType::kAge) {
+    for (unsigned i = model->min_age(); i <= model->max_age(); ++i) cache_ << " " << i;
     cache_ << REPORT_EOL;
   } else if (model->partition_type() == PartitionType::kLength) {
-    for (auto len_bin : model->length_bin_mid_points()) 
-      cache_ << " " << len_bin;
+    for (auto len_bin : model->length_bin_mid_points()) cache_ << " " << len_bin;
     cache_ << REPORT_EOL;
   }
 
   for (auto iterator : all_view) {
     cache_ << iterator->name_;
     for (auto value : iterator->data_) {
-        cache_ << " " << std::fixed << AS_DOUBLE(value);
+      cache_ << " " << std::fixed << AS_DOUBLE(value);
     }
     cache_ << REPORT_EOL;
   }
@@ -73,13 +71,9 @@ void InitialisationPartition::DoPrepareTabular(shared_ptr<Model> model) {
   LOG_INFO() << "Tabular mode for reports of type " << PARAM_INITIALISATION_PARTITION << " has not been implemented";
 }
 
-void InitialisationPartition::DoExecuteTabular(shared_ptr<Model> model) {
+void InitialisationPartition::DoExecuteTabular(shared_ptr<Model> model) {}
 
-}
-
-void InitialisationPartition::DoFinaliseTabular(shared_ptr<Model> model) {
-
-}
+void InitialisationPartition::DoFinaliseTabular(shared_ptr<Model> model) {}
 
 } /* namespace reports */
 } /* namespace niwa */

@@ -39,7 +39,9 @@ HarvestStrategyRampU::HarvestStrategyRampU(shared_ptr<Model> model) : Project(mo
   parameters_.Bind<unsigned>(PARAM_REFERENCE_INDEX_YEARS, &reference_index_years_, "The years to use for calculating the mean reference biomass for calculating the status relative to the reference points", "", true);
   parameters_.Bind<double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<double>(PARAM_MAX_DELTA, &max_delta_, "The maximum difference (proportion) in catch that can be applied (no maximum = 0)", "", 0.0)->set_lower_bound(0.0, true);
-  parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates", "", 1)->set_lower_bound(1, true);
+  auto* year_delta_param = parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates", "", 1u);
+  year_delta_param->set_lower_bound(1, true);
+  year_delta_param->set_alias_labels({PARAM_UPDATE_FREQUENCY_YEARS});
   parameters_.Bind<unsigned>(PARAM_YEAR_LAG, &year_lag_, "The lag (years) of the derived_quantity that is used for the calculation of the catch", "", 1)->set_lower_bound(1, true);
   parameters_.Bind<double>(PARAM_CURRENT_CATCH, &current_catch_, "The current catch to apply at the start of the projections (applied until first_year)", "", 0.0)->set_lower_bound(0.0, true);
   parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the calculated catch value under the harvest strategy rule", "", 1.0)->set_lower_bound(0.0, true);

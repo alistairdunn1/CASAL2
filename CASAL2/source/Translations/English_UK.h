@@ -57,6 +57,7 @@
 #define REPORT_END                           "*end"
 #define REPORT_EOL                           "\n"
 #define REPORT_R_DATAFRAME                   "{dataframe}" // Dataframe: R library will add a header to the data frame, so if you don't add one to the report R will put row 1 as the header
+#define REPORT_R_DATAFRAME_TSV               "{dataframe_tsv}" // Tab-separated dataframe: same as {dataframe} but columns delimited by tabs for faster R import
 #define REPORT_R_DATAFRAME_ROW_LABELS        "{dataframe_with_row_labels}"  // Data:frame R-library will add a header and assign the first column as row labels
 #define REPORT_R_MATRIX                      "{matrix}"  // A matrix: No header's
 #define REPORT_R_LIST                        "{list}" // A list of objects

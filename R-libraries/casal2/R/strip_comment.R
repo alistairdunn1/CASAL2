@@ -5,7 +5,7 @@
 #' line start with #
 #' or a wrapped in /* */
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param file a file read in by scan
 #' @return a file that has removed lines starting with # or betwee '/*' '*/'
 #' @rdname strip_comments
@@ -17,7 +17,7 @@ strip_comments <- function(file) {
   index1 <- index1[index1 != 0]
   index2 <- index2[index2 != 0]
   if (length(index1) != length(index2)) {
-    stop(paste("Error in the file ", filename, ". Cannot find a matching '/*' or '*/'", sep = ""))
+    stop(paste("Error in the file. Cannot find a matching '/*' or '*/'"))
   }
   if (length(index1) > 0 || length(index2) > 0) {
     index <- unlist(apply(cbind(index1, index2), 1, function(x) {
@@ -27,15 +27,13 @@ strip_comments <- function(file) {
   }
   file <- ifelse(regexpr("#", file) > 0, substring(file, 1, regexpr("#", file) - 1), file)
 
-  file <- file[file != ""]
-  ## remove lines that have /* */ partway through them
-  ## probably a little inefficient
-  for (i in 1:length(file)) {
-    index1 <- regexpr(pattern = "//*", file[i])
-    first_section <- substring(file[i], first = 1, last = index1 - 1)
-    second_section <- substring(file[i], first = index1 + 2)
-    index2 <- regexpr(pattern = "*/", second_section)
-    file[i] <- paste0(first_section, substring(second_section, first = index2 + 1))
+  file <- file[nzchar(file)]
+  ## strip inline /* ... */ comment sections (vectorised; the original loop used
+  ## a broken regex that matched any '/' and ran on every line)
+  if (any(grepl("/*", file, fixed = TRUE))) {
+    file <- gsub("/\\*.*?\\*/", "", file, perl = TRUE)
+    file <- trimws(file)
+    file <- file[nzchar(file)]
   }
 
   return(file)

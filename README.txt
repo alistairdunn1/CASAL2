@@ -84,7 +84,7 @@ Contact
 
 For more information about Casal2, please see the Casal2
 user manual. You can contact the Casal2 development team 
-at casal2@niwa.co.nz
+at casal2@zaita.com
 
 
 Textpad & Notepad++ syntax highlighting

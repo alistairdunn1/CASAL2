@@ -53,11 +53,11 @@ public:
   vector<string>& command_line_parameters() { return command_line_parameters_; }
   void            set_run_parameters(utilities::RunParameters& options) { options_ = options; }
   // Generic Options
-  void          set_standard_header(const string& header) { standard_header_ = header; }
-  const string& standard_header() const { return standard_header_; }
-  unsigned      random_seed() { return options_.random_number_seed_; }
+  void            set_standard_header(const string& header) { standard_header_ = header; }
+  const string&   standard_header() const { return standard_header_; }
+  unsigned        random_seed() { return options_.random_number_seed_; }
   vector<string>& config_file() { return options_.config_file_; }
-  bool          disable_all_reports() const { return options_.disable_all_reports_; }
+  bool            disable_all_reports() const { return options_.disable_all_reports_; }
 
   unsigned simulation_candidates() const { return options_.simulation_candidates_; }
   unsigned projection_candidates() const { return options_.projection_candidates_; }
@@ -66,6 +66,7 @@ public:
   bool   disable_standard_report() { return options_.no_std_report_; }
   bool   single_step() const { return options_.single_step_model_; }
   bool   print_tabular() const { return options_.tabular_reports_; }
+  bool   print_tabular_tsv() const { return options_.tabular_reports_tsv_; }
   string object_to_query() const { return options_.query_object_; }
 
   void set_continue_pass_verify(bool value) { options_.continue_pass_verify_ = value; }

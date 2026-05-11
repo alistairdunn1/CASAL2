@@ -1,28 +1,22 @@
 #' Utility extract function
 #'
-#' @author C Marsh
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
-make.data_frame_with_row_labs <- function(lines) {
-  columns <- string.to.vector.of.words(lines[1])[-1] ## remove the first element it should be label of rows
-  data <- data.frame(matrix(nrow = length(lines) - 1, ncol = length(columns)))
-  row_labs <- vector()
-  for (i in 2:length(lines)) {
-    line <- string.to.vector.of.words(lines[i])
-    row_labs <- c(row_labs, line[1])
-    line <- line[-1]
-    if (length(line) != length(columns)) {
-      stop(paste(lines[i], "is not the same length as", lines[1]))
-    }
-
-    data[i - 1, ] <- line
+makeDataFrameRowLabels <- function(lines) {
+  columns  <- string.to.vector.of.words(lines[1])[-1] ## remove first element (row-label column header)
+  rows     <- lapply(lines[-1], string.to.vector.of.words)
+  row_labs <- vapply(rows, `[[`, character(1L), 1L)
+  rows     <- lapply(rows, `[`, -1L)
+  bad      <- which(lengths(rows) != length(columns))
+  if (length(bad) > 0L) {
+    stop(paste(lines[bad[1L] + 1L], "is not the same length as", lines[1]))
   }
+  data <- as.data.frame(do.call(rbind, rows), stringsAsFactors = FALSE)
   colnames(data) <- columns
   rownames(data) <- row_labs
-  for (i in 1:ncol(data)) {
-    if (is.all.numeric(data[, i])) {
-      data[, i] <- as.numeric(data[, i])
-    }
+  for (i in seq_len(ncol(data))) {
+    if (is.all.numeric(data[[i]])) data[[i]] <- as.numeric(data[[i]])
   }
   data
 }

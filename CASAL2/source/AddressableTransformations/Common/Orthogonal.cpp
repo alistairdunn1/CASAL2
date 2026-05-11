@@ -118,12 +118,13 @@ void Orthogonal::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void Orthogonal::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void Orthogonal::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_PRODUCT_PARAMETER << " " << PARAM_QUOTIENT_PARAMETER << " " << parameter_labels_[0] << " " << parameter_labels_[1] << " negative_log_jacobian" << REPORT_EOL;
+    cache << PARAM_PRODUCT_PARAMETER << sep << PARAM_QUOTIENT_PARAMETER << sep << parameter_labels_[0] << sep << parameter_labels_[1] << sep << "negative_log_jacobian"
+          << REPORT_EOL;
   }
-  cache << product_parameter_ << " " << quotient_parameter_ << " " << restored_values_[0] << " " << restored_values_[1] << " " << jacobian_ << REPORT_EOL;
+  cache << product_parameter_ << sep << quotient_parameter_ << sep << restored_values_[0] << sep << restored_values_[1] << sep << jacobian_ << REPORT_EOL;
 }
 } /* namespace addressabletransformations */
 } /* namespace niwa */

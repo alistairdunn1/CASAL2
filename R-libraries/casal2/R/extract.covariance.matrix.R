@@ -10,8 +10,8 @@
 #' @export
 #'
 "extract.covariance.matrix" <- function(file, path = "", fileEncoding = "", quiet = FALSE) {
-  filename <- file.path(path, file)
-  lines <- convert.to.lines(filename, fileEncoding = fileEncoding, quiet = quiet)
+  filename <- if (nzchar(path)) file.path(path, file) else file
+  lines <- scan(filename, what = "", sep = "\n", fileEncoding = fileEncoding, quiet = quiet)
 
   start_str <- "covariance_matrix"
   end_str <- "*end"

@@ -10,6 +10,6 @@
 Utility function for observation related functionality
 }
 \author{
-Craig marsh
+Casal2 Development Team
 }
 \keyword{internal}

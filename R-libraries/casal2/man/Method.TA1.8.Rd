@@ -28,5 +28,5 @@ Method TA1.8 is described in Appendix A of the following paper Francis, R.I.C.C.
 Canadian Journal of Fisheries and Aquatic Sciences 68: 1124-1138. (With corrections to the equation in Francis R.I.C.C. (2011) Corrigendum: Data weighting in statistical fisheries stock assessment models.
 }
 \author{
-Chris Francis
+Casal2 Development Team
 }

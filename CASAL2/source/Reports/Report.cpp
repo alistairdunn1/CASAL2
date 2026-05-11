@@ -199,6 +199,9 @@ void Report::PrepareTabular(shared_ptr<Model> model) {
 
   Report::lock_.lock();
   SetUpInternalStates();
+  // Set field separator for data rows based on --tabular-tsv flag.
+  if (model->global_configuration().print_tabular_tsv())
+    report_sep_ = "\t";
 
   // Put a header in each file. this is for R library compatibility more than anything.
   if (file_name_ != "" && write_mode_ == PARAM_OVERWRITE)

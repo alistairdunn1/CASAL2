@@ -1,6 +1,6 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 
@@ -146,7 +146,7 @@
         next_no <- next_no + 1
       }
       if (next_no - line_no > 1) {
-        result[[label]] <- make.data_frame_with_row_labs(lines[(line_no + 1):(next_no - 1)])
+        result[[label]] <- makeDataFrameRowLabels(lines[(line_no + 1):(next_no - 1)])
       } else {
         result[[label]] <- data.frame()
       }

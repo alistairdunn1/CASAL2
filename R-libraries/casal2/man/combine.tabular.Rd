@@ -20,5 +20,5 @@ a 'casal2TAB' object which has been manipulated.
 returns a casal2TAB class that is several casal2TAB objects combined into one. Used when tabular output from different chains of the same model are to be combined into a single chain
 }
 \author{
-Alistair Dunn
+Casal2 Development Team
 }

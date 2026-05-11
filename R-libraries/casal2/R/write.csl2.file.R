@@ -4,7 +4,7 @@
 #' is used once a model has been read into R using extract.csl2.file and modified. This function will then
 #' output the configuration to a new file where it can be rerun in Casal2
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param object An R list object that follows the same structure that extract.csl2.file would produce
 #' @param file The file name
 #' @param path The path to output the file (optional)

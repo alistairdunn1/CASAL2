@@ -119,12 +119,12 @@ void Logistic::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void Logistic::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void Logistic::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_LOGISTIC_PARAMETER << " " << parameter_labels_[0] << " negative_log_jacobian" << REPORT_EOL;
+    cache << PARAM_LOGISTIC_PARAMETER << sep << parameter_labels_[0] << sep << "negative_log_jacobian" << REPORT_EOL;
   }
-  cache << logistic_value_ << " " << restored_values_[0] << " " << jacobian_ << REPORT_EOL;
+  cache << logistic_value_ << sep << restored_values_[0] << sep << jacobian_ << REPORT_EOL;
 }
 
 } /* namespace addressabletransformations */

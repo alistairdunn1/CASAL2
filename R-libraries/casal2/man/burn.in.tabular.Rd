@@ -20,5 +20,5 @@ a 'casal2TAB' object which has been manipulated.
 returns a casal2TAB class that has been shortened to the ith iteration
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

@@ -144,12 +144,21 @@ void EstimateValue::DoExecuteTabular(shared_ptr<Model> model) {
   if (first_run_) {
     first_run_ = false;
     cache_ << ReportHeader(type_, label_, format_);
-    cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
-    for (Estimate* estimate : estimates) cache_ << estimate->parameter() << " ";
+    string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+    cache_ << "values " << marker << REPORT_EOL;
+    for (unsigned i = 0; i < estimates.size(); ++i) {
+      if (i > 0)
+        cache_ << report_sep_;
+      cache_ << estimates[i]->parameter();
+    }
     cache_ << REPORT_EOL;
   }
 
-  for (Estimate* estimate : estimates) cache_ << AS_DOUBLE(estimate->value()) << " ";
+  for (unsigned i = 0; i < estimates.size(); ++i) {
+    if (i > 0)
+      cache_ << report_sep_;
+    cache_ << AS_DOUBLE(estimates[i]->value());
+  }
   cache_ << REPORT_EOL;
 
   if (estimates.size() > 0) {

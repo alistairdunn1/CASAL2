@@ -10,6 +10,6 @@ make.matrix(lines)
 create a matrix, does not expect header values.
 }
 \author{
-Dan Fu
+Casal2 Development Team
 }
 \keyword{internal}

@@ -1,9 +1,9 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
-get.lines <- function(lines, from = -1, to = -1, contains = "", starts.with = "", clip.to = "", clip.from = "", clip.to.match = "", clip.from.match = "", ...) {
+get.lines <- function(lines, from = -1, to = -1, contains = "", starts.with = "", clip.to = "", clip.from = "", clip.to.match = "", clip.from.match = "", fixed = TRUE, ...) {
   result <- lines
   if (from > 0) {
     result <- result[(1:length(result)) >= from]
@@ -13,12 +13,12 @@ get.lines <- function(lines, from = -1, to = -1, contains = "", starts.with = ""
   }
   if (clip.to != "") {
     if (any(result == clip.to)) {
-      result <- result[(pos(result, clip.to) + 1):length(result)]
+      result <- result[(match(clip.to, result) + 1):length(result)]
     }
   }
   if (clip.from != "") {
     if (any(result == clip.from)) {
-      result <- result[1:(pos(result, clip.from) - 1)]
+      result <- result[1:(match(clip.from, result) - 1)]
     }
   }
   if (clip.to.match != "") {
@@ -32,10 +32,10 @@ get.lines <- function(lines, from = -1, to = -1, contains = "", starts.with = ""
     }
   }
   if (contains != "") {
-    result <- result[Regexpr(contains, result, ...) > 0]
+    result <- result[regexpr(contains, result, fixed = fixed, ...) > 0]
   }
   if (starts.with != "") {
-    result <- result[Regexpr(paste("^", starts.with, sep = ""), result, ...) > 0]
+    result <- result[regexpr(paste0("^", starts.with), result, fixed = fixed, ...) > 0]
   }
   return(result)
 }

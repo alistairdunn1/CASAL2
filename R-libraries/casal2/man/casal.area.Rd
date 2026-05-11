@@ -10,6 +10,6 @@ casal.area(corners)
 Utility function
 }
 \author{
-A.Dunn
+Casal2 Development Team
 }
 \keyword{internal}

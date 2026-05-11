@@ -14,6 +14,6 @@ is.all.numeric(
 Utility extract function
 }
 \author{
-Dan Fu (not really)
+Casal2 Development Team
 }
 \keyword{internal}

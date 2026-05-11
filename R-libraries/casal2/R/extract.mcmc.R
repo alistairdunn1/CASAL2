@@ -4,7 +4,7 @@
 #' An extract function that reads objective and sample output that are produced from a 'casal2 -m' model run. This function
 #' also creates a 'casal2.mcmc' class which can be used in plotting and summary functions.
 #'
-#' @author C. Marsh
+#' @author Casal2 Development Team
 #' @param samples.file <string> the name of the input file containing the samples.file output by casal2
 #' @param objectives.file <string> the name of the input file containing the objectives.file output by casal2
 #' @param path Optional<string>, the path to the file
@@ -15,19 +15,16 @@
 #' @return a 'casal2MCMC' that can be integrated using the str() function.
 #'
 "extract.mcmc" <- function(samples.file = "samples.1", objectives.file = "objectives.1", path = "", return_covariance = FALSE, fileEncoding = "", quiet = FALSE) {
-  set.class <- function(object, new.class) {
-    # use in the form
-    #  object <- set.class(object,"new class")
-    attributes(object)$class <- c(new.class, attributes(object)$class[attributes(object)$class != new.class])
-    object
-  }
   if (missing(path)) {
     path <- ""
   }
 
-  obj_filename <- make.filename(path = path, file = objectives.file)
-  sample_filename <- make.filename(path = path, file = samples.file)
-  sample_file <- convert.to.lines(sample_filename, fileEncoding = fileEncoding, quiet = quiet)
+  ## treat a blank objectives.file as "not supplied"
+  has_objectives <- nzchar(trimws(objectives.file))
+
+  obj_filename <- if (has_objectives && nzchar(path)) file.path(path, objectives.file) else if (has_objectives) objectives.file else NULL
+  sample_filename <- if (nzchar(path)) file.path(path, samples.file) else samples.file
+  sample_file <- scan(sample_filename, what = "", sep = "\n", fileEncoding = fileEncoding, quiet = quiet)
   temp <- get.lines(sample_file, starts.with = "\\*", fixed = F)
   is.samples <- FALSE
   if (substr(temp, 1, 13) != "*mcmc_sample[") {
@@ -55,7 +52,14 @@
   #########################
   ## Deal with the Objectives
   #########################
-  objective_file <- convert.to.lines(obj_filename, fileEncoding = fileEncoding, quiet = quiet)
+  if (!has_objectives) {
+    if (return_covariance) {
+      warning("return_covariance = TRUE but no objectives.file supplied; covariance matrix will not be returned.")
+    }
+    result <- set.class(Dataframe, "casal2MCMC")
+    return(result)
+  }
+  objective_file <- scan(obj_filename, what = "", sep = "\n", fileEncoding = fileEncoding, quiet = quiet)
   covar <- get.lines(objective_file, starts.with = "starting_covariance_matrix", fixed = F)
   object <- get.lines(objective_file, starts.with = "samples", fixed = F)
   covar_lines <- get.lines(objective_file, clip.to = covar)

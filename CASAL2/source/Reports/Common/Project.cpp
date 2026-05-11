@@ -37,7 +37,9 @@ Project::Project() {
  * Validate object
  */
 void Project::DoValidate(shared_ptr<Model> model) {
-  parameters_.Validate(PARAM_PROJECT)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
+  if (!model->global_configuration().print_tabular()) {
+    parameters_.Validate(PARAM_PROJECT)->DuplicateParameterIfNotAssigned(PARAM_LABEL);
+  }
 }
 
 /**

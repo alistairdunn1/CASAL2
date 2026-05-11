@@ -1424,7 +1424,7 @@ The \command{harvest\_strategy\_constant\_catch} command applies a harvest strat
 
 The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
 
-The constant catch harvest strategy applies a catch equal to \argument{alpha} times the proportional change in the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+The constant catch harvest strategy applies a catch equal to \argument{alpha} times the proportional change in the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{year\_delta}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
 
 The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
 
@@ -1438,7 +1438,7 @@ The harvest strategy rule is only applied in the years in the projection period 
 	alpha 1.0
 	min_delta 0.1
 	max_delta 0.3
-	update_frequency_years 3
+	year_delta 3
 	biomass_index_lag_years 2
 	current_catch 963.9
 	first_year 2009
@@ -1451,7 +1451,7 @@ The \command{harvest\_strategy\_constant\_u} method applies a harvest strategy f
 
 The biomass index is a derived quantity. A derived quantity of \subcommand{type=biomass\_index} is recommended as this will allow the introduction of random error, autocorrelation, and bias into the index when calculating the catch from the exploitation rate.
 
-The constant $U$ harvest strategy applies a catch equal to \argument{U} times the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+The constant $U$ harvest strategy applies a catch equal to \argument{U} times the biomass index (scaled by \argument{multiplier}), where the \argument{biomass\_index} is the value of the derived quantity from the current year less the \argument{biomass\_index\_lag\_years}. It will update the catch that is applied according to the frequency defined by \argument{year\_delta}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
 
 The harvest strategy rule is only applied in the years in the projection period from \argument{first\_year}. Before \argument{first\_year} the \argument{current\_catch} is applied.
 
@@ -1464,7 +1464,7 @@ The harvest strategy rule is only applied in the years in the projection period 
 	u 0.15
 	min_delta 0.1
 	max_delta 0.3
-	update_frequency_years 3
+	year_delta 3
 	biomass_index_lag_years 2
 	current_catch 963.9
 	first_year 2009
@@ -1482,7 +1482,7 @@ The ramp $U$ harvest strategy calculates the $\hat{U}$ to be applied from a ramp
 
 Both the \argument{reference\_index} and \argument{biomass\_index} are derived quantities where their value is equal to the value of the current year less the \argument{biomass\_index\_lag\_years}. The \argument{reference\_index} is then divided by its value from the initialisation phase (i.e., is a proportion). Note that if a lognormal distribution is assumed for \argument{reference\_biomass}, the ratio of the initial to current biomass may need to be adjusted for the bias in the expectation. This can be applied using \argument{bias\_adjustment=true}. 
 
-The ramp rule harvest strategy applies a catch equal to $\hat{U}$ times the biomass index (scaled by \argument{multiplier}). It will update the catch that is applied according to the frequency defined by \argument{update\_frequency\_years}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
+The ramp rule harvest strategy applies a catch equal to $\hat{U}$ times the biomass index (scaled by \argument{multiplier}). It will update the catch that is applied according to the frequency defined by \argument{year\_delta}. The catch will only be applied if the change is greater than \argument{min\_delta}, and the maximum change that can be applied is equal to \argument{max\_delta} (where a value of zero is interpreted as no maximum). 
 
 In addition, the value of $\hat{U}$ that is used is equal to the lowest value of \argument{u} when the reference index is less than the first value of \argument{reference\_points}, and equal to the highest value of \argument{u} when the reference index is greater than last value of \argument{reference\_points}. Otherwise, $\hat{U}$ is derived using linear interpolation between inflection points of the reference index.
 
@@ -1499,7 +1499,7 @@ The harvest strategy rule is only applied in the years in the projection period 
 	reference_points 0.00 0.10 0.20 0.40 
 	min_delta 0.1
 	max_delta 0.3
-	update_frequency_years 3
+	year_delta 3
 	biomass_index_lag_years 2
 	current_catch 963.9
 	first_year 2009

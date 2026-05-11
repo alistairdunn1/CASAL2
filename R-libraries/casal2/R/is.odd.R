@@ -1,8 +1,6 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
-is.odd <- function(x) {
-  ifelse((x / 2) == (x %/% 2), F, T)
-}
+is.odd <- function(x) x %% 2 != 0

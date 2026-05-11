@@ -265,16 +265,34 @@ void Simplex::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void Simplex::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void Simplex::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    for (unsigned i = 0; i < zk_.size(); ++i) cache << "simplex_value[" << i + 1 << "] ";
-    for (unsigned i = 0; i < restored_values_.size(); ++i) cache << "parameter_value[" << i + 1 << "] ";
-    cache << "negative_log_jacobian" << REPORT_EOL;
+    bool first_col = true;
+    for (unsigned i = 0; i < zk_.size(); ++i) {
+      if (!first_col)
+        cache << sep;
+      cache << "simplex_value[" << i + 1 << "]";
+      first_col = false;
+    }
+    for (unsigned i = 0; i < restored_values_.size(); ++i) {
+      cache << sep << "parameter_value[" << i + 1 << "]";
+    }
+    cache << sep << "negative_log_jacobian" << REPORT_EOL;
   }
-  for (unsigned i = 0; i < zk_.size(); ++i) cache << simplex_parameter_[i] << " ";
-  for (unsigned i = 0; i < restored_values_.size(); ++i) cache << restored_values_[i] << " ";
-  cache << jacobian_ << REPORT_EOL;
+  {
+    bool first_col = true;
+    for (unsigned i = 0; i < zk_.size(); ++i) {
+      if (!first_col)
+        cache << sep;
+      cache << simplex_parameter_[i];
+      first_col = false;
+    }
+    for (unsigned i = 0; i < restored_values_.size(); ++i) {
+      cache << sep << restored_values_[i];
+    }
+    cache << sep << jacobian_ << REPORT_EOL;
+  }
 }
 
 } /* namespace addressabletransformations */

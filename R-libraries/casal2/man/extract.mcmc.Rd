@@ -34,5 +34,5 @@ An extract function that reads objective and sample output that are produced fro
 also creates a 'casal2.mcmc' class which can be used in plotting and summary functions.
 }
 \author{
-C. Marsh
+Casal2 Development Team
 }

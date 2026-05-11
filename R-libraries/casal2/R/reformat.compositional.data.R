@@ -5,7 +5,7 @@
 #' reformat the Casal2 observations so they can be used as input for functions on CASAL observation data, such as
 #' Chris Francis' Data Weighting function.
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param model The R object that has been extracted using the extract() function.
 #' @param report_label <string> The label of the report for the observation to convert
 #' @export
@@ -54,22 +54,16 @@ reformat.compositional.data <- function(model, report_label) {
 
   rownames(fit) <- rownames(err) <- rownames(obs) <- years
 
-  if (length(ages) > 1 & n_category == 1) {
-    colnames(obs) <- paste0("X", ages)
-    colnames(fit) <- paste0("X", ages)
-    colnames(err) <- paste0("X", ages)
-  } else if (length(ages) > 1 & n_category == 2) {
-    colnames(obs) <- c(paste0(substr(categories[1], 1, 1), ages), paste0(substr(categories[2], 1, 1), ages))
-    colnames(fit) <- c(paste0(substr(categories[1], 1, 1), ages), paste0(substr(categories[2], 1, 1), ages))
-    colnames(err) <- c(paste0(substr(categories[1], 1, 1), ages), paste0(substr(categories[2], 1, 1), ages))
-  } else if (length(lengths) > 1 & n_category == 1) {
-    colnames(obs) <- paste0("X", lengths)
-    colnames(fit) <- paste0("X", lengths)
-    colnames(err) <- paste0("X", lengths)
-  } else if (length(lengths) > 1 & n_category == 2) {
-    colnames(obs) <- c(paste0(substr(categories[1], 1, 1), lengths), paste0(substr(categories[2], 1, 1), lengths))
-    colnames(fit) <- c(paste0(substr(categories[1], 1, 1), lengths), paste0(substr(categories[2], 1, 1), lengths))
-    colnames(err) <- c(paste0(substr(categories[1], 1, 1), lengths), paste0(substr(categories[2], 1, 1), lengths))
+  if (length(ages) > 1 && n_category == 1) {
+    colnames(obs) <- colnames(fit) <- colnames(err) <- paste0("X", ages)
+  } else if (length(ages) > 1 && n_category == 2) {
+    cn <- c(paste0(substr(categories[1], 1, 1), ages), paste0(substr(categories[2], 1, 1), ages))
+    colnames(obs) <- colnames(fit) <- colnames(err) <- cn
+  } else if (length(lengths) > 1 && n_category == 1) {
+    colnames(obs) <- colnames(fit) <- colnames(err) <- paste0("X", lengths)
+  } else if (length(lengths) > 1 && n_category == 2) {
+    cn <- c(paste0(substr(categories[1], 1, 1), lengths), paste0(substr(categories[2], 1, 1), lengths))
+    colnames(obs) <- colnames(fit) <- colnames(err) <- cn
   }
 
   final_list <- list()

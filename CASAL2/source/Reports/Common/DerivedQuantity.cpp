@@ -46,7 +46,7 @@ void DerivedQuantity::DoBuild(shared_ptr<Model> model) {
  */
 void DerivedQuantity::DoExecute(shared_ptr<Model> model) {
   LOG_TRACE();
-  cache_ << ReportHeader(type_, derived_quantity_label_, format_);
+  cache_ << ReportHeader(type_, label_, format_);
   string label = derived_quantity_->label();
   cache_ << label << " " << REPORT_R_LIST << REPORT_EOL;
   cache_ << "type: " << derived_quantity_->type() << REPORT_EOL;
@@ -71,8 +71,9 @@ void DerivedQuantity::DoExecute(shared_ptr<Model> model) {
 }
 
 void DerivedQuantity::DoPrepareTabular(shared_ptr<Model> model) {
-  cache_ << ReportHeader(type_, derived_quantity_label_, format_);
-  cache_ << "values " << REPORT_R_DATAFRAME << REPORT_EOL;
+  cache_ << ReportHeader(type_, label_, format_);
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
 }
 
 /**
@@ -84,24 +85,36 @@ void DerivedQuantity::DoExecuteTabular(shared_ptr<Model> model) {
   const map<unsigned, Double>  values       = derived_quantity_->values();
   const vector<vector<Double>> init_values  = derived_quantity_->initialisation_values();
   if (first_run_) {
-    first_run_ = false;
+    first_run_     = false;
+    bool first_col = true;
     for (unsigned i = 0; i < init_values.size(); ++i) {
-      cache_ << derived_type << "[" << derived_quantity_->label() << "][initialisation_phase_" << i + 1 << "] ";
+      if (!first_col)
+        cache_ << report_sep_;
+      first_col = false;
+      cache_ << derived_type << "[" << derived_quantity_->label() << "][initialisation_phase_" << i + 1 << "]";
     }
-    for (auto iter = values.begin(); iter != values.end(); ++iter) cache_ << derived_type << "[" << derived_quantity_->label() << "][" << iter->first << "] ";
-
+    for (auto iter = values.begin(); iter != values.end(); ++iter) {
+      if (!first_col)
+        cache_ << report_sep_;
+      first_col = false;
+      cache_ << derived_type << "[" << derived_quantity_->label() << "][" << iter->first << "]";
+    }
     cache_ << REPORT_EOL;
   }
 
+  bool first_col = true;
   for (unsigned i = 0; i < init_values.size(); ++i) {
-    Double value = init_values[i].back();
-    cache_ << AS_DOUBLE(value) << " ";
+    if (!first_col)
+      cache_ << report_sep_;
+    first_col = false;
+    cache_ << AS_DOUBLE(init_values[i].back());
   }
   for (auto iter = values.begin(); iter != values.end(); ++iter) {
-    Double weight = iter->second;
-    cache_ << AS_DOUBLE(weight) << " ";
+    if (!first_col)
+      cache_ << report_sep_;
+    first_col = false;
+    cache_ << AS_DOUBLE(iter->second);
   }
-
   cache_ << REPORT_EOL;
 }
 

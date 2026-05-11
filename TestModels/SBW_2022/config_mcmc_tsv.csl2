@@ -1,0 +1,29 @@
+# SBW_2022 short-chain MCMC configuration for --tabular-tsv testing.
+# Run sequence:
+#   casal2 -E mpd_tsv.log -c config_mcmc_tsv.csl2        (MPD estimation)
+#   casal2 -M mpd_tsv.log -T -c config_mcmc_tsv.csl2     (MCMC with TSV tabular output)
+#
+# Uses Estimation_mcmc_short.csl2 so the MCMC chain is only 10,000 iterations
+# (burn-in 1,000, keep every 100th -> ~90 posterior samples).
+
+# Population
+!include "Config/Population.csl2"
+
+# Estimation (short MCMC, same estimates/penalties as the base model)
+!include "Config/Estimation_mcmc_short.csl2"
+
+@minimiser adolc
+type adolc
+iterations 1000
+evaluations 1000
+tolerance 1e-6
+parameter_transformation sin_transform
+covariance True
+
+# Observations
+!include "Config/Observation.csl2"
+!include "Config/Observation-Acoustics.csl2"
+!include "Config/Observation-CPUE.csl2"
+
+# Tabular reports (estimate_value, objective_function, default)
+!include "Config/reports_tabular.csl2"

@@ -106,12 +106,12 @@ void SquareRoot::FillReportCache(ostringstream& cache) {
 /**
  * Report stuff for this transformation
  */
-void SquareRoot::FillTabularReportCache(ostringstream& cache, bool first_run) {
+void SquareRoot::FillTabularReportCache(ostringstream& cache, bool first_run, const string& sep) {
   LOG_FINEST() << "FillTabularReportCache";
   if (first_run) {
-    cache << PARAM_SQUARE_ROOT_PARAMETER << " " << parameter_labels_[0] << " negative_sqrt_jacobian" << REPORT_EOL;
+    cache << PARAM_SQUARE_ROOT_PARAMETER << sep << parameter_labels_[0] << sep << "negative_sqrt_jacobian" << REPORT_EOL;
   }
-  cache << SquareRoot_value_ << " " << restored_values_[0] << " " << jacobian_ << REPORT_EOL;
+  cache << SquareRoot_value_ << sep << restored_values_[0] << sep << jacobian_ << REPORT_EOL;
 }
 } /* namespace addressabletransformations */
 } /* namespace niwa */

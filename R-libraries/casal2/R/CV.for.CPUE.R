@@ -3,7 +3,7 @@
 #' Originally written in Chris Francis's DataWeighting Package, this has been copied over and modified so that users can
 #' use this functionality with Casal2 models/output.
 
-#' @author Chris Francis
+#' @author Casal2 Development Team
 #' @param year vector of years with CPUE indices
 #' @param cpue CPUE indices
 #' @param f degree of lowess smoothing (0 = no smoothing, 1 = maximum smoothing)

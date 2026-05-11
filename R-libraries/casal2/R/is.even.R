@@ -1,8 +1,6 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
-is.even <- function(x) {
-  ifelse((x / 2) == (x %/% 2), T, F)
-}
+is.even <- function(x) x %% 2 == 0

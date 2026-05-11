@@ -33,6 +33,6 @@ expand_shorthand_syntax(syntax = "0.75*3 0.75*3")
 }
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }
 \keyword{internal}

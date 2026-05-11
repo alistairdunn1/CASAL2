@@ -15,5 +15,5 @@ ReadSimulatedData(filename, path = "")
 This function reads in a set of simulated observations generated from Casal2 in simulation mode. These functions read in all the simulated obs as a list, for visualising and summarising in R
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

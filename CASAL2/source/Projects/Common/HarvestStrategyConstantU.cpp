@@ -35,7 +35,7 @@ HarvestStrategyConstantU::HarvestStrategyConstantU(shared_ptr<Model> model) : Pr
   parameters_.Bind<Double>(PARAM_U, &u_, "The exploitation rate to apply")->set_default_value(0.0);
   parameters_.Bind<Double>(PARAM_MIN_DELTA, &min_delta_, "The minimum difference (proportion) in catch required before it is updated")->set_default_value(0);
   parameters_.Bind<Double>(PARAM_MAX_DELTA, &max_delta_, "The maximum difference (proportion) in catch that can be applied (no maximum = 0)")->set_default_value(0.0);
-  parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates")->set_default_value(1);
+  parameters_.Bind<unsigned>(PARAM_YEAR_DELTA, &year_delta_, "The number of years between updates")->set_default_value(1u)->set_alias_labels({PARAM_UPDATE_FREQUENCY_YEARS});
   parameters_.Bind<unsigned>(PARAM_YEAR_LAG, &year_lag_, "The lag (years) of the derived_quantity that is used for the calculation of the catch")->set_default_value(1);
   parameters_.Bind<Double>(PARAM_CURRENT_CATCH, &current_catch_, "The current catch to apply at the start of the projections (applied until first_year)")->set_default_value(0);
   parameters_.Bind<Double>(PARAM_MULTIPLIER, &multiplier_, "Multiplier that is applied to the projected value")->set_default_value(1.0);

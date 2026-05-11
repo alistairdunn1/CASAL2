@@ -34,5 +34,5 @@ This function reads in your observation.csl2 file and apples a reweighting facto
 automate the dataweighting process. The problem with this method, is that it strips out all the comments from the original observation.csl2 file.
 }
 \author{
-Craig Marsh
+Casal2 Development Team
 }

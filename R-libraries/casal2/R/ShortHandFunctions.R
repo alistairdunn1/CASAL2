@@ -1,9 +1,31 @@
+#' @title get_block
+#' @description Extract the block type from a Casal2 parameter label of the
+#'   form \code{block[label].parameter}.
+#' @param parameter_label Character vector of full parameter labels.
+#' @return Character vector of block types (the part before the first \code{[}).
+#' @export
+get_block <- function(parameter_label) {
+  vapply(strsplit(parameter_label, "[", fixed = TRUE), `[[`, character(1L), 1L)
+}
+
+#' @title get_label
+#' @description Extract the label from a Casal2 parameter label of the form
+#'   \code{block[label].parameter}.
+#' @param parameter_label Character vector of full parameter labels.
+#' @return Character vector of labels (the part between \code{[} and \code{]}).
+#' @export
+get_label <- function(parameter_label) {
+  parts <- strsplit(parameter_label, "[", fixed = TRUE)
+  labels <- vapply(parts, function(x) if (length(x) >= 2L) x[[2L]] else NA_character_, character(1L))
+  vapply(strsplit(labels, "]", fixed = TRUE), `[[`, character(1L), 1L)
+}
+
 #' @title expand_category_block
 #'
 #' @description
 #' A utility function for expanding short hand syntax in @category blocks in casal2 config files
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param categories string of categories
 #' @return a vector of strings
 #' @keywords internal
@@ -45,7 +67,7 @@ expand_category_block <- function(categories) {
 #' @description
 #' A utility function for expanding short hand syntax of categories used in subcommands throughout casal2 config files
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param shorthand_categories shorthand values to expand
 #' @param reference_categories string of categories expanded from the @category block of a config. derived from expand_category_block
 #' @param category_format the format defined in the @categories block
@@ -125,7 +147,7 @@ expand_category_shorthand <- function(shorthand_categories, reference_categories
 #' @description
 #' A utility function for expanding short hand syntax for based on - format=*.EN.*, label*5, and + syntax
 #'
-#' @author Craig Marsh
+#' @author Casal2 Development Team
 #' @param syntax string of the syntax to expand
 #' @return a vector of strings
 #' @keywords internal

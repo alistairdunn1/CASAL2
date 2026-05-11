@@ -76,6 +76,7 @@ void CommandLineParser::Parse(int argc, char* argv[], RunParameters& options) {
     ("loglevel,L", value<string>(), "Set message log level. Defaults to [info]. See the Manual for further options")
     ("single-step", "Single step the model each year with new estimable values")
     ("tabular,t", "Print reports using the Tabular format")
+    ("tabular-tsv,T", "Print reports using the Tabular format with tab-separated data rows (faster R import via data.table::fread)")
     ("unittest", "Run the unit tests for Casal2")
     ("verifylevel,V", value<string>(), "If Casal2 exits with a verify message (the default), then it will halt. If [arg] = warning Casal2 will complete the model run and print the verify statement");
   // clang-format on
@@ -168,6 +169,10 @@ void CommandLineParser::Parse(int argc, char* argv[], RunParameters& options) {
     options.single_step_model_ = true;
   if (parameters.count("tabular"))
     options.tabular_reports_ = true;
+  if (parameters.count("tabular-tsv")) {
+    options.tabular_reports_     = true;  // TSV implies tabular
+    options.tabular_reports_tsv_ = true;
+  }
   if (parameters.count("phases"))
     options.estimation_phases_ = parameters["phases"].as<unsigned>();
   if (parameters.count("Estimate")) {

@@ -6,7 +6,7 @@
 #' indicates ill-posedness, i.e. the parameter estimation problem does not have a unique solution.
 #' This eigenvalue decomposition has been widely used in the estimation literature
 #'
-#' @author C.Marsh
+#' @author Casal2 Development Team
 #' @param cas2_mod Model object that are generated from the extract.mpd() function. It expects the report of type covariance_matrix to be present.
 #' @param delta delta value
 #' @return a data frame or message about the model
@@ -15,16 +15,9 @@
 
 check_mpd_identifiability <- function(cas2_mod, delta = .Machine$double.eps) {
   # check that there is covariance and estimate_value report in this output
-  covar_ndx <- 0
-  est_ndx <- 0
-  for (i in 1:length(cas2_mod)) {
-    if (cas2_mod[[i]]$type == "covariance_matrix") {
-      covar_ndx <- i
-    }
-    if (cas2_mod[[i]]$type == "estimate_value") {
-      est_ndx <- i
-    }
-  }
+  report_types <- vapply(cas2_mod, function(x) if (is.null(x$type)) "" else x$type, character(1L))
+  covar_ndx    <- match("covariance_matrix", report_types, nomatch = 0L)
+  est_ndx      <- match("estimate_value",    report_types, nomatch = 0L)
   if (covar_ndx == 0) {
     stop("A report of type 'covariance_matrix' was not found. Please re-run the estimation with a @report with 'type covariance_matrix'")
   }

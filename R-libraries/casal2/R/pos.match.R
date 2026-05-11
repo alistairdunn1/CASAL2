@@ -1,8 +1,8 @@
 #' Utility extract function
 #'
-#' @author Dan Fu
+#' @author Casal2 Development Team
 #' @keywords internal
 #'
 "pos.match" <- function(vector, regexp) {
-  min((1:length(vector))[Regexpr(regexp, vector) > 0])
+  which(regexpr(regexp, vector, fixed = TRUE) > 0)[1L]
 }
