@@ -46,7 +46,7 @@ TEST_F(InternalEmptyModel, AddressableTransformation_Logistic) {
   ObjectiveFunction& obj_function = model_->objective_function();
   EXPECT_NEAR(2698.1334330594045, obj_function.score(), 1e-4);
 
-  auto log_total_parameter = model_->objects().GetAddressable("parameter_transformation[loga50].logistic_parameter");
+  auto log_total_parameter = model_->objects().GetAddressable("parameter_transformation[loga50].logistic_parameter{1}");
   EXPECT_NEAR(1.2527629684953681, *log_total_parameter, 1e-2);
 }
 

@@ -37,12 +37,12 @@ public:
 
 protected:
   // methods
-  void   DoValidate() override final;
-  void   DoBuild() override final;
-  void   DoRestore() override final;
-  Double logistic_value_;
-  Double lower_bound_;
-  Double upper_bound_;
+  void           DoValidate() override final;
+  void           DoBuild() override final;
+  void           DoRestore() override final;
+  vector<Double> logistic_values_;
+  vector<Double> lower_bounds_;
+  vector<Double> upper_bounds_;
 };
 
 } /* namespace addressabletransformations */
