@@ -109,6 +109,17 @@ vector<unsigned> Model::years() const {
 }
 
 /**
+ * Return only the model estimation years (start_year to final_year) regardless
+ * of run mode. Unlike years(), this never includes projection years, making it
+ * safe to use for defaults such as standardise_years in recruitment processes.
+ */
+vector<unsigned> Model::years_model() const {
+  vector<unsigned> years;
+  for (unsigned year = start_year_; year <= final_year_; ++year) years.push_back(year);
+  return years;
+}
+
+/**
  * Return the years this model is going to run in a vector.
  * We return a vector because the years will be compared
  * against processes etc that may run only on some years

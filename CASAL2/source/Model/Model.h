@@ -83,6 +83,7 @@ public:
   bool                          projection_final_phase() { return projection_final_phase_; }
   void                          set_projection_final_phase(bool phase) { projection_final_phase_ = phase; }
   virtual vector<unsigned>      years() const;
+  virtual vector<unsigned>      years_model() const;
   virtual vector<unsigned>      years_all() const;
   virtual vector<unsigned>      years_projection() const;
   unsigned                      year_spread() const;

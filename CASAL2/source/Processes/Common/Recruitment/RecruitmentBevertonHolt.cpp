@@ -103,7 +103,7 @@ void RecruitmentBevertonHolt::DoValidate() {
       ->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.Validate(PARAM_STEEPNESS)->GreaterThanOrEqualTo(0.2)->LessThanOrEqualTo(1.0);
   parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model()->final_year() - model()->start_year());
-  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
+  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToModelYearsOnly()->IsInIncreasingOrder();
 
   if (process_profile_ == ProcessProfile::kAge) {
     parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model()->min_age());

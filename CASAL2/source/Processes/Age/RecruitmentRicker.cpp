@@ -93,7 +93,7 @@ void RecruitmentRicker::DoValidate() {
       ->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.ValidateVector(PARAM_RECRUITMENT_MULTIPLIERS)->GreaterThanOrEqualTo(0.0)->NumberOfElements(years_.size());
   parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model()->final_year() - model()->start_year());
-  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToAllModelYears()->IsInIncreasingOrder();
+  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToModelYearsOnly()->IsInIncreasingOrder();
 
   if (age_ != model()->min_age()) {
     LOG_WARNING_P(PARAM_AGE) << "(" << age_ << ") is not equal to the model min_age (" << model()->min_age()
