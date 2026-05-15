@@ -308,6 +308,122 @@ TEST_F(InternalEmptyModel, Processes_BevertonHolt_Recruitment_B0_initialised) {
   EXPECT_DOUBLE_EQ(11994661.788456656, stock.data_[7]);
 }
 
+/**
+ * Simplex auto-detection test.
+ * Identical model to Processes_BevertonHolt_Recruitment_AutoSSBOffset except:
+ *   - no explicit standardise_years
+ *   - @parameter_transformation simplex on all recruitment_multipliers
+ * With all multipliers = 1.0 and simplex covering all 19 model years:
+ *   auto-detected standardise_years = {1994:2012}, mean_ycs_ = 19/19 = 1.0
+ *   => standardised == raw => output identical to AutoSSBOffset test
+ */
+const std::string test_cases_process_recruitment_bh_simplex =
+    R"(
+@model
+start_year 1994
+final_year 2012
+min_age 1
+base_weight_units kgs
+max_age 12
+age_plus t
+initialisation_phases iphase1 iphase2
+time_steps step_one=[processes=Recruitment] step_two=[processes=Ageing]
+
+@categories
+format stage.sex
+names immature.male mature.male immature.female mature.female
+age_lengths no_age_length*4
+
+@age_length no_age_length
+type none
+length_weight no_length_weight
+
+@length_weight no_length_weight
+type none
+
+@initialisation_phase iphase1
+years 200
+
+@initialisation_phase iphase2
+years 1
+
+@ageing Ageing
+categories *
+
+@recruitment Recruitment
+type beverton_holt
+categories stage=immature
+proportions 0.5 0.5
+r0 1.6059e+006
+b0_initialisation_phase iphase2
+age 1
+ssb SSB
+recruitment_multipliers 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+steepness 0.75
+
+@derived_quantity SSB
+type biomass
+time_step model.step_one
+categories stage=immature
+time_step_proportion 1.0
+selectivities MaturityMale MaturityFemale
+
+@selectivity MaturityMale
+type logistic
+a50 11.99
+ato95 5.25
+
+@selectivity MaturityFemale
+type logistic
+a50 16.92
+ato95 7.68
+
+@parameter_transformation simplex_ycs
+type simplex
+parameters process[Recruitment].recruitment_multipliers
+sum_to_one false
+
+@estimate ycs_simp
+type uniform
+parameter parameter_transformation[simplex_ycs].simplex
+lower_bound -10*18
+upper_bound 10*18
+
+@report DQ
+type derived_quantity
+)";
+
+TEST_F(InternalEmptyModel, Processes_BevertonHolt_Recruitment_Simplex_AutoDetectsStandardiseYears) {
+  AddConfigurationLine(test_cases_process_recruitment_bh_simplex, __FILE__, __LINE__);
+  LoadConfiguration();
+
+  model_->Start(RunMode::kBasic);
+
+  // With simplex on all 19 multipliers (all = 1.0), auto-detect sets
+  // standardise_years = {1994:2012} and mean_ycs_ = 19/19 = 1.0.
+  // standardised == raw, so output is identical to AutoSSBOffset
+  // (which uses explicit standardise_years 1996:2007, also giving mean_ycs_ = 1.0).
+  partition::Category& male = model_->partition().category("immature.male");
+  EXPECT_DOUBLE_EQ(0.0, male.data_[0]);
+  EXPECT_DOUBLE_EQ(808729.94416124187, male.data_[1]);
+  EXPECT_DOUBLE_EQ(808432.22560777736, male.data_[2]);
+  EXPECT_DOUBLE_EQ(808131.97955769731, male.data_[3]);
+  EXPECT_DOUBLE_EQ(807829.17489105463, male.data_[4]);
+  EXPECT_DOUBLE_EQ(807523.7799964858, male.data_[5]);
+  EXPECT_DOUBLE_EQ(807215.76276109123, male.data_[6]);
+  EXPECT_DOUBLE_EQ(806905.09056026023, male.data_[7]);
+
+  partition::Category& female = model_->partition().category("immature.female");
+  EXPECT_DOUBLE_EQ(0.0, female.data_[0]);
+  EXPECT_DOUBLE_EQ(808729.94416124187, female.data_[1]);
+  EXPECT_DOUBLE_EQ(808432.22560777736, female.data_[2]);
+  EXPECT_DOUBLE_EQ(808131.97955769731, female.data_[3]);
+  EXPECT_DOUBLE_EQ(807829.17489105463, female.data_[4]);
+  EXPECT_DOUBLE_EQ(807523.7799964858, female.data_[5]);
+  EXPECT_DOUBLE_EQ(807215.76276109123, female.data_[6]);
+  EXPECT_DOUBLE_EQ(806905.09056026023, female.data_[7]);
+}
+
 }  // namespace niwa::processes::common
 
 #endif /* TESTMODE */

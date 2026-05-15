@@ -18,10 +18,13 @@
 #include <limits>
 #include <numeric>
 
+#include "AddressableTransformations/Common/Simplex.h"
+#include "AddressableTransformations/Manager.h"
 #include "Categories/Categories.h"
 #include "DerivedQuantities/Manager.h"
 #include "Estimates/Manager.h"
 #include "InitialisationPhases/Manager.h"
+#include "Model/Managers.h"
 #include "TimeSteps/Manager.h"
 #include "Utilities/Map.h"
 #include "Utilities/Math.h"
@@ -103,7 +106,7 @@ void RecruitmentBevertonHolt::DoValidate() {
       ->SameNumberOfElementsAs(PARAM_CATEGORIES);
   parameters_.Validate(PARAM_STEEPNESS)->GreaterThanOrEqualTo(0.2)->LessThanOrEqualTo(1.0);
   parameters_.Validate(PARAM_SSB_OFFSET)->GreaterThanOrEqualTo(0u)->LessThanOrEqualTo(model()->final_year() - model()->start_year());
-  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->DefaultToModelYearsOnly()->IsInIncreasingOrder();
+  parameters_.ValidateVector(PARAM_STANDARDISE_YEARS)->IsModelYear()->IsInIncreasingOrder();
 
   if (process_profile_ == ProcessProfile::kAge) {
     parameters_.Validate(PARAM_AGE)->IsAge()->DefaultValue(model()->min_age());
@@ -259,9 +262,19 @@ void RecruitmentBevertonHolt::DoVerify(shared_ptr<Model> model) {
   LOG_FINE() << "check lookup usage = " << IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kLookup);
 
   if (IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kTransformation)) {
-    if (parameters_.Get(PARAM_STANDARDISE_YEARS)->has_been_defined())
-      LOG_VERIFY() << "There is an @parameter_transformation for the parameter " << PARAM_RECRUITMENT_MULTIPLIERS
-                   << ". If this is type=simplex, you should not specify the subcommand " << PARAM_STANDARDISE_YEARS;
+    if (parameters_.Get(PARAM_STANDARDISE_YEARS)->has_been_defined()) {
+      LOG_ERROR_P(PARAM_STANDARDISE_YEARS) << "When a @parameter_transformation of type simplex is applied to " << PARAM_RECRUITMENT_MULTIPLIERS << ", " << PARAM_STANDARDISE_YEARS
+                                           << " must not be specified - it is auto-detected from the simplex year range. "
+                                           << "Remove the " << PARAM_STANDARDISE_YEARS << " subcommand.";
+    } else if (standardise_recruitment_multipliers_) {
+      // Detection already performed in DoReset(); report the detected range
+      LOG_INFO() << PARAM_STANDARDISE_YEARS << " defaulting to " << standardise_years_.front() << ":" << standardise_years_.back() << " (" << standardise_years_.size()
+                 << " years)";
+    }
+  } else if (!parameters_.Get(PARAM_STANDARDISE_YEARS)->has_been_defined()) {
+    // No transformation and no user-supplied standardise_years - disable standardisation
+    standardise_years_.clear();
+    standardise_recruitment_multipliers_ = false;
   }
 
   if (model->run_mode() == RunMode::kProjection) {
@@ -285,6 +298,34 @@ void RecruitmentBevertonHolt::DoVerify(shared_ptr<Model> model) {
  */
 void RecruitmentBevertonHolt::DoReset() {
   LOG_TRACE();
+
+  // Auto-detect simplex standardise_years_ on first reset (DoReset runs inside Build(), before DoVerify)
+  if (!simplex_standardise_detected_) {
+    simplex_standardise_detected_ = true;
+    if (IsAddressableUsedFor(PARAM_RECRUITMENT_MULTIPLIERS, addressable::kTransformation) && !parameters_.Get(PARAM_STANDARDISE_YEARS)->has_been_defined()) {
+      bool   simplex_found   = false;
+      string expected_prefix = "process[" + label_ + "]." + PARAM_RECRUITMENT_MULTIPLIERS;
+      for (auto* trans : model()->managers()->addressable_transformation()->objects()) {
+        auto* simplex_trans = dynamic_cast<niwa::addressabletransformations::Simplex*>(trans);
+        if (!simplex_trans)
+          continue;
+        for (const auto& param_label : simplex_trans->GetParameterLabels()) {
+          if (param_label.find(expected_prefix) == 0) {
+            auto indices = simplex_trans->GetMapIndices(0);
+            if (!indices.empty()) {
+              standardise_years_.assign(indices.begin(), indices.end());
+              std::sort(standardise_years_.begin(), standardise_years_.end());
+              simplex_found = true;
+            }
+            break;
+          }
+        }
+      }
+      standardise_recruitment_multipliers_ = simplex_found;
+      if (!simplex_found)
+        standardise_years_.clear();
+    }
+  }
 
   if (parameters_.Get(PARAM_B0)->has_been_defined()) {
     have_scaled_partition = false;
