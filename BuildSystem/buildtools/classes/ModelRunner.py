@@ -122,6 +122,19 @@ class ModelRunner:
     Utility functions to run from the threads
     """
 
+    def _check_asserts_in_logs(self, folder_path, log_files):
+        """Check logs for @assert success or failure."""
+        for log_file in log_files:
+            file_path = os.path.join(folder_path, log_file)
+            if os.path.exists(file_path):
+                with open(file_path, "r", errors="replace") as f:
+                    content = f.read()
+                if "Assert Failed" in content:
+                    return False  # An assert failed
+                if "Assert Passed" in content:
+                    return True  # At least one assert passed
+        return None  # No assert messages found
+
     def runCommandInThread(
         self, folderPath, folderName, executionType, commands, checkForFileList=[]
     ):
@@ -129,7 +142,6 @@ class ModelRunner:
             if "-s" in command and not os.path.exists(folderPath + "/sim"):
                 os.mkdir(folderPath + "/sim")
 
-        # Prevent multiple differentiation methods from running simultaneously
         requires_lock = executionType in ["betadiff"]
         if requires_lock:
             self.adolcLock.acquire()
@@ -139,7 +151,7 @@ class ModelRunner:
             exit_code = EX_OK
             for command in commands:
                 if exit_code != EX_OK:
-                    break  # Skip remaining commands if one fails
+                    break
                 process = subprocess.Popen(
                     command,
                     cwd=folderPath,
@@ -150,8 +162,19 @@ class ModelRunner:
                 output, error = process.communicate()
                 exit_code = process.wait()
             elapsed = time.time() - start
+
+            # Check logs for @assert results
+            log_files = [
+                "estimate_betadiff.log",
+                "estimate_gammadiff.log",
+                "estimate_adolc.log",
+                "run.log",
+            ]
+            assert_check = self._check_asserts_in_logs(folderPath, log_files)
+            if assert_check is False:
+                exit_code = 1  # Mark as failed if any assert failed
+
         finally:
-            # Always release the lock, even if an exception occurs
             if requires_lock:
                 self.adolcLock.release()
 
@@ -160,7 +183,6 @@ class ModelRunner:
                 for checkForFile in checkForFileList:
                     if not os.path.exists(folderPath + "/sim/" + checkForFile):
                         exit_code = 1  # Indicate failure if expected file is not found
-                # clean up sim directory after running
                 for filename in os.listdir(folderPath + "/sim"):
                     file_path = os.path.join(folderPath + "/sim", filename)
                     os.remove(file_path)
