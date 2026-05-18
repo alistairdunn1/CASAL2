@@ -1,0 +1,254 @@
+#INITIALSATION
+@model
+min_age 1
+max_age 30
+age_plus TRUE
+base_weight_units tonnes
+initialisation_phases Phase1
+time_steps Sep OctMar AprAug 
+start_year 1975
+final_year 2025
+projection_final_year 2255
+type age
+length_bins 0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100 105 110 115 120 125 130 135 140 145 150
+length_plus FALSE
+threads 1
+
+@categories
+format sex
+names Male Female
+age_lengths AgeLengthM AgeLengthF
+
+@initialisation_phase Phase1
+type Derived
+
+@time_step Sep
+processes Ageing
+
+@time_step OctMar
+processes Recruitment Mortality
+
+@time_step AprAug
+processes Mortality
+
+# Population processes
+@process None
+type null_process 
+
+@process Recruitment
+type recruitment_beverton_holt
+categories Male Female
+proportions 0.5 0.5
+b0 100000
+#standardise_years 1975:2020 # YCS=1974:2019
+recruitment_multipliers 1 * 51
+steepness 0.8
+ssb SSB
+age 1
+
+@process Ageing
+type ageing
+categories Male Female
+
+@process Mortality
+type mortality_instantaneous
+m 0.19 0.19
+time_step_proportions 0.58 0.42
+relative_m_by_age One
+categories *
+table catches
+year  SummerFishery WinterFishery
+1975  113.6   6.4
+1976  266.1  14.9
+1977  352.2  19.8
+1978  721.5  40.5
+1979  344.7  19.3
+1980  331.4  18.6
+1981  257.6  14.4
+1982  169.5   9.5
+1983  424.2  23.8
+1984  683.7  38.3
+1985  497.1  27.9
+1986  774.6  43.4
+1987  675.1  37.9
+1988 1036.9  58.1
+1989 1171.3  65.7
+1990  554.7 163.8
+1991 2154.6 163.8
+1992 2653.4 152.7
+1993 3807.8 110.7
+1994 1569.7  50.1
+1995 1913.5  68.6
+1996 2717.6  71.8
+1997 1868.5  50.4
+1998 2838.1 105.5
+1999 2639.6 231.6
+2000 2879.7 219.9
+2001 2684.1 132.3
+2002 2320.1 123.7
+2003 2661.7 118.1
+2004 3205.0  22.9
+2005 2550.9  39.7
+2006 2511.2  27.0
+2007 1689.9  16.5
+2008 2313.6  16.4
+2009 2423.1  22.2
+2010 1882.2  44.6
+2011 1292.6  26.0
+2012 1855.2  46.6
+2013 1842.7  35.5
+2014 1794.3  45.9
+2015 1565.8  42.5
+2016 1459.2  10.8
+2017  912.7  31.3
+2018 1140.7   9.3
+2019  640.2   6.8
+2020  881.1  15.9
+2021 1281.5  14.5
+2022 1519.6   4.4
+2023  933.5  15.5
+2024  750.6   2.4
+2025 1073.2  10.6
+end_table
+table method
+method           category  selectivity    u_max time_step  penalty           
+SummerFishery    Male      SummerFisherySelM      0.99    OctMar  FisheryCatchMustBeTaken
+SummerFishery    Female    SummerFisherySelF      0.99    OctMar  FisheryCatchMustBeTaken
+WinterFishery    Male      WinterFisherySelM      0.99    AprAug  FisheryCatchMustBeTaken
+WinterFishery    Female    WinterFisherySelF      0.99    AprAug  FisheryCatchMustBeTaken
+end_table
+
+@derived_quantity SSB
+type biomass
+time_step OctMar
+categories Male Female
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities MaturityM MaturityF
+
+# Definition of selectivities
+@selectivity One 
+type constant
+c 1.0
+
+@selectivity MaturityM
+type all_values_bounded
+l 1
+h 14
+#v   0 0.01  0.03  0.09  0.22  0.46  0.71  0.88  0.96  0.98  0.99  1.00   1.00 1.00 1.00 # 2018 assessment
+# v  0 0.01  0.04  0.126 0.318 0.632 0.893 0.987 0.999 1     1     1      1    1    1 # corrected maturation
+v    0.000 0.001 0.009 0.098 0.410 0.694 0.821 0.885 0.933 0.969 0.990 0.999 1.000 1.000 # Dunn et al 2025
+
+@selectivity MaturityF
+type all_values_bounded
+l 1
+h 14
+#v 0 0.01  0.02  0.05  0.11  0.23  0.43  0.64  0.81  0.91  0.96  0.98  0.99  1.00 1.00 # 2018 assessment
+#v 0 0.01  0.03  0.078 0.18  0.368 0.64  0.87  0.975 0.998 1     1     1     1    1 # corrected maturation
+v  0.000 0.002 0.009 0.048 0.192 0.481 0.740 0.875 0.936 0.966 0.983 0.992 0.997 1.000 # Dunn et al 2025
+
+@selectivity SummerFisherySelM
+type logistic
+a50 6
+ato95 3
+alpha 1
+
+@selectivity SummerFisherySelF
+type logistic
+a50 6
+ato95 3
+alpha 1
+
+@selectivity WinterFisherySelM
+type logistic
+a50 6
+ato95 3
+alpha 1
+
+@selectivity WinterFisherySelF
+type logistic
+a50 6
+ato95 3
+alpha 1
+
+@selectivity NovemberTANSelM
+type double_normal
+mu 6
+sigma_l 3
+sigma_r 10
+alpha 1
+
+@selectivity NovemberTANSelF
+type double_normal
+mu 6
+sigma_l 3
+sigma_r 10
+alpha 1
+
+@selectivity AprilTANSelM
+type double_normal
+mu 6
+sigma_l 3
+sigma_r 10
+alpha 1
+
+@selectivity AprilTANSelF
+type double_normal
+mu 6
+sigma_l 3
+sigma_r 10
+alpha 1
+
+@selectivity SeptemberTANSelM
+type double_normal
+mu 6
+sigma_l 3
+sigma_r 10
+alpha 1
+
+@selectivity SeptemberTANSelF
+type double_normal
+mu 6
+sigma_l 3
+sigma_r 10
+alpha 1
+
+# AGE-LENGTH
+# Revised Dunn, Mormede, Webber (2022) [Bayes, all ages]
+@age_length AgeLengthM
+type von_bertalanffy
+compatibility_option casal
+by_length FALSE
+time_step_proportions 0.00 0.20 0.50
+linf 89.01
+k 0.29
+t0 -0.36
+cv_first 0.07
+distribution normal
+length_weight LengthWeightM
+
+@age_length AgeLengthF
+type von_bertalanffy
+compatibility_option casal
+by_length FALSE
+time_step_proportions 0.00 0.20 0.50
+Linf 113.96
+k 0.17
+t0 -1.07
+cv_first 0.09
+distribution normal
+length_weight LengthWeightF
+
+# SIZE-WEIGHT
+@length_weight LengthWeightM
+type basic
+units tonnes
+a 2.3473e-09
+b 3.257
+
+@length_weight LengthWeightF
+type basic
+units tonnes
+a 2.4581e-09
+b 3.246
+

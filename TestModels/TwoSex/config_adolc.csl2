@@ -3,6 +3,11 @@
 !include "reports.csl2"
 !include "estimation.csl2"
 
+@assert ObjectiveFunction
+type objective_function
+value 1782.72476
+error_type error
+
 @minimiser ADOLC
 type ADOLC
 tolerance 1e-6

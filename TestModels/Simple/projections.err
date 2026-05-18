@@ -5,7 +5,6 @@
 [INFO] Creating default report for process Ageing
 [INFO] Creating default report for process instant_mort
 [INFO] Creating default report for projections __projections__
-[WARNING] <<UNKNOWN LOCATION>> the parameter 'project' : the project report with label '__projections__' was requested, but an @project with that label was not found in the input configuration files. Please check your input configuration files. The report will not be generated
 [INFO] Initiating projection run mode
 [INFO] Completed
 [INFO] Total elapsed time: 1 second

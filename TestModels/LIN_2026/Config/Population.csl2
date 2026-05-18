@@ -1,0 +1,250 @@
+#INITIALSATION
+
+@model
+min_age 1
+max_age 28
+age_plus TRUE
+base_weight_units tonnes
+initialisation_phases Phase1
+time_steps JanDec EndDec
+start_year 1972
+final_year 2026
+projection_final_year 2038 #2131 # change to 2131 for U projections
+type age
+length_bins 0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200 210 220 230 240
+length_plus FALSE
+threads 1
+
+@categories
+format sex
+names Male Female 
+age_lengths AgeLengthMale AgeLengthFemale 
+
+@initialisation_phase Phase1
+type Derived
+
+@time_step JanDec
+processes Recruitment Mortality
+
+@time_step EndDec
+processes Ageing
+
+# Population processes
+@process None
+type null_process 
+
+@process Recruitment
+type recruitment_beverton_holt
+categories Male Female
+proportions 0.5 0.5
+b0 80000
+#standardise_years 1976:2014
+recruitment_multipliers 1 * 55
+steepness 0.84
+ssb SSB
+age 1
+
+@process Ageing
+type ageing
+categories *
+
+@process Mortality
+type mortality_instantaneous
+m 0.18
+time_step_proportions 1 # equivalent of mprops parameter, time of timestep
+relative_m_by_age One
+categories *
+table catches # BLL, POT, TRL = everything else, 2023 mean of last 3 years
+year  wcsiLLN  wcsiTRL wcsiPOT
+1973	85	20		0
+1975	401	800		0
+1976	565	2100    0
+1974	144	40		0
+1977	715	4300    0
+1978	300	323     0
+1979	539	360     0
+1980	540	305     0
+1981	492	300     0
+1982	675	400     0
+1983	1040	710 0
+1984	924	595     0
+1985	1156	302 0
+1986	1082	362 0
+1987	1105	370 0
+1988	1428	291 0
+1989	1959	370 0
+1990	259	2695	0
+1991	456	2046	0
+1992	931	1777	0
+1993	739	1591	0
+1994	969	1442	0
+1995	868	1385	0
+1996	861	1877	0
+1997	1350	2068	0
+1998	1073	2045	0
+1999	900	2191	0
+2000	935	2386	0
+2001	999	2382	1
+2002	762	2475	0
+2003	926	2094	0
+2004	764	2092	0
+2005	845	1595	0
+2006	781	1773	0
+2007	1161	1323	0
+2008	1021	1150	0
+2009	992	1216	0
+2010	1199	1386	0
+2011	1143	1606	0
+2012	1285	1697	0
+2013	1089	1959	0
+2014	1444	1914	0
+2015	1349	2092	2
+2016	1471	2159	15
+2017	1470	2451	0
+2018	1225	2440	15
+2019	1400	1834	8
+2020	1752	1687	0
+2021	1847	1406	210
+2022	1590	1482	213
+2023	1184	1488	739
+2024	1215	1244	765
+2025	876		920		730 # updated March 2026
+2026	1092	1217	745 #average of last three years
+end_table
+
+table method
+method      category  selectivity       u_max time_step  penalty
+wcsiTRL     Male  wcsiTRLselMale        0.6    JanDec  FisheryCatchMustBeTaken
+wcsiLLN     Male  wcsiLLNselMale        0.6    JanDec  FisheryCatchMustBeTaken
+wcsiPOT     Male  wcsiLLNselMale        0.6    JanDec  FisheryCatchMustBeTaken
+wcsiTRL     Female  wcsiTRLselFemale    0.6    JanDec  FisheryCatchMustBeTaken
+wcsiLLN     Female  wcsiLLNselFemale    0.6    JanDec  FisheryCatchMustBeTaken
+wcsiPOT     Female  wcsiLLNselFemale    0.6    JanDec  FisheryCatchMustBeTaken
+end_table
+
+@derived_quantity SSB
+type biomass
+time_step JanDec
+categories Male Female
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities MaturityMale MaturityFemale
+
+@derived_quantity VulnBT
+type biomass
+time_step JanDec
+categories Male Female
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities wcsiTRLselMale wcsiTRLselFemale
+
+@derived_quantity VulnBLL
+type biomass
+time_step JanDec
+categories Male Female
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities wcsiLLNselMale wcsiLLNselFemale
+
+@derived_quantity VulnPOT
+type biomass
+time_step JanDec
+categories Male Female
+time_step_proportion 0.5
+time_step_proportion_method weighted_sum
+selectivities wcsiLLNselMale wcsiLLNselFemale
+
+
+# Definition of selectivities
+@selectivity One 
+type constant
+c 1.0
+
+@selectivity MaturityMale
+type all_values_bounded
+l 3
+h 9
+v 0.00 0.015 0.095 0.39 0.77 0.94 1.00 
+
+@selectivity MaturityFemale
+type all_values_bounded
+l 3
+h 12
+v 0.00 0.004 0.017 0.06 0.18 0.39 0.65 0.85 0.94 1.00
+
+
+@selectivity wcsiTANselMale
+type logistic
+a50 13
+ato95 7
+alpha 1
+
+@selectivity wcsiTANselFemale
+type logistic
+a50 13
+ato95 7
+alpha 1
+
+@selectivity wcsiTRLselMale
+type logistic
+a50 10
+ato95 4
+alpha 1
+
+@selectivity wcsiTRLselFemale
+type logistic
+a50 10
+ato95 4
+alpha 1
+
+@selectivity wcsiLLNselMale
+type logistic
+a50 13
+ato95 4
+alpha 1
+
+@selectivity wcsiLLNselFemale
+type logistic
+a50 13
+ato95 4
+alpha 1
+
+# AGE-LENGTH
+@age_length AgeLengthMale
+type von_bertalanffy
+#compatibility_option casal #remove eventually
+by_length TRUE #change to true later
+time_step_proportions 0.50 0.00
+Linf 126.1
+k 0.13
+t0 -0.1
+cv_first 0.09
+cv_last 0.09
+distribution normal
+length_weight LengthWeightMale
+
+@age_length AgeLengthFemale
+type von_bertalanffy
+#compatibility_option casal #remove eventually
+by_length TRUE #change to true later
+time_step_proportions 0.50 0.00
+Linf 148.9
+k 0.11
+t0 -0.1
+cv_first 0.09
+cv_last 0.09
+distribution normal
+length_weight LengthWeightFemale
+
+# SIZE-WEIGHT
+@length_weight LengthWeightMale
+type basic
+units tonnes
+a 1.31e-9
+b 3.292
+
+@length_weight LengthWeightFemale
+type basic
+units tonnes
+a 0.98e-9
+b 3.362

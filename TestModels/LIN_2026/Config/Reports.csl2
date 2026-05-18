@@ -1,0 +1,78 @@
+# REPORTS: Define standard reports
+
+@report default
+type default
+processes TRUE
+observations TRUE
+catchabilities TRUE
+selectivities TRUE
+projects TRUE
+derived_quantities TRUE
+parameter_transformations TRUE
+
+@report EstimateValues
+type estimate_value
+
+@report EstimateSummary
+type estimate_summary
+
+@report EstimationResult
+type Estimation_result
+
+@report ObjectiveFunction
+type objective_function
+
+
+@report PartitionInitialisation
+type initialisation_partition
+
+@report Hessian
+type hessian_matrix
+
+@report Covariance
+type covariance_matrix
+
+@report Correlation
+type correlation_matrix
+
+@report MCMCCovariance
+type mcmc_covariance
+
+@report MCMCObjective
+type mcmc_objective
+file_name objectives
+write_mode incremental_suffix
+
+@report MCMCSample
+type mcmc_sample
+file_name samples
+write_mode incremental_suffix
+
+/*
+@report PartitionJanDec
+type partition
+time_step JanDec
+
+@report PartitionEndDec
+type partition
+time_step EndDec
+
+@report PartitionOctMay
+type partition_biomass
+time_step OctMay
+
+@report PartitionJunSep
+type partition_biomass
+time_step JunSep 
+
+@report PartitionEndDec
+type partition_biomass
+time_step EndDec
+*/
+
+@report CategoryList
+type Category_list
+
+@report RandomNumberSeed
+type random_number_seed
+

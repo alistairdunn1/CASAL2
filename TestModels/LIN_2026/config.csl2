@@ -1,0 +1,42 @@
+# Implementation of CASAL model: WG Model 20 - trawl survey index of abundance - M = 0.18
+# See Kienzle, M. (2021). Stock assessment for ling off the west coast South Island (LIN 7WC) 
+#     to the 2018-19 fishing year. New Zealand Fisheries Assessment Report 2021/18. Ministry
+#     for Primary Industries, Wellington, N.Z., 26 p
+
+# Includes required csl2 input configuration files and defines ASSERTS
+
+# Population
+!include "Config/Population.csl2"
+
+# Estimation
+!include "Config/Estimation.csl2"
+#!include "config/estimation_transformations.csl2"
+!include "Config/Estimation_survey.csl2"
+!include "Config/Estimation_fishery.csl2"
+
+# Profiles
+!include "Config/Profiles.csl2"
+
+# Observations
+!include "Config/Observation_survey.csl2"
+!include "Config/Observation_fishery.csl2"
+
+# Reports
+# Exclude this file for projections (to make the projection file smaller and easier to read)
+!include "Config/Reports.csl2"
+
+# Asserts to validate the CASAL model
+@assert CASAL_B0
+type addressable
+parameter process[Recruitment].b0
+years 1972
+time_step OctSep
+values 47175.9 # CASAL B0 
+error_type error
+tolerance 1e-2
+
+@assert CASALObjectiveFunction
+type objective_function
+value 823.214
+error_type error
+tolerance 1e-2

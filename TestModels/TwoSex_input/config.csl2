@@ -2,3 +2,8 @@
 !include "Observation.csl2"
 !include "reports.csl2"
 !include "estimation.csl2"
+
+@assert obj
+type objective_function
+value 1782.72476
+error_type error

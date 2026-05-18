@@ -6,3 +6,4 @@
 @assert obj
 type objective_function
 value 1482.970819
+error_type error

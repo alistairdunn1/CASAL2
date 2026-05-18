@@ -39,7 +39,6 @@ evaluations 1000
 tolerance 0.002
 covariance true
 
-
 @assert ObjectiveFunction
 type objective_function
 value 2296.96901

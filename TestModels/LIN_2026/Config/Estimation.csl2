@@ -1,0 +1,75 @@
+# ESTIMATION: Estimation methods, ageing error, and estimate population parameters
+
+@minimiser betadiff
+type betadiff
+tolerance 0.002 #1e-6
+iterations 2500
+covariance TRUE
+active TRUE
+
+# @minimiser adolc
+# type adolc
+# tolerance 1e-6
+# iterations 2500
+# covariance TRUE
+# active TRUE
+
+@mcmc MCMC
+type random_walk
+start 1
+length 3000000
+keep 1000
+step_size 0.02
+adapt_stepsize_at 50000 100000 200000 500000 1000000
+proposal_distribution t
+df 4
+adapt_stepsize_method ratio
+burn_in 1000000 # =1000*1000
+max_correlation 0.8
+
+# Ageing error
+@ageing_error AgeingError
+type normal
+cv 0.05 #halve compare to before
+
+# PENALTIES
+@penalty FisheryCatchMustBeTaken
+type process
+log_scale TRUE
+multiplier 100
+
+################################################################
+# Option to implement LOG transformation method for estimating B0
+################################################################
+
+
+ @estimate 
+ parameter parameter_transformation[logRecruitment].log_parameter
+ lower_bound 10
+ upper_bound 13.5
+ type uniform
+
+ @parameter_transformation logRecruitment
+ type log
+ parameters process[Recruitment].b0
+ prior_applies_to_restored_parameters FALSE
+
+################################################################
+# Implement SIMPLEX transformation method for estimating YCS
+################################################################
+
+@parameter_transformation Simplex_recruitment_multipliers
+type simplex
+sum_to_one false
+parameters process[Recruitment].recruitment_multipliers{1976:2021}
+prior_applies_to_restored_parameters true
+
+@estimate
+parameter parameter_transformation[Simplex_recruitment_multipliers].simplex
+#estimation_phase 1
+type lognormal
+mu 1*46
+cv 0.6*46
+lower_bound -10*46
+upper_bound 10*46
+

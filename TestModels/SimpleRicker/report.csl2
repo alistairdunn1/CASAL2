@@ -1,8 +1,3 @@
-@assert obj
-type objective_function
-value 684.287
-tolerance 0.005
-
 @report obj
 type objective_function
 

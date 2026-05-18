@@ -36,7 +36,6 @@ tolerance 2e-6
 iterations 1000
 evaluations 2000
 
-
 @assert ObjectiveFunction
 type objective_function
 value 6898.73560

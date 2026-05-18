@@ -1,0 +1,25 @@
+# PROJECTIONS: Define YCS random process and future catches
+
+@project Recruitment
+type empirical_sampling
+parameter process[Recruitment].standardised_recruitment_multipliers
+#start_year 1975
+start_year 2011
+final_year 2020
+years 2021:2031
+multiplier 1
+
+@project SummerFishery
+type constant
+parameter process[Mortality].method_SummerFishery
+years 2026:2031
+# values 3521.2 # TACC
+values 1014.6 # Current
+
+@project WinterFishery
+type constant
+parameter process[Mortality].method_WinterFishery
+years 2026:2031
+# values 179.8 # TACC
+values 51.8 # Current
+
