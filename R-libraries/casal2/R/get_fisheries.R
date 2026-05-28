@@ -129,8 +129,18 @@
     if (is.null(this_report$sub_type) || this_report$sub_type != "mortality_instantaneous") next
 
     fish_vals <- this_report$values
-    collabs <- colnames(fish_vals)
+    nms <- colnames(fish_vals)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    value_cols <- setdiff(nms, meta_cols)
+    if (length(value_cols) == 0L) next
+
+    fish_vals_data <- fish_vals[, value_cols, drop = FALSE]
+    collabs <- colnames(fish_vals_data)
     n_iter <- nrow(fish_vals)
+    iter_base <- if (length(iter_col) == 1L) as.numeric(fish_vals[[iter_col]]) else seq_len(n_iter)
+    chain_base <- if (length(chain_col) == 1L) fish_vals[[chain_col]] else NULL
 
     ## Parse column names: field[fishery_or_category][year_or_age]
     parts <- strsplit(collabs, "[", fixed = TRUE)
@@ -160,14 +170,17 @@
         n_years <- length(yr_vals)
 
         base_df <- data.frame(
-          iteration        = rep(seq_len(n_iter), times = n_years),
+          iteration        = rep(iter_base, times = n_years),
           fishery          = fsh,
           year             = suppressWarnings(as.numeric(rep(yr_vals, each = n_iter))),
           stringsAsFactors = FALSE
         )
+        if (!is.null(chain_base)) {
+          base_df$chain <- rep(chain_base, times = n_years)
+        }
         for (fld in flds_here) {
           fld_cols <- orig_cols[fsh_mask & fldv == fld]
-          base_df[[fld]] <- as.numeric(unlist(fish_vals[, fld_cols, drop = FALSE], use.names = FALSE))
+          base_df[[fld]] <- as.numeric(unlist(fish_vals_data[, fld_cols, drop = FALSE], use.names = FALSE))
         }
         rows[[k]] <- base_df
       }
@@ -198,12 +211,15 @@
         cat_cols <- orig_cols[cat_mask]
 
         rows[[k]] <- data.frame(
-          iteration        = rep(seq_len(n_iter), times = n_ages),
+          iteration        = rep(iter_base, times = n_ages),
           category         = cat_k,
           age              = suppressWarnings(as.numeric(rep(age_vals, each = n_iter))),
-          m_by_age         = as.numeric(unlist(fish_vals[, cat_cols, drop = FALSE], use.names = FALSE)),
+          m_by_age         = as.numeric(unlist(fish_vals_data[, cat_cols, drop = FALSE], use.names = FALSE)),
           stringsAsFactors = FALSE
         )
+        if (!is.null(chain_base)) {
+          rows[[k]]$chain <- rep(chain_base, times = n_ages)
+        }
       }
 
       long_df <- do.call(rbind, rows)

@@ -157,6 +157,10 @@
     if (is.null(val_df) || nrow(val_df) == 0L) next
     collabs <- colnames(val_df)
     n_iter <- nrow(val_df)
+    iter_col <- collabs[tolower(collabs) == "iteration"]
+    chain_col <- collabs[tolower(collabs) == "chain"]
+    iter_base <- if (length(iter_col) == 1L) as.numeric(val_df[[iter_col]]) else seq_len(n_iter)
+    chain_base <- if (length(chain_col) == 1L) val_df[[chain_col]] else NULL
 
     ## Parse field_type, year, category, bin from each column name
     m <- regmatches(collabs, regexec(col_regex, collabs))
@@ -175,7 +179,8 @@
     n_obs <- sum(obs_mask)
 
     ## Key columns repeated for every field type
-    iter_vec <- rep(seq_len(n_iter), times = n_obs)
+    iter_vec <- rep(iter_base, times = n_obs)
+    chain_vec <- if (!is.null(chain_base)) rep(chain_base, times = n_obs) else NULL
     year_long <- suppressWarnings(as.numeric(rep(yr_u, each = n_iter)))
     cat_long <- rep(cat_u, each = n_iter)
     obs_key <- paste(yr_u, cat_u, sep = "\r")
@@ -205,6 +210,9 @@
         value             = vals,
         stringsAsFactors  = FALSE
       )
+      if (!is.null(chain_vec)) {
+        ft_chunks[[ft]]$chain <- chain_vec
+      }
     }
 
     complete_df <- .safe_rbind(list(complete_df, .safe_rbind(ft_chunks)))

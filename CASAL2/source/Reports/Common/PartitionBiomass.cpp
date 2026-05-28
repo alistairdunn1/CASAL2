@@ -90,7 +90,56 @@ void PartitionBiomass::DoExecute(shared_ptr<Model> model) {
 }
 
 void PartitionBiomass::DoPrepareTabular(shared_ptr<Model> model) {
-  LOG_INFO() << "Tabular mode for reports of type " << PARAM_PARTITION << " has not been implemented";
+  cache_ << ReportHeader(type_, label_, format_);
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
+
+  cache_ << "year" << report_sep_ << "time_step" << report_sep_ << "category";
+  if (model->partition_type() == PartitionType::kAge) {
+    for (unsigned i = model->min_age(); i <= model->max_age(); ++i) {
+      cache_ << report_sep_ << i;
+    }
+  } else if (model->partition_type() == PartitionType::kLength) {
+    for (auto len_bin : model->length_bin_mid_points()) {
+      cache_ << report_sep_ << len_bin;
+    }
+  }
+  cache_ << REPORT_EOL;
+}
+
+void PartitionBiomass::DoExecuteTabular(shared_ptr<Model> model) {
+  niwa::partition::accessors::All all_view(model);
+  unsigned                        time_step_index = model->managers()->time_step()->current_time_step();
+
+  if (model->partition_type() == PartitionType::kAge) {
+    for (auto iterator : all_view) {
+      cache_ << model->current_year() << report_sep_ << time_step_ << report_sep_ << iterator->name_;
+      unsigned age          = model->min_age();
+      Double   weight_value = 0.0;
+      for (auto value : iterator->data_) {
+        weight_value = value * iterator->age_length_->mean_weight(time_step_index, age);
+        cache_ << report_sep_ << std::fixed << AS_DOUBLE(weight_value);
+        age++;
+      }
+      cache_ << REPORT_EOL;
+    }
+  } else if (model->partition_type() == PartitionType::kLength) {
+    for (auto iterator : all_view) {
+      cache_ << model->current_year() << report_sep_ << time_step_ << report_sep_ << iterator->name_;
+      unsigned length_ndx   = 0;
+      Double   weight_value = 0.0;
+      for (auto value : iterator->data_) {
+        weight_value = value * iterator->growth_increment_->get_mean_weight(length_ndx);
+        cache_ << report_sep_ << std::fixed << AS_DOUBLE(weight_value);
+        length_ndx++;
+      }
+      cache_ << REPORT_EOL;
+    }
+  }
+}
+
+void PartitionBiomass::DoFinaliseTabular(shared_ptr<Model> model) {
+  ready_for_writing_ = true;
 }
 
 } /* namespace reports */

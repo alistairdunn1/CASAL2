@@ -108,18 +108,28 @@
     if (is.null(this_report$type) || this_report$type != "catchability") next
 
     val_df <- this_report$values
-    collabs <- colnames(val_df)
+    nms <- colnames(val_df)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    collabs <- setdiff(nms, meta_cols)
+    if (length(collabs) == 0L) next
     n_iter <- nrow(val_df)
-    n_col <- ncol(val_df)
+    n_col <- length(collabs)
+    iter_base <- if (length(iter_col) == 1L) as.numeric(val_df[[iter_col]]) else seq_len(n_iter)
+    chain_base <- if (length(chain_col) == 1L) val_df[[chain_col]] else NULL
 
     ## Reshape wide -> long in base R
     long_df <- data.frame(
-      iteration = rep(seq_len(n_iter), times = n_col),
+      iteration = rep(iter_base, times = n_col),
       parameter = rep(collabs, each = n_iter),
-      catchability = as.numeric(unlist(val_df, use.names = FALSE)),
+      catchability = as.numeric(unlist(val_df[, collabs, drop = FALSE], use.names = FALSE)),
       label = report_labels[i],
       stringsAsFactors = FALSE
     )
+    if (!is.null(chain_base)) {
+      long_df$chain <- rep(chain_base, times = n_col)
+    }
     complete_df <- rbind(complete_df, long_df)
   }
   complete_df

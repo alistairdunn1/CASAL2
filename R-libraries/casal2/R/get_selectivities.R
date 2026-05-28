@@ -95,9 +95,16 @@
     if (is.null(this_report$type) || this_report$type != "selectivity") next
 
     sel_df <- this_report$values
-    collabs <- colnames(sel_df)
+    nms <- colnames(sel_df)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    collabs <- setdiff(nms, meta_cols)
+    if (length(collabs) == 0L) next
     n_iter <- nrow(sel_df)
-    n_col <- ncol(sel_df)
+    n_col <- length(collabs)
+    iter_base <- if (length(iter_col) == 1L) as.numeric(sel_df[[iter_col]]) else seq_len(n_iter)
+    chain_base <- if (length(chain_col) == 1L) sel_df[[chain_col]] else NULL
 
     ## Column names have the form:  report_label[selectivity_label].bin
     ## Split on "." to separate the bin value from the rest.
@@ -114,8 +121,8 @@
     }, character(1L))
 
     ## Reshape wide -> long in base R
-    iterations <- rep(seq_len(n_iter), times = n_col)
-    sel_values <- as.numeric(unlist(sel_df, use.names = FALSE))
+    iterations <- rep(iter_base, times = n_col)
+    sel_values <- as.numeric(unlist(sel_df[, collabs, drop = FALSE], use.names = FALSE))
     sel_lab_long <- rep(sel_labs, each = n_iter)
     bin_long <- as.numeric(rep(bin_labs, each = n_iter))
 
@@ -127,6 +134,9 @@
       label             = report_labels[i],
       stringsAsFactors  = FALSE
     )
+    if (!is.null(chain_base)) {
+      long_df$chain <- rep(chain_base, times = n_col)
+    }
 
     complete_df <- rbind(complete_df, long_df)
   }

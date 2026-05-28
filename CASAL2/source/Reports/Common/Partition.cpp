@@ -73,7 +73,37 @@ void Partition::DoExecute(shared_ptr<Model> model) {
 }
 
 void Partition::DoPrepareTabular(shared_ptr<Model> model) {
-  LOG_INFO() << "Tabular mode for reports of type " << PARAM_PARTITION << " has not been implemented";
+  cache_ << ReportHeader(type_, label_, format_);
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
+
+  cache_ << "year" << report_sep_ << "time_step" << report_sep_ << "category";
+  if (model->partition_type() == PartitionType::kAge) {
+    for (unsigned i = model->min_age(); i <= model->max_age(); ++i) {
+      cache_ << report_sep_ << i;
+    }
+  } else if (model->partition_type() == PartitionType::kLength) {
+    for (auto len_bin : model->length_bin_mid_points()) {
+      cache_ << report_sep_ << len_bin;
+    }
+  }
+  cache_ << REPORT_EOL;
+}
+
+void Partition::DoExecuteTabular(shared_ptr<Model> model) {
+  niwa::partition::accessors::All all_view(model);
+
+  for (auto iterator : all_view) {
+    cache_ << model->current_year() << report_sep_ << time_step_ << report_sep_ << iterator->name_;
+    for (auto value : iterator->data_) {
+      cache_ << report_sep_ << std::fixed << AS_DOUBLE(value);
+    }
+    cache_ << REPORT_EOL;
+  }
+}
+
+void Partition::DoFinaliseTabular(shared_ptr<Model> model) {
+  ready_for_writing_ = true;
 }
 
 } /* namespace reports */

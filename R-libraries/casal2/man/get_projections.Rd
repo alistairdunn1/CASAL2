@@ -25,8 +25,10 @@ object produced by \code{extract.tabular()} or \code{extract.mpd()}.}
 (default \code{TRUE}).}
 }
 \value{
-For \code{casal2TAB} input: a data frame with columns \code{colname},
-  \code{value}, \code{year}, and \code{param}; or \code{NULL}.
+For \code{casal2TAB} input: a data frame with columns
+  \code{iteration}, \code{colname}, \code{value}, \code{year},
+  \code{param}, \code{label}, and (when present in tabular input)
+  \code{chain}; or \code{NULL}.
   \code{casal2MPD} and list methods are not implemented.
 }
 \description{

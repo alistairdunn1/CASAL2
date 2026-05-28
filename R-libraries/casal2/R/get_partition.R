@@ -82,5 +82,43 @@
 #' @method get_partition casal2TAB
 #' @export
 "get_partition.casal2TAB" <- function(model, reformat_labels = TRUE, ...) {
-  stop("get_partition for casal2TAB has not been implemented")
+  report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
+  rows <- vector("list", length(model))
+  for (i in seq_along(model)) {
+    if (report_labels[i] == "header") next
+    this_report <- model[[i]]
+    if (is.null(this_report$type) || this_report$type != "partition") next
+
+    val_df <- this_report$values
+    if (is.null(val_df) || nrow(val_df) == 0L) next
+    nms <- colnames(val_df)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+
+    if (!("year" %in% nms) || !("time_step" %in% nms) || !("category" %in% nms)) next
+    bin_cols <- setdiff(nms, c("year", "time_step", "category", meta_cols))
+    if (length(bin_cols) == 0L) next
+
+    n_rows <- nrow(val_df)
+    n_col <- length(bin_cols)
+    iter_base <- if (length(iter_col) == 1L) as.numeric(val_df[[iter_col]]) else seq_len(n_rows)
+    chain_base <- if (length(chain_col) == 1L) val_df[[chain_col]] else NULL
+
+    long_df <- data.frame(
+      iteration = rep(iter_base, times = n_col),
+      year = rep(val_df$year, times = n_col),
+      time_step = rep(val_df$time_step, times = n_col),
+      category = rep(val_df$category, times = n_col),
+      bin = rep(bin_cols, each = n_rows),
+      value = as.numeric(unlist(val_df[, bin_cols, drop = FALSE], use.names = FALSE)),
+      label = report_labels[i],
+      stringsAsFactors = FALSE
+    )
+    if (!is.null(chain_base)) {
+      long_df$chain <- rep(chain_base, times = n_col)
+    }
+    rows[[i]] <- long_df
+  }
+  .bind_rows_list(rows)
 }
