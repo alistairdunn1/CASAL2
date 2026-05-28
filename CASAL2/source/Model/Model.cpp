@@ -865,6 +865,8 @@ void Model::RunProjection() {
       Reset();
       state_        = State::kInitialise;
       current_year_ = start_year_;
+      // update data type before Init phase (ensures age-length mean_weight cache uses init-state averages, not a carry-over year)
+      age_length_manager.UpdateDataType();
       // Run the intialisation phase
       init_phase_manager.Execute(pointer());
       // Reset all parameter and re run the model
