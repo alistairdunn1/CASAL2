@@ -53,6 +53,38 @@
 \defType{Real number}
 \defDefault{1}
 
+\subsubsection{Additional prior of type ar1}
+\commandlabsubarg{additional\_prior}{type}{AR1}
+\defRef{sec:AdditionalPrior-AR1}
+\label{syntax:AdditionalPrior-AR1}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
+
+\defSub{rho}{The AR1 autocorrelation parameter ($\rho$)}
+\defType{Real number}
+\defDefault{0}
+\defLowerBound{-1.0 (exclusive)}
+\defUpperBound{1.0 (exclusive)}
+
+\defSub{sigma}{The innovation standard deviation ($\sigma$)}
+\defType{Real number}
+\defDefault{1}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{mean}{The process mean ($\mu$)}
+\defType{Real number}
+\defDefault{0}
+
+\defSub{multiplier}{Multiply the AR1 penalty by this factor}
+\defType{Real number}
+\defDefault{1}
+
+\defSub{log\_scale}{Should the AR1 be applied in log space?}
+\defType{Boolean}
+\defDefault{false}
+
 \subsubsection{Additional prior of type lognormal}
 \commandlabsubarg{additional\_prior}{type}{Log\_Normal}
 \defRef{sec:AdditionalPrior-LogNormal}

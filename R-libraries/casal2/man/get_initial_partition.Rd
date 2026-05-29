@@ -29,10 +29,7 @@ For \code{casal2MPD} input: a data frame with columns \code{category},
   \code{bin}, \code{value}, \code{par_set} (integer index of the parameter
   set/minimisation; 1 for single run, ordered factor for multi-run \code{-i}
   output), and \code{label}.
-For \code{casal2TAB} input: a data frame with columns \code{iteration},
-  \code{initialisation_phase}, \code{category}, \code{bin},
-  \code{value}, \code{label}, and (when present in tabular input)
-  \code{chain}.
+  \code{casal2TAB} is not yet implemented.
   Returns \code{NULL} when no matching reports are found.
 }
 \description{
