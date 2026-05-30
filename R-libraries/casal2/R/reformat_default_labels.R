@@ -13,6 +13,11 @@
 #' reformat_default_labels(c("header", "__selectivities__", "my_report"))
 #' }
 reformat_default_labels <- function(report_labels) {
+  if (is.null(report_labels)) {
+    return(character(0))
+  }
+  report_labels <- as.character(report_labels)
+
   n <- nchar(report_labels)
   ## identify labels that both start and end with '__'
   default_ndx <- startsWith(report_labels, "__") & endsWith(report_labels, "__")
