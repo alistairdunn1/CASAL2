@@ -111,16 +111,56 @@
     this_report <- model[[i]]
     if (is.null(this_report$type) || tolower(this_report$type) != "time_varying") next
 
-    df <- .normalise_timevarying_cols(this_report$values)
-    if (is.null(df) || !is.data.frame(df) || nrow(df) == 0L) next
+    vals <- this_report$values
+    if (is.null(vals) || !is.data.frame(vals) || nrow(vals) == 0L) next
 
-    if (!"par_set" %in% names(df)) {
-      low <- tolower(names(df))
-      iter_idx <- which(low == "iteration")
-      if (length(iter_idx) >= 1L) {
-        df$par_set <- df[[iter_idx[1L]]]
-      } else {
-        df$par_set <- 1L
+    nms <- colnames(vals)
+    low <- tolower(nms)
+    iter_col <- nms[low == "iteration"]
+    chain_col <- nms[low == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    value_cols <- setdiff(nms, meta_cols)
+
+    ## C++ tabular output encodes time-varying columns as:
+    ##   time_varying[label][year]
+    col_regex <- "^time_varying\\[([^][]+)\\]\\[([^][]+)\\]$"
+    m <- regmatches(value_cols, regexec(col_regex, value_cols))
+    matched <- lengths(m) == 3L
+
+    if (any(matched)) {
+      tv_cols <- value_cols[matched]
+      parsed <- m[matched]
+      n_iter <- nrow(vals)
+      n_col <- length(tv_cols)
+
+      iter_base <- if (length(iter_col) == 1L) as.numeric(vals[[iter_col]]) else seq_len(n_iter)
+      chain_base <- if (length(chain_col) == 1L) vals[[chain_col]] else NULL
+      param_labs <- vapply(parsed, `[[`, character(1L), 2L)
+      year_labs <- suppressWarnings(as.numeric(vapply(parsed, `[[`, character(1L), 3L)))
+
+      df <- data.frame(
+        iteration = rep(iter_base, times = n_col),
+        parameter = rep(param_labs, each = n_iter),
+        year = rep(year_labs, each = n_iter),
+        value = as.numeric(unlist(vals[, tv_cols, drop = FALSE], use.names = FALSE)),
+        stringsAsFactors = FALSE
+      )
+      if (!is.null(chain_base)) {
+        df$chain <- rep(chain_base, times = n_col)
+      }
+      df$par_set <- df$iteration
+    } else {
+      ## Backward-compatible fallback for previously parsed/tabulated layouts.
+      df <- .normalise_timevarying_cols(vals)
+      if (is.null(df) || !is.data.frame(df) || nrow(df) == 0L) next
+
+      if (!"par_set" %in% names(df)) {
+        iter_idx <- which(tolower(names(df)) == "iteration")
+        if (length(iter_idx) >= 1L) {
+          df$par_set <- df[[iter_idx[1L]]]
+        } else {
+          df$par_set <- 1L
+        }
       }
     }
 
