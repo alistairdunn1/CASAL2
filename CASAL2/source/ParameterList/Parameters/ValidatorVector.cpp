@@ -407,7 +407,7 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
 
   auto current_model = model();
   if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    if (param->target() != nullptr || param->target()->size() == 0) {
+    if (param->target() != nullptr && param->target()->empty()) {
       *param->target() = current_model->years();
     }
   } else {
@@ -432,7 +432,7 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToModelYearsOnly() {
 
   auto current_model = model();
   if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    if (param->target() != nullptr || param->target()->size() == 0) {
+    if (param->target() != nullptr && param->target()->empty()) {
       *param->target() = current_model->years_model();
     }
   } else {
@@ -459,7 +459,7 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
   }
 
   if (auto* param = dynamic_cast<BindableVector<double>*>(parameter_)) {
-    if (param->target() != nullptr || param->target()->size() == 0) {
+    if (param->target() != nullptr && param->target()->empty()) {
       (*param->target()).assign(current_model->length_bins().begin(), current_model->length_bins().end());
     }
   } else {

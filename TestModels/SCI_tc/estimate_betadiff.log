@@ -1,10 +1,10 @@
 Casal2 (https://github.com/alistairdunn1/CASAL2.git:master)
 Call: C:\Projects\Software\CASAL2-AD\BuildSystem/Casal2/casal2.exe -e -g 20 -c config_betadiff.csl2 
-Date: Fri May 29 19:26:21 2026
+Date: Fri Jun  5 09:18:36 2026
 Seed: 20
-Version: v26.05 (2026-05-29)
+Version: v26.06 (2026-06-02)
 Copyright (c) 2017-2026, NIWA (www.niwa.co.nz)
-Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=33948
+Environment: User=alist Machine=QUIET-5950X OS=Windows_NT PID=1420
 
 
 *partition[state_Oct_Jan]
@@ -1504,7 +1504,7 @@ correlation_matrix {matrix}
 
 *process[Recruitment]
 process_label: Recruitment
-age: 55
+age: 0
 b0: 2107.57
 b0_initialisation_phase: 
 categories: untagged.male untagged.female
@@ -9407,7 +9407,7 @@ year category age length observed expected residual error_value process_error ad
 
 *process[__Recruitment__]
 process_label: Recruitment
-age: 55
+age: 0
 b0: 2107.57
 b0_initialisation_phase: 
 categories: untagged.male untagged.female
@@ -9475,7 +9475,7 @@ initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_2_male
 max_age: 0
-min_age: 892481072
+min_age: 0
 n: 9
 penalty: none
 selectivities: tag_1996_2_male.one
@@ -9493,7 +9493,7 @@ initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_2_female
 max_age: 0
-min_age: 0
+min_age: 6647375
 n: 31
 penalty: none
 selectivities: tag_1996_2_female.one
@@ -9510,8 +9510,8 @@ from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_3_male
-max_age: 0
-min_age: 48
+max_age: 48
+min_age: 0
 n: 61.9068
 penalty: none
 selectivities: tag_1996_3_male.one
@@ -9528,8 +9528,8 @@ from: untagged.female
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1996_3_female
-max_age: 0
-min_age: 0
+max_age: 6647375
+min_age: 892469296
 n: 75.9552
 penalty: none
 selectivities: tag_1996_3_female.one
@@ -9546,7 +9546,7 @@ from: untagged.male
 initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1997_1_male
-max_age: 0
+max_age: 6647375
 min_age: 48
 n: 55.005
 penalty: none
@@ -9565,7 +9565,7 @@ initial_mortality: 0
 initial_mortality_selectivity: 
 label: tag_1997_1_female
 max_age: 54
-min_age: 6619184
+min_age: 48
 n: 40.033
 penalty: none
 selectivities: tag_1997_1_female.one
