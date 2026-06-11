@@ -98,12 +98,17 @@ ato95 2
 type constant
 c 1
 
-
-
 @penalty event_mortality_penalty
 type process
 log_scale True
 multiplier 10
 
-!include "reports.txt"
-!include "estimation.txt"
+!include "estimation.csl2"
+
+@report objective
+type objective_function
+
+@assert objective
+type objective_function
+value 15045.07457
+error_type error

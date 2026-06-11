@@ -118,8 +118,18 @@
     if (this_report$sub_type != "recruitment_beverton_holt") next
 
     vals <- this_report$values
-    collabs <- colnames(vals)
+    nms <- colnames(vals)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    value_cols <- setdiff(nms, meta_cols)
+    if (length(value_cols) == 0L) next
+
+    vals_data <- vals[, value_cols, drop = FALSE]
+    collabs <- colnames(vals_data)
     n_iter <- nrow(vals)
+    iter_base <- if (length(iter_col) == 1L) as.numeric(vals[[iter_col]]) else seq_len(n_iter)
+    chain_base <- if (length(chain_col) == 1L) vals[[chain_col]] else NULL
 
     ## First token before "[" identifies the component; duplicates (e.g.
     ## recruitment_multipliers vs standardised_recruitment_multipliers) are
@@ -131,8 +141,14 @@
     components <- unique(first_component)
     cols_saved <- integer(0)
 
-    non_multi_column_df <- data.frame(iteration = seq_len(n_iter))
-    multi_column_df <- data.frame(iteration = rep(seq_len(n_iter), times = 1L))
+    non_multi_column_df <- data.frame(iteration = iter_base)
+    if (!is.null(chain_base)) {
+      non_multi_column_df$chain <- chain_base
+    }
+    multi_column_df <- data.frame(iteration = iter_base)
+    if (!is.null(chain_base)) {
+      multi_column_df$chain <- chain_base
+    }
 
     first_multi <- TRUE
 
@@ -145,14 +161,15 @@
 
       if (length(col_ndx) == 1L) {
         ## scalar component -- one value per iteration
-        non_multi_column_df[[components[j]]] <- as.numeric(vals[, col_ndx])
+        non_multi_column_df[[components[j]]] <- as.numeric(vals_data[, col_ndx])
       } else {
         ## year-varying component -- reshape wide -> long
-        sub_mat <- as.matrix(vals[, col_ndx, drop = FALSE])
+        sub_mat <- as.matrix(vals_data[, col_ndx, drop = FALSE])
         ## extract year labels from column names like "recruits[2000]"
         yr_raw <- sub(".*\\[(.*)\\]$", "\\1", colnames(sub_mat))
 
-        long_iter <- rep(seq_len(n_iter), times = ncol(sub_mat))
+        long_iter <- rep(iter_base, times = ncol(sub_mat))
+        long_chain <- if (!is.null(chain_base)) rep(chain_base, times = ncol(sub_mat)) else NULL
         long_year <- rep(yr_raw, each = n_iter)
         long_value <- as.numeric(sub_mat)
 
@@ -161,6 +178,9 @@
             iteration              = long_iter,
             stringsAsFactors       = FALSE
           )
+          if (!is.null(long_chain)) {
+            multi_column_df$chain <- long_chain
+          }
           first_multi <- FALSE
         }
         multi_column_df[[components[j]]] <- long_value

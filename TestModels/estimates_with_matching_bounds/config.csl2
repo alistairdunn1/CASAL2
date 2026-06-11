@@ -286,6 +286,7 @@ alpha 0.7
 @assert obj
 type objective_function
 value 16884.27791
+error_type error
 
 @report obj
 type objective_function

@@ -1,0 +1,45 @@
+# Projections
+#@project Future_ycs
+#type lognormal
+#parameter process[Recruitment].recruitment_multipliers
+#years 2024:2028
+#mean 0 
+#sigma 0.6 
+#multiplier 1
+
+# arima now in a different file
+#@project Future_ycs
+#type multiple_values
+#parameter process[Recruitment].recruitment_multipliers
+#years 2022:2031
+#!include "config/arima_YCS_2016-2020_average.csl2"
+#multiplier 1
+
+
+ @project Future_ycs
+ type empirical_sampling
+ parameter process[Recruitment].recruitment_multipliers
+ years 2021:2138
+ start_year 2016
+ final_year 2020
+ multiplier 1
+
+@project future_catch_wcsiTRL
+type constant
+parameter process[Mortality].method_wcsiTRL
+years 2027:2138
+values 1511
+
+@project future_catch_wcsiLLN
+type constant
+parameter process[Mortality].method_wcsiLLN
+years 2027:2138
+values 1758
+
+@project future_catch_wcsiPOT
+type constant
+parameter process[Mortality].method_wcsiPOT
+years 2027:2138
+values 1758
+
+

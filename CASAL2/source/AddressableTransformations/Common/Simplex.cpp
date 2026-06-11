@@ -259,7 +259,8 @@ void Simplex::FillReportCache(ostringstream& cache) {
   cache << "parameter_values: ";
   for (unsigned i = 0; i < restored_values_.size(); ++i) cache << restored_values_[i] << " ";
   cache << REPORT_EOL;
-  cache << "negative_log_jacobian: " << jacobian_ << REPORT_EOL;
+  Double neg_log_jacobian = -1.0 * jacobian_;
+  cache << "negative_log_jacobian: " << neg_log_jacobian << REPORT_EOL;
 }
 
 /**
@@ -291,7 +292,8 @@ void Simplex::FillTabularReportCache(ostringstream& cache, bool first_run, const
     for (unsigned i = 0; i < restored_values_.size(); ++i) {
       cache << sep << restored_values_[i];
     }
-    cache << sep << jacobian_ << REPORT_EOL;
+    Double neg_log_jacobian = -1.0 * jacobian_;
+    cache << sep << neg_log_jacobian << REPORT_EOL;
   }
 }
 

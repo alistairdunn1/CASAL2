@@ -466,11 +466,11 @@ where, for example, $X_1$ is observed catch biomass and $X_2$ is the estimated c
 
 Additional priors are optional additional priors or penalties that can be applied to encourage vectors to be smooth or have some average, or apply a prior to parameter or group of parameters.
 
-The types of additional priors available include smoothing and averaging of vector parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are described below.
+The types of additional priors available include smoothing and averaging of vector parameters, an AR1 process prior for sequential parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are described below.
 
 \subsubsection{Vector smoothing}\label{sec:AdditionalPrior-VectorSmoothing}\index{Additional prior!Vector smoothing}
 
-The \subcommand{vector\_smoothing} additional prior is applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be "smoothed" can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
+The \subcommand{vector\_smoothing} additional prior is applied to a vector parameter. Sum of squares of $r^{th}$ differences, optionally on a log scale. This encourages the vector to be like a polynomial of degree $(r-1)$. A range of the vector to be ``smoothed'' can be specified (and if not, the smoother is applied to the entire vector). However, this restriction must be specified by an index of the vector and must be between 1 and the length of the vector, inclusive.
 
 \subsubsection{Vector average}\label{sec:AdditionalPrior-VectorAverage}\index{Additional prior!Vector average}
 
@@ -525,6 +525,24 @@ Apply an \subcommand{element\_difference} additional prior to encourage two vect
 \begin{equation}
 - \log \left(\pi \left(p_1,p_2 \right) \right) = \sum_{i = 1}^n \left( p_{1,i} - p_{2,i} \right)^2
 \end{equation}
+
+\subsubsection{AR1}\label{sec:AdditionalPrior-AR1}\index{Additional prior!AR1}
+
+Apply an \subcommand{ar1} additional prior to a sequential vector (or map) parameter to encourage temporal autocorrelation around a process mean $\mu$.
+
+For sequence values $x_1,\dots,x_n$ the AR1 residual in year $t$ is
+
+\begin{equation}
+e_t = (x_t - \mu) - \rho(x_{t-1} - \mu), \quad t = 2,\dots,n
+\end{equation}
+
+and the objective-function contribution is
+
+\begin{equation}
+- \log \left(\pi \left(\mathbf{x} \right) \right) = 0.5\times \text{multiplier} \times \sum_{t=2}^{n}\frac{e_t^2}{\sigma^2}
+\end{equation}
+
+where $\rho$ is the AR1 autocorrelation parameter and $\sigma$ is the innovation standard deviation. If \subcommand{log\_scale true}, the AR1 prior is applied to $\log(x_t)$ values.
 
 \subsubsection{Beta}\label{sec:AdditionalPrior-Beta}\index{Additional prior!Beta}
 

@@ -1,0 +1,51 @@
+# ESTIMATION: Estimation of selectivities etc. for fisheries
+
+@estimate
+parameter selectivity[SummerFisherySelM].a50
+same selectivity[WinterFisherySelM].a50
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound 1
+upper_bound 25
+
+@estimate
+parameter selectivity[SummerFisherySelM].ato95
+same selectivity[WinterFisherySelM].ato95
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound 1
+upper_bound 50
+
+@estimate
+parameter selectivity[SummerFisherySelM].alpha
+same selectivity[WinterFisherySelM].alpha
+type students_t
+mu 1
+sigma 30
+df 3
+lower_bound 0.01
+upper_bound 50
+
+@estimate
+parameter selectivity[SummerFisherySelF].a50
+same selectivity[WinterFisherySelF].a50 
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound 1
+upper_bound 25
+
+@estimate
+parameter selectivity[SummerFisherySelF].ato95
+same selectivity[WinterFisherySelF].ato95
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound 1
+upper_bound 50

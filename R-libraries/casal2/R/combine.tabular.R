@@ -37,14 +37,41 @@
     if (!("values" %in% names(this_list))) {
       next
     }
+    iter_col <- names(this_list$values)[tolower(names(this_list$values)) == "iteration"]
+    next_iter_id <- 1L
+
     ## Collect all data frames then bind once -- avoids O(n^2) row copying
     ## that occurs when rbind-ing inside a loop.
     chunks <- vector("list", n_objects)
-    chunks[[1L]] <- this_list$values
-    for (j in 2L:n_objects) {
-      chunks[[j]] <- tab_objects[[j]][[i]]$values
+    for (j in seq_len(n_objects)) {
+      chunk_df <- tab_objects[[j]][[i]]$values
+
+      if (length(iter_col) == 1L) {
+        ## Remap each chain's iteration labels into a global, non-overlapping
+        ## integer sequence while preserving repeated rows per iteration.
+        old_iter <- chunk_df[[iter_col]]
+        keep <- !is.na(old_iter)
+        if (any(keep)) {
+          old_keys <- as.character(old_iter[keep])
+          uniq_keys <- unique(old_keys)
+          mapped_ids <- seq.int(from = next_iter_id, length.out = length(uniq_keys))
+          new_iter <- rep(NA_integer_, length(old_iter))
+          new_iter[keep] <- mapped_ids[match(old_keys, uniq_keys)]
+          chunk_df[[iter_col]] <- new_iter
+          next_iter_id <- next_iter_id + length(uniq_keys)
+        }
+      }
+
+      chunk_df$chain <- j
+      chunks[[j]] <- chunk_df
     }
-    this_list$values <- do.call(rbind, chunks)
+    combined_values <- do.call(rbind, chunks)
+
+    if (verbose && length(iter_col) == 1L) {
+      message(paste0("Report '", names(tab_object)[i], "': added chain column and reassigned iteration IDs to be unique across chains"))
+    }
+
+    this_list$values <- combined_values
     tab_object[[i]] <- this_list
   }
   return(tab_object)

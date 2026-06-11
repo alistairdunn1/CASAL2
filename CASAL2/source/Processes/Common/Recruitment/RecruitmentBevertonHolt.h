@@ -76,6 +76,7 @@ private:
   unsigned                   year_counter_         = 0;
   OrderedMap<string, Double> proportions_by_category_;
   bool                       standardise_recruitment_multipliers_ = true;
+  bool                       simplex_standardise_detected_        = false;
   Double                     mean_ycs_                            = 1.0;
   vector<unsigned>           years_;
 

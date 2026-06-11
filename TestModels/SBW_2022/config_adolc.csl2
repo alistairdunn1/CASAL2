@@ -21,3 +21,10 @@ covariance True
 
 # Reports
 !include "Config/Reports.csl2"
+
+@assert obj
+type objective_function
+value 1213.41
+error_type error
+tolerance 1e-3
+

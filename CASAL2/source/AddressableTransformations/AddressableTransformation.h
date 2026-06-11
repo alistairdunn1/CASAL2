@@ -37,7 +37,12 @@ public:
   void Restore();
 
   // pure virtual
-  vector<string> GetParameterLabels() { return parameter_labels_; }  // so managers can check business rules to catch duplicate addressables in multiple transformation blocks
+  vector<string>   GetParameterLabels() { return parameter_labels_; }  // so managers can check business rules to catch duplicate addressables in multiple transformation blocks
+  vector<unsigned> GetMapIndices(unsigned param_counter) {
+    if (param_counter < vector_and_u_map_indicies_.size())
+      return vector_and_u_map_indicies_[param_counter];
+    return {};
+  }
   virtual Double GetScore() = 0;
 
   // For reporting EstimableTransformation

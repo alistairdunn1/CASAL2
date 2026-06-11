@@ -1,0 +1,274 @@
+@catchability NovemberTANq
+type free
+q 0.05
+
+@estimate NovemberTANq
+parameter catchability[NovemberTANq].q
+type students_t
+mu 0.16
+sigma 10
+df 3
+lower_bound 0.01
+upper_bound 0.40
+
+@catchability AprilTANq
+type free
+q 0.05
+
+@estimate AprilTANq
+parameter catchability[AprilTANq].q
+type students_t
+mu 0.16
+sigma 10
+df 3
+lower_bound 0.01
+upper_bound 0.40
+
+
+/* 
+@catchability SeptemberTANq
+type free
+q 0.05
+
+@estimate SeptemberTANq
+parameter catchability[SeptemberTANq].q
+type lognormal
+mu 0.16
+cv 0.79
+lower_bound 0.01
+upper_bound 0.40 
+*/
+
+# TAN survey ogives
+@estimate
+parameter selectivity[NovemberTANSelM].mu
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  1
+upper_bound 25
+
+@estimate
+parameter selectivity[NovemberTANSelM].sigma_l
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  0.1
+upper_bound 50
+
+# @estimate
+# parameter selectivity[NovemberTANSelM].sigma_r
+# type students_t
+# mu 100
+# sigma 300
+# df 3
+# lower_bound  1
+# upper_bound 500
+
+@estimate
+parameter parameter_transformation[invNovemberTANSelM].inverse_parameter
+lower_bound 0.001
+upper_bound 1000
+type students_t
+mu 100
+sigma 30
+df 3
+
+@parameter_transformation invNovemberTANSelM
+type inverse
+parameters selectivity[NovemberTANSelM].sigma_r
+prior_applies_to_restored_parameters true
+
+@estimate
+parameter selectivity[NovemberTANSelM].alpha
+type uniform
+lower_bound  0
+upper_bound 50
+
+@estimate
+parameter selectivity[NovemberTANSelF].mu
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  1
+upper_bound 25
+
+@estimate
+parameter selectivity[NovemberTANSelF].sigma_l
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  0.1
+upper_bound 50
+
+# @estimate
+# parameter selectivity[NovemberTANSelF].sigma_r
+# type students_t
+# mu 100
+# sigma 300
+# df 3
+# lower_bound  1
+# upper_bound 500
+
+@estimate
+parameter parameter_transformation[invNovemberTANSelF].inverse_parameter
+lower_bound 0.001
+upper_bound 1000
+type students_t
+mu 100
+sigma 30
+df 3
+
+@parameter_transformation invNovemberTANSelF
+type inverse
+parameters selectivity[NovemberTANSelF].sigma_r
+prior_applies_to_restored_parameters true
+
+
+@estimate
+parameter selectivity[AprilTANSelM].mu
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  1
+upper_bound 25
+
+@estimate
+parameter selectivity[AprilTANSelM].sigma_l
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  1
+upper_bound 50
+
+# @estimate
+# parameter selectivity[AprilTANSelM].sigma_r
+# type students_t
+# mu 100
+# sigma 300
+# df 3
+# lower_bound  1
+# upper_bound 200
+
+@estimate
+parameter parameter_transformation[invAprilTANSelM].inverse_parameter
+lower_bound 0.001
+upper_bound 1000
+type students_t
+mu 100
+sigma 30
+df 3
+
+@parameter_transformation invAprilTANSelM
+type inverse
+parameters selectivity[AprilTANSelM].sigma_r
+prior_applies_to_restored_parameters true
+
+@estimate
+parameter selectivity[AprilTANSelM].alpha
+type uniform
+lower_bound  0
+upper_bound 50
+
+@estimate
+parameter selectivity[AprilTANSelF].mu
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  1
+upper_bound 25
+
+@estimate
+parameter selectivity[AprilTANSelF].sigma_l
+type students_t
+mu 6
+sigma 30
+df 3
+lower_bound  1
+upper_bound 50
+
+# @estimate
+# parameter selectivity[AprilTANSelF].sigma_r
+# type students_t
+# mu 100
+# sigma 300
+# df 3
+# lower_bound  1
+# upper_bound 200
+
+@estimate
+parameter parameter_transformation[invAprilTANSelF].inverse_parameter
+lower_bound 0.001
+upper_bound 1000
+type students_t
+mu 100
+sigma 30
+df 3
+
+@parameter_transformation invAprilTANSelF
+type inverse
+parameters selectivity[AprilTANSelF].sigma_r
+prior_applies_to_restored_parameters true
+
+/*
+@estimate
+parameter selectivity[SeptemberTANSelM].mu
+same selectivity[SeptemberTANSelF].mu
+type uniform
+lower_bound  1
+upper_bound 25
+
+@estimate
+parameter selectivity[SeptemberTANSelM].sigma_l
+same selectivity[SeptemberTANSelF].sigma_l
+type uniform
+lower_bound  1
+upper_bound 25
+
+@estimate
+parameter selectivity[SeptemberTANSelM].sigma_r
+same selectivity[SeptemberTANSelF].sigma_r
+type uniform
+lower_bound  1
+upper_bound 25
+*/
+
+# Process error
+@estimate NovemberTANBiomass_PE
+parameter observation[NovemberTANBiomass].process_error
+lower_bound 0.0001
+upper_bound 100.0
+type students_t
+mu 0.0
+sigma 3
+df 3
+mcmc_fixed TRUE
+
+@estimate AprilTANBiomass_PE
+parameter observation[AprilTANBiomass].process_error
+lower_bound 0.0001
+upper_bound 100.0
+type students_t
+mu 0.0
+sigma 3
+df 3
+mcmc_fixed TRUE
+/*
+@estimate
+parameter observation[SeptemberTANBiomass].process_error
+lower_bound 0.001
+upper_bound 2
+type students_t
+mu 0.0
+sigma 30
+df 3
+mcmc_fixed TRUE
+*/
+

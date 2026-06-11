@@ -9,5 +9,9 @@ tolerance 1e-6
 iterations 2000
 active true
 
-
+@assert obj
+type objective_function
+value 684.287
+error_type error
+tolerance 0.005
 

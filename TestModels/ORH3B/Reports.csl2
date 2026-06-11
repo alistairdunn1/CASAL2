@@ -5,12 +5,10 @@ type simulated_observation
 observation CPUEandes
 file_name sim/CPUEandes
 
-
 @report fishery_LF_sim
 type simulated_observation
 observation Obs_Andes_LF
 file_name sim/Obs_Andes_LF
-
 
 ## Derived Quantities
 @report DerivedQuantities
@@ -21,12 +19,10 @@ derived_quantity SSB
 type observation
 observation CPUEandes
 
-
 @report fishery_LF
 type observation
 observation Obs_Andes_LF
 pearsons_residuals True
-
 
 @report nuisance_Q
 type catchability

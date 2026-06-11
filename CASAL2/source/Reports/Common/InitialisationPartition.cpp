@@ -68,12 +68,39 @@ void InitialisationPartition::DoExecute(shared_ptr<Model> model) {
 }
 
 void InitialisationPartition::DoPrepareTabular(shared_ptr<Model> model) {
-  LOG_INFO() << "Tabular mode for reports of type " << PARAM_INITIALISATION_PARTITION << " has not been implemented";
+  cache_ << ReportHeader(type_, label_, format_);
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
+
+  cache_ << "initialisation_phase" << report_sep_ << "category";
+  if (model->partition_type() == PartitionType::kAge) {
+    for (unsigned i = model->min_age(); i <= model->max_age(); ++i) {
+      cache_ << report_sep_ << i;
+    }
+  } else if (model->partition_type() == PartitionType::kLength) {
+    for (auto len_bin : model->length_bin_mid_points()) {
+      cache_ << report_sep_ << len_bin;
+    }
+  }
+  cache_ << REPORT_EOL;
 }
 
-void InitialisationPartition::DoExecuteTabular(shared_ptr<Model> model) {}
+void InitialisationPartition::DoExecuteTabular(shared_ptr<Model> model) {
+  niwa::partition::accessors::All all_view(model);
+  string                          phase_label = model->get_current_initialisation_phase_label();
 
-void InitialisationPartition::DoFinaliseTabular(shared_ptr<Model> model) {}
+  for (auto iterator : all_view) {
+    cache_ << phase_label << report_sep_ << iterator->name_;
+    for (auto value : iterator->data_) {
+      cache_ << report_sep_ << std::fixed << AS_DOUBLE(value);
+    }
+    cache_ << REPORT_EOL;
+  }
+}
+
+void InitialisationPartition::DoFinaliseTabular(shared_ptr<Model> model) {
+  ready_for_writing_ = true;
+}
 
 } /* namespace reports */
 } /* namespace niwa */

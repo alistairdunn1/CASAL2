@@ -56,6 +56,7 @@ public:
   shared_ptr<ValidatorVector> IsAge();
   shared_ptr<ValidatorVector> IsLengthBin();
   shared_ptr<ValidatorVector> DefaultToAllModelYears();
+  shared_ptr<ValidatorVector> DefaultToModelYearsOnly();
   shared_ptr<ValidatorVector> DefaultToAllModelLengthBins();
   shared_ptr<ValidatorVector> NumberOfElements(unsigned count);
   shared_ptr<ValidatorVector> SameNumberOfElementsAs(const string& label, bool split_combined_categories = true);

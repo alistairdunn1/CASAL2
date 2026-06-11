@@ -61,7 +61,60 @@ void OutputParameters::DoExecute(shared_ptr<Model> model) {
 }
 
 void OutputParameters::DoPrepareTabular(shared_ptr<Model> model) {
-  LOG_INFO() << "Tabular mode for reports of type " << PARAM_OUTPUT_PARAMETERS << " has not been implemented";
+  cache_ << ReportHeader(type_, label_, format_);
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
+}
+
+/**
+ * Execute this report in tabular mode.
+ */
+void OutputParameters::DoExecuteTabular(shared_ptr<Model> model) {
+  vector<Estimate*> estimates = model->managers()->estimate()->objects();
+  vector<Profile*>  profiles  = model->managers()->profile()->objects();
+
+  if (first_run_) {
+    first_run_ = false;
+    bool first = true;
+    for (Estimate* estimate : estimates) {
+      if (!first)
+        cache_ << report_sep_;
+      first = false;
+      cache_ << estimate->parameter();
+    }
+
+    if (model->run_mode() == RunMode::kProfiling) {
+      for (Profile* profile : profiles) {
+        if (!first)
+          cache_ << report_sep_;
+        first = false;
+        cache_ << profile->parameter();
+      }
+    }
+    cache_ << REPORT_EOL;
+  }
+
+  bool first = true;
+  for (Estimate* estimate : estimates) {
+    if (!first)
+      cache_ << report_sep_;
+    first = false;
+    cache_ << AS_DOUBLE(estimate->value());
+  }
+
+  if (model->run_mode() == RunMode::kProfiling) {
+    for (Profile* profile : profiles) {
+      if (!first)
+        cache_ << report_sep_;
+      first = false;
+      cache_ << AS_DOUBLE(profile->value());
+    }
+  }
+  cache_ << REPORT_EOL;
+}
+
+void OutputParameters::DoFinaliseTabular(shared_ptr<Model> model) {
+  ready_for_writing_ = true;
 }
 
 } /* namespace reports */

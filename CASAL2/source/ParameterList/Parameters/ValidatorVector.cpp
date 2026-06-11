@@ -407,11 +407,36 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelYears() {
 
   auto current_model = model();
   if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
-    if (param->target() != nullptr || param->target()->size() == 0) {
+    if (param->target() != nullptr && param->target()->empty()) {
       *param->target() = current_model->years();
     }
   } else {
     LOG_CODE_ERROR() << "Parameter::ValidatorVector::DefaultToAllModelYears " << parameter_->location() << " " << parameter_->label() << " is not a vector<unsigned> type";
+  }
+
+  return shared_from_this();
+}
+
+/**
+ * This method will check if the current parameter has been defined. If it has not,
+ * it will default the parameter to only the model estimation years (start_year to
+ * final_year), never including projection years. Use this instead of
+ * DefaultToAllModelYears() when projection years must not inflate the default set
+ * (e.g. standardise_years in recruitment processes).
+ *
+ * @return A shared pointer to the Validator object for method chaining.
+ */
+shared_ptr<ValidatorVector> ValidatorVector::DefaultToModelYearsOnly() {
+  if (parameter_->has_been_defined())
+    return shared_from_this();  // do nothing
+
+  auto current_model = model();
+  if (auto* param = dynamic_cast<BindableVector<unsigned>*>(parameter_)) {
+    if (param->target() != nullptr && param->target()->empty()) {
+      *param->target() = current_model->years_model();
+    }
+  } else {
+    LOG_CODE_ERROR() << "Parameter::ValidatorVector::DefaultToModelYearsOnly " << parameter_->location() << " " << parameter_->label() << " is not a vector<unsigned> type";
   }
 
   return shared_from_this();
@@ -434,7 +459,7 @@ shared_ptr<ValidatorVector> ValidatorVector::DefaultToAllModelLengthBins() {
   }
 
   if (auto* param = dynamic_cast<BindableVector<double>*>(parameter_)) {
-    if (param->target() != nullptr || param->target()->size() == 0) {
+    if (param->target() != nullptr && param->target()->empty()) {
       (*param->target()).assign(current_model->length_bins().begin(), current_model->length_bins().end());
     }
   } else {

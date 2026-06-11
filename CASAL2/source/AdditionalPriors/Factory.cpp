@@ -12,6 +12,7 @@
 // headers
 #include "Factory.h"
 
+#include "../AdditionalPriors/Common/AR1.h"
 #include "../AdditionalPriors/Common/Beta.h"
 #include "../AdditionalPriors/Common/ElementDifference.h"
 #include "../AdditionalPriors/Common/LogNormal.h"
@@ -42,6 +43,8 @@ AdditionalPrior* Factory::Create(shared_ptr<Model> model, const string& object_t
   if (object_type == PARAM_ADDITIONAL_PRIOR) {
     if (sub_type == PARAM_BETA)
       object = new Beta(model);
+    else if (sub_type == PARAM_AR1)
+      object = new AR1(model);
     else if (sub_type == PARAM_ELEMENT_DIFFERENCE)
       object = new ElementDifference(model);
     else if (sub_type == PARAM_VECTOR_SMOOTHING)

@@ -1,0 +1,15 @@
+@report default
+type default
+processes true
+observations true
+catchabilities true
+selectivities true
+projects false
+derived_quantities True
+parameter_transformations true
+
+@report EstimateValues
+type estimate_value
+
+@report ObjectiveFunction
+type objective_function

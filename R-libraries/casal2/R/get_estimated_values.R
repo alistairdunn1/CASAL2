@@ -88,16 +88,26 @@
     if (is.null(this_report$type) || this_report$type != "estimate_value") next
     ## val_df: rows = iterations, columns = parameter names
     val_df <- this_report$values
-    params <- colnames(val_df)
+    nms <- colnames(val_df)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    params <- setdiff(nms, meta_cols)
+    if (length(params) == 0L) next
     n_iter <- nrow(val_df)
+    iter_base <- if (length(iter_col) == 1L) as.numeric(val_df[[iter_col]]) else seq_len(n_iter)
+    chain_base <- if (length(chain_col) == 1L) val_df[[chain_col]] else NULL
     ## Wide-to-long without reshape2
     df <- data.frame(
-      iteration = rep(seq_len(n_iter), times = length(params)),
+      iteration = rep(iter_base, times = length(params)),
       parameter = rep(params, each = n_iter),
-      value = unlist(val_df, use.names = FALSE),
+      value = unlist(val_df[, params, drop = FALSE], use.names = FALSE),
       label = report_labels[i],
       stringsAsFactors = FALSE
     )
+    if (!is.null(chain_base)) {
+      df$chain <- rep(chain_base, times = length(params))
+    }
     rows[[i]] <- df
   }
   .bind_rows_list(rows)

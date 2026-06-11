@@ -1,0 +1,105 @@
+# ESTIMATION: Estimation methods, ageing error, and estimate population parameters
+
+@minimiser adolc
+type adolc
+tolerance 1e-7
+iterations 10000
+evaluations 10000
+covariance TRUE
+active TRUE
+
+@mcmc MCMC
+type random_walk
+start 0.1
+length 4500000
+keep 3000
+step_size 0.02
+adapt_stepsize_at 10000 20000 30000 40000 50000 60000 70000 80000 90000 150000 250000 500000
+proposal_distribution t
+df 4
+adapt_stepsize_method ratio
+burn_in 1500000 
+max_correlation 0.8
+
+# Ageing error
+@ageing_error AgeingError
+type normal
+cv 0.08
+
+# Penalties
+# PENALTIES
+@penalty FisheryCatchMustBeTaken
+type process
+log_scale TRUE
+multiplier 1000
+
+################################################################
+# Implement LOG transformation method for estimating B0
+################################################################
+
+## NOTE: comment out the line "standardise_years 1976:2016" in @process[Recruitment] in population.csl2
+# Parameters
+# @estimate
+# parameter process[Recruitment].b0
+# estimation_phase 1
+# type uniform_log
+# lower_bound  5000
+# upper_bound  350000
+
+@estimate 
+parameter parameter_transformation[logRecruitment].log_parameter
+lower_bound 10
+upper_bound 13
+type uniform
+
+@parameter_transformation logRecruitment
+type log
+parameters process[Recruitment].b0
+prior_applies_to_restored_parameters FALSE
+
+################################################################
+# Implement SIMPLEX transformation method for estimating YCS
+################################################################
+
+/* @estimate
+parameter process[Recruitment].recruitment_multipliers
+estimation_phase 1
+type lognormal
+# 1975:2020 # YCS = 1974-2019
+# years     1975 1976 1977 1978 1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025
+mu             1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1
+cv           1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1  1.1
+lower_bound 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01    1    1    1    1    1
+upper_bound  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100  100    1    1    1    1    1
+
+# Year class strength penalty (an additional prior in Casal2)
+@additional_prior PenaltyYCSAverageOne
+type vector_average
+parameter process[Recruitment].recruitment_multipliers
+method k
+k 1
+multiplier 100
+ */
+@parameter_transformation Simplex_recruitment_multipliers
+type simplex
+sum_to_one false
+parameters process[Recruitment].recruitment_multipliers{1975:2020}
+prior_applies_to_restored_parameters true
+
+@estimate
+type lognormal
+mu 1*46
+cv 1.1*46
+parameter parameter_transformation[Simplex_recruitment_multipliers].simplex
+lower_bound -10*46
+upper_bound 10*46
+
+# Natural mortality
+# @estimate M
+# parameter process[Mortality].m{Male}
+# same process[Mortality].m{Female}
+# type normal_by_stdev
+# mu 0.19
+# sigma 0.05
+# lower_bound 0.05
+# upper_bound 0.40

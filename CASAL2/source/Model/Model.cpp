@@ -109,6 +109,17 @@ vector<unsigned> Model::years() const {
 }
 
 /**
+ * Return only the model estimation years (start_year to final_year) regardless
+ * of run mode. Unlike years(), this never includes projection years, making it
+ * safe to use for defaults such as standardise_years in recruitment processes.
+ */
+vector<unsigned> Model::years_model() const {
+  vector<unsigned> years;
+  for (unsigned year = start_year_; year <= final_year_; ++year) years.push_back(year);
+  return years;
+}
+
+/**
  * Return the years this model is going to run in a vector.
  * We return a vector because the years will be compared
  * against processes etc that may run only on some years
@@ -854,6 +865,8 @@ void Model::RunProjection() {
       Reset();
       state_        = State::kInitialise;
       current_year_ = start_year_;
+      // update data type before Init phase (ensures age-length mean_weight cache uses init-state averages, not a carry-over year)
+      age_length_manager.UpdateDataType();
       // Run the intialisation phase
       init_phase_manager.Execute(pointer());
       // Reset all parameter and re run the model

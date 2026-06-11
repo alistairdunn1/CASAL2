@@ -216,7 +216,3 @@ b 3.318
 type free
 q 0.0867659185
 
-@assert obj
-type objective_function
-value 1782.72476
-

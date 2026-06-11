@@ -66,12 +66,40 @@ void Initialisation::DoExecute(shared_ptr<Model> model) {
 }
 
 void Initialisation::DoPrepareTabular(shared_ptr<Model> model) {
-  LOG_INFO() << "Tabular mode for reports of type " << PARAM_INITIALISATION << " has not been implemented";
+  cache_ << ReportHeader(type_, label_, format_);
+  string marker = (report_sep_ == "\t") ? REPORT_R_DATAFRAME_TSV : REPORT_R_DATAFRAME;
+  cache_ << "values " << marker << REPORT_EOL;
+  cache_ << "initialisation_phase" << report_sep_ << PARAM_TYPE << report_sep_ << PARAM_YEAR << report_sep_ << PARAM_LAMBDA << report_sep_ << PARAM_VALUE << report_sep_
+         << "converged" << REPORT_EOL;
 }
 
-void Initialisation::DoExecuteTabular(shared_ptr<Model> model) {}
+void Initialisation::DoExecuteTabular(shared_ptr<Model> model) {
+  label_                     = model->get_current_initialisation_phase_label();
+  initialisation_            = model->managers()->initialisation_phase()->GetInitPhase(label_);
+  string initialisation_type = initialisation_->type();
 
-void Initialisation::DoFinaliseTabular(shared_ptr<Model> model) {}
+  if (initialisation_type == PARAM_ITERATIVE) {
+    years_             = initialisation_->GetConvergenceYears();
+    lambda_            = initialisation_->GetTestConvergenceLambda();
+    Double true_lambda = initialisation_->GetConvergenceLambda();
+    for (unsigned i = 0; i < years_.size(); ++i) {
+      if (lambda_[i] < 0.0)
+        break;
+      cache_ << label_ << report_sep_ << initialisation_type << report_sep_ << years_[i] << report_sep_ << true_lambda << report_sep_ << lambda_[i] << report_sep_;
+      if (true_lambda <= lambda_[i])
+        cache_ << "FALSE";
+      else
+        cache_ << "TRUE";
+      cache_ << REPORT_EOL;
+    }
+  } else {
+    cache_ << label_ << report_sep_ << initialisation_type << report_sep_ << "NA" << report_sep_ << "NA" << report_sep_ << "NA" << report_sep_ << "NA" << REPORT_EOL;
+  }
+}
+
+void Initialisation::DoFinaliseTabular(shared_ptr<Model> model) {
+  ready_for_writing_ = true;
+}
 
 } /* namespace reports */
 } /* namespace niwa */

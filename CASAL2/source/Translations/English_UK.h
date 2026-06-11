@@ -166,6 +166,7 @@
 #define PARAM_ANNUAL_SHIFT                        "annual_shift"
 #define PARAM_APPEND                              "append"
 #define PARAM_AREA                                "area"
+#define PARAM_AR1                                 "ar1"
 #define PARAM_ARMA                                "arma"
 #define PARAM_ASCENDING                           "ascending"
 #define PARAM_ASSERT                              "assert"

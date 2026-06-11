@@ -122,17 +122,37 @@
     ## Splitting on "[" gives: c("label", "dq_name]", "year]", "]").
     ## Build a matrix (one row per column name) then index directly -- one pass,
     ## no repeated vapply calls over the same strsplit result.
-    col_labs <- colnames(this_report$values)
+    val_df <- this_report$values
+    nms <- colnames(val_df)
+    iter_col <- nms[tolower(nms) == "iteration"]
+    chain_col <- nms[tolower(nms) == "chain"]
+    meta_cols <- c(iter_col, chain_col)
+    dq_cols <- setdiff(nms, meta_cols)
+    if (length(dq_cols) == 0L) next
+
+    iter_base <- if (length(iter_col) == 1L) as.numeric(val_df[[iter_col]]) else seq_len(nrow(val_df))
+    chain_base <- if (length(chain_col) == 1L) val_df[[chain_col]] else NULL
+
+    val_sub <- val_df[, dq_cols, drop = FALSE]
+    col_labs <- colnames(val_sub)
     parts_mat <- do.call(rbind, strsplit(col_labs, "[", fixed = TRUE))
     first <- parts_mat[, 1L]
     second <- substr(parts_mat[, 2L], 1L, nchar(parts_mat[, 2L]) - 1L)
     third <- substr(parts_mat[, 3L], 1L, nchar(parts_mat[, 3L]) - 1L)
     ## Rename columns to "dq_label-year-label" for convenient downstream splitting
-    colnames(this_report$values) <- paste(second, third, first, sep = "-")
+    colnames(val_sub) <- paste(second, third, first, sep = "-")
     ## Convert wide-to-long using base R (avoids reshape2 dependency)
-    val_mat <- as.matrix(this_report$values)
-    long_df <- .melt_matrix(val_mat) # Var1=row, Var2=col, value
-    colnames(long_df) <- c("iteration", "colname", "value")
+    n_iter <- nrow(val_sub)
+    n_col <- ncol(val_sub)
+    long_df <- data.frame(
+      iteration = rep(iter_base, times = n_col),
+      colname = rep(colnames(val_sub), each = n_iter),
+      value = as.numeric(unlist(val_sub, use.names = FALSE)),
+      stringsAsFactors = FALSE
+    )
+    if (!is.null(chain_base)) {
+      long_df$chain <- rep(chain_base, times = n_col)
+    }
     long_df$label <- report_labels[i]
     split_cols <- strsplit(long_df$colname, "-", fixed = TRUE)
     long_df$dq_label <- vapply(split_cols, `[[`, character(1L), 1L)

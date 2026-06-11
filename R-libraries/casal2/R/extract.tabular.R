@@ -141,7 +141,7 @@
               raw <- unlist(tokens, use.names = FALSE)
               mat <- matrix(raw, nrow = n_rows, ncol = n_cols, byrow = TRUE)
               Data <- as.data.frame(mat, stringsAsFactors = FALSE)
-              Data[] <- lapply(Data, type.convert, as.is = TRUE)
+              Data[] <- lapply(Data, utils::type.convert, as.is = TRUE)
               colnames(Data) <- col_header
             } else {
               ## Fallback (irregular row widths are unusual but safe to handle).
@@ -163,7 +163,7 @@
               raw <- unlist(tokens, use.names = FALSE)
               mat <- matrix(raw, nrow = n_rows, ncol = n_cols, byrow = TRUE)
               Data <- as.data.frame(mat, stringsAsFactors = FALSE)
-              Data[] <- lapply(Data, type.convert, as.is = TRUE)
+              Data[] <- lapply(Data, utils::type.convert, as.is = TRUE)
               colnames(Data) <- col_header
             } else {
               ## Fallback for irregular rows.

@@ -136,6 +136,7 @@ b 1097386
 @assert obj
 type objective_function
 value -2780.06012
+error_type error
 
 @report obj
 type objective_function

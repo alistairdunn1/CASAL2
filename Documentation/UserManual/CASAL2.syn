@@ -62,6 +62,7 @@ CharEsc = \
 
 [Keywords 2]
 ADOLC
+AR1
 Abundance
 Abundance 
 Addressable
@@ -493,7 +494,6 @@ type
 u
 u_max
 units
-update_frequency_years
 upper_bound
 v
 value
@@ -511,6 +511,7 @@ y2
 ycs_values
 ycs_years
 year
+year_delta
 year_effects
 years
 years_at_liberty

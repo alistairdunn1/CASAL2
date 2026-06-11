@@ -3,6 +3,11 @@
 !include "reports.csl2"
 !include "estimation.csl2"
 
+@assert ObjectiveFunction
+type objective_function
+value 1782.945578
+error_type error
+
 @minimiser gammdiff
 type numerical_differences
 tolerance 1e-8
