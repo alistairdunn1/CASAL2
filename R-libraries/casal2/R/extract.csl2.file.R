@@ -27,7 +27,9 @@
 
   # process any !includes
   if (include) {
-    print(paste("Processing the !include statements in the csl2 file in path = '", path, "' with file name = '", file, "'.", sep = ""))
+    if (!quiet) {
+      print(paste("Processing the !include statements in the csl2 file in path = '", path, "' with file name = '", file, "'.", sep = ""))
+    }
     i <- 1
     while (i != length(file)) {
       if (tolower(substring(file[i], 1, 8)) == "!include") {
