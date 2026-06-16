@@ -284,6 +284,8 @@ The procedure used to choose the sample of points is that, to start, all points 
 
 The probability of acceptance for each jump is $0$ if the jump would move a parameter value outside of its bounds, $1$ if it improves the posterior, or $(new posterior/old posterior)$ otherwise. How often the position of the chain is recorded is specified with the \texttt{keep} parameter. For example, with \texttt{keep 10}, only every $10$th sample is recorded.
 
+For very long MCMC runs with many estimated parameters, the retained chain history can consume significant memory. By default, the complete chain history is retained in memory. To reduce memory usage during long MCMC runs, set \commandsub{mcmc}{retain\_chain\_history} to \texttt{false}. When disabled, only the most recent chain state is retained in memory, which is sufficient for reporting and convergence, while still allowing full diagnostics and output of posterior samples. This is particularly useful for MCMCs with thousands of iterations and many parameters. Note that unit tests and some diagnostic tools may rely on full chain history, so this option should only be disabled for production MCMC runs.
+
 The option to specify that some of the estimated parameters are fixed during the MCMC is available via the \subcommand{mcmc\_fixed} in the \command{estimate} block. If the chain starts at the point estimate or at a random location, these fixed parameters are set to their values at the end of estimation during the MCMC phase.
 
 If  the start of the chain is specified with the command \texttt{\cname\ -i}, these fixed parameters are set to the values in the file.

@@ -65,6 +65,8 @@ MCMC::MCMC(shared_ptr<Model> model) : model_(model) {
     ->set_default_value(PARAM_RATIO);
   parameters_.Bind<unsigned>(PARAM_ADAPT_COVARIANCE_AT, &adapt_covariance_matrix_, "The iteration number in which to adapt the covariance matrix")
     ->set_default_value(0u);
+  parameters_.Bind<bool>(PARAM_RETAIN_CHAIN, &retain_chain_history_, "Retain full chain history (set to false to save memory in long MCMCs)")
+    ->set_default_value(true);
   // clang-format on
 }
 #ifdef USE_AUTODIFF
@@ -667,6 +669,12 @@ void MCMC::UpdateCovarianceMatrix() {
     LOG_MEDIUM() << "Applying Cholesky decomposition";
     if (!DoCholeskyDecomposition())
       LOG_FATAL() << "Cholesky decomposition failed. Cannot continue MCMC";
+
+    // Trim chain_ to keep only the last link since covariance history is no longer needed
+    if (chain_.size() > 1) {
+      chain_.erase(chain_.begin(), chain_.end() - 1);
+      LOG_INFO() << "Trimmed chain_ to last link only after covariance adaptation";
+    }
 
     mcmc_state_ = PARAM_ADAPT_COVARIANCE;
     // continue chain

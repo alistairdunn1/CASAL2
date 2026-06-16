@@ -89,6 +89,11 @@
 \defLowerBound{0 (inclusive)}
 \defValue{If zero, then no covariance matrix adaption is applied. Otherwise must be a positive integer that is less than the burn\_in}
 
+\defSub{retain\_chain\_history}{Retain full chain history in memory}
+\defType{Boolean}
+\defDefault{true}
+\defValue{If true, the complete MCMC chain is retained in memory. If false, only the most recent chain state is kept, significantly reducing memory usage for long MCMC runs with many estimated parameters. Set to false for production runs to avoid memory issues; set to true for diagnostic and testing purposes}
+
 \subsubsection{MCMC of type Hamiltonian Monte Carlo}
 \commandlabsubarg{mcmc}{type}{Hamiltonian}
 \label{syntax:MCMC-HamiltonianMonteCarlo}

@@ -78,7 +78,7 @@ void MCMCSample::DoExecute(shared_ptr<Model> model) {
   if (!model)
     LOG_CODE_ERROR() << "!model";
 
-  auto     chain   = mcmc_->chain();
+  auto&    chain   = mcmc_->chain();
   unsigned element = chain.size() - 1;
   cache_ << utilities::String::join<double>(chain[element].values_, " ") << REPORT_EOL;
 

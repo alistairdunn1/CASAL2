@@ -131,6 +131,7 @@ protected:
   vector<unsigned>        adapt_step_size_              = {0};
   unsigned                adapt_covariance_matrix_      = 0;
   string                  adapt_stepsize_method_;
+  bool                    retain_chain_history_ = true;  // set to false in production to save memory
 };
 
 } /* namespace niwa */

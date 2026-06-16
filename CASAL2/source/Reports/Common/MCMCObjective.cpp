@@ -98,7 +98,7 @@ void MCMCObjective::DoExecute(shared_ptr<Model> model) {
     first_time_ = false;
   }
 
-  auto chain = mcmc_->chain();
+  auto& chain = mcmc_->chain();
   if (chain.size() >= 1) {
     unsigned element = chain.size() - 1;
     cache_ << chain[element].iteration_ << " " << chain[element].mcmc_state_ << " " << chain[element].score_ << " " << chain[element].prior_ << " " << chain[element].likelihood_

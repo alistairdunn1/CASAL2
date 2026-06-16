@@ -133,6 +133,7 @@
 #define PARAM_ADAPT_STEPSIZE                      "adapt_stepsize"
 #define PARAM_ADAPT_STEPSIZE_AT                   "adapt_stepsize_at"
 #define PARAM_ADAPT_STEPSIZE_METHOD               "adapt_stepsize_method"
+#define PARAM_RETAIN_CHAIN                        "retain_chain_history"
 #define PARAM_ADDITIONAL_PRIOR                    "additional_prior"
 #define PARAM_ADDITIVE                            "additive"
 #define PARAM_ADDITIVE_NORMAL                     "additive_normal"

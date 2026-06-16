@@ -276,6 +276,11 @@ void IndependenceMetropolis::DoExecute(shared_ptr<ThreadPool> thread_pool) {
       }
       chain_.push_back(new_link);
 
+      // If not retaining chain history, keep only the last link to save memory
+      if (!retain_chain_history_ && chain_.size() > 1) {
+        chain_.erase(chain_.begin(), chain_.end() - 1);
+      }
+
       // LOG_MEDIUM() << "Storing: Successful Jumps " << successful_jumps_ << " Jumps : " << jumps_;
       model()->managers()->report()->Execute(model(), State::kIterationComplete);
     }
