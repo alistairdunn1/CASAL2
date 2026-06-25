@@ -468,7 +468,7 @@ where, for example, $X_1$ is observed catch biomass and $X_2$ is the estimated c
 
 Additional priors are optional additional priors or penalties that can be applied to encourage vectors to be smooth or have some average, or apply a prior to parameter or group of parameters.
 
-The types of additional priors available include smoothing and averaging of vector parameters, an AR1 process prior for sequential parameters, a uniform log or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are described below.
+The types of additional priors available include smoothing and averaging of vector parameters, an AR1 process prior for sequential parameters, a uniform log, normal, or lognormal prior on a single parameter, and a prior on the sum of a list of parameters. The additional priors are described below.
 
 \subsubsection{Vector smoothing}\label{sec:AdditionalPrior-VectorSmoothing}\index{Additional prior!Vector smoothing}
 
@@ -495,6 +495,14 @@ Methods available for the type \texttt{vector\_average} are \subcommand{l}, \sub
 \end{itemize}
 
 where $\overline{ln\left(X\right)}$ is the mean of the logged values.
+
+\subsubsection{Normal}\label{sec:AdditionalPrior-Normal}\index{Additional prior!normal}
+
+Apply a \subcommand{normal} additional prior with mean $\mu$ and CV $c$ to a single parameter,
+
+\begin{equation}
+- \log \left(\pi \left(p \right) \right) = 0.5\left(\frac{p - \mu}{c\mu} \right)^2
+\end{equation}
 
 \subsubsection{Lognormal}\label{sec:AdditionalPrior-LogNormal}\index{Additional prior!lognormal}
 

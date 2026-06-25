@@ -85,6 +85,25 @@
 \defType{Boolean}
 \defDefault{false}
 
+\subsubsection{Additional prior of type normal}
+\commandlabsubarg{additional\_prior}{type}{Normal}
+\defRef{sec:AdditionalPrior-Normal}
+\label{syntax:AdditionalPrior-Normal}
+
+\defSub{parameter}{The name of the parameter for the additional prior}
+\defType{String}
+\defDefault{No default}
+
+\defSub{mu}{The normal prior mean (mu) parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
+\defSub{cv}{The normal CV parameter}
+\defType{Real number (estimable)}
+\defDefault{No default}
+\defLowerBound{0.0 (exclusive)}
+
 \subsubsection{Additional prior of type lognormal}
 \commandlabsubarg{additional\_prior}{type}{Log\_Normal}
 \defRef{sec:AdditionalPrior-LogNormal}
