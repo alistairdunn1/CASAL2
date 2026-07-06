@@ -51,6 +51,29 @@
   df
 }
 
+## Bind a list of data frames by column union, filling missing columns with NA.
+## Needed because different time_varying reports can emit different schemas.
+.bind_rows_fill <- function(lst) {
+  lst <- lst[!vapply(lst, is.null, logical(1L))]
+  if (length(lst) == 0L) {
+    return(NULL)
+  }
+  if (length(lst) == 1L) {
+    return(lst[[1L]])
+  }
+
+  all_cols <- unique(unlist(lapply(lst, names), use.names = FALSE))
+  aligned <- lapply(lst, function(d) {
+    miss <- setdiff(all_cols, names(d))
+    if (length(miss) > 0L) {
+      for (nm in miss) d[[nm]] <- NA
+    }
+    d[, all_cols, drop = FALSE]
+  })
+
+  do.call(rbind, aligned)
+}
+
 #' @rdname get_timevarying_parameters
 #' @method get_timevarying_parameters casal2MPD
 #' @export
@@ -86,10 +109,10 @@
         df$par_set <- iter_labs[dash_i]
         inner[[dash_i]] <- df
       }
-      rows[[i]] <- .bind_rows_list(inner)
+      rows[[i]] <- .bind_rows_fill(inner)
     }
   }
-  .bind_rows_list(rows)
+  .bind_rows_fill(rows)
 }
 
 #' @rdname get_timevarying_parameters
@@ -168,5 +191,5 @@
     rows[[i]] <- df
   }
 
-  .bind_rows_list(rows)
+  .bind_rows_fill(rows)
 }
