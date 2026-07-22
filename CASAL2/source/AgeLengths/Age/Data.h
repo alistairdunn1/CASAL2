@@ -30,7 +30,7 @@ public:
   virtual ~Data() {};
   void DoValidate() override final;
   void DoBuild() override final;
-  void DoReset() override final {};
+  void DoReset() override final;
 
   Double calculate_mean_length(unsigned year, unsigned time_step, unsigned age) override final;
 

@@ -46,6 +46,15 @@ void Data::DoValidate() {
 }
 
 /**
+ * Reset any persistent state that accumulates during MCMC iterations
+ */
+void Data::DoReset() {
+  age_length_matrix_years_.clear();
+  age_length_matrix_year_key_.clear();
+  age_length_transition_matrix_.clear();
+}
+
+/**
  * Build any objects that will need to be utilised by this object.
  * Obtain smart_pointers to any objects that will be used by this object.
  */
