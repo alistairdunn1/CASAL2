@@ -164,20 +164,7 @@ void AgeLength::Build() {
   }
   // age-length matrix assumes all down stream classes i.e. processes and observations have flagged BuildAgeLengthMatrixForTheseYears
   LOG_FINE() << "years we need to build age-length matrix for = " << age_length_matrix_years_.size();
-  if (age_length_matrix_years_.size() > 0) {
-    age_length_transition_matrix_.resize(age_length_matrix_years_.size());
-    for (unsigned year_iter = 0; year_iter < age_length_matrix_years_.size(); ++year_iter) {
-      age_length_transition_matrix_[year_iter].resize(time_step_count);
-      for (unsigned time_step_ndx = 0; time_step_ndx < time_step_count; ++time_step_ndx) {
-        age_length_transition_matrix_[year_iter][time_step_ndx].resize(model()->age_spread());
-        numbers_by_age_length_transition_.resize(model()->age_spread());
-        for (unsigned age_iter = 0; age_iter < model()->age_spread(); ++age_iter) {
-          age_length_transition_matrix_[year_iter][time_step_ndx][age_iter].resize(model()->get_number_of_length_bins(), 0.0);
-          numbers_by_age_length_transition_[age_iter].resize(model()->get_number_of_length_bins(), 0.0);
-        }
-      }
-    }
-  }
+  EnsureAgeLengthMatrixAllocated();
 
   model_years_ = model()->years();
   // Build child dependencies
@@ -196,6 +183,32 @@ void AgeLength::Build() {
   quantiles_[2] = 0.5;
   quantiles_[3] = 0.7;
   quantiles_[4] = 0.9;
+}
+
+void AgeLength::EnsureAgeLengthMatrixAllocated() {
+  const unsigned year_count       = age_length_matrix_years_.size();
+  const unsigned time_step_count  = model()->time_steps().size();
+  const unsigned age_spread       = model()->age_spread();
+  const unsigned length_bin_count = model()->get_number_of_length_bins();
+
+  if (year_count == 0)
+    return;
+
+  age_length_transition_matrix_.resize(year_count);
+  for (unsigned year_iter = 0; year_iter < year_count; ++year_iter) {
+    age_length_transition_matrix_[year_iter].resize(time_step_count);
+    for (unsigned time_step_ndx = 0; time_step_ndx < time_step_count; ++time_step_ndx) {
+      age_length_transition_matrix_[year_iter][time_step_ndx].resize(age_spread);
+      for (unsigned age_iter = 0; age_iter < age_spread; ++age_iter) {
+        age_length_transition_matrix_[year_iter][time_step_ndx][age_iter].assign(length_bin_count, 0.0);
+      }
+    }
+  }
+
+  numbers_by_age_length_transition_.resize(age_spread);
+  for (unsigned age_iter = 0; age_iter < age_spread; ++age_iter) {
+    numbers_by_age_length_transition_[age_iter].assign(length_bin_count, 0.0);
+  }
 }
 
 /**

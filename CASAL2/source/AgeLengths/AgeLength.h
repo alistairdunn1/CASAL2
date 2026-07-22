@@ -90,6 +90,7 @@ protected:
   void PopulateCV();
   void PopulateAgeLengthMatrix();
   void UpdateAgeLengthMatrixForThisYear(unsigned year);
+  void EnsureAgeLengthMatrixAllocated();
 
   // members
   weak_ptr<Model> model_;

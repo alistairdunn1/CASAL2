@@ -12,7 +12,9 @@
 #'   \code{fishing_pressure}, \code{exploitation_rate}, \code{catch},
 #'   \code{actual_catch}, \code{fishery}, \code{par_set} (integer index of the
 #'   parameter set/minimisation; 1 for single run, ordered factor for multi-run
-#'   \code{-i} output), and \code{label}.
+#'   \code{-i} output), and \code{label}. When \code{m_by_age = TRUE}, returns
+#'   columns \code{category}, \code{age}, \code{m_by_age}, \code{par_set}, and
+#'   \code{label}.
 #'   For \code{casal2TAB} (MCMC) input when \code{m_by_age = FALSE}: a data frame
 #'   with columns \code{iteration} (integer MCMC posterior-sample index),
 #'   \code{fishery}, \code{year}, \code{exploitation_rate}, \code{fishing_pressure},
@@ -63,10 +65,45 @@
   .bind_rows_list(rows)
 }
 
+## Extract m_by_age data frame from one instantaneous-mortality process report.
+.m_by_age_from_report <- function(rpt, par_set, label) {
+  mba_ndx <- grepl("^m_by_age\\[", names(rpt))
+  if (!any(mba_ndx)) {
+    return(NULL)
+  }
+
+  mba_names <- names(rpt)[mba_ndx]
+  parsed <- regmatches(mba_names, regexec("^m_by_age\\[([^]]+)\\]$", mba_names))
+  if (any(lengths(parsed) != 2L)) {
+    stop("get_fisheries.casal2MPD(m_by_age=TRUE): expected m_by_age field names in the form m_by_age[category]")
+  }
+  categories <- vapply(parsed, `[[`, character(1L), 2L)
+
+  mba_idx <- which(mba_ndx)
+  rows <- vector("list", length(mba_idx))
+
+  for (j in seq_along(mba_idx)) {
+    vals <- as.numeric(rpt[[mba_idx[j]]])
+    rows[[j]] <- data.frame(
+      category         = categories[j],
+      age              = seq_along(vals),
+      m_by_age         = vals,
+      par_set          = par_set,
+      label            = label,
+      stringsAsFactors = FALSE
+    )
+  }
+
+  .safe_rbind(rows)
+}
+
 #' @rdname get_fisheries
 #' @method get_fisheries casal2MPD
+#' @param m_by_age Logical. If \code{TRUE} return the natural-mortality-by-age
+#'   data; if \code{FALSE} (default) return the standard fishery catch/effort
+#'   columns.
 #' @export
-"get_fisheries.casal2MPD" <- function(model, reformat_labels = TRUE, ...) {
+"get_fisheries.casal2MPD" <- function(model, reformat_labels = TRUE, m_by_age = FALSE, ...) {
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)
 
   orig_names <- names(model)
@@ -83,10 +120,17 @@
       ## single run
       if (tolower(this_report$type) != "process") next
       if (tolower(this_report$sub_type) != "mortality_instantaneous") next
-      rows[[i]] <- .fisheries_from_report(this_report,
-        par_set = 1L,
-        label = report_labels[i]
-      )
+      rows[[i]] <- if (m_by_age) {
+        .m_by_age_from_report(this_report,
+          par_set = 1L,
+          label = report_labels[i]
+        )
+      } else {
+        .fisheries_from_report(this_report,
+          par_set = 1L,
+          label = report_labels[i]
+        )
+      }
     } else {
       ## multi-run (-i)
       if (tolower(this_report[[1L]]$type) != "process") next
@@ -95,10 +139,17 @@
       iter_labs <- names(this_report)
       inner <- vector("list", n_runs)
       for (dash_i in seq_len(n_runs)) {
-        inner[[dash_i]] <- .fisheries_from_report(this_report[[dash_i]],
-          par_set = iter_labs[dash_i],
-          label   = report_labels[i]
-        )
+        inner[[dash_i]] <- if (m_by_age) {
+          .m_by_age_from_report(this_report[[dash_i]],
+            par_set = iter_labs[dash_i],
+            label   = report_labels[i]
+          )
+        } else {
+          .fisheries_from_report(this_report[[dash_i]],
+            par_set = iter_labs[dash_i],
+            label   = report_labels[i]
+          )
+        }
       }
       rows[[i]] <- .bind_rows_list(inner)
     }
@@ -109,15 +160,12 @@
 #' @rdname get_fisheries
 #' @method get_fisheries list
 #' @export
-"get_fisheries.list" <- function(model, reformat_labels = TRUE, ...) {
-  .list_method(model, get_fisheries.casal2MPD, reformat_labels = reformat_labels)
+"get_fisheries.list" <- function(model, reformat_labels = TRUE, m_by_age = FALSE, ...) {
+  .list_method(model, get_fisheries.casal2MPD, reformat_labels = reformat_labels, m_by_age = m_by_age)
 }
 
 #' @rdname get_fisheries
 #' @method get_fisheries casal2TAB
-#' @param m_by_age Logical. If \code{TRUE} return the natural-mortality-by-age
-#'   data; if \code{FALSE} (default) return the standard fishery catch/effort
-#'   columns.
 #' @export
 "get_fisheries.casal2TAB" <- function(model, reformat_labels = TRUE, m_by_age = FALSE, ...) {
   report_labels <- if (reformat_labels) reformat_default_labels(names(model)) else names(model)

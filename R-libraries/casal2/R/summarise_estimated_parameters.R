@@ -29,6 +29,10 @@
 
 ## Evaluate normalised prior density over a grid of parameter values.
 .eval_prior_density <- function(param_value, type, hyper_param_values, lower_b, upper_b) {
+  log_priors <- c("uniform_log", "normal_log", "lognormal")
+  if (type %in% log_priors) {
+    param_value <- pmax(param_value, .Machine$double.eps)
+  }
   res <- switch(type,
     normal = {
       sigma <- hyper_param_values[1L] * hyper_param_values[2L]
@@ -52,27 +56,27 @@
     },
     beta = {
       new_mu <- (hyper_param_values[1L] - hyper_param_values[3L]) /
-                (hyper_param_values[4L] - hyper_param_values[3L])
-      new_t  <- (((hyper_param_values[1L] - hyper_param_values[3L]) *
-                   (hyper_param_values[4L] - hyper_param_values[1L])) /
-                  (hyper_param_values[2L]^2)) - 1
+        (hyper_param_values[4L] - hyper_param_values[3L])
+      new_t <- (((hyper_param_values[1L] - hyper_param_values[3L]) *
+        (hyper_param_values[4L] - hyper_param_values[1L])) /
+        (hyper_param_values[2L]^2)) - 1
       Bm <- new_t * new_mu
       Bn <- new_t * (1 - new_mu)
-      r  <- (1 - Bm) * log(param_value - hyper_param_values[3L]) +
-            (1 - Bn) * log(hyper_param_values[4L] - param_value)
+      r <- (1 - Bm) * log(param_value - hyper_param_values[3L]) +
+        (1 - Bn) * log(hyper_param_values[4L] - param_value)
       exp(-r)
     },
     students_t = {
-      mu    <- hyper_param_values[1L]
+      mu <- hyper_param_values[1L]
       sigma <- hyper_param_values[2L]
-      df    <- hyper_param_values[3L]
-      x1    <- lgamma((df + 1) / 2) - lgamma(df / 2)
-      x2    <- 0.5 * log(df * pi) + log(sigma)
-      x3    <- log(1 + (1 / df) * ((param_value - mu) / sigma)^2)
-      x4    <- (df + 1) / 2
+      df <- hyper_param_values[3L]
+      x1 <- lgamma((df + 1) / 2) - lgamma(df / 2)
+      x2 <- 0.5 * log(df * pi) + log(sigma)
+      x3 <- log(1 + (1 / df) * ((param_value - mu) / sigma)^2)
+      x4 <- (df + 1) / 2
       exp(x1 - x2 - x3 * x4)
     },
-    NULL   # unknown type -> NULL so caller can skip
+    NULL # unknown type -> NULL so caller can skip
   )
   if (!is.null(res)) res / max(res, na.rm = TRUE) else NULL
 }
@@ -81,11 +85,11 @@
 #' @method summarise_estimated_parameters casal2MPD
 #' @export
 summarise_estimated_parameters.casal2MPD <- function(model, ignore = NULL,
-                                                      n = 250L, ...) {
+                                                     n = 250L, ...) {
   report_labels <- reformat_default_labels(names(model))
-  complete_df   <- NULL
-  plot_rows     <- list()
-  found_report  <- FALSE
+  complete_df <- NULL
+  plot_rows <- list()
+  found_report <- FALSE
   for (i in seq_along(model)) {
     if (report_labels[i] == "header") next
     this_report <- model[[i]]
@@ -111,30 +115,34 @@ summarise_estimated_parameters.casal2MPD <- function(model, ignore = NULL,
       ## Sanitise parameter label for downstream use
       param_label <- gsub("[\\{\\}\\[\\]]", "_", this_param$parameter, perl = TRUE)
       if (!is.null(ignore) && grepl(ignore, param_label)) next
-      hyper_params       <- this_param$hyperparameters
+      hyper_params <- this_param$hyperparameters
       hyper_param_values <- as.numeric(this_param$hyperparameter_values)
-      hyper_str          <- paste(paste0(hyper_params, " = ", hyper_param_values), collapse = ", ")
+      hyper_str <- paste(paste0(hyper_params, " = ", hyper_param_values), collapse = ", ")
       temp_df <- data.frame(
-        parameter       = this_param$parameter,
-        initial_value   = as.numeric(this_param$initial_value),
-        prior           = this_param$sub_type,
-        bounds          = paste0(this_param$lower_bound, " - ", this_param$upper_bound),
-        phase           = this_param$phase,
-        MPD             = as.numeric(this_param$value),
-        std_dev         = as.numeric(this_param$std_dev),
-        mcmc_fixed      = if (length(this_param$mcmc_fixed) > 0L) this_param$mcmc_fixed else FALSE,
+        parameter = this_param$parameter,
+        initial_value = as.numeric(this_param$initial_value),
+        prior = this_param$sub_type,
+        bounds = paste0(this_param$lower_bound, " - ", this_param$upper_bound),
+        phase = this_param$phase,
+        MPD = as.numeric(this_param$value),
+        std_dev = as.numeric(this_param$std_dev),
+        mcmc_fixed = if (length(this_param$mcmc_fixed) > 0L) this_param$mcmc_fixed else FALSE,
         stringsAsFactors = FALSE
       )
       temp_df[["Hyper parameters"]] <- hyper_str
       complete_df <- rbind(complete_df, temp_df)
       ## Evaluate prior density for plotting
-      param_seq <- seq(from = as.numeric(this_param$lower_bound),
-                       to   = as.numeric(this_param$upper_bound),
-                       length.out = n)
-      dens <- .eval_prior_density(param_seq, type = temp_df$prior,
-                                   hyper_param_values = hyper_param_values,
-                                   lower_b = as.numeric(this_param$lower_bound),
-                                   upper_b = as.numeric(this_param$upper_bound))
+      param_seq <- seq(
+        from = as.numeric(this_param$lower_bound),
+        to = as.numeric(this_param$upper_bound),
+        length.out = n
+      )
+      dens <- .eval_prior_density(param_seq,
+        type = temp_df$prior,
+        hyper_param_values = hyper_param_values,
+        lower_b = as.numeric(this_param$lower_bound),
+        upper_b = as.numeric(this_param$upper_bound)
+      )
       if (!is.null(dens)) {
         plot_rows[[length(plot_rows) + 1L]] <- data.frame(
           parameter_value  = param_seq,
@@ -145,8 +153,9 @@ summarise_estimated_parameters.casal2MPD <- function(model, ignore = NULL,
       }
     }
   }
-  if (is.null(complete_df))
+  if (is.null(complete_df)) {
     return("Could not find 'estimate_summary' report in Casal2 output")
+  }
   plot_df <- .bind_rows_list(plot_rows)
   list(plot_df = plot_df, summary_df = complete_df)
 }

@@ -9,9 +9,9 @@
 \usage{
 get_fisheries(model, ...)
 
-\method{get_fisheries}{casal2MPD}(model, reformat_labels = TRUE, ...)
+\method{get_fisheries}{casal2MPD}(model, reformat_labels = TRUE, m_by_age = FALSE, ...)
 
-\method{get_fisheries}{list}(model, reformat_labels = TRUE, ...)
+\method{get_fisheries}{list}(model, reformat_labels = TRUE, m_by_age = FALSE, ...)
 
 \method{get_fisheries}{casal2TAB}(model, reformat_labels = TRUE, m_by_age = FALSE, ...)
 }
@@ -33,7 +33,9 @@ For \code{casal2MPD} input: a data frame with columns \code{year},
   \code{fishing_pressure}, \code{exploitation_rate}, \code{catch},
   \code{actual_catch}, \code{fishery}, \code{par_set} (integer index of the
   parameter set/minimisation; 1 for single run, ordered factor for multi-run
-  \code{-i} output), and \code{label}.
+  \code{-i} output), and \code{label}. When \code{m_by_age = TRUE}, returns
+  columns \code{category}, \code{age}, \code{m_by_age}, \code{par_set}, and
+  \code{label}.
   For \code{casal2TAB} (MCMC) input when \code{m_by_age = FALSE}: a data frame
   with columns \code{iteration} (integer MCMC posterior-sample index),
   \code{fishery}, \code{year}, \code{exploitation_rate}, \code{fishing_pressure},

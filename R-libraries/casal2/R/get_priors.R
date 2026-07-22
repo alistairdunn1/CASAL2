@@ -50,7 +50,9 @@
 ## Evaluate normalised prior density for one parameter over a grid of values.
 ## Returns NULL for unknown prior types so the caller can skip.
 .prior_density_row <- function(type, hyper_vals, lower, upper, n) {
-  x <- seq(lower, upper, length.out = n)
+  log_priors <- c("uniform_log", "normal_log", "lognormal")
+  lower_eval <- if (type %in% log_priors) max(lower, .Machine$double.eps) else lower
+  x <- seq(lower_eval, upper, length.out = n)
   res <- switch(type,
     normal = {
       sigma <- hyper_vals[1L] * hyper_vals[2L]

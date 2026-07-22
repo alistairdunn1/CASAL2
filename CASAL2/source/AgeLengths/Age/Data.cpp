@@ -12,6 +12,8 @@
 // headers
 #include "Data.h"
 
+#include <algorithm>
+
 #include "../../Model/Managers.h"
 #include "../../TimeSteps/Manager.h"
 #include "../../Utilities/To.h"
@@ -49,9 +51,18 @@ void Data::DoValidate() {
  * Reset any persistent state that accumulates during MCMC iterations
  */
 void Data::DoReset() {
-  age_length_matrix_years_.clear();
-  age_length_matrix_year_key_.clear();
-  age_length_transition_matrix_.clear();
+  // Reuse existing matrix storage across MCMC resets to avoid reallocation churn.
+  for (auto& year_matrix : age_length_transition_matrix_) {
+    for (auto& step_matrix : year_matrix) {
+      for (auto& age_vector : step_matrix) {
+        std::fill(age_vector.begin(), age_vector.end(), 0.0);
+      }
+    }
+  }
+
+  for (auto& age_vector : numbers_by_age_length_transition_) {
+    std::fill(age_vector.begin(), age_vector.end(), 0.0);
+  }
 }
 
 /**
@@ -123,8 +134,8 @@ void Data::DoBuild() {
       LOG_CODE_ERROR() << "row.size() != columns.size()";
     number_of_years += 1;
     if ((columns.size() - 1) != model()->age_spread())
-      LOG_ERROR_P(PARAM_DATA) << "An age needs to be specified for every age in the model. " << columns.size() - 1 << " ages were specified, and there are " << model()->age_spread()
-                              << " ages in the model";
+      LOG_ERROR_P(PARAM_DATA) << "An age needs to be specified for every age in the model. " << columns.size() - 1 << " ages were specified, and there are "
+                              << model()->age_spread() << " ages in the model";
     unsigned year = utilities::ToInline<string, unsigned>(row[0]);
     // Check year is valid
     const vector<unsigned>& model_years = model()->years();
