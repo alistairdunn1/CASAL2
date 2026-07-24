@@ -1,0 +1,24 @@
+Start test: get_profile returns expected columns for HAK_2025/profile.log
+  'test-get-profile.R:11:3' [error]
+End test: get_profile returns expected columns for HAK_2025/profile.log
+
+Start test: get_profile uses the same profiled parameter as HAK_2025/profile.dat
+  'test-get-profile.R:20:3' [error]
+End test: get_profile uses the same profiled parameter as HAK_2025/profile.dat
+
+Start test: get_profile profile grid matches HAK_2025/profile.dat
+  'test-get-profile.R:30:3' [error]
+End test: get_profile profile grid matches HAK_2025/profile.dat
+
+                file context
+1 test-get-profile.R        
+2 test-get-profile.R        
+3 test-get-profile.R        
+                                                                  test nb failed
+1        get_profile returns expected columns for HAK_2025/profile.log  0      0
+2 get_profile uses the same profiled parameter as HAK_2025/profile.dat  0      0
+3                get_profile profile grid matches HAK_2025/profile.dat  0      0
+  skipped error warning user system real passed result
+1   FALSE  TRUE       0 7.13   0.16 7.25      0   NULL
+2   FALSE  TRUE       0 7.18   0.12 7.30      0   NULL
+3   FALSE  TRUE       0 7.00   0.24 7.23      0   NULL

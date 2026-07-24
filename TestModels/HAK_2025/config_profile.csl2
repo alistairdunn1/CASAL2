@@ -1,0 +1,27 @@
+# Includes required csl2 input configuration files and defines ASSERTS
+
+# Population
+!include "Config/Population.csl2"
+
+# Estimation
+!include "Config/Estimation.csl2"
+!include "Config/Estimation_survey.csl2"
+!include "Config/Estimation_fishery.csl2"
+
+# Profiles
+!include "Config/Profiles.csl2"
+
+# Observations
+!include "Config/Observation_survey.csl2"
+!include "Config/Observation_fishery.csl2"
+!include "Config/Observation_CPUE.csl2"
+
+# Reports
+!include "Config/Reports.csl2"
+
+# @assert obj
+# type objective_function
+# value 3559.67133
+# error_type error
+
+

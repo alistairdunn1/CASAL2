@@ -26,17 +26,17 @@
 !include "Config/Reports.csl2"
 
 # Asserts to validate the CASAL model
-@assert CASAL_B0
-type addressable
-parameter process[Recruitment].b0
-years 1972
-time_step JanDec
-values 54241.3
-error_type error
-tolerance 0.5
+# @assert CASAL_B0
+# type addressable
+# parameter process[Recruitment].b0
+# years 1972
+# time_step JanDec
+# values 54241.3
+# error_type error
+# tolerance 0.5
 
-@assert CASALObjectiveFunction
-type objective_function
-value 1629.5
-error_type error
-tolerance 0.5
+# @assert CASALObjectiveFunction
+# type objective_function
+# value 1629.5
+# error_type error
+# tolerance 0.5

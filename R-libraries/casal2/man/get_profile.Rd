@@ -3,15 +3,19 @@
 \name{get_profile}
 \alias{get_profile}
 \alias{get_profile.casal2MPD}
+\alias{get_profile.list}
 \title{get_profile}
 \usage{
 get_profile(model, ...)
 
 \method{get_profile}{casal2MPD}(model, aggregate_obs = TRUE, reformat_labels = TRUE, ...)
+
+\method{get_profile}{list}(model, aggregate_obs = TRUE, reformat_labels = TRUE, ...)
 }
 \arguments{
 \item{model}{A \code{casal2MPD} object produced by \code{extract.mpd()} from
-a Casal2 profile run (\code{-p} flag).}
+a Casal2 profile run (\code{-p} flag), or a named \code{list} of
+\code{casal2MPD} objects.}
 
 \item{\dots}{Further arguments (currently unused).}
 
@@ -22,8 +26,12 @@ over years (default \code{TRUE}).}
 (default \code{TRUE}).}
 }
 \value{
-A data frame with columns \code{component}, \code{parameter_values},
-  \code{negative_loglikelihood}, and \code{parameter}.
+A data frame with columns \code{component}, \code{parameter_values}
+  (estimated value from each MPD run), \code{profile_values} (tested value
+  from the profile report), \code{negative_loglikelihood}, and
+  \code{parameter}, and \code{profile} (the profile block label,
+  e.g., \code{profile: B0}). For list input, the output additionally includes
+  \code{model_label}.
 }
 \description{
 Extract profile run data from a Casal2 MPD model output into a

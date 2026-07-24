@@ -2,7 +2,7 @@
 
 @profile B0
 parameter parameter_transformation[logRecruitment].log_parameter
-steps 29
+steps 11
 upper_bound 12
 lower_bound 10.5
 

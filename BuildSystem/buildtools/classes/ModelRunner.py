@@ -60,6 +60,8 @@ class ModelRunner:
         self.executionTypeList.append(["mcmc_resume", "resume_mcmc"])
         self.executionTypeList.append(["SingleSexTagByLength_input", "run_dash_I"])
         self.executionTypeList.append(["SingleSexTagByLength_n", "run_dash_I"])
+        self.executionTypeList.append(["LIN_2026", "profile_config"])
+        self.executionTypeList.append(["HAK_2025", "profile_config"])
         self.executionTypeList.append(["Simple", "projections"])
         self.executionTypeList.append(["SBW_2022", "tabular_tsv_mcmc"])
         # self.executionTypeList.append(["MultiSelectivity", "betadiff"])
@@ -94,6 +96,8 @@ class ModelRunner:
             log_files = ["multi_sim.log", "multi_sim.err"]
         elif execution_type in ["run_dash_i", "run_dash_I"]:
             log_files = ["run.log", "run.err"]
+        elif execution_type in ["profile", "profile_config"]:
+            log_files = ["profile.log", "profile.err"]
         elif execution_type == "projections":
             log_files = ["projections.log", "projections.err"]
         else:
@@ -149,6 +153,8 @@ class ModelRunner:
         try:
             start = time.time()
             exit_code = EX_OK
+            output = b""
+            error = b""
             for command in commands:
                 if exit_code != EX_OK:
                     break
@@ -290,6 +296,14 @@ class ModelRunner:
                     if exec_type == "run_dash_I":
                         threadCommand.append(
                             f"{exe_path} -r -I pars.out > run.log 2> run.err"
+                        )
+                    if exec_type == "profile":
+                        threadCommand.append(
+                            f"{exe_path} -p -o profile.dat > profile.log 2> profile.err"
+                        )
+                    if exec_type == "profile_config":
+                        threadCommand.append(
+                            f"{exe_path} -p -o profile.dat -c config_profile.csl2 > profile.log 2> profile.err"
                         )
                     if exec_type == "projections":
                         threadCommand.append(

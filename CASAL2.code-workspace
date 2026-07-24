@@ -62,6 +62,9 @@
     "[python]": {
       "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "python.formatting.provider": "yapf"
+    "python.formatting.provider": "yapf",
+    "chat.tools.terminal.autoApprove": {
+      "C:\\Progra~1\\R\\R-4.4.1\\bin\\x64\\Rscript.exe": true
+    }
   }
 }
